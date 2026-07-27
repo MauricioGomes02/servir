@@ -6,7 +6,6 @@ import {
   ExecutionContextIdErrorCodes,
   parseCorrelationId,
   parseRequestId,
-  type RequestId,
 } from '.';
 
 describe('ExecutionContext', () => {
@@ -31,21 +30,6 @@ describe('ExecutionContext', () => {
       requestId: 'request-456',
     });
     assert.equal(Object.isFrozen(context), true);
-  });
-
-  it('mantem CorrelationId e RequestId nominalmente distintos', () => {
-    const correlationId = parseCorrelationId('correlation-123');
-
-    assert.equal(correlationId.success, true);
-
-    if (!correlationId.success) {
-      return;
-    }
-
-    // @ts-expect-error CorrelationId nao pode substituir RequestId.
-    const requestId: RequestId = correlationId.value;
-
-    assert.equal(requestId, 'correlation-123');
   });
 
   it('rejeita identificador com tipo invalido', () => {

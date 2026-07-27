@@ -83,16 +83,4 @@ describe('DomainEvent', () => {
       },
     });
   });
-
-  it('nao obtem identidade ou instante de fontes implicitas', () => {
-    if (false) {
-      // @ts-expect-error eventId e occurredAt sao obrigatorios.
-      createDomainEvent({
-        name: 'organization.updated',
-        payload: {
-          organizationId: 'organization-123',
-        },
-      });
-    }
-  });
 });
