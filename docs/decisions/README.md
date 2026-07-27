@@ -12,5 +12,6 @@
 | [008](008-strong-types.md) | Tipos fortes e nominais | Aceita |
 | [009](009-immutability.md) | Imutabilidade por padrão | Aceita |
 | [010](010-telemetry-context-propagation.md) | Propagação de contexto de telemetria | Aceita |
+| [011](011-temporal-modeling.md) | Modelagem temporal explícita | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

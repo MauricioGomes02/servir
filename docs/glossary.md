@@ -26,6 +26,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Context | Metadados imutáveis da execução, independentes do transporte. | Propagado por Application. | `ExecutionContext`. | Objeto HTTP dentro do domínio. |
 | Logger | Port para registrar fatos estruturados. | Adaptadores enviam a destinos. | `logger.info(fact)`. | `console.log` em entidade. |
 | Clock | Port que fornece tempo de forma controlável. | Injetado onde tempo é uma dependência. | `clock.now()`. | `new Date()` disperso. |
+| Instant | Value Object que representa um ponto absoluto na linha do tempo, normalizado em UTC. | Produzido por Clock; usado por Events. | `2026-07-27T15:00:00.000Z`. | Horário civil sem offset. |
 | CorrelationId | Identificador que correlaciona operações relacionadas. | Campo de Context/Message. | Mesmo ID em passos de um fluxo. | ID da entidade de negócio. |
 | Handler | Componente que trata um tipo de mensagem. | Recebe Command, Query ou Event. | `CancelOrderHandler`. | Service com dezenas de métodos. |
 | Publisher | Port que envia mensagens sem conhecer consumidores. | Usa Event Bus ou broker por adapter. | Publicador de eventos pendentes. | Agregado chamando webhook. |

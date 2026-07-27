@@ -10,7 +10,7 @@ Uso disperso de `Date` torna testes não determinísticos e esconde a origem tem
 
 ## Responsabilidades
 
-- Fornecer o instante atual por contrato.
+- Fornecer o instante atual como `Instant` por contrato.
 - Permitir implementação fixa/controlada em testes.
 - Definir representação e precisão temporal.
 
@@ -31,11 +31,11 @@ flowchart LR
 
 ## Exemplos
 
-Um handler obtém `now` uma vez e o passa ao agregado, evitando leituras temporais divergentes.
+Um handler obtém `Instant` por `clock.now()` uma vez e o passa ao agregado, evitando leituras temporais divergentes.
 
 ## Relacionamento com outras primitivas
 
-Events podem receber `occurredAt`; Policies temporais recebem instante explícito; adapters implementam o port.
+Events recebem `occurredAt: Instant`; Policies temporais recebem instante explícito; adapters implementam o port.
 
 ## Possíveis evoluções
 

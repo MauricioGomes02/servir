@@ -24,7 +24,8 @@ Primitivas construídas fora de ordem tendem a duplicar responsabilidades ou dep
 flowchart TD
     D[Documentação e vocabulário] --> R[Result]
     R --> N[Notification]
-    N --> DE[Domain Event]
+    N --> I[Instant]
+    I --> DE[Domain Event]
     DE --> EB[Event Bus]
     EB --> AR[Aggregate Root]
     AR --> E[Entity]
@@ -45,8 +46,10 @@ flowchart TD
 | Vocabulário e documentação | Em andamento | Links, ADRs e contratos revisados |
 | Result | Implementação inicial | Semântica e testes estabilizados |
 | Notification | Implementação inicial | Acúmulo, imutabilidade e testes decididos |
-| Domain Event e Event Bus | Planejado | Contratos e ordenação definidos |
-| Aggregate Root | Planejado | Ciclo de eventos pendentes definido |
+| Instant | Implementação inicial | UTC, imutabilidade, igualdade e serialização testadas |
+| Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
+| Event Bus | Planejado | Contratos, falhas e ordenação definidos |
+| Aggregate Root | Implementação inicial | Registro, snapshot, ordem e retirada testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
 | Specification e Policy | Planejado | Cada contrato documentado e testado |

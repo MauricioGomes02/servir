@@ -7,6 +7,7 @@
 - [Aggregate Root](aggregate-root.md)
 - [Entity](entity.md)
 - [Value Object](value-object.md)
+- [Instant](instant.md)
 - [Specification](specification.md)
 - [Policy](policy.md)
 - [Context](context.md)
