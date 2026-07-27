@@ -14,5 +14,6 @@
 | [010](010-telemetry-context-propagation.md) | Propagação de contexto de telemetria | Aceita |
 | [011](011-temporal-modeling.md) | Modelagem temporal explícita | Aceita |
 | [012](012-in-memory-event-dispatch.md) | Dispatch de eventos em memória | Aceita |
+| [013](013-structured-logging.md) | Logging estruturado e contextual | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

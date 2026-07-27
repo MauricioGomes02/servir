@@ -32,23 +32,43 @@ flowchart LR
 
 ## Exemplos
 
-`logger.info("schedule.published", { scheduleId, correlationId })`, criado fora do agregado.
+```ts
+logger.log(createLogRecord({
+  level: LogLevels.Info,
+  eventName: 'schedule.published',
+  occurredAt: envelope.event.occurredAt,
+  context: {
+    correlationId: envelope.correlationId,
+    messageId: envelope.messageId,
+    causationId: envelope.causationId,
+  },
+  attributes: {
+    'schedule.id': envelope.event.payload.scheduleId,
+  },
+}));
+```
+
+`LogContext` aceita apenas `CorrelationId`, `RequestId`, `MessageId` e `causationId` nesta etapa. O adapter acrescenta trace/span IDs e resource attributes como serviço, versão e ambiente.
 
 ## Relacionamento com outras primitivas
 
-Consome Context; handlers de eventos podem transformar Domain Events em registros; adapters implementam o port.
+Consome metadados permitidos de Context e Message; handlers de eventos podem transformar Domain Events em registros; adapters implementam o port. Logger é observabilidade de melhor esforço e não substitui um `AuditWriter` durável.
 
 ## Possíveis evoluções
 
-Definir schema de atributos, redaction, métricas derivadas e tracing.
+Adapters para OpenTelemetry e console, com redaction, limites de tamanho, tratamento estruturado de exceções e enriquecimento de resource/trace context.
 
 ## Boas práticas
 
 - Usar nomes estáveis e atributos pesquisáveis.
 - Remover segredos e minimizar dados pessoais.
+- Preferir IDs, códigos, contagens, duração e resultado da operação.
+- Manter atributos de resource e trace fora das chamadas da application.
 
 ## Anti-patterns
 
 - Log textual como contrato de integração.
 - Logger dentro de Value Object ou Entity.
 - Capturar e ignorar erro após logar.
+- Copiar payload, headers, tokens, entidades ou dados pessoais por conveniência.
+- Usar IDs de alta cardinalidade como dimensões de métricas automaticamente.

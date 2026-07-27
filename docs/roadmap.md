@@ -56,7 +56,8 @@ flowchart TD
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
 | Specification e Policy | Planejado | Cada contrato documentado e testado |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
-| Logger a Unit of Work | Planejado | Cada contrato documentado e testado |
+| Logger | Implementação inicial | Registro, contexto, imutabilidade e adapter de teste definidos |
+| Clock a Unit of Work | Planejado | Cada contrato documentado e testado |
 | Casos de uso e adaptadores | Bloqueado | Fundação concluída |
 
 ## Exemplos
