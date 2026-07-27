@@ -1,0 +1,4 @@
+interface:
+  display_name: "Logging por Fatos"
+  short_description: "Modelar observabilidade sem vazar infraestrutura"
+  default_prompt: "Use $logger para modelar logging e observabilidade por fatos."

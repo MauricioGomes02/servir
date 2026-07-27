@@ -1,0 +1,4 @@
+interface:
+  display_name: "Notification Pattern"
+  short_description: "Acumular falhas esperadas de validação"
+  default_prompt: "Use $notification para modelar validações acumulativas."

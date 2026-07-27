@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agregados de Domínio"
+  short_description: "Modelar limites e invariantes de agregados"
+  default_prompt: "Use $aggregate para modelar ou revisar um agregado."

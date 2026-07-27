@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentação Arquitetural"
+  short_description: "Manter wiki glossário ADRs e diagramas"
+  default_prompt: "Use $documentation para criar ou atualizar documentação arquitetural."

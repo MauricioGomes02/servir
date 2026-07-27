@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arquitetura do Servir"
+  short_description: "Aplicar princípios arquiteturais do projeto"
+  default_prompt: "Use $architecture para orientar uma decisão arquitetural no Servir."

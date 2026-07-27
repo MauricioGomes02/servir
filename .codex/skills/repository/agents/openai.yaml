@@ -1,0 +1,4 @@
+interface:
+  display_name: "Contratos de Repositório"
+  short_description: "Definir portas de persistência independentes"
+  default_prompt: "Use $repository para definir ou revisar um contrato de repositório."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Value Objects"
+  short_description: "Modelar valores imutáveis e sem identidade"
+  default_prompt: "Use $value-object para modelar ou revisar um Value Object."

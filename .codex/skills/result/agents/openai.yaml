@@ -1,0 +1,4 @@
+interface:
+  display_name: "Result Pattern"
+  short_description: "Representar sucesso e falha de forma tipada"
+  default_prompt: "Use $result para modelar operações com sucesso ou falha esperada."

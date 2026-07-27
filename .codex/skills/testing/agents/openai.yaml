@@ -1,0 +1,4 @@
+interface:
+  display_name: "Testes de Primitivas"
+  short_description: "Especificar contratos arquiteturais com testes"
+  default_prompt: "Use $testing para criar ou revisar testes das primitivas."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revisão Arquitetural"
+  short_description: "Revisar código contra as regras do projeto"
+  default_prompt: "Use $review para realizar uma revisão arquitetural."

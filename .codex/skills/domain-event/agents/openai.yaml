@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eventos de Domínio"
+  short_description: "Modelar fatos sem efeitos colaterais"
+  default_prompt: "Use $domain-event para modelar ou revisar um evento de domínio."

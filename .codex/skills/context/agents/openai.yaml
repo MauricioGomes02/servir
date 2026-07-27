@@ -1,0 +1,4 @@
+interface:
+  display_name: "Contexto de Execução"
+  short_description: "Propagar metadados sem depender de transporte"
+  default_prompt: "Use $context para modelar o contexto de execução."

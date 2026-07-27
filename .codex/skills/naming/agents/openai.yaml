@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nomenclatura Arquitetural"
+  short_description: "Aplicar o vocabulário ubíquo ao código"
+  default_prompt: "Use $naming para escolher ou revisar nomes no projeto."

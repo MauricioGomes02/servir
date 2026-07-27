@@ -1,0 +1,4 @@
+interface:
+  display_name: "Entidades de Domínio"
+  short_description: "Modelar identidade e igualdade de entidades"
+  default_prompt: "Use $entity para modelar ou revisar uma entidade de domínio."
