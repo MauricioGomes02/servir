@@ -50,7 +50,7 @@ flowchart TD
 | Instant | Implementação inicial | UTC, imutabilidade, igualdade e serialização testadas |
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
 | Message Envelope | Implementação inicial | Identidade, correlação, causalidade e imutabilidade testadas |
-| Event Bus | Planejado | Contratos, falhas e ordenação definidos |
+| Event Bus | Implementação inicial | Ports, concorrência, falhas e subscriptions testados |
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e retirada testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |

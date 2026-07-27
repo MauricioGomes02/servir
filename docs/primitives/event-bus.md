@@ -32,23 +32,34 @@ flowchart LR
 
 ## Exemplos
 
-Um bus em memória pode apoiar testes; um adapter pode mapear o port para Kafka sem alterar o domínio.
+```ts
+bus.subscribe<OrganizationCreated>(
+  'organization.created',
+  auditOrganizationCreated,
+);
+
+await publisher.publish(envelope);
+```
+
+O bus em memória inicia todos os handlers inscritos e aguarda suas conclusões concorrentemente. Se houver falhas, lança `EventDispatchError` somente depois que todos terminarem, preservando o nome e a causa de cada handler. Ausência de handlers é sucesso e a ordem de conclusão não é garantida.
 
 ## Relacionamento com outras primitivas
 
-Recebe Domain/Application Events, invoca Handlers e pode usar Logger e Context.
+`EventPublisher` e `EventHandler` são ports da application. O adapter em memória recebe `EventEnvelope`, resolve subscriptions pelo nome do evento e invoca handlers sem alterar o Domain Event.
 
 ## Possíveis evoluções
 
-Políticas de concorrência, retry, idempotência, dead-letter e observabilidade.
+Adapters duráveis com retry, idempotência, dead-letter e observabilidade. Brokers não precisam reproduzir a concorrência local, mas devem preservar a independência e tornar falhas observáveis.
 
 ## Boas práticas
 
 - Documentar semântica de falha e ordem.
 - Manter o contrato independente do transporte.
+- Usar nome estável para identificar cada handler.
 
 ## Anti-patterns
 
 - Service locator disfarçado.
 - Engolir falhas de handlers.
 - Prometer “exactly once” sem mecanismo verificável.
+- Usar o bus em memória como substituto de outbox ou broker durável.

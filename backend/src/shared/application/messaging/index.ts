@@ -15,6 +15,14 @@ export type {
 } from './event-envelope';
 
 export type {
+  EventHandler,
+} from './event-handler';
+
+export type {
+  EventPublisher,
+} from './event-publisher';
+
+export type {
   MessageId,
 } from './message-id';
 
