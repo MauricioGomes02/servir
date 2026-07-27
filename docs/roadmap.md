@@ -26,7 +26,8 @@ flowchart TD
     R --> N[Notification]
     N --> I[Instant]
     I --> DE[Domain Event]
-    DE --> EB[Event Bus]
+    DE --> M[Message Envelope]
+    M --> EB[Event Bus]
     EB --> AR[Aggregate Root]
     AR --> E[Entity]
     E --> VO[Value Object]
@@ -48,6 +49,7 @@ flowchart TD
 | Notification | Implementação inicial | Acúmulo, imutabilidade e testes decididos |
 | Instant | Implementação inicial | UTC, imutabilidade, igualdade e serialização testadas |
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
+| Message Envelope | Implementação inicial | Identidade, correlação, causalidade e imutabilidade testadas |
 | Event Bus | Planejado | Contratos, falhas e ordenação definidos |
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e retirada testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |

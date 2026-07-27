@@ -45,7 +45,7 @@ O contrato cresce apenas quando mensagens, autorização ou tenancy demonstrarem
 
 ## Relacionamento com outras primitivas
 
-Logger e mensagens usam `CorrelationId`; adapters propagam tracing técnico conforme W3C Trace Context sem expor tipos do OpenTelemetry ao núcleo. Policies podem receber identidade do ator quando semanticamente necessário.
+Logger e `EventEnvelope` usam `CorrelationId`; adapters propagam tracing técnico conforme W3C Trace Context sem expor tipos do OpenTelemetry ao núcleo. Policies podem receber identidade do ator quando semanticamente necessário.
 
 ## Possíveis evoluções
 

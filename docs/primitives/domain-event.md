@@ -54,7 +54,7 @@ const event = createDomainEvent({
 
 ## Possíveis evoluções
 
-Definir envelope, versionamento, causalidade, deduplicação e tradução entre contextos.
+Definir versionamento, deduplicação e tradução entre contextos. `EventEnvelope` pertence à application e acrescenta identidade da mensagem, correlação e causalidade sem alterar o fato.
 
 ## Boas práticas
 

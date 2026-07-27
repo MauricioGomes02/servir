@@ -3,6 +3,7 @@
 - [Result](result.md)
 - [Notification](notification.md)
 - [Domain Event](domain-event.md)
+- [Message](message.md)
 - [Event Bus](event-bus.md)
 - [Aggregate Root](aggregate-root.md)
 - [Entity](entity.md)
