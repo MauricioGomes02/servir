@@ -61,7 +61,7 @@ flowchart TD
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
 | Logger | Implementação inicial | Registro, contexto, imutabilidade e adapter de teste definidos |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
-| Id Generator | Implementação inicial | Port tipado, sequência determinística, esgotamento e desacoplamento de EntityId testados |
+| Id Generator | Implementação inicial | Port tipado, sequência determinística e adapter UUIDv7 com factory nominal e falhas técnicas codificadas estão testados |
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto e confirmação seletiva de eventos testados; adapter transacional permanece planejado |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope pelo mesmo Unit of Work; adapters tecnológicos permanecem planejados |

@@ -39,7 +39,7 @@ export interface IdGenerator<TId> {
 }
 ```
 
-`SequenceIdGenerator<TId>` fornece identidades tipadas em ordem e falha com código estável quando a sequência determinística é esgotada. Um adapter UUID concreto permanece associado à factory do ID de seu domínio; a fundação não converte texto para um tipo nominal por cast.
+`SequenceIdGenerator<TId>` fornece identidades tipadas em ordem e falha com código estável quando a sequência determinística é esgotada. `UuidV7Generator<TId, TError>` usa UUIDv7 na infraestrutura e delega construção e validação à factory do ID; a fundação não converte texto para um tipo nominal por cast.
 
 ## Relacionamento com outras primitivas
 
@@ -47,12 +47,13 @@ Produz o ID tipado exigido pelo consumidor; pode ser usado por factory/caso de u
 
 ## Possíveis evoluções
 
-Definir geração em lote, IDs ordenáveis e políticas por bounded context.
+Definir geração em lote e políticas específicas por bounded context. UUIDv7 é o padrão inicial para identidades persistidas, não uma exigência universal.
 
 ## Boas práticas
 
 - Esconder o formato atrás de tipo nominal.
 - Testar unicidade/formato no adapter e comportamento com gerador determinístico.
+- Não usar a ordenação ou o timestamp aproximado do UUIDv7 como substituto de `Instant` ou regra de negócio.
 
 ## Anti-patterns
 

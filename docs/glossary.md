@@ -16,6 +16,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Integration Event | Contrato versionado para comunicação entre contextos/sistemas. | Derivado de fato interno por adaptador. | `order.created.v1`. | Expor diretamente a classe de domínio. |
 | Message | Envelope geral de comunicação com payload e metadados. | Especializado em Command, Query ou Event. | Envelope com correlation ID. | Objeto global de request. |
 | MessageId | Identificador de uma mensagem transportada ou processada. | Usado por envelopes e causalidade. | ID de um `EventEnvelope`. | ID do fato ou da entidade reutilizado sem contrato. |
+| UUIDv7 | Estratégia padrão de infraestrutura para novas identidades persistidas e temporalmente ordenáveis. | Implementa Id Generator e é validado pela factory do ID nominal. | UUID conforme RFC 9562. | Usar o timestamp embutido como `createdAt`. |
 | Command | Intenção de alterar estado; nome no imperativo. | Tratado por um Handler. | `CancelOrder`. | `OrderCancelled`. |
 | Query | Pedido de informação sem alterar estado observável. | Tratado por leitor especializado. | `GetOrderById`. | Método que persiste auditoria de negócio. |
 | Specification | Predicado de negócio reutilizável e combinável. | Pode apoiar Policy. | `isActive.and(hasCredit)`. | Serviço que executa efeitos. |
