@@ -37,6 +37,15 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Mapper | Traduz representações sem decidir negócio. | Usado em Adapter. | Persistência ↔ domínio. | Validador com acesso ao banco. |
 | Validator | Avalia restrições de entrada/estrutura e relata violações. | Pode produzir Notification. | Validação de payload. | Policy de autorização de negócio. |
 
+## Organizações
+
+| Termo | Definição e responsabilidade | Relações | Exemplo | Anti-exemplo |
+|---|---|---|---|---|
+| Organization | Aggregate Root que representa uma organização responsável por suas regras e continuidade. | Identificada por OrganizationId; inicialmente possui OrganizationName. | Comunidade que futuramente organiza equipes e escalas. | Registro pertencente ao módulo de notificações. |
+| OrganizationId | Identidade opaca e estável de uma Organization. | Gerada fora do Aggregate e validada por factory própria. | `organization-123`. | Nome ou ID de outro Aggregate reutilizado. |
+| OrganizationName | Nome obrigatório e normalizado de uma Organization, limitado a 120 caracteres. | Compõe Organization e OrganizationCreated. | `Comunidade Servir`. | Texto vazio ou usado como identidade. |
+| OrganizationCreated | Domain Event que registra a criação válida de uma Organization. | Registrado por Organization; publicado fora do domínio. | `organization.created`. | Envio de email dentro da factory. |
+
 ## Regras de evolução
 
 - Antes de criar um termo, verificar se ele já existe com outro nome.
