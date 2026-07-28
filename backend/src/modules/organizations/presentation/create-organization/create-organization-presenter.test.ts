@@ -1,0 +1,118 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import { OrganizationId } from '@/modules/organizations/domain';
+import {
+  createExecutionContext,
+  parseCorrelationId,
+} from '@/shared/application/context';
+import { failure, success } from '@/shared/core/result';
+import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
+import { SupportedLocales } from '@/shared/presentation';
+
+import {
+  organizationMessageCatalog,
+} from '../localization';
+import { CreateOrganizationPresenter } from '.';
+
+function context() {
+  const correlationId = parseCorrelationId('correlation-123');
+  assert.equal(correlationId.success, true);
+
+  if (!correlationId.success) {
+    throw new Error('Invalid deterministic test fixture');
+  }
+
+  return createExecutionContext({ correlationId: correlationId.value });
+}
+
+function presenter(): CreateOrganizationPresenter {
+  return new CreateOrganizationPresenter(
+    new InMemoryMessageTranslator(organizationMessageCatalog),
+  );
+}
+
+describe('CreateOrganizationPresenter', () => {
+  it('apresenta o identificador sem expor o objeto de dominio', () => {
+    const organizationId = OrganizationId.create('organization-123');
+    assert.equal(organizationId.success, true);
+
+    if (!organizationId.success) {
+      throw new Error('Invalid deterministic test fixture');
+    }
+
+    const view = presenter().present(
+      success({ organizationId: organizationId.value }),
+      context(),
+      SupportedLocales.PortugueseBrazil,
+    );
+
+    assert.deepEqual(view, {
+      success: true,
+      data: {
+        organizationId: 'organization-123',
+      },
+    });
+    assert.equal(Object.isFrozen(view), true);
+    assert.equal(view.success && Object.isFrozen(view.data), true);
+  });
+
+  it('apresenta a falha esperada em portugues com correlacao', () => {
+    const executionContext = context();
+    const view = presenter().present(
+      failure({
+        code: 'organization.name.empty',
+        field: 'name',
+      }),
+      executionContext,
+      SupportedLocales.PortugueseBrazil,
+    );
+
+    assert.deepEqual(view, {
+      success: false,
+      error: {
+        code: 'organization.name.empty',
+        message: 'Informe o nome da organizacao.',
+        field: 'name',
+        parameters: undefined,
+        correlationId: executionContext.correlationId,
+      },
+    });
+  });
+
+  it('apresenta parametros da falha esperada em ingles americano', () => {
+    const executionContext = context();
+    const view = presenter().present(
+      failure({
+        code: 'organization.name.too_long',
+        field: 'name',
+        params: {
+          maxLength: 120,
+          actualLength: 121,
+        },
+      }),
+      executionContext,
+      SupportedLocales.EnglishUnitedStates,
+    );
+
+    assert.deepEqual(view, {
+      success: false,
+      error: {
+        code: 'organization.name.too_long',
+        message: 'The organization name must have at most 120 characters.',
+        field: 'name',
+        parameters: {
+          maxLength: 120,
+          actualLength: 121,
+        },
+        correlationId: executionContext.correlationId,
+      },
+    });
+    assert.equal(Object.isFrozen(view), true);
+    assert.equal(!view.success && Object.isFrozen(view.error), true);
+    assert.equal(
+      !view.success && Object.isFrozen(view.error.parameters),
+      true,
+    );
+  });
+});

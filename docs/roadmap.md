@@ -65,7 +65,7 @@ flowchart TD
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto e confirmação seletiva de eventos testados; adapter transacional permanece planejado |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope pelo mesmo Unit of Work; adapters tecnológicos permanecem planejados |
-| Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória e erro apresentado estão definidos; negociação pelo transporte e fronteira de falhas técnicas permanecem planejadas |
+| Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado e primeiro Presenter estão definidos; negociação pelo transporte e fronteira de falhas técnicas permanecem planejadas |
 | Apresentação temporal e datas civis | Planejado | API preserva `Instant` UTC; apresentação converte com locale e timezone IANA; agendamentos modelam data civil, horário civil e zona separadamente; precedência entre timezone da operação, usuário, organização e aplicação permanece por definir com o primeiro consumidor |
 
 ## Exemplos
