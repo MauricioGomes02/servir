@@ -63,7 +63,7 @@ flowchart TD
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, esgotamento e desacoplamento de EntityId testados |
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto e confirmação seletiva de eventos testados; adapter transacional permanece planejado |
-| Primeiro corte vertical | Domínio inicial | OrganizationId, OrganizationName, Organization e OrganizationCreated definidos; CreateOrganization e seus ports permanecem planejados |
+| Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope pelo mesmo Unit of Work; adapters tecnológicos permanecem planejados |
 | Apresentação e localização de erros | Planejado | Locale negociado com fallback; respostas expõem código estável, mensagem traduzida, campo, parâmetros e correlation ID sem revelar falhas técnicas |
 
 ## Exemplos

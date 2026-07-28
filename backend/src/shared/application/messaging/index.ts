@@ -19,6 +19,10 @@ export type {
 } from './event-handler';
 
 export type {
+  EventOutbox,
+} from './event-outbox';
+
+export type {
   EventPublisher,
 } from './event-publisher';
 

@@ -1,0 +1,187 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import {
+  createExecutionContext,
+  parseCorrelationId,
+} from '@/shared/application/context';
+import {
+  parseMessageId,
+  type EventEnvelope,
+  type EventOutbox,
+  type MessageId,
+} from '@/shared/application/messaging';
+import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import {
+  parseDomainEventId,
+  type DomainEventId,
+} from '@/shared/domain/domain-event';
+import { Instant } from '@/shared/domain/instant';
+import { FixedClock } from '@/shared/infrastructure/clock';
+import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
+import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
+import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
+
+import {
+  OrganizationId,
+  OrganizationNameErrorCodes,
+} from '../../../domain';
+import { InMemoryOrganizationRepository } from '../../../infrastructure';
+import type { OrganizationWriteScope } from '../../ports';
+import { CreateOrganizationHandler } from '.';
+
+function fixtureIds() {
+  const organizationId = OrganizationId.create('organization-123');
+  const eventId = parseDomainEventId('event-123');
+  const messageId = parseMessageId('message-123');
+  const correlationId = parseCorrelationId('correlation-123');
+  const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
+
+  assert.equal(organizationId.success, true);
+  assert.equal(eventId.success, true);
+  assert.equal(messageId.success, true);
+  assert.equal(correlationId.success, true);
+  assert.equal(occurredAt.success, true);
+
+  if (
+    !organizationId.success
+    || !eventId.success
+    || !messageId.success
+    || !correlationId.success
+    || !occurredAt.success
+  ) {
+    throw new Error('Invalid deterministic test fixture');
+  }
+
+  return {
+    organizationId: organizationId.value,
+    eventId: eventId.value,
+    messageId: messageId.value,
+    correlationId: correlationId.value,
+    occurredAt: occurredAt.value,
+  };
+}
+
+function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
+  const ids = fixtureIds();
+  const organizations = new InMemoryOrganizationRepository();
+  const scope: OrganizationWriteScope = {
+    organizations,
+    outbox,
+  };
+  const unitOfWork = new DirectUnitOfWork(scope);
+  const handler = new CreateOrganizationHandler({
+    clock: new FixedClock(ids.occurredAt),
+    organizationIdGenerator: new SequenceIdGenerator([ids.organizationId]),
+    domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([
+      ids.eventId,
+    ]),
+    messageIdGenerator: new SequenceIdGenerator<MessageId>([
+      ids.messageId,
+    ]),
+    unitOfWork,
+  });
+  const context = createExecutionContext({
+    correlationId: ids.correlationId,
+  });
+
+  return {
+    handler,
+    context,
+    ids,
+    organizations,
+    outbox,
+  };
+}
+
+describe('CreateOrganizationHandler', () => {
+  it('persiste organizacao e envelope no mesmo escopo', async () => {
+    const fixture = createFixture();
+
+    const result = await fixture.handler.handle({
+      name: 'Comunidade Servir',
+    }, fixture.context);
+
+    assert.equal(result.success, true);
+
+    if (!result.success) {
+      return;
+    }
+
+    assert.equal(result.value.organizationId, fixture.ids.organizationId);
+    assert.equal(fixture.organizations.organizations.length, 1);
+    assert.deepEqual(
+      fixture.organizations.organizations[0]?.pendingDomainEvents,
+      [],
+    );
+
+    assert.equal(fixture.outbox instanceof InMemoryEventOutbox, true);
+
+    if (!(fixture.outbox instanceof InMemoryEventOutbox)) {
+      return;
+    }
+
+    assert.equal(fixture.outbox.envelopes.length, 1);
+    assert.equal(
+      fixture.outbox.envelopes[0]?.correlationId,
+      fixture.ids.correlationId,
+    );
+    assert.equal(
+      fixture.outbox.envelopes[0]?.messageId,
+      fixture.ids.messageId,
+    );
+    assert.equal(
+      fixture.outbox.envelopes[0]?.event.name,
+      'organization.created',
+    );
+  });
+
+  it('retorna falha esperada sem persistir estado ou evento', async () => {
+    const fixture = createFixture();
+
+    const result = await fixture.handler.handle({
+      name: '   ',
+    }, fixture.context);
+
+    assert.equal(result.success, false);
+
+    if (result.success) {
+      return;
+    }
+
+    assert.equal(result.error.code, OrganizationNameErrorCodes.Empty);
+    assert.deepEqual(fixture.organizations.organizations, []);
+
+    assert.equal(fixture.outbox instanceof InMemoryEventOutbox, true);
+
+    if (fixture.outbox instanceof InMemoryEventOutbox) {
+      assert.deepEqual(fixture.outbox.envelopes, []);
+    }
+  });
+
+  it('mantem evento pendente quando a persistencia atomica falha', async () => {
+    const failure = new Error('outbox unavailable');
+    const received: EventEnvelope[] = [];
+    const failingOutbox: EventOutbox = {
+      async add(envelopes) {
+        received.push(...envelopes);
+        throw failure;
+      },
+    };
+    const fixture = createFixture(failingOutbox);
+
+    await assert.rejects(
+      fixture.handler.handle({
+        name: 'Comunidade Servir',
+      }, fixture.context),
+      (error: unknown) => error === failure,
+    );
+
+    assert.equal(received.length, 1);
+    assert.equal(fixture.organizations.organizations.length, 1);
+    assert.equal(
+      fixture.organizations.organizations[0]?.pendingDomainEvents.length,
+      1,
+    );
+  });
+});
