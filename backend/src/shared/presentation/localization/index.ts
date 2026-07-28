@@ -1,6 +1,7 @@
 export {
   DefaultLocale,
   resolveLocale,
+  resolveLocaleCandidates,
   SupportedLocales,
 } from './locale';
 

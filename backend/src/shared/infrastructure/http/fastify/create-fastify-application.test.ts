@@ -1,0 +1,201 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import {
+  parseCorrelationId,
+  parseRequestId,
+  type CorrelationId,
+  type RequestId,
+} from '@/shared/application/context';
+import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
+import { InMemoryLogger } from '@/shared/infrastructure/logging';
+import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
+import type { MessageCatalog } from '@/shared/presentation';
+
+import { createFastifyApplication } from '.';
+
+const REQUEST_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b1';
+
+const catalog: MessageCatalog = {
+  'pt-BR': {},
+  'en-US': {},
+};
+
+function correlationId(value: string): CorrelationId {
+  const result = parseCorrelationId(value);
+  assert.equal(result.success, true);
+
+  if (!result.success) {
+    throw new Error('Invalid deterministic test fixture');
+  }
+
+  return result.value;
+}
+
+function requestId(value: string): RequestId {
+  const result = parseRequestId(value);
+  assert.equal(result.success, true);
+
+  if (!result.success) {
+    throw new Error('Invalid deterministic test fixture');
+  }
+
+  return result.value;
+}
+
+function application(generatedCorrelationId = 'correlation-generated') {
+  const logger = new InMemoryLogger();
+  const app = createFastifyApplication({
+    correlationIdGenerator: new SequenceIdGenerator([
+      correlationId(generatedCorrelationId),
+    ]),
+    logger,
+    messageTranslator: new InMemoryMessageTranslator(catalog),
+    requestIdGenerator: new SequenceIdGenerator([
+      requestId(REQUEST_ID),
+    ]),
+  });
+
+  return { app, logger };
+}
+
+describe('createFastifyApplication', () => {
+  it('cria contexto a partir da requisicao e expoe os IDs efetivos', async () => {
+    const { app } = application();
+    app.get('/context', async (request) => ({
+      correlationId: request.executionContext?.correlationId,
+      requestId: request.executionContext?.requestId,
+      locale: request.locale,
+    }));
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/context',
+      headers: {
+        'x-correlation-id': 'correlation-received',
+        'accept-language': 'en-US,pt-BR;q=0.8',
+      },
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers['x-correlation-id'], 'correlation-received');
+    assert.equal(response.headers['x-request-id'], REQUEST_ID);
+    assert.deepEqual(response.json(), {
+      correlationId: 'correlation-received',
+      requestId: REQUEST_ID,
+      locale: 'en-US',
+    });
+  });
+
+  it('gera correlacao e seleciona o primeiro idioma suportado', async () => {
+    const { app } = application();
+    app.get('/context', async (request) => ({
+      correlationId: request.executionContext?.correlationId,
+      locale: request.locale,
+    }));
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/context',
+      headers: {
+        'accept-language': 'es,en;q=0.8',
+      },
+    });
+    await app.close();
+
+    assert.deepEqual(response.json(), {
+      correlationId: 'correlation-generated',
+      locale: 'en-US',
+    });
+  });
+
+  it('nao aproxima uma regiao nao suportada', async () => {
+    const { app } = application();
+    app.get('/locale', async (request) => ({ locale: request.locale }));
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/locale',
+      headers: {
+        'accept-language': 'en-GB',
+      },
+    });
+    await app.close();
+
+    assert.deepEqual(response.json(), { locale: 'pt-BR' });
+  });
+
+  it('oculta detalhes de falhas tecnicas e preserva a correlacao', async () => {
+    const { app, logger } = application();
+    app.get('/failure', async () => {
+      throw new Error('secret technical detail');
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/failure',
+      headers: {
+        'accept-language': 'en',
+      },
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 500);
+    assert.equal(response.headers['x-correlation-id'], 'correlation-generated');
+    assert.deepEqual(response.json(), {
+      success: false,
+      error: {
+        code: 'internal.error',
+        message: 'The request could not be processed.',
+        correlationId: 'correlation-generated',
+      },
+    });
+    assert.equal(response.body.includes('secret technical detail'), false);
+    assert.equal(logger.records.length, 1);
+    const [record] = logger.records;
+    assert.ok(record);
+    assert.deepEqual({
+      ...record,
+      attributes: {
+        ...record.attributes,
+        'exception.stacktrace': undefined,
+      },
+    }, {
+      level: 'error',
+      eventName: 'http.request.failed',
+      context: {
+        correlationId: 'correlation-generated',
+        requestId: REQUEST_ID,
+      },
+      attributes: {
+        'http.request.method': 'GET',
+        'http.route': '/failure',
+        'http.response.status_code': 500,
+        'error.type': 'Error',
+        'exception.message': 'secret technical detail',
+        'exception.stacktrace': undefined,
+      },
+    });
+    assert.equal(
+      typeof record.attributes['exception.stacktrace'],
+      'string',
+    );
+  });
+
+  it('nao registra automaticamente uma falha esperada do cliente', async () => {
+    const { app, logger } = application();
+    app.get('/invalid', async () => {
+      throw Object.assign(new Error('invalid input'), { statusCode: 400 });
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/invalid',
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 400);
+    assert.equal(logger.records.length, 0);
+  });
+});

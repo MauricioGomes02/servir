@@ -20,6 +20,8 @@
     "typescript": "^5.8.0"
   },
   "dependencies": {
+    "@fastify/accepts": "^5.0.4",
+    "fastify": "^5.10.0",
     "uuid": "^14.0.1"
   }
 }

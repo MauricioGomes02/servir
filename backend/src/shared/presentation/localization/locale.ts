@@ -27,3 +27,25 @@ export function resolveLocale(candidate: unknown): SupportedLocale {
 
   return supportedLocale ?? LocaleAliases[normalized] ?? DefaultLocale;
 }
+
+export function resolveLocaleCandidates(
+  candidates: ReadonlyArray<unknown>,
+): SupportedLocale {
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') {
+      continue;
+    }
+
+    const normalized = candidate.trim().toLowerCase();
+    const supportedLocale = Object.values(SupportedLocales).find(
+      (locale) => locale.toLowerCase() === normalized,
+    );
+    const locale = supportedLocale ?? LocaleAliases[normalized];
+
+    if (locale !== undefined) {
+      return locale;
+    }
+  }
+
+  return DefaultLocale;
+}

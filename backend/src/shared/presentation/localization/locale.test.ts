@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import {
   DefaultLocale,
   resolveLocale,
+  resolveLocaleCandidates,
   SupportedLocales,
 } from '.';
 
@@ -28,5 +29,16 @@ describe('Locale', () => {
     assert.equal(resolveLocale('es'), DefaultLocale);
     assert.equal(resolveLocale('en-GB'), DefaultLocale);
     assert.equal(resolveLocale(undefined), DefaultLocale);
+  });
+
+  it('seleciona o primeiro candidato suportado sem aproximar regioes', () => {
+    assert.equal(
+      resolveLocaleCandidates(['es', 'en']),
+      SupportedLocales.EnglishUnitedStates,
+    );
+    assert.equal(
+      resolveLocaleCandidates(['en-GB']),
+      DefaultLocale,
+    );
   });
 });
