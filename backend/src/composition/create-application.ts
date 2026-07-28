@@ -16,7 +16,10 @@ import type { Logger } from '@/shared/application/logging';
 import { parseMessageId } from '@/shared/application/messaging';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { SystemClock } from '@/shared/infrastructure/clock';
-import { createFastifyApplication } from '@/shared/infrastructure/http';
+import {
+  createFastifyApplication,
+  httpProblemMessageCatalog,
+} from '@/shared/infrastructure/http';
 import {
   UuidV7Generator,
   type UuidV7Source,
@@ -43,9 +46,16 @@ export function createApplication(
   options: CreateApplicationOptions = {},
 ): FastifyInstance {
   const logger = options.logger ?? new JsonStdoutLogger();
-  const translator = new InMemoryMessageTranslator(
-    organizationMessageCatalog,
-  );
+  const translator = new InMemoryMessageTranslator({
+    'pt-BR': {
+      ...httpProblemMessageCatalog['pt-BR'],
+      ...organizationMessageCatalog['pt-BR'],
+    },
+    'en-US': {
+      ...httpProblemMessageCatalog['en-US'],
+      ...organizationMessageCatalog['en-US'],
+    },
+  });
   const organizations = new InMemoryOrganizationRepository();
   const outbox = new InMemoryEventOutbox();
   const eventBus = new InMemoryEventBus();
@@ -101,6 +111,7 @@ export function createApplication(
 
   registerCreateOrganizationRoute(app, {
     handler: createOrganizationHandler,
+    messageTranslator: translator,
     presenter: createOrganizationPresenter,
   });
 

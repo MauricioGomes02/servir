@@ -10,14 +10,15 @@ import {
 } from '@/shared/presentation';
 
 export interface CreateOrganizationSuccessView {
-  readonly success: true;
-  readonly data: Readonly<{
-    organizationId: string;
+  readonly kind: 'success';
+  readonly resource: Readonly<{
+    id: string;
+    name: string;
   }>;
 }
 
 export interface CreateOrganizationFailureView {
-  readonly success: false;
+  readonly kind: 'failure';
   readonly error: PresentedError;
 }
 
@@ -35,7 +36,7 @@ export class CreateOrganizationPresenter {
   ): CreateOrganizationView {
     if (!result.success) {
       return Object.freeze({
-        success: false,
+        kind: 'failure',
         error: presentError(
           result.error,
           context,
@@ -46,9 +47,10 @@ export class CreateOrganizationPresenter {
     }
 
     return Object.freeze({
-      success: true,
-      data: Object.freeze({
-        organizationId: result.value.organizationId.toString(),
+      kind: 'success',
+      resource: Object.freeze({
+        id: result.value.organizationId.toString(),
+        name: result.value.name,
       }),
     });
   }

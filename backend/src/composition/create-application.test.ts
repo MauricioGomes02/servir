@@ -43,11 +43,10 @@ describe('createApplication', () => {
     assert.equal(response.headers['x-request-id'], UUIDS[0]);
     assert.equal(response.headers['x-correlation-id'], UUIDS[1]);
     assert.deepEqual(response.json(), {
-      success: true,
-      data: {
-        organizationId: UUIDS[2],
-      },
+      id: UUIDS[2],
+      name: 'Comunidade Servir',
     });
+    assert.equal(response.headers.location, `/organizations/${UUIDS[2]}`);
     assert.equal(ids.length, 0);
     assert.equal(logger.records.length, 1);
     assert.equal(logger.records[0]?.eventName, 'organization.created');

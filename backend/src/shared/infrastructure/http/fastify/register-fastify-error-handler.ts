@@ -1,5 +1,6 @@
 import {
   parseCorrelationId,
+  parseRequestId,
   type ExecutionContext,
 } from '@/shared/application/context';
 import {
@@ -8,12 +9,14 @@ import {
   type LogAttributes,
   type Logger,
 } from '@/shared/application/logging';
-import {
-  DefaultLocale,
-  presentError,
-  type MessageTranslator,
-} from '@/shared/presentation';
+import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
+
+import {
+  createHttpProblemDetails,
+  HttpProblemMessageCodes,
+  HttpProblemTypes,
+} from '../problem-details';
 
 interface HttpErrorLike {
   readonly statusCode?: number;
@@ -69,6 +72,7 @@ function errorAttributes(error: unknown): LogAttributes {
 
 function fallbackContext(requestId: string): ExecutionContext | undefined {
   const correlationId = parseCorrelationId(requestId);
+  const parsedRequestId = parseRequestId(requestId);
 
   if (!correlationId.success) {
     return undefined;
@@ -76,6 +80,9 @@ function fallbackContext(requestId: string): ExecutionContext | undefined {
 
   return {
     correlationId: correlationId.value,
+    requestId: parsedRequestId.success
+      ? parsedRequestId.value
+      : undefined,
   };
 }
 
@@ -103,32 +110,28 @@ export function registerFastifyErrorHandler(
       }));
     }
 
-    const code = statusCode >= 500
-      ? 'internal.error'
-      : 'request.invalid';
-    const locale = request.locale ?? DefaultLocale;
+    const isInternalError = statusCode >= 500;
+    const locale = request.locale;
+    const type = isInternalError
+      ? HttpProblemTypes.InternalError
+      : HttpProblemTypes.InvalidRequest;
+    const titleCode = isInternalError
+      ? HttpProblemMessageCodes.InternalErrorTitle
+      : HttpProblemMessageCodes.InvalidRequestTitle;
 
-    if (context === undefined) {
-      return reply.status(statusCode).send({
-        success: false,
-        error: {
-          code,
-          message: messageTranslator.translate({
-            code,
-            locale,
-          }),
-        },
-      });
-    }
-
-    return reply.status(statusCode).send({
-      success: false,
-      error: presentError(
-        { code },
-        context,
-        locale,
-        messageTranslator,
-      ),
-    });
+    return reply
+      .status(statusCode)
+      .type('application/problem+json')
+      .header('content-language', locale)
+      .send(createHttpProblemDetails({
+        type,
+        title: messageTranslator.translate({
+          code: titleCode,
+          locale,
+        }),
+        status: statusCode,
+        correlationId: context?.correlationId,
+        requestId: context?.requestId,
+      }));
   });
 }

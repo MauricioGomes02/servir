@@ -22,6 +22,7 @@ import type { CreateOrganizationCommand } from './create-organization-command';
 
 export interface CreateOrganizationOutput {
   readonly organizationId: OrganizationId;
+  readonly name: string;
 }
 
 export interface CreateOrganizationDependencies {
@@ -68,6 +69,7 @@ export class CreateOrganizationHandler {
 
     return success(Object.freeze({
       organizationId: organization.value.id,
+      name: organization.value.name.toString(),
     }));
   }
 }

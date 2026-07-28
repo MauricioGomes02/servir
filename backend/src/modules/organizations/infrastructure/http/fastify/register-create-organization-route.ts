@@ -1,11 +1,17 @@
 import type { CreateOrganizationHandler } from '@/modules/organizations/application';
 import type { CreateOrganizationPresenter } from '@/modules/organizations/presentation';
+import {
+  createValidationProblemDetails,
+  HttpProblemMessageCodes,
+} from '@/shared/infrastructure/http/problem-details';
+import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
 import { CreateOrganizationRouteContextError } from './create-organization-route-context-error';
 
 export interface CreateOrganizationRouteDependencies {
   readonly handler: CreateOrganizationHandler;
+  readonly messageTranslator: MessageTranslator;
   readonly presenter: CreateOrganizationPresenter;
 }
 
@@ -42,6 +48,26 @@ export function registerCreateOrganizationRoute(
       request.locale,
     );
 
-    return reply.status(view.success ? 201 : 422).send(view);
+    if (view.kind === 'failure') {
+      return reply
+        .status(422)
+        .type('application/problem+json')
+        .header('content-language', request.locale)
+        .send(createValidationProblemDetails({
+          title: dependencies.messageTranslator.translate({
+            code: HttpProblemMessageCodes.ValidationErrorTitle,
+            locale: request.locale,
+          }),
+          status: 422,
+          correlationId: context.correlationId,
+          requestId: context.requestId,
+          errors: [view.error],
+        }));
+    }
+
+    return reply
+      .status(201)
+      .header('location', `/organizations/${encodeURIComponent(view.resource.id)}`)
+      .send(view.resource);
   });
 }

@@ -15,7 +15,10 @@ import { parseMessageId } from '@/shared/application/messaging';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
-import { createFastifyApplication } from '@/shared/infrastructure/http';
+import {
+  createFastifyApplication,
+  httpProblemMessageCatalog,
+} from '@/shared/infrastructure/http';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
@@ -53,9 +56,16 @@ function fixture() {
 
   const organizations = new InMemoryOrganizationRepository();
   const outbox = new InMemoryEventOutbox();
-  const translator = new InMemoryMessageTranslator(
-    organizationMessageCatalog,
-  );
+  const translator = new InMemoryMessageTranslator({
+    'pt-BR': {
+      ...httpProblemMessageCatalog['pt-BR'],
+      ...organizationMessageCatalog['pt-BR'],
+    },
+    'en-US': {
+      ...httpProblemMessageCatalog['en-US'],
+      ...organizationMessageCatalog['en-US'],
+    },
+  });
   const handler = new CreateOrganizationHandler({
     clock: new FixedClock(instant.value),
     organizationIdGenerator: new SequenceIdGenerator([
@@ -81,7 +91,11 @@ function fixture() {
     ]),
   });
 
-  registerCreateOrganizationRoute(app, { handler, presenter });
+  registerCreateOrganizationRoute(app, {
+    handler,
+    messageTranslator: translator,
+    presenter,
+  });
 
   return { app, organizations, outbox };
 }
@@ -101,11 +115,10 @@ describe('registerCreateOrganizationRoute', () => {
 
     assert.equal(response.statusCode, 201);
     assert.deepEqual(response.json(), {
-      success: true,
-      data: {
-        organizationId: 'organization-123',
-      },
+      id: 'organization-123',
+      name: 'Comunidade Servir',
     });
+    assert.equal(response.headers.location, '/organizations/organization-123');
     assert.equal(response.headers['x-correlation-id'], 'correlation-123');
     assert.equal(organizations.organizations.length, 1);
     assert.equal(outbox.envelopes.length, 1);
@@ -126,14 +139,22 @@ describe('registerCreateOrganizationRoute', () => {
     await app.close();
 
     assert.equal(response.statusCode, 422);
+    assert.match(
+      response.headers['content-type'] ?? '',
+      /^application\/problem\+json/,
+    );
+    assert.equal(response.headers['content-language'], 'en-US');
     assert.deepEqual(response.json(), {
-      success: false,
-      error: {
+      type: '/problems/validation-error',
+      title: 'The request contains invalid data.',
+      status: 422,
+      instance: 'urn:servir:request:request-123',
+      correlationId: 'correlation-123',
+      errors: [{
         code: 'organization.name.invalid_type',
-        message: 'The organization name must be text.',
-        field: 'name',
-        correlationId: 'correlation-123',
-      },
+        detail: 'The organization name must be text.',
+        pointer: '#/name',
+      }],
     });
     assert.equal(organizations.organizations.length, 0);
     assert.equal(outbox.envelopes.length, 0);

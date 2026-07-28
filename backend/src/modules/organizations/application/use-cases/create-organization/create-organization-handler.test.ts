@@ -109,6 +109,7 @@ describe('CreateOrganizationHandler', () => {
     }
 
     assert.equal(result.value.organizationId, fixture.ids.organizationId);
+    assert.equal(result.value.name, 'Comunidade Servir');
     assert.equal(fixture.organizations.organizations.length, 1);
     assert.deepEqual(
       fixture.organizations.organizations[0]?.pendingDomainEvents,

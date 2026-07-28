@@ -143,13 +143,17 @@ describe('createFastifyApplication', () => {
 
     assert.equal(response.statusCode, 500);
     assert.equal(response.headers['x-correlation-id'], 'correlation-generated');
+    assert.match(
+      response.headers['content-type'] ?? '',
+      /^application\/problem\+json/,
+    );
+    assert.equal(response.headers['content-language'], 'en-US');
     assert.deepEqual(response.json(), {
-      success: false,
-      error: {
-        code: 'internal.error',
-        message: 'The request could not be processed.',
-        correlationId: 'correlation-generated',
-      },
+      type: '/problems/internal-error',
+      title: 'The request could not be processed.',
+      status: 500,
+      instance: `urn:servir:request:${REQUEST_ID}`,
+      correlationId: 'correlation-generated',
     });
     assert.equal(response.body.includes('secret technical detail'), false);
     assert.equal(logger.records.length, 1);
@@ -196,6 +200,43 @@ describe('createFastifyApplication', () => {
     await app.close();
 
     assert.equal(response.statusCode, 400);
+    assert.deepEqual(response.json(), {
+      type: '/problems/invalid-request',
+      title: 'Nao foi possivel processar a solicitacao.',
+      status: 400,
+      instance: `urn:servir:request:${REQUEST_ID}`,
+      correlationId: 'correlation-generated',
+    });
+    assert.equal(logger.records.length, 0);
+  });
+
+  it('apresenta JSON malformado como Problem Details', async () => {
+    const { app, logger } = application();
+    app.post('/payload', async () => ({ accepted: true }));
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/payload',
+      headers: {
+        'content-type': 'application/json',
+        'accept-language': 'en-US',
+      },
+      payload: '{"name":',
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 400);
+    assert.match(
+      response.headers['content-type'] ?? '',
+      /^application\/problem\+json/,
+    );
+    assert.deepEqual(response.json(), {
+      type: '/problems/invalid-request',
+      title: 'The request could not be processed.',
+      status: 400,
+      instance: `urn:servir:request:${REQUEST_ID}`,
+      correlationId: 'correlation-generated',
+    });
     assert.equal(logger.records.length, 0);
   });
 });

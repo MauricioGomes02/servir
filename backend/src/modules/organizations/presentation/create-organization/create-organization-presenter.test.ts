@@ -42,19 +42,26 @@ describe('CreateOrganizationPresenter', () => {
     }
 
     const view = presenter().present(
-      success({ organizationId: organizationId.value }),
+      success({
+        organizationId: organizationId.value,
+        name: 'Comunidade Servir',
+      }),
       context(),
       SupportedLocales.PortugueseBrazil,
     );
 
     assert.deepEqual(view, {
-      success: true,
-      data: {
-        organizationId: 'organization-123',
+      kind: 'success',
+      resource: {
+        id: 'organization-123',
+        name: 'Comunidade Servir',
       },
     });
     assert.equal(Object.isFrozen(view), true);
-    assert.equal(view.success && Object.isFrozen(view.data), true);
+    assert.equal(
+      view.kind === 'success' && Object.isFrozen(view.resource),
+      true,
+    );
   });
 
   it('apresenta a falha esperada em portugues com correlacao', () => {
@@ -69,7 +76,7 @@ describe('CreateOrganizationPresenter', () => {
     );
 
     assert.deepEqual(view, {
-      success: false,
+      kind: 'failure',
       error: {
         code: 'organization.name.empty',
         message: 'Informe o nome da organizacao.',
@@ -96,7 +103,7 @@ describe('CreateOrganizationPresenter', () => {
     );
 
     assert.deepEqual(view, {
-      success: false,
+      kind: 'failure',
       error: {
         code: 'organization.name.too_long',
         message: 'The organization name must have at most 120 characters.',
@@ -109,9 +116,9 @@ describe('CreateOrganizationPresenter', () => {
       },
     });
     assert.equal(Object.isFrozen(view), true);
-    assert.equal(!view.success && Object.isFrozen(view.error), true);
+    assert.equal(view.kind === 'failure' && Object.isFrozen(view.error), true);
     assert.equal(
-      !view.success && Object.isFrozen(view.error.parameters),
+      view.kind === 'failure' && Object.isFrozen(view.error.parameters),
       true,
     );
   });
