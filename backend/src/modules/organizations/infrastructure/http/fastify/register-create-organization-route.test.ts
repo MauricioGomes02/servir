@@ -1,0 +1,141 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import { CreateOrganizationHandler } from '@/modules/organizations/application';
+import { OrganizationId } from '@/modules/organizations/domain';
+import {
+  CreateOrganizationPresenter,
+  organizationMessageCatalog,
+} from '@/modules/organizations/presentation';
+import {
+  parseCorrelationId,
+  parseRequestId,
+} from '@/shared/application/context';
+import { parseMessageId } from '@/shared/application/messaging';
+import { parseDomainEventId } from '@/shared/domain/domain-event';
+import { Instant } from '@/shared/domain/instant';
+import { FixedClock } from '@/shared/infrastructure/clock';
+import { createFastifyApplication } from '@/shared/infrastructure/http';
+import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
+import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
+import { InMemoryLogger } from '@/shared/infrastructure/logging';
+import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
+import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
+
+import { InMemoryOrganizationRepository } from '../../persistence';
+import { registerCreateOrganizationRoute } from './register-create-organization-route';
+
+function fixture() {
+  const correlationId = parseCorrelationId('correlation-123');
+  const requestId = parseRequestId('request-123');
+  const organizationId = OrganizationId.create('organization-123');
+  const domainEventId = parseDomainEventId('event-123');
+  const messageId = parseMessageId('message-123');
+  const instant = Instant.create('2026-07-28T12:00:00.000Z');
+
+  assert.equal(correlationId.success, true);
+  assert.equal(requestId.success, true);
+  assert.equal(organizationId.success, true);
+  assert.equal(domainEventId.success, true);
+  assert.equal(messageId.success, true);
+  assert.equal(instant.success, true);
+
+  if (
+    !correlationId.success
+    || !requestId.success
+    || !organizationId.success
+    || !domainEventId.success
+    || !messageId.success
+    || !instant.success
+  ) {
+    throw new Error('Invalid deterministic test fixture');
+  }
+
+  const organizations = new InMemoryOrganizationRepository();
+  const outbox = new InMemoryEventOutbox();
+  const translator = new InMemoryMessageTranslator(
+    organizationMessageCatalog,
+  );
+  const handler = new CreateOrganizationHandler({
+    clock: new FixedClock(instant.value),
+    organizationIdGenerator: new SequenceIdGenerator([
+      organizationId.value,
+    ]),
+    domainEventIdGenerator: new SequenceIdGenerator([
+      domainEventId.value,
+    ]),
+    messageIdGenerator: new SequenceIdGenerator([
+      messageId.value,
+    ]),
+    unitOfWork: new DirectUnitOfWork({ organizations, outbox }),
+  });
+  const presenter = new CreateOrganizationPresenter(translator);
+  const app = createFastifyApplication({
+    correlationIdGenerator: new SequenceIdGenerator([
+      correlationId.value,
+    ]),
+    logger: new InMemoryLogger(),
+    messageTranslator: translator,
+    requestIdGenerator: new SequenceIdGenerator([
+      requestId.value,
+    ]),
+  });
+
+  registerCreateOrganizationRoute(app, { handler, presenter });
+
+  return { app, organizations, outbox };
+}
+
+describe('registerCreateOrganizationRoute', () => {
+  it('cria uma organizacao pelo contexto da requisicao', async () => {
+    const { app, organizations, outbox } = fixture();
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/organizations',
+      payload: {
+        name: 'Comunidade Servir',
+      },
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 201);
+    assert.deepEqual(response.json(), {
+      success: true,
+      data: {
+        organizationId: 'organization-123',
+      },
+    });
+    assert.equal(response.headers['x-correlation-id'], 'correlation-123');
+    assert.equal(organizations.organizations.length, 1);
+    assert.equal(outbox.envelopes.length, 1);
+    assert.equal(outbox.envelopes[0]?.correlationId, 'correlation-123');
+  });
+
+  it('apresenta uma entrada invalida no locale negociado sem persistir', async () => {
+    const { app, organizations, outbox } = fixture();
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/organizations',
+      headers: {
+        'accept-language': 'en-US',
+      },
+      payload: {},
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 422);
+    assert.deepEqual(response.json(), {
+      success: false,
+      error: {
+        code: 'organization.name.invalid_type',
+        message: 'The organization name must be text.',
+        field: 'name',
+        correlationId: 'correlation-123',
+      },
+    });
+    assert.equal(organizations.organizations.length, 0);
+    assert.equal(outbox.envelopes.length, 0);
+  });
+});
