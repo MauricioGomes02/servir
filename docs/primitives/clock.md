@@ -33,6 +33,14 @@ flowchart LR
 
 Um handler obtém `Instant` por `clock.now()` uma vez e o passa ao agregado, evitando leituras temporais divergentes.
 
+```ts
+export interface Clock {
+  now(): Instant;
+}
+```
+
+`SystemClock` traduz o tempo do ambiente para `Instant`. Falhas técnicas são encapsuladas em `SystemClockError`, com código estável e causa preservada. `FixedClock` devolve sempre o instante recebido na construção e torna testes determinísticos.
+
 ## Relacionamento com outras primitivas
 
 Events recebem `occurredAt: Instant`; Policies temporais recebem instante explícito; adapters implementam o port.

@@ -9,11 +9,11 @@ Entrada inválida, regra não satisfeita e ausência prevista não são defeitos
 
 ## Decisão
 
-Usar Result/Notification para condições esperadas. Reservar exceções para violações de programação, invariantes impossíveis após construção válida ou falhas técnicas não recuperáveis localmente.
+Usar Result/Notification para condições esperadas. Reservar exceções para violações de programação, invariantes impossíveis após construção válida ou falhas técnicas não recuperáveis localmente. Exceções customizadas expõem tipo e código estáveis; quando encapsulam outra falha, preservam sua causa.
 
 ## Consequências
 
-Assinaturas documentam o fluxo. Fronteiras ainda devem capturar, observar e traduzir exceções inesperadas.
+Assinaturas documentam o fluxo. Fronteiras ainda devem capturar, observar e traduzir exceções inesperadas. Tratamento, telemetria e tradução dependem do tipo ou código, nunca do texto da mensagem.
 
 ## Alternativas
 

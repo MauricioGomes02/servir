@@ -165,6 +165,7 @@ describe('InMemoryEventBus', () => {
           return false;
         }
 
+        assert.equal(error.code, 'event.dispatch.failed');
         assert.equal(error.eventName, 'organization.created');
         assert.deepEqual(
           error.failures.map((failure) => failure.handlerName),
@@ -209,7 +210,20 @@ describe('InMemoryEventBus', () => {
         'organization.created',
         auditHandler,
       ),
-      DuplicateEventSubscriptionError,
+      (error: unknown) => {
+        assert.equal(
+          error instanceof DuplicateEventSubscriptionError,
+          true,
+        );
+
+        if (!(error instanceof DuplicateEventSubscriptionError)) {
+          return false;
+        }
+
+        assert.equal(error.code, 'event_subscription.duplicate');
+
+        return true;
+      },
     );
   });
 });

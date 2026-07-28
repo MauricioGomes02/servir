@@ -40,6 +40,7 @@ flowchart TD
     ID --> RC[Repository Contracts]
     RC --> U[Unit of Work]
     U --> UC[Casos de uso]
+    UC --> PL[Apresentação e localização de erros]
 ```
 
 | Etapa | Estado | Critério de saída |
@@ -57,8 +58,10 @@ flowchart TD
 | Specification e Policy | Planejado | Cada contrato documentado e testado |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
 | Logger | Implementação inicial | Registro, contexto, imutabilidade e adapter de teste definidos |
-| Clock a Unit of Work | Planejado | Cada contrato documentado e testado |
+| Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
+| Id Generator a Unit of Work | Planejado | Cada contrato documentado e testado |
 | Casos de uso e adaptadores | Bloqueado | Fundação concluída |
+| Apresentação e localização de erros | Planejado | Locale negociado com fallback; respostas expõem código estável, mensagem traduzida, campo, parâmetros e correlation ID sem revelar falhas técnicas |
 
 ## Exemplos
 

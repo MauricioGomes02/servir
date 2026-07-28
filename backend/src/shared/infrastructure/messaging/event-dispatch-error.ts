@@ -6,6 +6,7 @@ export interface EventHandlerFailure {
 }
 
 export class EventDispatchError extends AggregateError {
+  readonly code = 'event.dispatch.failed';
   readonly failures: ReadonlyArray<EventHandlerFailure>;
 
   constructor(
