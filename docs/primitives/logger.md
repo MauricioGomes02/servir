@@ -56,7 +56,7 @@ Consome metadados permitidos de Context e Message; handlers de eventos podem tra
 
 ## Possíveis evoluções
 
-Adapters para OpenTelemetry e console, com redaction, limites de tamanho, tratamento estruturado de exceções e enriquecimento de resource/trace context.
+O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita. Permanecem planejados o adapter OpenTelemetry, políticas configuráveis de redaction, tratamento estruturado compartilhado de exceções e enriquecimento de resource/trace context.
 
 ## Boas práticas
 

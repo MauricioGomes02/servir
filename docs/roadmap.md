@@ -60,14 +60,14 @@ flowchart TD
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
 | Specification e Policy | Diretrizes definidas | Tipos concretos são criados quando regras consumidoras demonstrarem reuso ou decisão contextual |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
-| Logger | Implementação inicial | Registro, contexto, imutabilidade e adapter de teste definidos |
+| Logger | Implementação inicial | Registro, contexto, imutabilidade, adapter de teste e adapter JSON limitado para stdout definidos; OpenTelemetry e redaction configurável permanecem planejados |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
 | Id Generator | Implementação inicial | Port tipado, sequência determinística e adapter UUIDv7 com factory nominal e falhas técnicas codificadas estão testados |
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto e confirmação seletiva de eventos testados; adapter transacional permanece planejado |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope pelo mesmo Unit of Work; adapters tecnológicos permanecem planejados |
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado e primeiro Presenter estão definidos; negociação pelo transporte e fronteira de falhas técnicas permanecem planejadas |
-| Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, negociação de locale, fronteira segura de erros técnicos e rota `POST /organizations` estão testados; OpenTelemetry e composição executável permanecem planejados |
+| Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, negociação de locale, fronteira segura de erros técnicos, rota `POST /organizations` e composição executável estão testados; OpenTelemetry e adapters tecnológicos de persistência permanecem planejados |
 | Apresentação temporal e datas civis | Planejado | API preserva `Instant` UTC; apresentação converte com locale e timezone IANA; agendamentos modelam data civil, horário civil e zona separadamente; precedência entre timezone da operação, usuário, organização e aplicação permanece por definir com o primeiro consumidor |
 
 ## Exemplos
