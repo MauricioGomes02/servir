@@ -42,9 +42,11 @@ flowchart LR
 
 Consome erros estruturados de `Result`/`Notification` e a correlação do `ExecutionContext`. Adapters de entrada negociam o locale; adapters de tradução implementam `MessageTranslator`.
 
+Locale define idioma e convenções de apresentação; não define timezone. Quando a apresentação temporal for implementada, o mesmo `Instant` UTC poderá ser exibido em horários locais diferentes conforme a zona IANA do observador, sem alterar o valor persistido.
+
 ## Possíveis evoluções
 
-Negociação de `Accept-Language`, catálogos externos, pluralização e locale preservado em mensagens assíncronas serão introduzidos somente com consumidores concretos.
+Negociação de `Accept-Language`, catálogos externos, pluralização, formatação temporal com timezone IANA e locale preservado em mensagens assíncronas serão introduzidos somente com consumidores concretos.
 
 ## Boas práticas
 

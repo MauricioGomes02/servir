@@ -42,6 +42,10 @@ Domain Events recebem `occurredAt: Instant`; futuramente, `Clock.now()` retorna 
 
 Usar Temporal ou Luxon internamente para operações temporais sem alterar o contrato público. Introduzir precisão maior que milissegundos somente diante de requisito real.
 
+A apresentação temporal permanece planejada: APIs devem transmitir o `Instant` canônico em UTC, enquanto frontend, emails, PDFs e outros presenters podem convertê-lo usando locale e timezone IANA do observador. O timezone não será inferido do processo. Sua origem e precedência entre valor explícito da operação, preferência do usuário, organização e padrão da aplicação serão definidas com o primeiro consumidor.
+
+Agendamentos futuros não serão reduzidos prematuramente a `Instant`: data civil, horário civil e timezone IANA serão modelados separadamente, pois expressam a intenção local mesmo quando regras de offset mudam.
+
 ## Boas práticas
 
 - Persistir e transmitir em UTC.

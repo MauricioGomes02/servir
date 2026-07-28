@@ -27,6 +27,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Context | Metadados imutáveis da execução, independentes do transporte. | Propagado por Application. | `ExecutionContext`. | Objeto HTTP dentro do domínio. |
 | Logger | Port para registrar fatos estruturados. | Adaptadores enviam a destinos. | `logger.info(fact)`. | `console.log` em entidade. |
 | Locale | Identificador canônico do idioma usado na apresentação, distinto de timezone. | Resolvido pelo adapter de entrada e consumido pelo Presenter. | `pt-BR`. | Usar `America/Sao_Paulo` como idioma. |
+| Timezone | Identificador IANA que representa as regras civis de uma localidade, distinto de locale e offset fixo. | Converte `Instant` para apresentação e compõe agendamentos civis quando o caso de uso exigir. | `America/Rio_Branco`. | Persistir `-05:00` como regra permanente da localidade. |
 | Message Translator | Port da apresentação que traduz um código estável com parâmetros para um locale suportado. | Implementado por adapter; usa catálogos de apresentação. | Traduzir `organization.name.empty`. | Mensagem localizada dentro do erro de domínio. |
 | Presented Error | Representação segura e localizada de uma falha esperada. | Produzida por Presenter a partir de erro, locale e Context. | Código, mensagem, campo, parâmetros e correlation ID. | Expor stack trace ou mensagem técnica. |
 | Clock | Port que fornece tempo de forma controlável. | Injetado onde tempo é uma dependência. | `clock.now()`. | `new Date()` disperso. |
