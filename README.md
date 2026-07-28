@@ -2,7 +2,7 @@
 
 Fundação arquitetural para aplicações orientadas a domínio, composição e contratos explícitos. O primeiro domínio consumidor será a gestão de escalas e equipes ministeriais, mas as primitivas devem permanecer reutilizáveis e independentes de framework.
 
-> Status: fundação em construção. Casos de uso, APIs, persistência e integrações permanecem fora do escopo até a conclusão das etapas documentais e das primitivas.
+> Status: fundação com implementações iniciais. O primeiro corte vertical de caso de uso está liberado para validar os contratos; APIs e adapters tecnológicos entram somente conforme necessidades concretas.
 
 ## Índice
 
@@ -41,7 +41,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 1. Consolidar vocabulário e decisões.
 2. Especificar relações entre primitivas.
 3. Implementar e testar cada primitiva na ordem definida no [roadmap](docs/roadmap.md).
-4. Somente então iniciar casos de uso, adaptadores e infraestrutura.
+4. Validar a fundação com cortes verticais e introduzir somente os ports e adapters exigidos por consumidores reais.
 
 ## Como contribuir
 
@@ -53,4 +53,4 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 
 ## Estado atual
 
-Há implementações iniciais de `Result`, `Notification`, `Entity` e `ValueObject`. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
+Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, tempo, identidade e Unit of Work. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.

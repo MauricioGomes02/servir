@@ -33,13 +33,15 @@ flowchart LR
 
 `SchedulePublicationPolicy.evaluate(organization, period, actor)`.
 
+Policies concretas nascem quando uma decisão exige fatos que não pertencem naturalmente a uma única Entity ou Aggregate. A fundação preserva a diretriz, mas não cria um contrato universal sem consumidor.
+
 ## Relacionamento com outras primitivas
 
 Pode usar Specifications e Value Objects; retorna decisão ou Result; o caso de uso executa a consequência.
 
 ## Possíveis evoluções
 
-Adicionar explicações compostas e versionamento de políticas quando requisitos reais exigirem auditoria.
+Criar as primeiras Policies junto às decisões consumidoras. Adicionar explicações compostas e versionamento quando requisitos reais exigirem auditoria.
 
 ## Boas práticas
 

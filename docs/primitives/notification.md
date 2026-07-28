@@ -41,12 +41,13 @@ Pode ser a falha de `Result`; Validators produzem itens; factories impedem cria�
 
 ## Possíveis evoluções
 
-Decidir por testes se a API será persistentemente imutável ou um acumulador mutável com fronteira controlada.
+Evoluir para uma API persistentemente imutável somente se consumidores reais precisarem compartilhar versões intermediárias.
 
 ## Boas práticas
 
 - Manter códigos estáveis e mensagens fora do domínio.
 - Acumular somente validações independentes.
+- Copiar e congelar erros na entrada e devolver snapshots congelados.
 
 ## Anti-patterns
 

@@ -7,6 +7,8 @@ implements UnitOfWork<TScope> {
   execute<TResult>(
     work: (scope: TScope) => Promise<TResult>,
   ): Promise<TResult> {
-    return work(this.scope);
+    return Promise.resolve().then(
+      () => work(this.scope),
+    );
   }
 }

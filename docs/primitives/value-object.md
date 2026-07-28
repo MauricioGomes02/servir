@@ -39,11 +39,12 @@ Compõe Entities, Aggregates, Events e Context; factories podem retornar Result.
 
 ## Possíveis evoluções
 
-Definir estratégia de igualdade para coleções, datas e objetos aninhados sem assumir que congelamento raso garante imutabilidade profunda.
+Ampliar tipos estruturados suportados somente quando casos concretos exigirem novas semânticas de igualdade.
 
 ## Boas práticas
 
 - Fazer cópia defensiva e não expor estado mutável.
+- Copiar e congelar profundamente arrays e objetos estruturados recebidos.
 - Nomear operações na linguagem do domínio.
 
 ## Anti-patterns

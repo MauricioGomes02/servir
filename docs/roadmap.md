@@ -31,14 +31,15 @@ flowchart TD
     EB --> AR[Aggregate Root]
     AR --> E[Entity]
     E --> VO[Value Object]
-    VO --> S[Specification]
-    S --> P[Policy]
-    P --> C[Context]
+    VO --> C[Context]
     C --> L[Logger]
     L --> CL[Clock]
     CL --> ID[Id Generator]
     ID --> U[Unit of Work]
     U --> UC[Casos de uso]
+    UC -. define quando necessário .-> S[Specifications]
+    S -. pode compor .-> P[Policies]
+    UC -. define quando necessário .-> P
     UC -. define por consumidor .-> RC[Repository Ports específicos]
     UC --> PL[Apresentação e localização de erros]
 ```
@@ -52,17 +53,17 @@ flowchart TD
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
 | Message Envelope | Implementação inicial | Identidade, correlação, causalidade e imutabilidade testadas |
 | Event Bus | Implementação inicial | Ports, concorrência, falhas e subscriptions testados |
-| Aggregate Root | Implementação inicial | Registro, snapshot, ordem e retirada testados |
+| Aggregate Root | Implementação inicial | Registro, snapshot, ordem e confirmação seletiva testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
-| Specification e Policy | Planejado | Cada contrato documentado e testado |
+| Specification e Policy | Diretrizes definidas | Tipos concretos são criados quando regras consumidoras demonstrarem reuso ou decisão contextual |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
 | Logger | Implementação inicial | Registro, contexto, imutabilidade e adapter de teste definidos |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, esgotamento e desacoplamento de EntityId testados |
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto e confirmação seletiva de eventos testados; adapter transacional permanece planejado |
-| Casos de uso e adaptadores | Bloqueado | Fundação concluída |
+| Casos de uso e adaptadores | Liberado para corte vertical | Primeiro fluxo valida contratos da fundação e introduz apenas ports exigidos pelo consumidor |
 | Apresentação e localização de erros | Planejado | Locale negociado com fallback; respostas expõem código estável, mensagem traduzida, campo, parâmetros e correlation ID sem revelar falhas técnicas |
 
 ## Exemplos

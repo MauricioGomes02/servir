@@ -1,6 +1,17 @@
 import {
-  NotificationError,
+  type NotificationError,
 } from './notification-error';
+
+function copyError<TCode extends string>(
+  error: NotificationError<TCode>,
+): NotificationError<TCode> {
+  return Object.freeze({
+    ...error,
+    params: error.params
+      ? Object.freeze({ ...error.params })
+      : undefined,
+  });
+}
 
 export class Notification<
   TCode extends string = string,
@@ -8,7 +19,7 @@ export class Notification<
   private readonly items: NotificationError<TCode>[] = [];
 
   add(error: NotificationError<TCode>): this {
-    this.items.push(error);
+    this.items.push(copyError(error));
 
     return this;
   }
@@ -16,7 +27,7 @@ export class Notification<
   addMany(
     errors: readonly NotificationError<TCode>[],
   ): this {
-    this.items.push(...errors);
+    this.items.push(...errors.map((error) => copyError(error)));
 
     return this;
   }
@@ -50,14 +61,16 @@ export class Notification<
   }
 
   getErrors(): readonly NotificationError<TCode>[] {
-    return [...this.items];
+    return Object.freeze([...this.items]);
   }
 
   getErrorsForField(
     field: string,
   ): readonly NotificationError<TCode>[] {
-    return this.items.filter(
-      error => error.field === field,
+    return Object.freeze(
+      this.items.filter(
+        error => error.field === field,
+      ),
     );
   }
 

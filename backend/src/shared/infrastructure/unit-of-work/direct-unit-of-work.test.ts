@@ -41,4 +41,22 @@ describe('DirectUnitOfWork', () => {
       (error: unknown) => error === failure,
     );
   });
+
+  it('converte falha sincrona do trabalho em rejeicao', async () => {
+    const failure = new Error('synchronous failure');
+    const unitOfWork = new DirectUnitOfWork<TestScope>({
+      organizations: {
+        name: 'organizations',
+      },
+    });
+
+    const execution = unitOfWork.execute(() => {
+      throw failure;
+    });
+
+    await assert.rejects(
+      execution,
+      (error: unknown) => error === failure,
+    );
+  });
 });

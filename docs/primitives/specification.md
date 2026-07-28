@@ -35,13 +35,15 @@ flowchart LR
 
 `ActiveMemberSpecification.and(AvailableOnDateSpecification)`.
 
+Specifications concretas nascem quando uma condição de domínio demonstra reuso ou composição. A fundação não fornece uma árvore genérica antes desses consumidores.
+
 ## Relacionamento com outras primitivas
 
 Policies podem compor Specifications; Repositories podem receber specifications somente se a tradução e limitações forem explícitas.
 
 ## Possíveis evoluções
 
-Separar especificações executáveis em memória de representações traduzíveis para consulta.
+Criar as primeiras Specifications junto às regras consumidoras. Separar especificações executáveis em memória de representações traduzíveis para consulta quando houver essa necessidade.
 
 ## Boas práticas
 
