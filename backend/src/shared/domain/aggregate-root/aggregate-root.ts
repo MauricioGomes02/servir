@@ -4,6 +4,8 @@ import {
   type EntityId,
 } from '@/shared/domain/entity';
 
+import { DomainEventAcknowledgementError } from './domain-event-acknowledgement-error';
+
 export abstract class AggregateRoot<
   TId extends EntityId<string>,
   TProps extends object,
@@ -23,11 +25,22 @@ export abstract class AggregateRoot<
     ]);
   }
 
-  pullDomainEvents(): ReadonlyArray<TDomainEvent> {
-    const pendingEvents = this.pendingDomainEvents;
+  acknowledgeDomainEvents(
+    events: ReadonlyArray<TDomainEvent>,
+  ): void {
+    const matchesPendingSequence = events.every(
+      (event, index) => (
+        this.domainEvents[index]?.eventId === event.eventId
+      ),
+    );
 
-    this.domainEvents = [];
+    if (!matchesPendingSequence) {
+      throw new DomainEventAcknowledgementError(
+        this.domainEvents.length,
+        events.length,
+      );
+    }
 
-    return pendingEvents;
+    this.domainEvents = this.domainEvents.slice(events.length);
   }
 }

@@ -37,9 +37,9 @@ flowchart TD
     C --> L[Logger]
     L --> CL[Clock]
     CL --> ID[Id Generator]
-    ID --> RC[Repository Contracts]
-    RC --> U[Unit of Work]
+    ID --> U[Unit of Work]
     U --> UC[Casos de uso]
+    UC -. define por consumidor .-> RC[Repository Ports específicos]
     UC --> PL[Apresentação e localização de erros]
 ```
 
@@ -60,7 +60,8 @@ flowchart TD
 | Logger | Implementação inicial | Registro, contexto, imutabilidade e adapter de teste definidos |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, esgotamento e desacoplamento de EntityId testados |
-| Repository Contracts e Unit of Work | Planejado | Cada contrato documentado e testado |
+| Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
+| Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto e confirmação seletiva de eventos testados; adapter transacional permanece planejado |
 | Casos de uso e adaptadores | Bloqueado | Fundação concluída |
 | Apresentação e localização de erros | Planejado | Locale negociado com fallback; respostas expõem código estável, mensagem traduzida, campo, parâmetros e correlation ID sem revelar falhas técnicas |
 

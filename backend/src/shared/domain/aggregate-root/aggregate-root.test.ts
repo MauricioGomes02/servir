@@ -10,7 +10,10 @@ import {
 import { EntityId } from '@/shared/domain/entity';
 import { Instant } from '@/shared/domain/instant';
 
-import { AggregateRoot } from '.';
+import {
+  AggregateRoot,
+  DomainEventAcknowledgementError,
+} from '.';
 
 type NameChanged = DomainEvent<
   'test.name_changed',
@@ -139,10 +142,11 @@ describe('AggregateRoot', () => {
     );
   });
 
-  it('retira os eventos pendentes preservando a ordem', () => {
+  it('confirma somente os eventos persistidos e preserva eventos novos', () => {
     const aggregate = TestAggregate.create();
     const firstMetadata = eventMetadata('event-1');
     const secondMetadata = eventMetadata('event-2');
+    const thirdMetadata = eventMetadata('event-3');
 
     aggregate.changeName(
       'first',
@@ -154,15 +158,69 @@ describe('AggregateRoot', () => {
       secondMetadata.eventId,
       secondMetadata.occurredAt,
     );
+    const persistedEvents = aggregate.pendingDomainEvents;
+    aggregate.changeName(
+      'third',
+      thirdMetadata.eventId,
+      thirdMetadata.occurredAt,
+    );
 
-    const pulledEvents = aggregate.pullDomainEvents();
+    aggregate.acknowledgeDomainEvents(persistedEvents);
 
     assert.deepEqual(
-      pulledEvents.map((event) => event.eventId),
+      aggregate.pendingDomainEvents.map((event) => event.eventId),
+      [thirdMetadata.eventId],
+    );
+  });
+
+  it('rejeita confirmacao fora da sequencia sem remover eventos', () => {
+    const aggregate = TestAggregate.create();
+    const firstMetadata = eventMetadata('event-1');
+    const secondMetadata = eventMetadata('event-2');
+
+    aggregate.changeName(
+      'first',
+      firstMetadata.eventId,
+      firstMetadata.occurredAt,
+    );
+    const firstEvent = aggregate.pendingDomainEvents[0];
+    aggregate.changeName(
+      'second',
+      secondMetadata.eventId,
+      secondMetadata.occurredAt,
+    );
+    const secondEvent = aggregate.pendingDomainEvents[1];
+
+    assert.ok(firstEvent);
+    assert.ok(secondEvent);
+
+    assert.throws(
+      () => aggregate.acknowledgeDomainEvents([secondEvent]),
+      (error: unknown) => {
+        assert.equal(
+          error instanceof DomainEventAcknowledgementError,
+          true,
+        );
+
+        if (!(error instanceof DomainEventAcknowledgementError)) {
+          return false;
+        }
+
+        assert.equal(
+          error.code,
+          'aggregate_root.domain_events.acknowledgement_mismatch',
+        );
+        assert.equal(error.pendingCount, 2);
+        assert.equal(error.acknowledgementCount, 1);
+
+        return true;
+      },
+    );
+
+    assert.deepEqual(
+      aggregate.pendingDomainEvents.map((event) => event.eventId),
       [firstMetadata.eventId, secondMetadata.eventId],
     );
-    assert.equal(Object.isFrozen(pulledEvents), true);
-    assert.deepEqual(aggregate.pendingDomainEvents, []);
   });
 
   it('nasce sem eventos durante a reconstituicao', () => {

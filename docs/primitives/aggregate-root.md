@@ -52,7 +52,7 @@ class Organization extends AggregateRoot<
 }
 ```
 
-`pendingDomainEvents` devolve um snapshot imutável. `pullDomainEvents()` retira os eventos na ordem de registro, mas não os publica nem confirma entrega. O futuro Unit of Work definirá quando realizar essa retirada em relação à persistência e à outbox.
+`pendingDomainEvents` devolve um snapshot imutável sem remover eventos. Depois que estado e outbox forem confirmados, `acknowledgeDomainEvents(events)` remove somente o prefixo persistido. Eventos registrados depois do snapshot continuam pendentes; uma confirmação fora da sequência falha com código estável sem alterar a fila.
 
 ## Relacionamento com outras primitivas
 
@@ -60,13 +60,14 @@ Especializa Entity, usa Value Objects e Result/Notification, registra Domain Eve
 
 ## Possíveis evoluções
 
-Definir concorrência otimista, versionamento e a política transacional de retirada dos eventos junto ao Unit of Work.
+Definir concorrência otimista, versionamento e integração da confirmação de eventos com adapters transacionais reais.
 
 ## Boas práticas
 
 - Manter aggregates pequenos e orientados a invariantes.
 - Executar mudança e registro do fato atomicamente em memória.
 - Não registrar eventos ao reconstituir estado persistido.
+- Confirmar somente o snapshot persistido depois do commit.
 
 ## Anti-patterns
 
@@ -74,3 +75,4 @@ Definir concorrência otimista, versionamento e a política transacional de reti
 - Setters públicos em objetos internos.
 - Agregado chamando repository ou event bus.
 - Consumidor mutando a coleção interna de eventos.
+- Remover eventos pendentes antes da confirmação transacional.

@@ -35,18 +35,21 @@ flowchart LR
 
 `OrganizationRepository.findById` e `save`; consultas de leitura podem usar ports próprios quando não precisam reconstituir Aggregate.
 
+O port nasce junto ao primeiro consumidor que demonstra essas operações. A fundação não fornece uma interface compartilhada de Repository apenas para antecipar contratos ainda desconhecidos.
+
 ## Relacionamento com outras primitivas
 
 Opera Aggregate Roots e EntityIds; participa de Unit of Work; adapters usam Mappers.
 
 ## Possíveis evoluções
 
-Definir concorrência otimista, paginação e separação de read models quando os casos de uso existirem.
+Criar os primeiros ports específicos junto aos casos de uso consumidores. Definir concorrência otimista, paginação e separação de read models somente quando esses consumidores exigirem.
 
 ## Boas práticas
 
 - Desenhar pelo consumidor, não pela API do banco.
 - Manter contrato pequeno e específico do Aggregate.
+- Tratar ausência esperada sem convertê-la em falha técnica; o caso de uso atribui a semântica de negócio.
 
 ## Anti-patterns
 
