@@ -26,6 +26,9 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Repository | Port de coleção para carregar e persistir Aggregates. | Trabalha por Aggregate Root. | `save(organization)`. | CRUD genérico de todas as tabelas. |
 | Context | Metadados imutáveis da execução, independentes do transporte. | Propagado por Application. | `ExecutionContext`. | Objeto HTTP dentro do domínio. |
 | Logger | Port para registrar fatos estruturados. | Adaptadores enviam a destinos. | `logger.info(fact)`. | `console.log` em entidade. |
+| Locale | Identificador canônico do idioma usado na apresentação, distinto de timezone. | Resolvido pelo adapter de entrada e consumido pelo Presenter. | `pt-BR`. | Usar `America/Sao_Paulo` como idioma. |
+| Message Translator | Port da apresentação que traduz um código estável com parâmetros para um locale suportado. | Implementado por adapter; usa catálogos de apresentação. | Traduzir `organization.name.empty`. | Mensagem localizada dentro do erro de domínio. |
+| Presented Error | Representação segura e localizada de uma falha esperada. | Produzida por Presenter a partir de erro, locale e Context. | Código, mensagem, campo, parâmetros e correlation ID. | Expor stack trace ou mensagem técnica. |
 | Clock | Port que fornece tempo de forma controlável. | Injetado onde tempo é uma dependência. | `clock.now()`. | `new Date()` disperso. |
 | Instant | Value Object que representa um ponto absoluto na linha do tempo, normalizado em UTC. | Produzido por Clock; usado por Events. | `2026-07-27T15:00:00.000Z`. | Horário civil sem offset. |
 | CorrelationId | Identificador que correlaciona operações relacionadas. | Campo de Context/Message. | Mesmo ID em passos de um fluxo. | ID da entidade de negócio. |

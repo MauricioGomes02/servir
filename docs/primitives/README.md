@@ -13,6 +13,7 @@
 - [Policy](policy.md)
 - [Context](context.md)
 - [Logger](logger.md)
+- [Localização de erros](localization.md)
 - [Clock](clock.md)
 - [Id Generator](id-generator.md)
 - [Repository](repository.md)

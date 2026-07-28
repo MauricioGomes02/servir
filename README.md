@@ -53,4 +53,4 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 
 ## Estado atual
 
-Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, tempo, identidade e Unit of Work. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
+Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.

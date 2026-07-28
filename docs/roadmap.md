@@ -64,7 +64,7 @@ flowchart TD
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto e confirmação seletiva de eventos testados; adapter transacional permanece planejado |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope pelo mesmo Unit of Work; adapters tecnológicos permanecem planejados |
-| Apresentação e localização de erros | Planejado | Locale negociado com fallback; respostas expõem código estável, mensagem traduzida, campo, parâmetros e correlation ID sem revelar falhas técnicas |
+| Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória e erro apresentado estão definidos; negociação pelo transporte e fronteira de falhas técnicas permanecem planejadas |
 
 ## Exemplos
 
