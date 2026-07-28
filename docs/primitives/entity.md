@@ -39,7 +39,7 @@ Usa EntityId; pode conter Value Objects; Aggregate Root é uma Entity com respon
 
 ## Possíveis evoluções
 
-Extrair geração de ID para `IdGenerator` e definir factories concretas antes de ampliar a classe base.
+Definir factories e formatos de IDs concretos conforme cada domínio exigir, sem ampliar a classe base.
 
 ## Boas práticas
 

@@ -33,9 +33,17 @@ flowchart LR
 
 `OrganizationIdGenerator.generate()` pode usar UUID v7 no adapter e sequência fixa em testes.
 
+```ts
+export interface IdGenerator<TId> {
+  generate(): TId;
+}
+```
+
+`SequenceIdGenerator<TId>` fornece identidades tipadas em ordem e falha com código estável quando a sequência determinística é esgotada. Um adapter UUID concreto permanece associado à factory do ID de seu domínio; a fundação não converte texto para um tipo nominal por cast.
+
 ## Relacionamento com outras primitivas
 
-Produz EntityId; pode ser usado por factory/caso de uso, não necessariamente armazenado na Entity.
+Produz o ID tipado exigido pelo consumidor; pode ser usado por factory/caso de uso, não necessariamente armazenado na Entity. A factory do ID concreto continua responsável por validar formato e normalização.
 
 ## Possíveis evoluções
 

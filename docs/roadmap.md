@@ -59,7 +59,8 @@ flowchart TD
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
 | Logger | Implementação inicial | Registro, contexto, imutabilidade e adapter de teste definidos |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
-| Id Generator a Unit of Work | Planejado | Cada contrato documentado e testado |
+| Id Generator | Implementação inicial | Port tipado, sequência determinística, esgotamento e desacoplamento de EntityId testados |
+| Repository Contracts e Unit of Work | Planejado | Cada contrato documentado e testado |
 | Casos de uso e adaptadores | Bloqueado | Fundação concluída |
 | Apresentação e localização de erros | Planejado | Locale negociado com fallback; respostas expõem código estável, mensagem traduzida, campo, parâmetros e correlation ID sem revelar falhas técnicas |
 
