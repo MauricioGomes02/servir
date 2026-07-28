@@ -27,7 +27,8 @@ flowchart TD
     N --> I[Instant]
     I --> DE[Domain Event]
     DE --> M[Message Envelope]
-    M --> EB[Event Bus]
+    M --> OR[Outbox Relay]
+    OR --> EB[Event Bus]
     EB --> AR[Aggregate Root]
     AR --> E[Entity]
     E --> VO[Value Object]
@@ -55,6 +56,7 @@ flowchart TD
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
 | Message Envelope | Implementação inicial | Identidade, correlação, causalidade e imutabilidade testadas |
 | Event Bus | Implementação inicial | Ports, concorrência, falhas e subscriptions testados |
+| Outbox Relay | Implementação inicial | Adapter em memória publica em ordem, confirma após sucesso, preserva pendências em falha e evita flush concorrente; relay durável permanece planejado |
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e confirmação seletiva testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |

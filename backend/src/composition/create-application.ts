@@ -22,8 +22,15 @@ import {
   type UuidV7Source,
 } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
-import { JsonStdoutLogger } from '@/shared/infrastructure/logging';
-import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
+import {
+  EventLoggingHandler,
+  JsonStdoutLogger,
+} from '@/shared/infrastructure/logging';
+import {
+  InMemoryEventBus,
+  InMemoryEventOutbox,
+  InMemoryEventOutboxRelay,
+} from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import type { FastifyInstance } from 'fastify';
 
@@ -41,6 +48,12 @@ export function createApplication(
   );
   const organizations = new InMemoryOrganizationRepository();
   const outbox = new InMemoryEventOutbox();
+  const eventBus = new InMemoryEventBus();
+  const eventRelay = new InMemoryEventOutboxRelay(
+    outbox,
+    eventBus,
+    logger,
+  );
   const unitOfWork = new DirectUnitOfWork({ organizations, outbox });
   const clock = new SystemClock();
   const createOrganizationHandler = new CreateOrganizationHandler({
@@ -73,6 +86,17 @@ export function createApplication(
       parseRequestId,
       options.uuidSource,
     ),
+  });
+
+  eventBus.subscribe(
+    'organization.created',
+    new EventLoggingHandler(logger),
+  );
+  app.addHook('onReady', async () => {
+    eventRelay.start();
+  });
+  app.addHook('onClose', async () => {
+    await eventRelay.stop();
   });
 
   registerCreateOrganizationRoute(app, {

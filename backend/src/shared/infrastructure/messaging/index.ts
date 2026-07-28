@@ -14,6 +14,24 @@ export {
   InMemoryEventOutbox,
 } from './in-memory-event-outbox';
 
+export {
+  InMemoryEventOutboxAcknowledgementError,
+  InMemoryEventOutboxAcknowledgementErrorCode,
+} from './in-memory-event-outbox-acknowledgement-error';
+
+export {
+  InMemoryEventOutboxRelay,
+} from './in-memory-event-outbox-relay';
+
+export {
+  InMemoryEventOutboxRelayError,
+  InMemoryEventOutboxRelayErrorCodes,
+} from './in-memory-event-outbox-relay-error';
+
+export type {
+  InMemoryEventOutboxRelayErrorCode,
+} from './in-memory-event-outbox-relay-error';
+
 export type {
   EventHandlerFailure,
 } from './event-dispatch-error';

@@ -17,5 +17,6 @@
 | [013](013-structured-logging.md) | Logging estruturado e contextual | Aceita |
 | [014](014-uuid-v7-identifiers.md) | UUIDv7 para identidades geradas | Aceita |
 | [015](015-fastify-http-adapter.md) | Fastify como adapter HTTP | Aceita |
+| [016](016-in-memory-outbox-relay.md) | Relay de outbox em memória | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

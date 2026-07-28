@@ -16,8 +16,9 @@ const UUIDS = [
 describe('createApplication', () => {
   it('compoe o primeiro corte vertical executavel', async () => {
     const ids = [...UUIDS];
+    const logger = new InMemoryLogger();
     const app = createApplication({
-      logger: new InMemoryLogger(),
+      logger,
       uuidSource: () => {
         const id = ids.shift();
 
@@ -48,5 +49,12 @@ describe('createApplication', () => {
       },
     });
     assert.equal(ids.length, 0);
+    assert.equal(logger.records.length, 1);
+    assert.equal(logger.records[0]?.eventName, 'organization.created');
+    assert.deepEqual(logger.records[0]?.context, {
+      correlationId: UUIDS[1],
+      messageId: UUIDS[4],
+      causationId: undefined,
+    });
   });
 });

@@ -16,6 +16,10 @@ import {
 import { Instant } from '@/shared/domain/instant';
 
 import { InMemoryEventOutbox } from '.';
+import {
+  InMemoryEventOutboxAcknowledgementError,
+  InMemoryEventOutboxAcknowledgementErrorCode,
+} from './in-memory-event-outbox-acknowledgement-error';
 
 describe('InMemoryEventOutbox', () => {
   it('armazena envelopes em ordem e expoe snapshot imutavel', async () => {
@@ -58,5 +62,55 @@ describe('InMemoryEventOutbox', () => {
 
     assert.equal(Object.isFrozen(snapshot), true);
     assert.deepEqual(snapshot, [envelope]);
+    assert.deepEqual(outbox.nextEnvelope, envelope);
+
+    outbox.acknowledge(envelope.messageId);
+
+    assert.equal(outbox.nextEnvelope, undefined);
+    assert.equal(outbox.envelopes.length, 0);
+  });
+
+  it('rejeita confirmacao fora da ordem da outbox', async () => {
+    const storedMessageId = parseMessageId('message-stored');
+    const receivedMessageId = parseMessageId('message-received');
+    const eventId = parseDomainEventId('event-123');
+    const correlationId = parseCorrelationId('correlation-123');
+    const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
+
+    assert.equal(storedMessageId.success, true);
+    assert.equal(receivedMessageId.success, true);
+    assert.equal(eventId.success, true);
+    assert.equal(correlationId.success, true);
+    assert.equal(occurredAt.success, true);
+
+    if (
+      !storedMessageId.success
+      || !receivedMessageId.success
+      || !eventId.success
+      || !correlationId.success
+      || !occurredAt.success
+    ) {
+      throw new Error('Invalid deterministic test fixture');
+    }
+
+    const envelope = createEventEnvelope({
+      messageId: storedMessageId.value,
+      correlationId: correlationId.value,
+      event: createDomainEvent({
+        eventId: eventId.value,
+        name: 'organization.created',
+        occurredAt: occurredAt.value,
+        payload: { organizationId: 'organization-123' },
+      }),
+    });
+    const outbox = new InMemoryEventOutbox();
+    await outbox.add([envelope]);
+
+    assert.throws(
+      () => outbox.acknowledge(receivedMessageId.value),
+      (error) => error instanceof InMemoryEventOutboxAcknowledgementError
+        && error.code === InMemoryEventOutboxAcknowledgementErrorCode,
+    );
+    assert.equal(outbox.nextEnvelope?.messageId, envelope.messageId);
   });
 });

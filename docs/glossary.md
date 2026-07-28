@@ -38,6 +38,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Handler | Componente que trata um tipo de mensagem. | Recebe Command, Query ou Event. | `CancelOrderHandler`. | Service com dezenas de métodos. |
 | Publisher | Port que envia mensagens sem conhecer consumidores. | Usa Event Bus ou broker por adapter. | Publicador de eventos pendentes. | Agregado chamando webhook. |
 | Subscriber | Consumidor registrado para um tipo de mensagem. | Invoca um Handler. | Auditoria de `OrderCreated`. | Produtor conhecendo lista de consumidores. |
+| Outbox Relay | Adapter que entrega mensagens persistidas na outbox a um Publisher após a fronteira transacional. | Confirma entrega conforme a semântica do storage; pode acionar Event Bus ou broker. | Relay publica `OrganizationCreated` após o commit. | Caso de uso enviando e-mail depois de salvar e retornando falha por isso. |
 | Factory | Constrói objeto válido quando criação exige regras. | Pode retornar Result. | `Organization.create`. | Wrapper de `new` sem regra. |
 | Builder | Monta incrementalmente representação complexa, sobretudo em testes. | Produz objeto final válido. | `OrderBuilder` de teste. | Objeto de domínio parcialmente válido. |
 | Mapper | Traduz representações sem decidir negócio. | Usado em Adapter. | Persistência ↔ domínio. | Validador com acesso ao banco. |
