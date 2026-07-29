@@ -13,6 +13,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 - [Primitivas arquiteturais](docs/primitives/README.md)
 - [Decisões arquiteturais](docs/decisions/README.md)
 - [Estratégia de testes](docs/testing-strategy.md)
+- [Relay durável de outbox](docs/outbox-relay.md)
 - [Infraestrutura local e migrations](infrastructure/README.md)
 - [Exemplos conceituais](docs/examples/README.md)
 - [Como contribuir](#como-contribuir)

@@ -57,7 +57,7 @@ flowchart TD
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
 | Message Envelope | Implementação inicial | Identidade, correlação, causalidade e imutabilidade testadas |
 | Event Bus | Implementação inicial | Ports, concorrência, falhas e subscriptions testados |
-| Outbox Relay | Implementação inicial | Adapter em memória publica em ordem, confirma após sucesso, preserva pendências em falha e evita flush concorrente; relay durável permanece planejado |
+| Outbox Relay | Implementação inicial | Adapter em memória está testado; relay durável possui garantia `at-least-once`, claim por lease, retry e estados terminais definidos, enquanto o executável permanece planejado |
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e confirmação seletiva testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
@@ -70,8 +70,8 @@ flowchart TD
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto, confirmação seletiva de eventos e adapter PostgreSQL com commit/rollback testados |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope atomicamente em memória ou PostgreSQL; relay durável permanece planejado |
 | Workspaces de aplicações | Implementação inicial | Raiz coordena workspaces npm; API possui manifesto e ciclo de vida próprios; pacotes compartilhados surgem apenas com reuso comprovado |
-| Aplicação de relay durável | Planejado | Worker independente reivindica mensagens da outbox, publica no broker e confirma entrega com retry, idempotência, observabilidade e encerramento seguro definidos |
-| Infraestrutura de banco e migrations | Implementação inicial | PostgreSQL local, changelog Liquibase externo às aplicações, schema inicial e execução idempotente em container estão validados; credenciais dedicadas de runtime e IaC de ambientes compartilhados permanecem planejados |
+| Aplicação de relay durável | Design definido | Kafka e semântica operacional foram aceitos; worker independente ainda deve implementar claim, publicação, confirmação, retry, idempotência, observabilidade e encerramento seguro |
+| Infraestrutura de banco e migrations | Implementação inicial | PostgreSQL local, changelog Liquibase externo às aplicações, schema inicial e estado operacional do relay estão definidos; execução idempotente deve ser validada após cada novo changeset; credenciais dedicadas de runtime e IaC permanecem planejadas |
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado, primeiro Presenter e títulos HTTP localizados estão definidos |
 | Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, negociação de locale, Problem Details RFC 9457, representação direta do recurso, rota `POST /organizations`, composição executável e tracing HTTP/Fastify/PostgreSQL com OpenTelemetry estão testados; spans manuais do relay permanecem planejados |
 | Apresentação temporal e datas civis | Planejado | API preserva `Instant` UTC; apresentação converte com locale e timezone IANA; agendamentos modelam data civil, horário civil e zona separadamente; precedência entre timezone da operação, usuário, organização e aplicação permanece por definir com o primeiro consumidor |
