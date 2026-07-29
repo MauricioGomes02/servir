@@ -64,7 +64,15 @@ O tipo serializável de `IntegrationEvent` reside em `backend/packages/integrati
 
 Falha de confirmação não é tratada como falha de publicação. Ela é propagada e deixa a mensagem recuperável, pois o broker pode já tê-la aceitado. Esse caminho materializa a duplicidade conhecida da entrega `at-least-once`.
 
-Os adapters em memória implementados não substituem PostgreSQL ou Kafka. Eles especificam posse exclusiva durante a lease, recuperação após expiração, incremento de tentativas e rejeição de transições feitas por outro worker.
+Os adapters em memória especificam posse exclusiva durante a lease, recuperação após expiração, incremento de tentativas e rejeição de transições feitas por outro worker. Eles não substituem PostgreSQL ou Kafka.
+
+## Storage PostgreSQL
+
+`PostgresOutboxMessageStore` implementa o mesmo port com statements atômicos. O claim usa uma CTE materializada para selecionar mensagens disponíveis em ordem, aplica `FOR UPDATE SKIP LOCKED` e atualiza lease e tentativa antes de retornar as linhas. A transação implícita termina junto com o statement, antes de qualquer publicação no broker.
+
+Confirmação, reagendamento e falha terminal exigem `message_id`, o `lease_id` atual e uma lease cujo instante de expiração seja estritamente posterior à transição. No limite exato de `lease_expires_at`, a posse já expirou. Cada transição limpa a lease; falha de posse ou expiração produz código estável da Application, enquanto falhas do driver são classificadas pelo adapter.
+
+As linhas retornadas são validadas e convertidas para o contrato serializável antes de cruzarem o port. Payload e metadata são copiados e congelados; nenhuma mensagem de erro do PostgreSQL passa a definir comportamento.
 
 ## Estado persistido
 
@@ -88,7 +96,7 @@ Não existe coluna `status`: pendência, lease e estados terminais são derivado
 
 Publicação ocorre fora da transação PostgreSQL. Se Kafka confirmar e o processo falhar antes de `markPublished`, a mensagem poderá ser publicada novamente. Esse é o ponto conhecido da garantia `at-least-once`. `message_id` deve acompanhar a mensagem e ser usado para idempotência pelos consumidores.
 
-Falhas transitórias usam backoff exponencial com jitter calculado a partir de um `Clock` injetado. A política concreta, os limites e a classificação de erros serão especificados no primeiro corte executável.
+Falhas transitórias usarão backoff exponencial com jitter calculado a partir de dependências controláveis. A política concreta, os limites e a classificação entre falhas transitórias e terminais permanecem no próximo incremento.
 
 ## Observabilidade
 
@@ -96,7 +104,6 @@ Cada ciclo, claim e publicação deve produzir spans apropriados. Logs estrutura
 
 ## Evoluções planejadas
 
-- Implementar claim, confirmação e reagendamento PostgreSQL com testes de concorrência.
 - Implementar uma política concreta de retry com backoff exponencial e jitter.
 - Adicionar o publisher Kafka e propagação OpenTelemetry.
 - Compor o processo contínuo com configuração e encerramento seguro.

@@ -10,3 +10,10 @@ export {
 export type {
   ProcessOutboxBatchConfigErrorCode,
 } from './process-outbox-batch-config-error';
+export {
+  OutboxLeaseError,
+  OutboxLeaseErrorCodes,
+} from './outbox-lease-error';
+export type {
+  OutboxLeaseErrorCode,
+} from './outbox-lease-error';

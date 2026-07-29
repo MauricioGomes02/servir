@@ -3,14 +3,14 @@ import { describe, it } from 'node:test';
 
 import type { Clock, RetryPolicy } from '@/application/ports';
 import {
+  OutboxLeaseError,
+  OutboxLeaseErrorCodes,
   ProcessOutboxBatchConfigError,
   ProcessOutboxBatchConfigErrorCodes,
 } from '@/application/errors';
 import {
   InMemoryIntegrationEventPublisher,
   InMemoryOutboxMessageStore,
-  OutboxLeaseError,
-  OutboxLeaseErrorCodes,
 } from '@/infrastructure';
 
 import { ProcessOutboxBatch } from './process-outbox-batch';

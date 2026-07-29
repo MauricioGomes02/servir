@@ -5,11 +5,10 @@ import type {
   ClaimOutboxMessages,
   OutboxMessageStore,
 } from '@/application';
-
 import {
   OutboxLeaseError,
   OutboxLeaseErrorCodes,
-} from './outbox-lease-error';
+} from '@/application';
 
 export interface InMemoryOutboxMessage {
   readonly messageId: string;

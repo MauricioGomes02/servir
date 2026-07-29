@@ -9,9 +9,12 @@ export type {
   OutboxMessageSnapshot,
 } from './in-memory-outbox-message-store';
 export {
-  OutboxLeaseError,
-  OutboxLeaseErrorCodes,
-} from './outbox-lease-error';
+  PostgresOutboxMessageStore,
+} from './postgres-outbox-message-store';
+export {
+  PostgresOutboxMessageStoreError,
+  PostgresOutboxMessageStoreErrorCodes,
+} from './postgres-outbox-message-store-error';
 export type {
-  OutboxLeaseErrorCode,
-} from './outbox-lease-error';
+  PostgresOutboxMessageStoreErrorCode,
+} from './postgres-outbox-message-store-error';

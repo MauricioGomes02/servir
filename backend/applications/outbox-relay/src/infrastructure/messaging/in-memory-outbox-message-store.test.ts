@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  InMemoryOutboxMessageStore,
   OutboxLeaseError,
   OutboxLeaseErrorCodes,
+} from '@/application';
+import {
+  InMemoryOutboxMessageStore,
 } from '.';
 
 const MESSAGE = {
