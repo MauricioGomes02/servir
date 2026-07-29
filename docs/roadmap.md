@@ -71,7 +71,7 @@ flowchart TD
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope atomicamente em memória ou PostgreSQL; relay durável permanece planejado |
 | Infraestrutura de banco e migrations | Implementação inicial | PostgreSQL local, changelog Liquibase externo ao backend, schema inicial e execução idempotente em container estão validados; credenciais dedicadas de runtime e IaC de ambientes compartilhados permanecem planejados |
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado, primeiro Presenter e títulos HTTP localizados estão definidos |
-| Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, negociação de locale, Problem Details RFC 9457, representação direta do recurso, rota `POST /organizations`, composição executável e tracing HTTP/Fastify com OpenTelemetry estão testados; spans manuais do relay e adapters tecnológicos de persistência permanecem planejados |
+| Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, negociação de locale, Problem Details RFC 9457, representação direta do recurso, rota `POST /organizations`, composição executável e tracing HTTP/Fastify/PostgreSQL com OpenTelemetry estão testados; spans manuais do relay permanecem planejados |
 | Apresentação temporal e datas civis | Planejado | API preserva `Instant` UTC; apresentação converte com locale e timezone IANA; agendamentos modelam data civil, horário civil e zona separadamente; precedência entre timezone da operação, usuário, organização e aplicação permanece por definir com o primeiro consumidor |
 
 ## Exemplos

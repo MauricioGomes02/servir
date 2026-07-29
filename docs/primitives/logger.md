@@ -58,6 +58,8 @@ Consome metadados permitidos de Context e Message; handlers de eventos podem tra
 
 O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita e já correlaciona o registro ao span ativo. Permanecem planejados um exporter de logs OpenTelemetry, políticas configuráveis de redaction e tratamento estruturado compartilhado de exceções.
 
+Falhas de adapters PostgreSQL são registradas na fronteira HTTP ou no worker que possui `ExecutionContext`, nunca simultaneamente no adapter que irá relançá-las. A instrumentação automática do driver produz spans técnicos separados com `db.query.text` parametrizado, sem valores dos parâmetros; logs preservam apenas o código estável e o contexto necessário, usando `traceId` para navegação até a query.
+
 ## Boas práticas
 
 - Usar nomes estáveis e atributos pesquisáveis.

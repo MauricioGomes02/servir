@@ -10,6 +10,10 @@ import {
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
+import {
+  PostgresEventOutboxError,
+  PostgresEventOutboxErrorCode,
+} from '@/shared/infrastructure/messaging';
 import type { MessageCatalog } from '@/shared/presentation';
 
 import { createFastifyApplication } from '.';
@@ -208,6 +212,32 @@ describe('createFastifyApplication', () => {
       correlationId: 'correlation-generated',
     });
     assert.equal(logger.records.length, 0);
+  });
+
+  it('logs a stable persistence code without exposing its cause', async () => {
+    const { app, logger } = application();
+    app.get('/persistence-failure', async () => {
+      throw new PostgresEventOutboxError(
+        new Error('secret database detail'),
+      );
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/persistence-failure',
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 500);
+    assert.equal(logger.records.length, 1);
+    assert.equal(
+      logger.records[0]?.attributes['error.code'],
+      PostgresEventOutboxErrorCode,
+    );
+    assert.equal(
+      JSON.stringify(logger.records).includes('secret database detail'),
+      false,
+    );
   });
 
   it('presents malformed JSON as Problem Details', async () => {

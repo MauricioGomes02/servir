@@ -2,10 +2,22 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  createPgInstrumentation,
   OpenTelemetryError,
   OpenTelemetryErrorCodes,
   startOpenTelemetry,
 } from './open-telemetry';
+
+describe('PgInstrumentation', () => {
+  it('keeps enhanced database reporting disabled by default', () => {
+    const instrumentation = createPgInstrumentation();
+
+    assert.equal(
+      instrumentation.getConfig().enhancedDatabaseReporting,
+      false,
+    );
+  });
+});
 
 describe('startOpenTelemetry', () => {
   it('does not create the SDK when telemetry is disabled', async () => {

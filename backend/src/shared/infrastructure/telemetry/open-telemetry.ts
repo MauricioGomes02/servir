@@ -2,6 +2,7 @@ import FastifyOtelInstrumentation from '@fastify/otel';
 import { W3CTraceContextPropagator } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 
 export const OpenTelemetryErrorCodes = {
@@ -44,12 +45,19 @@ function isDisabled(environment: NodeJS.ProcessEnv): boolean {
     || environment.OTEL_TRACES_EXPORTER?.toLowerCase() === 'none';
 }
 
+export function createPgInstrumentation(): PgInstrumentation {
+  return new PgInstrumentation({
+    enhancedDatabaseReporting: false,
+  });
+}
+
 function createSdk(): TelemetrySdk {
   return new NodeSDK({
     traceExporter: new OTLPTraceExporter(),
     textMapPropagator: new W3CTraceContextPropagator(),
     instrumentations: [
       new HttpInstrumentation(),
+      createPgInstrumentation(),
       new FastifyOtelInstrumentation({
         instrumentHooks: false,
         registerOnInitialization: true,
