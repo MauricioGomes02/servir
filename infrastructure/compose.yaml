@@ -27,7 +27,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      LIQUIBASE_COMMAND_CHANGELOG_FILE: /liquibase/changelog/db.changelog-root.yaml
+      LIQUIBASE_SEARCH_PATH: /liquibase/changelog
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: db.changelog-root.yaml
       LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-servir}
       LIQUIBASE_COMMAND_USERNAME: ${POSTGRES_MIGRATOR_USER:-servir_migrator}
       LIQUIBASE_COMMAND_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD:-servir_migrator_local}
@@ -38,4 +39,3 @@ services:
 
 volumes:
   postgres-data:
-
