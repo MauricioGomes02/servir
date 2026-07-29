@@ -33,7 +33,7 @@ flowchart LR
 
 ## Exemplos
 
-Erros usam `code`, `field` opcional e parâmetros serializáveis. A implementação inicial está em `backend/src/shared/domain/notification`.
+Erros usam `code`, `field` opcional e parâmetros serializáveis. A implementação inicial está em `backend/applications/api/src/shared/domain/notification`.
 
 ## Relacionamento com outras primitivas
 

@@ -24,5 +24,6 @@
 | [020](020-uuid-contract-for-persisted-identifiers.md) | Contrato UUID para identificadores persistidos | Aceita |
 | [021](021-postgresql-transactional-unit-of-work.md) | Unit of Work transacional com PostgreSQL | Aceita |
 | [022](022-postgresql-observability.md) | Observabilidade da persistência PostgreSQL | Aceita |
+| [023](023-application-workspaces.md) | Aplicações independentes em npm workspaces | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

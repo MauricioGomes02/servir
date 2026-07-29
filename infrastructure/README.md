@@ -1,6 +1,6 @@
 # Infraestrutura
 
-Esta pasta concentra recursos operacionais externos às aplicações. O backend consome o banco, mas não cria nem atualiza seu schema durante o startup.
+Esta pasta concentra recursos operacionais externos às aplicações. A API consome o banco, mas não cria nem atualiza seu schema durante o startup.
 
 ## Ambiente local
 
@@ -20,7 +20,7 @@ docker compose run --rm liquibase status
 
 As credenciais do exemplo pertencem somente ao ambiente local. Em ambientes compartilhados, o pipeline de migrations deve usar uma identidade com permissão de DDL, enquanto cada aplicação usa uma identidade de runtime limitada às operações necessárias. Segredos não devem ser versionados.
 
-Após aplicar as migrations, o backend local pode usar `PERSISTENCE_MODE=postgres` e uma `DATABASE_URL` apontando para esse banco. A credencial simplificada do Compose serve apenas ao desenvolvimento local; criar e rotacionar uma identidade restrita de runtime permanece obrigatório para ambientes compartilhados.
+Após aplicar as migrations, a API local pode usar `PERSISTENCE_MODE=postgres` e uma `DATABASE_URL` apontando para esse banco. A credencial simplificada do Compose serve apenas ao desenvolvimento local; criar e rotacionar uma identidade restrita de runtime permanece obrigatório para ambientes compartilhados.
 
 ## Organização
 

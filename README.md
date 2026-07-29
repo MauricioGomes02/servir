@@ -31,7 +31,11 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 ```text
 .
 ├── .codex/skills/      # Guardrails para futuras contribuições assistidas
-├── backend/src/        # Código da fundação e, futuramente, dos domínios
+├── backend/
+│   ├── applications/
+│   │   └── api/        # API HTTP e seu composition root
+│   └── packages/       # Pacotes compartilhados somente quando houver reuso comprovado
+├── frontend/           # Aplicações de apresentação web
 ├── infrastructure/     # Banco local, migrations e futura IaC
 └── docs/
     ├── decisions/      # Architecture Decision Records
@@ -56,16 +60,16 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 
 ## Estado atual
 
-Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e persistência atômica de Organization + outbox em memória ou PostgreSQL. Reações pós-commit usam relay apenas no modo em memória; o relay durável permanece planejado. PostgreSQL local, Liquibase e o schema inicial são externos ao backend. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
+Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e persistência atômica de Organization + outbox em memória ou PostgreSQL. Reações pós-commit usam relay apenas no modo em memória; uma aplicação de relay durável permanece planejada. PostgreSQL local, Liquibase e o schema inicial são externos às aplicações. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
 
-## Executar o backend localmente
+## Executar a API localmente
 
-O backend usa o suporte nativo do Node para carregar `backend/.env` quando o arquivo existir. Copie `backend/.env.example` para personalizar o ambiente local; o `.env` não é versionado e não substitui as variáveis fornecidas pela plataforma em produção.
+O backend usa npm workspaces. A API usa o suporte nativo do Node para carregar `backend/applications/api/.env` quando o arquivo existir. Copie `backend/applications/api/.env.example` para personalizar o ambiente local; o `.env` não é versionado e não substitui as variáveis fornecidas pela plataforma em produção.
 
 ```bash
 cd backend
 npm install
-npm run dev
+npm run dev:api
 ```
 
 O exemplo mantém o OpenTelemetry desabilitado enquanto não houver um collector local. Para exportar traces, configure `OTEL_SDK_DISABLED=false` e mantenha `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` apontando para o endpoint OTLP/protobuf do collector.

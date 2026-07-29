@@ -31,7 +31,7 @@ flowchart LR
 
 ## Exemplos
 
-Duas organizações com nomes iguais continuam distintas quando seus IDs diferem. A implementação inicial está em `backend/src/shared/domain/entity`.
+Duas organizações com nomes iguais continuam distintas quando seus IDs diferem. A implementação inicial está em `backend/applications/api/src/shared/domain/entity`.
 
 ## Relacionamento com outras primitivas
 

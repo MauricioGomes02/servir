@@ -32,7 +32,7 @@ flowchart LR
 
 ## Exemplos
 
-`Result<OrganizationName, OrganizationNameError>` diferencia construção válida de entrada inválida. A implementação inicial está em `backend/src/shared/core/result`.
+`Result<OrganizationName, OrganizationNameError>` diferencia construção válida de entrada inválida. A implementação inicial está em `backend/applications/api/src/shared/core/result`.
 
 ## Relacionamento com outras primitivas
 

@@ -31,7 +31,7 @@ flowchart LR
 
 ## Exemplos
 
-`OrganizationName`, `Email` e `Money`. A implementação base inicial está em `backend/src/shared/domain/value-object`.
+`OrganizationName`, `Email` e `Money`. A implementação base inicial está em `backend/applications/api/src/shared/domain/value-object`.
 
 ## Relacionamento com outras primitivas
 
