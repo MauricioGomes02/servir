@@ -19,5 +19,6 @@
 | [015](015-fastify-http-adapter.md) | Fastify como adapter HTTP | Aceita |
 | [016](016-in-memory-outbox-relay.md) | Relay de outbox em memória | Aceita |
 | [017](017-http-resource-and-problem-representations.md) | Representações HTTP de recursos e problemas | Aceita |
+| [018](018-testing-strategy.md) | Design e nomeação de testes comportamentais | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

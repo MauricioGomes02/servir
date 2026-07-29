@@ -9,7 +9,7 @@ import {
 import { JsonStdoutLogger } from './json-stdout-logger';
 
 describe('JsonStdoutLogger', () => {
-  it('escreve um registro estruturado por linha', () => {
+  it('writes one structured record per line', () => {
     const lines: string[] = [];
     const logger = new JsonStdoutLogger((line) => lines.push(line));
 
@@ -34,7 +34,7 @@ describe('JsonStdoutLogger', () => {
     });
   });
 
-  it('limita valores tecnicos extensos antes de escrever', () => {
+  it('limits large technical values before writing', () => {
     const lines: string[] = [];
     const logger = new JsonStdoutLogger((line) => lines.push(line));
 
@@ -56,7 +56,7 @@ describe('JsonStdoutLogger', () => {
     assert.equal(stacktrace.endsWith('...[truncated]'), true);
   });
 
-  it('acrescenta trace e span ativos sem alterar o port de logging', () => {
+  it('adds active trace and span IDs without changing the logging port', () => {
     const lines: string[] = [];
     const logger = new JsonStdoutLogger(
       (line) => lines.push(line),
@@ -78,7 +78,7 @@ describe('JsonStdoutLogger', () => {
     assert.equal(output.spanId, 'b7ad6b7169203331');
   });
 
-  it('nao propaga uma falha do destino de observabilidade', () => {
+  it('does not propagate an observability destination failure', () => {
     const logger = new JsonStdoutLogger(() => {
       throw new Error('stdout unavailable');
     });

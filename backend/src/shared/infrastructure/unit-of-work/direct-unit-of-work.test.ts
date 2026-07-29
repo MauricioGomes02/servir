@@ -10,7 +10,7 @@ interface TestScope {
 }
 
 describe('DirectUnitOfWork', () => {
-  it('executa o trabalho com o escopo configurado e preserva o resultado', async () => {
+  it('runs work with the configured scope and preserves its result', async () => {
     const scope: TestScope = {
       organizations: {
         name: 'organizations',
@@ -26,7 +26,7 @@ describe('DirectUnitOfWork', () => {
     assert.equal(result, 'completed');
   });
 
-  it('propaga a falha do trabalho sem perder sua identidade', async () => {
+  it('propagates a work failure without losing its identity', async () => {
     const failure = new Error('repository unavailable');
     const unitOfWork = new DirectUnitOfWork<TestScope>({
       organizations: {
@@ -42,7 +42,7 @@ describe('DirectUnitOfWork', () => {
     );
   });
 
-  it('converte falha sincrona do trabalho em rejeicao', async () => {
+  it('converts a synchronous work failure into a rejection', async () => {
     const failure = new Error('synchronous failure');
     const unitOfWork = new DirectUnitOfWork<TestScope>({
       organizations: {

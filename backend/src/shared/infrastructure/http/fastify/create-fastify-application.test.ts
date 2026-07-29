@@ -60,7 +60,7 @@ function application(generatedCorrelationId = 'correlation-generated') {
 }
 
 describe('createFastifyApplication', () => {
-  it('cria contexto a partir da requisicao e expoe os IDs efetivos', async () => {
+  it('creates context from the request and exposes effective IDs', async () => {
     const { app } = application();
     app.get('/context', async (request) => ({
       correlationId: request.executionContext?.correlationId,
@@ -88,7 +88,7 @@ describe('createFastifyApplication', () => {
     });
   });
 
-  it('gera correlacao e seleciona o primeiro idioma suportado', async () => {
+  it('generates correlation and selects the first supported language', async () => {
     const { app } = application();
     app.get('/context', async (request) => ({
       correlationId: request.executionContext?.correlationId,
@@ -110,7 +110,7 @@ describe('createFastifyApplication', () => {
     });
   });
 
-  it('nao aproxima uma regiao nao suportada', async () => {
+  it('does not approximate an unsupported region', async () => {
     const { app } = application();
     app.get('/locale', async (request) => ({ locale: request.locale }));
 
@@ -126,7 +126,7 @@ describe('createFastifyApplication', () => {
     assert.deepEqual(response.json(), { locale: 'pt-BR' });
   });
 
-  it('oculta detalhes de falhas tecnicas e preserva a correlacao', async () => {
+  it('hides technical failure details and preserves correlation', async () => {
     const { app, logger } = application();
     app.get('/failure', async () => {
       throw new Error('secret technical detail');
@@ -187,7 +187,7 @@ describe('createFastifyApplication', () => {
     );
   });
 
-  it('nao registra automaticamente uma falha esperada do cliente', async () => {
+  it('does not automatically log an expected client failure', async () => {
     const { app, logger } = application();
     app.get('/invalid', async () => {
       throw Object.assign(new Error('invalid input'), { statusCode: 400 });
@@ -210,7 +210,7 @@ describe('createFastifyApplication', () => {
     assert.equal(logger.records.length, 0);
   });
 
-  it('apresenta JSON malformado como Problem Details', async () => {
+  it('presents malformed JSON as Problem Details', async () => {
     const { app, logger } = application();
     app.post('/payload', async () => ({ accepted: true }));
 

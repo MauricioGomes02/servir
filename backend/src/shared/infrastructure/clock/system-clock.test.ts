@@ -7,7 +7,7 @@ import {
 } from '.';
 
 describe('SystemClock', () => {
-  it('converte o tempo do sistema em Instant UTC', () => {
+  it('converts system time into a UTC Instant', () => {
     const epochMilliseconds = Date.UTC(2026, 6, 28, 12, 0, 0);
     const clock = new SystemClock(() => epochMilliseconds);
 
@@ -23,7 +23,7 @@ describe('SystemClock', () => {
     );
   });
 
-  it('classifica e preserva a causa de uma falha tecnica', () => {
+  it('classifies and preserves the cause of a technical failure', () => {
     const clock = new SystemClock(() => Number.NaN);
 
     assert.throws(

@@ -33,7 +33,7 @@ function presenter(): CreateOrganizationPresenter {
 }
 
 describe('CreateOrganizationPresenter', () => {
-  it('apresenta o identificador sem expor o objeto de dominio', () => {
+  it('presents the identifier without exposing the domain object', () => {
     const organizationId = OrganizationId.create('organization-123');
     assert.equal(organizationId.success, true);
 
@@ -64,7 +64,7 @@ describe('CreateOrganizationPresenter', () => {
     );
   });
 
-  it('apresenta a falha esperada em portugues com correlacao', () => {
+  it('presents the expected failure in Portuguese with correlation', () => {
     const executionContext = context();
     const view = presenter().present(
       failure({
@@ -87,7 +87,7 @@ describe('CreateOrganizationPresenter', () => {
     });
   });
 
-  it('apresenta parametros da falha esperada em ingles americano', () => {
+  it('presents expected failure parameters in American English', () => {
     const executionContext = context();
     const view = presenter().present(
       failure({

@@ -82,7 +82,7 @@ function eventMetadata(eventIdInput: string): Readonly<{
 }
 
 describe('AggregateRoot', () => {
-  it('registra eventos junto de uma mudanca valida', () => {
+  it('records events alongside a valid change', () => {
     const aggregate = TestAggregate.create();
     const metadata = eventMetadata('event-1');
 
@@ -100,7 +100,7 @@ describe('AggregateRoot', () => {
     );
   });
 
-  it('nao registra evento quando a mudanca falha', () => {
+  it('does not record an event when the change fails', () => {
     const aggregate = TestAggregate.create();
     const metadata = eventMetadata('event-1');
 
@@ -114,7 +114,7 @@ describe('AggregateRoot', () => {
     assert.deepEqual(aggregate.pendingDomainEvents, []);
   });
 
-  it('expoe snapshot imutavel sem revelar a colecao interna', () => {
+  it('exposes an immutable snapshot without revealing the internal collection', () => {
     const aggregate = TestAggregate.create();
     const firstMetadata = eventMetadata('event-1');
     const secondMetadata = eventMetadata('event-2');
@@ -142,7 +142,7 @@ describe('AggregateRoot', () => {
     );
   });
 
-  it('confirma somente os eventos persistidos e preserva eventos novos', () => {
+  it('acknowledges only persisted events and preserves newer events', () => {
     const aggregate = TestAggregate.create();
     const firstMetadata = eventMetadata('event-1');
     const secondMetadata = eventMetadata('event-2');
@@ -173,7 +173,7 @@ describe('AggregateRoot', () => {
     );
   });
 
-  it('rejeita confirmacao fora da sequencia sem remover eventos', () => {
+  it('rejects out-of-sequence acknowledgement without removing events', () => {
     const aggregate = TestAggregate.create();
     const firstMetadata = eventMetadata('event-1');
     const secondMetadata = eventMetadata('event-2');
@@ -223,7 +223,7 @@ describe('AggregateRoot', () => {
     );
   });
 
-  it('nasce sem eventos durante a reconstituicao', () => {
+  it('starts without events during reconstitution', () => {
     const aggregate = TestAggregate.create();
 
     assert.deepEqual(aggregate.pendingDomainEvents, []);

@@ -50,6 +50,7 @@ flowchart TD
 | Etapa | Estado | Critério de saída |
 |---|---|---|
 | Vocabulário e documentação | Em andamento | Links, ADRs e contratos revisados |
+| Documentação bilíngue | Planejado | Português definido como fonte canônica; versões em inglês organizadas em `docs/en/`; navegação entre idiomas e processo de sincronização definidos; skills voltadas apenas a agentes avaliadas para padronização em inglês |
 | Result | Implementação inicial | Semântica e testes estabilizados |
 | Notification | Implementação inicial | Acúmulo, imutabilidade e testes decididos |
 | Instant | Implementação inicial | UTC, imutabilidade, igualdade e serialização testadas |

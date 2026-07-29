@@ -12,6 +12,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 - [Vocabulário ubíquo](docs/glossary.md)
 - [Primitivas arquiteturais](docs/primitives/README.md)
 - [Decisões arquiteturais](docs/decisions/README.md)
+- [Estratégia de testes](docs/testing-strategy.md)
 - [Exemplos conceituais](docs/examples/README.md)
 - [Como contribuir](#como-contribuir)
 

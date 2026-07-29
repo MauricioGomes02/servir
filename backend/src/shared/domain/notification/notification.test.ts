@@ -4,7 +4,7 @@ import { describe, it } from 'node:test';
 import { Notification } from '.';
 
 describe('Notification', () => {
-  it('acumula e consulta erros por codigo e campo', () => {
+  it('accumulates and queries errors by code and field', () => {
     const notification = new Notification<
       'organization.name.empty' | 'organization.slug.empty'
     >();
@@ -30,7 +30,7 @@ describe('Notification', () => {
     assert.equal(notification.getErrorsForField('name').length, 1);
   });
 
-  it('preserva erros e snapshots contra mutacao externa', () => {
+  it('protects errors and snapshots from external mutation', () => {
     const params = { maxLength: 120 };
     const error = {
       code: 'organization.name.max_length' as const,
@@ -51,7 +51,7 @@ describe('Notification', () => {
     assert.equal(Object.isFrozen(errors[0]?.params), true);
   });
 
-  it('combina notificacoes sem compartilhar erros mutaveis', () => {
+  it('combines notifications without sharing mutable errors', () => {
     const source = new Notification<'organization.name.empty'>()
       .add({ code: 'organization.name.empty', field: 'name' });
     const target = new Notification<'organization.name.empty'>()

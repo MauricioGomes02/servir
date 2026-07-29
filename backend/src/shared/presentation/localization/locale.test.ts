@@ -9,7 +9,7 @@ import {
 } from '.';
 
 describe('Locale', () => {
-  it('resolve locales suportados para a forma canonica', () => {
+  it('resolves supported locales to their canonical form', () => {
     assert.equal(resolveLocale(' pt-br '), SupportedLocales.PortugueseBrazil);
     assert.equal(
       resolveLocale('EN-us'),
@@ -17,7 +17,7 @@ describe('Locale', () => {
     );
   });
 
-  it('resolve aliases de idioma para o locale suportado', () => {
+  it('resolves language aliases to the supported locale', () => {
     assert.equal(resolveLocale('pt'), SupportedLocales.PortugueseBrazil);
     assert.equal(
       resolveLocale('EN'),
@@ -25,13 +25,13 @@ describe('Locale', () => {
     );
   });
 
-  it('usa o locale padrao quando o valor nao e suportado', () => {
+  it('uses the default locale when the value is unsupported', () => {
     assert.equal(resolveLocale('es'), DefaultLocale);
     assert.equal(resolveLocale('en-GB'), DefaultLocale);
     assert.equal(resolveLocale(undefined), DefaultLocale);
   });
 
-  it('seleciona o primeiro candidato suportado sem aproximar regioes', () => {
+  it('selects the first supported candidate without approximating regions', () => {
     assert.equal(
       resolveLocaleCandidates(['es', 'en']),
       SupportedLocales.EnglishUnitedStates,
@@ -39,6 +39,13 @@ describe('Locale', () => {
     assert.equal(
       resolveLocaleCandidates(['en-GB']),
       DefaultLocale,
+    );
+  });
+
+  it('skips non-string candidates before selecting a supported locale', () => {
+    assert.equal(
+      resolveLocaleCandidates([undefined, 123, 'en']),
+      SupportedLocales.EnglishUnitedStates,
     );
   });
 });

@@ -101,7 +101,7 @@ function fixture() {
 }
 
 describe('registerCreateOrganizationRoute', () => {
-  it('cria uma organizacao pelo contexto da requisicao', async () => {
+  it('creates an organization through the request context', async () => {
     const { app, organizations, outbox } = fixture();
 
     const response = await app.inject({
@@ -125,7 +125,7 @@ describe('registerCreateOrganizationRoute', () => {
     assert.equal(outbox.envelopes[0]?.correlationId, 'correlation-123');
   });
 
-  it('apresenta uma entrada invalida no locale negociado sem persistir', async () => {
+  it('presents invalid input in the negotiated locale without persisting', async () => {
     const { app, organizations, outbox } = fixture();
 
     const response = await app.inject({

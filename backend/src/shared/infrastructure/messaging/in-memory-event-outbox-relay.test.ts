@@ -90,7 +90,7 @@ async function relayFixture(
 }
 
 describe('InMemoryEventOutboxRelay', () => {
-  it('publica e confirma envelopes pendentes em ordem', async () => {
+  it('publishes and acknowledges pending envelopes in order', async () => {
     const published: EventEnvelope[] = [];
     const publisher: EventPublisher = {
       async publish(pendingEnvelope): Promise<void> {
@@ -106,7 +106,7 @@ describe('InMemoryEventOutboxRelay', () => {
     assert.equal(outbox.envelopes.length, 0);
   });
 
-  it('mantem o envelope pendente e registra a falha para retry', async () => {
+  it('keeps the envelope pending and logs the failure for retry', async () => {
     const logger = new InMemoryLogger();
     const failure = new Error('email provider unavailable');
     const publisher: EventPublisher = {
@@ -133,7 +133,7 @@ describe('InMemoryEventOutboxRelay', () => {
     });
   });
 
-  it('compartilha uma execucao ativa sem publicar em duplicidade', async () => {
+  it('shares an active execution without publishing duplicates', async () => {
     let release: (() => void) | undefined;
     let publications = 0;
     const publisher: EventPublisher = {

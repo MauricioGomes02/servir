@@ -14,7 +14,7 @@ const UUIDS = [
 ];
 
 describe('createApplication', () => {
-  it('compoe o primeiro corte vertical executavel', async () => {
+  it('composes the first executable vertical slice', async () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
     const app = createApplication({

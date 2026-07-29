@@ -95,7 +95,7 @@ function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
 }
 
 describe('CreateOrganizationHandler', () => {
-  it('persiste organizacao e envelope no mesmo escopo', async () => {
+  it('persists the organization and envelope in the same scope', async () => {
     const fixture = createFixture();
 
     const result = await fixture.handler.handle({
@@ -137,7 +137,7 @@ describe('CreateOrganizationHandler', () => {
     );
   });
 
-  it('retorna falha esperada sem persistir estado ou evento', async () => {
+  it('returns an expected failure without persisting state or event', async () => {
     const fixture = createFixture();
 
     const result = await fixture.handler.handle({
@@ -160,7 +160,7 @@ describe('CreateOrganizationHandler', () => {
     }
   });
 
-  it('mantem evento pendente quando a persistencia atomica falha', async () => {
+  it('keeps the event pending when atomic persistence fails', async () => {
     const failure = new Error('outbox unavailable');
     const received: EventEnvelope[] = [];
     const failingOutbox: EventOutbox = {

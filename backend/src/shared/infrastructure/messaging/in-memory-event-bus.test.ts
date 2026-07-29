@@ -73,7 +73,7 @@ function handler(
 }
 
 describe('InMemoryEventBus', () => {
-  it('entrega o mesmo envelope aos handlers inscritos', async () => {
+  it('delivers the same envelope to subscribed handlers', async () => {
     const bus = new InMemoryEventBus();
     const message = envelope();
     const received: EventEnvelope<OrganizationCreated>[] = [];
@@ -96,7 +96,7 @@ describe('InMemoryEventBus', () => {
     assert.deepEqual(received, [message, message]);
   });
 
-  it('inicia handlers independentemente antes de aguardar conclusao', async () => {
+  it('starts independent handlers before awaiting completion', async () => {
     const bus = new InMemoryEventBus();
     const started: string[] = [];
     let releaseHandlers: (() => void) | undefined;
@@ -129,7 +129,7 @@ describe('InMemoryEventBus', () => {
     await publishing;
   });
 
-  it('aguarda todos e agrega falhas sem interromper os demais', async () => {
+  it('awaits every handler and aggregates failures without stopping the others', async () => {
     const bus = new InMemoryEventBus();
     const handled: string[] = [];
     const auditFailure = new Error('audit unavailable');
@@ -187,13 +187,13 @@ describe('InMemoryEventBus', () => {
     assert.deepEqual(handled, ['audit', 'log', 'email']);
   });
 
-  it('conclui com sucesso quando nao existem handlers', async () => {
+  it('completes successfully when no handlers exist', async () => {
     const bus = new InMemoryEventBus();
 
     await bus.publish(envelope());
   });
 
-  it('rejeita subscription duplicada para evento e handler', () => {
+  it('rejects a duplicate subscription for the same event and handler', () => {
     const bus = new InMemoryEventBus();
     const auditHandler = handler(
       'audit.organization_created',

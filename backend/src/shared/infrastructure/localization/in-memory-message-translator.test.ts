@@ -18,7 +18,7 @@ const catalog: MessageCatalog = {
 };
 
 describe('InMemoryMessageTranslator', () => {
-  it('traduz por codigo e interpola parametros', () => {
+  it('translates by code and interpolates parameters', () => {
     const translator = new InMemoryMessageTranslator(catalog);
 
     assert.equal(
@@ -31,7 +31,7 @@ describe('InMemoryMessageTranslator', () => {
     );
   });
 
-  it('retorna mensagem segura quando o codigo nao possui traducao', () => {
+  it('returns a safe message when the code has no translation', () => {
     const translator = new InMemoryMessageTranslator(catalog);
 
     assert.equal(
@@ -43,7 +43,7 @@ describe('InMemoryMessageTranslator', () => {
     );
   });
 
-  it('preserva o catalogo contra mutacao externa', () => {
+  it('protects the catalog from external mutation', () => {
     const mutableCatalog = {
       'pt-BR': { greeting: 'Ola' },
       'en-US': { greeting: 'Hello' },

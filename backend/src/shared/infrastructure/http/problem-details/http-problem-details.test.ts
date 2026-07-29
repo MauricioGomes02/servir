@@ -13,7 +13,7 @@ import {
 } from './http-problem-details';
 
 describe('HttpProblemDetails', () => {
-  it('representa uma ocorrencia HTTP sem detalhes tecnicos', () => {
+  it('represents an HTTP occurrence without technical details', () => {
     const correlationId = parseCorrelationId('correlation-123');
     const requestId = parseRequestId('request-123');
     assert.equal(correlationId.success, true);
@@ -38,7 +38,7 @@ describe('HttpProblemDetails', () => {
     });
   });
 
-  it('representa erros de validacao por codigo e JSON Pointer', () => {
+  it('represents validation errors by code and JSON Pointer', () => {
     const correlationId = parseCorrelationId('correlation-123');
     const requestId = parseRequestId('request-123');
     assert.equal(correlationId.success, true);

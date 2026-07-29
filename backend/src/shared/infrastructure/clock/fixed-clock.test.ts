@@ -6,7 +6,7 @@ import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '.';
 
 describe('FixedClock', () => {
-  it('devolve sempre o instante configurado', () => {
+  it('always returns the configured instant', () => {
     const instant = Instant.create('2026-07-28T12:00:00.000Z');
 
     assert.equal(instant.success, true);

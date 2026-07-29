@@ -8,7 +8,7 @@ import { SupportedLocales } from '@/shared/presentation/localization';
 import { organizationMessageCatalog } from '.';
 
 describe('organizationMessageCatalog', () => {
-  it('traduz os erros de OrganizationName nos locales suportados', () => {
+  it('translates OrganizationName errors in supported locales', () => {
     const translator = new InMemoryMessageTranslator(
       organizationMessageCatalog,
     );

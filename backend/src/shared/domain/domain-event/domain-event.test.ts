@@ -9,7 +9,7 @@ import {
 import { Instant } from '@/shared/domain/instant';
 
 describe('DomainEvent', () => {
-  it('cria um fato profundamente imutavel com metadados explicitos', () => {
+  it('creates a deeply immutable fact with explicit metadata', () => {
     const eventId = parseDomainEventId('event-123');
     const occurredAt = Instant.create(
       '2026-07-27T12:00:00.000Z',
@@ -44,7 +44,7 @@ describe('DomainEvent', () => {
     assert.notEqual(event.payload, sourcePayload);
   });
 
-  it('preserva o payload original ao criar a copia imutavel', () => {
+  it('preserves the original payload while creating an immutable copy', () => {
     const eventId = parseDomainEventId('event-123');
     const occurredAt = Instant.create(
       '2026-07-27T12:00:00.000Z',
@@ -72,7 +72,17 @@ describe('DomainEvent', () => {
     assert.equal(Object.isFrozen(sourcePayload.fields), false);
   });
 
-  it('rejeita identidade de evento vazia', () => {
+  it('rejects an event identity with an invalid type', () => {
+    assert.deepEqual(parseDomainEventId(123), {
+      success: false,
+      error: {
+        code: DomainEventMetadataErrorCodes.InvalidType,
+        field: 'eventId',
+      },
+    });
+  });
+
+  it('rejects an empty event identity', () => {
     const result = parseDomainEventId('   ');
 
     assert.deepEqual(result, {
@@ -80,6 +90,29 @@ describe('DomainEvent', () => {
       error: {
         code: DomainEventMetadataErrorCodes.Empty,
         field: 'eventId',
+      },
+    });
+  });
+
+  it('accepts an event identity with exactly 128 characters', () => {
+    const input = 'a'.repeat(128);
+
+    assert.deepEqual(parseDomainEventId(input), {
+      success: true,
+      value: input,
+    });
+  });
+
+  it('rejects an event identity longer than 128 characters', () => {
+    assert.deepEqual(parseDomainEventId('a'.repeat(129)), {
+      success: false,
+      error: {
+        code: DomainEventMetadataErrorCodes.TooLong,
+        field: 'eventId',
+        params: {
+          maxLength: 128,
+          actualLength: 129,
+        },
       },
     });
   });

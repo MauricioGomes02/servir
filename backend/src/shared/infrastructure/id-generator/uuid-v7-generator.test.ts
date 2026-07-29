@@ -13,7 +13,7 @@ import {
 const UUID_V7 = '0198f334-6dc5-7c20-9af1-91d7e599c7b1';
 
 describe('UuidV7Generator', () => {
-  it('produz uma identidade tipada pela factory configurada', () => {
+  it('produces a typed identity through the configured factory', () => {
     const generator = new UuidV7Generator(
       OrganizationId.create,
       () => UUID_V7,
@@ -24,7 +24,7 @@ describe('UuidV7Generator', () => {
     assert.equal(id.toString(), UUID_V7);
   });
 
-  it('classifica e preserva a falha da fonte', () => {
+  it('classifies and preserves a source failure', () => {
     const sourceFailure = new Error('entropy unavailable');
     const generator = new UuidV7Generator(
       OrganizationId.create,
@@ -50,7 +50,7 @@ describe('UuidV7Generator', () => {
     );
   });
 
-  it('classifica e preserva a excecao da factory', () => {
+  it('classifies and preserves a factory exception', () => {
     const factoryFailure = new Error('factory unavailable');
     const generator = new UuidV7Generator<OrganizationId, never>(
       () => {
@@ -76,7 +76,7 @@ describe('UuidV7Generator', () => {
     );
   });
 
-  it('classifica e preserva a rejeicao do valor gerado', () => {
+  it('classifies and preserves rejection of the generated value', () => {
     const rejection = {
       code: 'test.id.rejected',
     } as const;

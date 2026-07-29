@@ -9,7 +9,7 @@ import {
 import { InMemoryLogger } from '.';
 
 describe('InMemoryLogger', () => {
-  it('armazena registros em ordem e expoe snapshot imutavel', () => {
+  it('stores records in order and exposes an immutable snapshot', () => {
     const logger = new InMemoryLogger();
     const first: LogRecord = {
       level: LogLevels.Info,
@@ -44,7 +44,7 @@ describe('InMemoryLogger', () => {
     );
   });
 
-  it('faz copia defensiva do registro recebido', () => {
+  it('makes a defensive copy of the received record', () => {
     const logger = new InMemoryLogger();
     const attributes = {
       fields: ['name'],

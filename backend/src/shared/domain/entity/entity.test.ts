@@ -23,7 +23,7 @@ class TestEntity extends Entity<TestEntityId, { name: string }> {
 }
 
 describe('Entity', () => {
-  it('compara entidades pela identidade apesar da mudanca de estado', () => {
+  it('compares entities by identity despite state changes', () => {
     const id = TestEntityId.create('entity-123');
     const first = TestEntity.create(id, 'first');
     const second = TestEntity.create(
@@ -36,7 +36,7 @@ describe('Entity', () => {
     assert.equal(first.equals(second), true);
   });
 
-  it('distingue entidades com identidades diferentes', () => {
+  it('distinguishes entities with different identities', () => {
     const first = TestEntity.create(
       TestEntityId.create('entity-123'),
       'same',

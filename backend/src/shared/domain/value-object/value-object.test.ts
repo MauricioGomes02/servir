@@ -21,7 +21,7 @@ class TestValue extends ValueObject<TestValueProps, 'TestValue'> {
 }
 
 describe('ValueObject', () => {
-  it('compara valores pelo conteudo', () => {
+  it('compares values by content', () => {
     const first = new TestValue({
       label: 'value',
       metadata: { tags: ['first'] },
@@ -40,7 +40,7 @@ describe('ValueObject', () => {
     assert.equal(first.equals(null), false);
   });
 
-  it('copia e congela profundamente propriedades estruturadas', () => {
+  it('deeply copies and freezes structured properties', () => {
     const tags = ['first'];
     const props = {
       label: 'value',

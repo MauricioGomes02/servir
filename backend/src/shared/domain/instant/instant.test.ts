@@ -7,7 +7,7 @@ import {
 } from '.';
 
 describe('Instant', () => {
-  it('representa um ponto absoluto em UTC sem expor Date', () => {
+  it('represents an absolute point in UTC without exposing Date', () => {
     const result = Instant.create('2026-07-27T15:00:00.000Z');
 
     assert.equal(result.success, true);
@@ -22,7 +22,7 @@ describe('Instant', () => {
     assert.equal(Object.isFrozen(result.value), true);
   });
 
-  it('compara instantes pelo ponto absoluto representado', () => {
+  it('compares instants by their represented absolute point', () => {
     const first = Instant.create('2026-07-27T15:00:00.000Z');
     const second = Instant.create('2026-07-27T15:00:00.000Z');
 
@@ -36,7 +36,7 @@ describe('Instant', () => {
     assert.equal(first.value.equals(second.value), true);
   });
 
-  it('rejeita valor que nao seja texto', () => {
+  it('rejects a non-string value', () => {
     const result = Instant.create(new Date());
 
     assert.deepEqual(result, {
@@ -48,7 +48,7 @@ describe('Instant', () => {
     });
   });
 
-  it('rejeita data civil sem offset ou zona', () => {
+  it('rejects a civil date without an offset or zone', () => {
     const result = Instant.create('2026-07-27T15:00:00');
 
     assert.deepEqual(result, {
@@ -60,7 +60,7 @@ describe('Instant', () => {
     });
   });
 
-  it('rejeita offset equivalente que nao esteja normalizado em UTC', () => {
+  it('rejects an equivalent offset that is not normalized to UTC', () => {
     const result = Instant.create('2026-07-27T12:00:00-03:00');
 
     assert.deepEqual(result, {

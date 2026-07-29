@@ -11,7 +11,7 @@ import { SupportedLocales } from '@/shared/presentation/localization';
 import { presentError } from '.';
 
 describe('presentError', () => {
-  it('apresenta erro localizado com parametros e correlacao', () => {
+  it('presents a localized error with parameters and correlation', () => {
     const correlationId = parseCorrelationId('correlation-123');
     assert.equal(correlationId.success, true);
 

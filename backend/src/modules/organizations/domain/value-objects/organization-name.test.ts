@@ -7,7 +7,7 @@ import {
 } from '.';
 
 describe('OrganizationName', () => {
-  it('normaliza e representa um nome valido', () => {
+  it('normalizes and represents a valid name', () => {
     const result = OrganizationName.create('  Comunidade Servir  ');
 
     assert.equal(result.success, true);
@@ -20,7 +20,7 @@ describe('OrganizationName', () => {
     assert.equal(result.value.toJSON(), 'Comunidade Servir');
   });
 
-  it('rejeita nome com tipo invalido', () => {
+  it('rejects a name with an invalid type', () => {
     const result = OrganizationName.create(null);
 
     assert.deepEqual(result, {
@@ -32,7 +32,7 @@ describe('OrganizationName', () => {
     });
   });
 
-  it('rejeita nome vazio', () => {
+  it('rejects an empty name', () => {
     const result = OrganizationName.create('   ');
 
     assert.deepEqual(result, {
@@ -44,7 +44,21 @@ describe('OrganizationName', () => {
     });
   });
 
-  it('limita o nome a 120 caracteres', () => {
+  it('accepts a name with exactly 120 characters', () => {
+    const input = 'a'.repeat(120);
+
+    const result = OrganizationName.create(input);
+
+    assert.equal(result.success, true);
+
+    if (!result.success) {
+      return;
+    }
+
+    assert.equal(result.value.toString(), input);
+  });
+
+  it('rejects a name longer than 120 characters', () => {
     const result = OrganizationName.create('a'.repeat(121));
 
     assert.equal(result.success, false);

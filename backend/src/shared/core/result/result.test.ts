@@ -7,7 +7,7 @@ import {
 } from '.';
 
 describe('Result', () => {
-  it('representa sucesso como ramo imutavel e exclusivo', () => {
+  it('represents success as an immutable exclusive branch', () => {
     const result = success('organization-123');
 
     assert.deepEqual(result, {
@@ -18,7 +18,7 @@ describe('Result', () => {
     assert.equal('error' in result, false);
   });
 
-  it('copia e congela profundamente um erro estruturado', () => {
+  it('deeply copies and freezes a structured error', () => {
     const error = {
       code: 'organization.name.max_length',
       params: {

@@ -8,7 +8,7 @@ import {
 } from './open-telemetry';
 
 describe('startOpenTelemetry', () => {
-  it('nao cria o SDK quando a telemetria esta desabilitada', async () => {
+  it('does not create the SDK when telemetry is disabled', async () => {
     let sdkCreated = false;
     const telemetry = startOpenTelemetry({
       environment: { OTEL_SDK_DISABLED: 'true' },
@@ -24,7 +24,23 @@ describe('startOpenTelemetry', () => {
     assert.equal(sdkCreated, false);
   });
 
-  it('inicia e encerra o SDK configurado', async () => {
+  it('does not create the SDK when the trace exporter is disabled', async () => {
+    let sdkCreated = false;
+    const telemetry = startOpenTelemetry({
+      environment: { OTEL_TRACES_EXPORTER: 'NoNe' },
+      sdkFactory: () => {
+        sdkCreated = true;
+        throw new Error('unexpected SDK creation');
+      },
+    });
+
+    await telemetry.shutdown();
+
+    assert.equal(telemetry.enabled, false);
+    assert.equal(sdkCreated, false);
+  });
+
+  it('starts and shuts down the configured SDK', async () => {
     const calls: string[] = [];
     const telemetry = startOpenTelemetry({
       environment: {},
@@ -42,7 +58,7 @@ describe('startOpenTelemetry', () => {
     assert.deepEqual(calls, ['start', 'shutdown']);
   });
 
-  it('codifica uma falha de inicializacao sem depender da mensagem', () => {
+  it('codes a startup failure without depending on its message', () => {
     assert.throws(
       () => startOpenTelemetry({
         environment: {},
@@ -58,7 +74,7 @@ describe('startOpenTelemetry', () => {
     );
   });
 
-  it('codifica uma falha de encerramento sem depender da mensagem', async () => {
+  it('codes a shutdown failure without depending on its message', async () => {
     const telemetry = startOpenTelemetry({
       environment: {},
       sdkFactory: () => ({

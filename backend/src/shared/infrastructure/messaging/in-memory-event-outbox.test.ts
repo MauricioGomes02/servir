@@ -22,7 +22,7 @@ import {
 } from './in-memory-event-outbox-acknowledgement-error';
 
 describe('InMemoryEventOutbox', () => {
-  it('armazena envelopes em ordem e expoe snapshot imutavel', async () => {
+  it('stores envelopes in order and exposes an immutable snapshot', async () => {
     const messageId = parseMessageId('message-123');
     const eventId = parseDomainEventId('event-123');
     const correlationId = parseCorrelationId('correlation-123');
@@ -70,7 +70,7 @@ describe('InMemoryEventOutbox', () => {
     assert.equal(outbox.envelopes.length, 0);
   });
 
-  it('rejeita confirmacao fora da ordem da outbox', async () => {
+  it('rejects acknowledgement outside outbox order', async () => {
     const storedMessageId = parseMessageId('message-stored');
     const receivedMessageId = parseMessageId('message-received');
     const eventId = parseDomainEventId('event-123');

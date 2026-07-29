@@ -7,7 +7,7 @@ import {
 } from '.';
 
 describe('SequenceIdGenerator', () => {
-  it('gera as identidades na ordem configurada', () => {
+  it('generates identities in the configured order', () => {
     const ids = ['organization-1', 'organization-2'] as const;
     const generator = new SequenceIdGenerator(ids);
 
@@ -15,7 +15,7 @@ describe('SequenceIdGenerator', () => {
     assert.equal(generator.generate(), 'organization-2');
   });
 
-  it('preserva a sequencia recebida contra mutacao externa', () => {
+  it('protects the received sequence from external mutation', () => {
     const ids = ['organization-1'];
     const generator = new SequenceIdGenerator(ids);
 
@@ -24,7 +24,7 @@ describe('SequenceIdGenerator', () => {
     assert.equal(generator.generate(), 'organization-1');
   });
 
-  it('classifica o esgotamento como erro de configuracao do teste', () => {
+  it('classifies exhaustion as a test configuration error', () => {
     const generator = new SequenceIdGenerator<string>([]);
 
     assert.throws(

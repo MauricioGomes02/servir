@@ -20,7 +20,7 @@ function isLogAttributeObject(
 }
 
 describe('LogRecord', () => {
-  it('preserva somente contexto e atributos fornecidos', () => {
+  it('preserves only the provided context and attributes', () => {
     const correlationId = parseCorrelationId('correlation-123');
     const messageId = parseMessageId('message-123');
     const occurredAt = Instant.create(
@@ -62,7 +62,7 @@ describe('LogRecord', () => {
     assert.equal(record.occurredAt, occurredAt.value);
   });
 
-  it('cria copia profundamente imutavel sem congelar a origem', () => {
+  it('creates a deeply immutable copy without freezing the source', () => {
     const attributes = {
       change: {
         fields: ['name'],

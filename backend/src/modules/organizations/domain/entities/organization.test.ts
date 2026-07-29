@@ -33,7 +33,7 @@ function validMetadata() {
 }
 
 describe('Organization', () => {
-  it('cria organizacao valida e registra o fato ocorrido', () => {
+  it('creates a valid organization and records the occurred fact', () => {
     const metadata = validMetadata();
 
     const result = Organization.create({
@@ -61,7 +61,7 @@ describe('Organization', () => {
     });
   });
 
-  it('nao cria organizacao nem fato quando o nome e invalido', () => {
+  it('creates neither organization nor fact when the name is invalid', () => {
     const result = Organization.create({
       ...validMetadata(),
       name: '   ',

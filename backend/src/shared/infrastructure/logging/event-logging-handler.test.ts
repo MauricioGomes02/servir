@@ -57,7 +57,7 @@ function fixture() {
 }
 
 describe('EventLoggingHandler', () => {
-  it('registra metadados estruturados sem copiar o payload', async () => {
+  it('logs structured metadata without copying the payload', async () => {
     const logger = new InMemoryLogger();
     const handler = new EventLoggingHandler(logger);
     const envelope = fixture();

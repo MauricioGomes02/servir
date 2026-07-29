@@ -51,7 +51,7 @@ function fixtures() {
 }
 
 describe('EventEnvelope', () => {
-  it('associa evento e metadados em um envelope imutavel', () => {
+  it('associates an event and metadata in an immutable envelope', () => {
     const fixture = fixtures();
 
     const envelope = createEventEnvelope(fixture);
@@ -63,7 +63,7 @@ describe('EventEnvelope', () => {
     assert.equal(Object.isFrozen(envelope), true);
   });
 
-  it('preserva a mensagem que causou o evento', () => {
+  it('preserves the message that caused the event', () => {
     const fixture = fixtures();
     const causationId = parseMessageId('command-123');
 
@@ -83,7 +83,7 @@ describe('EventEnvelope', () => {
 });
 
 describe('MessageId', () => {
-  it('normaliza um identificador recebido na borda', () => {
+  it('normalizes an identifier received at the boundary', () => {
     const result = parseMessageId(' message-123 ');
 
     assert.deepEqual(result, {
@@ -92,7 +92,7 @@ describe('MessageId', () => {
     });
   });
 
-  it('rejeita identificador com tipo invalido', () => {
+  it('rejects an identifier with an invalid type', () => {
     const result = parseMessageId(123);
 
     assert.deepEqual(result, {
@@ -104,7 +104,7 @@ describe('MessageId', () => {
     });
   });
 
-  it('rejeita identificador vazio', () => {
+  it('rejects an empty identifier', () => {
     const result = parseMessageId('   ');
 
     assert.deepEqual(result, {
@@ -116,7 +116,16 @@ describe('MessageId', () => {
     });
   });
 
-  it('limita o tamanho de identificadores externos', () => {
+  it('accepts an identifier with exactly 128 characters', () => {
+    const input = 'a'.repeat(128);
+
+    assert.deepEqual(parseMessageId(input), {
+      success: true,
+      value: input,
+    });
+  });
+
+  it('rejects an external identifier longer than 128 characters', () => {
     const result = parseMessageId('a'.repeat(129));
 
     assert.deepEqual(result, {
