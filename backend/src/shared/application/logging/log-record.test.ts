@@ -22,7 +22,9 @@ function isLogAttributeObject(
 describe('LogRecord', () => {
   it('preserves only the provided context and attributes', () => {
     const correlationId = parseCorrelationId('correlation-123');
-    const messageId = parseMessageId('message-123');
+    const messageId = parseMessageId(
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+    );
     const occurredAt = Instant.create(
       '2026-07-27T15:00:00.000Z',
     );
@@ -54,7 +56,7 @@ describe('LogRecord', () => {
 
     assert.deepEqual(record.context, {
       correlationId: 'correlation-123',
-      messageId: 'message-123',
+      messageId: '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
     });
     assert.deepEqual(record.attributes, {
       'organization.id': 'organization-123',

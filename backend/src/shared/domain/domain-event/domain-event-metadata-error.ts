@@ -2,6 +2,7 @@ export const DomainEventMetadataErrorCodes = {
   InvalidType: 'domain_event_metadata.invalid_type',
   Empty: 'domain_event_metadata.empty',
   TooLong: 'domain_event_metadata.too_long',
+  InvalidFormat: 'domain_event_metadata.invalid_format',
 } as const;
 
 export type DomainEventMetadataErrorCode =

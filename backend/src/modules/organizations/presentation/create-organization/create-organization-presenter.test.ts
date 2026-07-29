@@ -34,7 +34,9 @@ function presenter(): CreateOrganizationPresenter {
 
 describe('CreateOrganizationPresenter', () => {
   it('presents the identifier without exposing the domain object', () => {
-    const organizationId = OrganizationId.create('organization-123');
+    const organizationId = OrganizationId.create(
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
+    );
     assert.equal(organizationId.success, true);
 
     if (!organizationId.success) {
@@ -53,7 +55,7 @@ describe('CreateOrganizationPresenter', () => {
     assert.deepEqual(view, {
       kind: 'success',
       resource: {
-        id: 'organization-123',
+        id: '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
         name: 'Comunidade Servir',
       },
     });

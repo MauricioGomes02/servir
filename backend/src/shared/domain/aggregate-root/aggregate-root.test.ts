@@ -84,7 +84,7 @@ function eventMetadata(eventIdInput: string): Readonly<{
 describe('AggregateRoot', () => {
   it('records events alongside a valid change', () => {
     const aggregate = TestAggregate.create();
-    const metadata = eventMetadata('event-1');
+    const metadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
 
     const changed = aggregate.changeName(
       'changed',
@@ -102,7 +102,7 @@ describe('AggregateRoot', () => {
 
   it('does not record an event when the change fails', () => {
     const aggregate = TestAggregate.create();
-    const metadata = eventMetadata('event-1');
+    const metadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
 
     const changed = aggregate.changeName(
       '   ',
@@ -116,8 +116,8 @@ describe('AggregateRoot', () => {
 
   it('exposes an immutable snapshot without revealing the internal collection', () => {
     const aggregate = TestAggregate.create();
-    const firstMetadata = eventMetadata('event-1');
-    const secondMetadata = eventMetadata('event-2');
+    const firstMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+    const secondMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
 
     aggregate.changeName(
       'first',
@@ -144,9 +144,9 @@ describe('AggregateRoot', () => {
 
   it('acknowledges only persisted events and preserves newer events', () => {
     const aggregate = TestAggregate.create();
-    const firstMetadata = eventMetadata('event-1');
-    const secondMetadata = eventMetadata('event-2');
-    const thirdMetadata = eventMetadata('event-3');
+    const firstMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+    const secondMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
+    const thirdMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
 
     aggregate.changeName(
       'first',
@@ -175,8 +175,8 @@ describe('AggregateRoot', () => {
 
   it('rejects out-of-sequence acknowledgement without removing events', () => {
     const aggregate = TestAggregate.create();
-    const firstMetadata = eventMetadata('event-1');
-    const secondMetadata = eventMetadata('event-2');
+    const firstMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+    const secondMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
 
     aggregate.changeName(
       'first',

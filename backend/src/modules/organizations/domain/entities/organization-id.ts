@@ -3,6 +3,7 @@ import {
   success,
   type Result,
 } from '@/shared/core/result';
+import { isCanonicalUuid } from '@/shared/core/uuid';
 import { EntityId } from '@/shared/domain/entity';
 
 import {
@@ -48,6 +49,13 @@ export class OrganizationId extends EntityId<'OrganizationId'> {
       });
     }
 
-    return success(new OrganizationId(value));
+    if (!isCanonicalUuid(value)) {
+      return failure({
+        code: OrganizationIdErrorCodes.InvalidFormat,
+        field: 'organizationId',
+      });
+    }
+
+    return success(new OrganizationId(value.toLowerCase()));
   }
 }

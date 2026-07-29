@@ -1,0 +1,41 @@
+name: servir-local
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:18.4-alpine}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-servir}
+      POSTGRES_USER: ${POSTGRES_MIGRATOR_USER:-servir_migrator}
+      POSTGRES_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD:-servir_migrator_local}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres-data:/var/lib/postgresql/18/docker
+
+  liquibase:
+    image: ${LIQUIBASE_IMAGE:-liquibase/liquibase:4.33.0}
+    profiles:
+      - tools
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: /liquibase/changelog/db.changelog-root.yaml
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-servir}
+      LIQUIBASE_COMMAND_USERNAME: ${POSTGRES_MIGRATOR_USER:-servir_migrator}
+      LIQUIBASE_COMMAND_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD:-servir_migrator_local}
+    volumes:
+      - ./database/liquibase/changelog:/liquibase/changelog:ro
+    command:
+      - update
+
+volumes:
+  postgres-data:
+

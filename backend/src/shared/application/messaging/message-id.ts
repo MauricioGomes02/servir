@@ -3,6 +3,7 @@ import {
   success,
   type Result,
 } from '@/shared/core/result';
+import { isCanonicalUuid } from '@/shared/core/uuid';
 
 import {
   MessageIdErrorCodes,
@@ -47,5 +48,12 @@ export function parseMessageId(
     });
   }
 
-  return success(value as MessageId);
+  if (!isCanonicalUuid(value)) {
+    return failure({
+      code: MessageIdErrorCodes.InvalidFormat,
+      field: 'messageId',
+    });
+  }
+
+  return success(value.toLowerCase() as MessageId);
 }

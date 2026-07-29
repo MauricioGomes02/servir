@@ -13,6 +13,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 - [Primitivas arquiteturais](docs/primitives/README.md)
 - [Decisões arquiteturais](docs/decisions/README.md)
 - [Estratégia de testes](docs/testing-strategy.md)
+- [Infraestrutura local e migrations](infrastructure/README.md)
 - [Exemplos conceituais](docs/examples/README.md)
 - [Como contribuir](#como-contribuir)
 
@@ -31,6 +32,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 .
 ├── .codex/skills/      # Guardrails para futuras contribuições assistidas
 ├── backend/src/        # Código da fundação e, futuramente, dos domínios
+├── infrastructure/     # Banco local, migrations e futura IaC
 └── docs/
     ├── decisions/      # Architecture Decision Records
     ├── examples/       # Exemplos conceituais, não aplicações completas
@@ -54,7 +56,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 
 ## Estado atual
 
-Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e reações pós-commit por relay, ainda com persistência e outbox em memória. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
+Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e reações pós-commit por relay, ainda com adapters em memória. A infraestrutura externa já define PostgreSQL local, Liquibase e o schema inicial; a integração do backend com esse banco permanece planejada. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
 
 ## Executar o backend localmente
 

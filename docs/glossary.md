@@ -12,10 +12,11 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Result | União tipada entre sucesso e falha esperada. | Pode carregar Notification. | `Result<Email, EmailError>`. | `try/catch` para entrada inválida. |
 | Notification | Coleção de violações esperadas acumuláveis. | Pode ser erro de Result. | Erros de vários campos. | Log ou exceção agregada. |
 | Domain Event | Fato passado relevante dentro do domínio. | Registrado por Aggregate Root. | `OrderCancelled`. | Comando `CancelOrder`. |
+| DomainEventId | UUID canônico e nominal que identifica um fato de domínio; novos fatos usam UUIDv7. | Compõe Domain Event sem substituir MessageId. | ID de `OrganizationCreated`. | Reutilizar o ID do Aggregate como ID do evento. |
 | Application Event | Fato do fluxo da aplicação, não necessariamente do domínio. | Orquestrado na camada Application. | `ImportCompleted`. | Evento de integração público. |
 | Integration Event | Contrato versionado para comunicação entre contextos/sistemas. | Derivado de fato interno por adaptador. | `order.created.v1`. | Expor diretamente a classe de domínio. |
 | Message | Envelope geral de comunicação com payload e metadados. | Especializado em Command, Query ou Event. | Envelope com correlation ID. | Objeto global de request. |
-| MessageId | Identificador de uma mensagem transportada ou processada. | Usado por envelopes e causalidade. | ID de um `EventEnvelope`. | ID do fato ou da entidade reutilizado sem contrato. |
+| MessageId | UUID canônico e nominal de uma mensagem transportada ou processada; novas mensagens usam UUIDv7. | Usado por envelopes e causalidade. | ID de um `EventEnvelope`. | ID do fato ou da entidade reutilizado sem contrato. |
 | UUIDv7 | Estratégia padrão de infraestrutura para novas identidades persistidas e temporalmente ordenáveis. | Implementa Id Generator e é validado pela factory do ID nominal. | UUID conforme RFC 9562. | Usar o timestamp embutido como `createdAt`. |
 | Command | Intenção de alterar estado; nome no imperativo. | Tratado por um Handler. | `CancelOrder`. | `OrderCancelled`. |
 | Query | Pedido de informação sem alterar estado observável. | Tratado por leitor especializado. | `GetOrderById`. | Método que persiste auditoria de negócio. |
@@ -50,7 +51,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Termo | Definição e responsabilidade | Relações | Exemplo | Anti-exemplo |
 |---|---|---|---|---|
 | Organization | Aggregate Root que representa uma organização responsável por suas regras e continuidade. | Identificada por OrganizationId; inicialmente possui OrganizationName. | Comunidade que futuramente organiza equipes e escalas. | Registro pertencente ao módulo de notificações. |
-| OrganizationId | Identidade opaca e estável de uma Organization. | Gerada fora do Aggregate e validada por factory própria. | `organization-123`. | Nome ou ID de outro Aggregate reutilizado. |
+| OrganizationId | UUID canônico, nominal e estável de uma Organization; novas identidades usam UUIDv7. | Gerada fora do Aggregate e validada por factory própria. | `0198f334-6dc5-7c20-9af1-91d7e599c7b1`. | Nome ou ID de outro Aggregate reutilizado. |
 | OrganizationName | Nome obrigatório e normalizado de uma Organization, limitado a 120 caracteres. | Compõe Organization e OrganizationCreated. | `Comunidade Servir`. | Texto vazio ou usado como identidade. |
 | OrganizationCreated | Domain Event que registra a criação válida de uma Organization. | Registrado por Organization; publicado fora do domínio. | `organization.created`. | Envio de email dentro da factory. |
 

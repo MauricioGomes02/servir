@@ -13,8 +13,12 @@ import {
 import { OrganizationNameErrorCodes } from '../value-objects';
 
 function validMetadata() {
-  const id = OrganizationId.create('organization-123');
-  const eventId = parseDomainEventId('event-123');
+  const id = OrganizationId.create(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
+  );
+  const eventId = parseDomainEventId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
+  );
   const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 
   assert.equal(id.success, true);
@@ -55,7 +59,7 @@ describe('Organization', () => {
       name: 'organization.created',
       occurredAt: metadata.occurredAt,
       payload: {
-        organizationId: 'organization-123',
+        organizationId: '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
         name: 'Comunidade Servir',
       },
     });

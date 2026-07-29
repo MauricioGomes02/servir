@@ -31,9 +31,15 @@ import { registerCreateOrganizationRoute } from './register-create-organization-
 function fixture() {
   const correlationId = parseCorrelationId('correlation-123');
   const requestId = parseRequestId('request-123');
-  const organizationId = OrganizationId.create('organization-123');
-  const domainEventId = parseDomainEventId('event-123');
-  const messageId = parseMessageId('message-123');
+  const organizationId = OrganizationId.create(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
+  );
+  const domainEventId = parseDomainEventId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
+  );
+  const messageId = parseMessageId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+  );
   const instant = Instant.create('2026-07-28T12:00:00.000Z');
 
   assert.equal(correlationId.success, true);
@@ -115,10 +121,13 @@ describe('registerCreateOrganizationRoute', () => {
 
     assert.equal(response.statusCode, 201);
     assert.deepEqual(response.json(), {
-      id: 'organization-123',
+      id: '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
       name: 'Comunidade Servir',
     });
-    assert.equal(response.headers.location, '/organizations/organization-123');
+    assert.equal(
+      response.headers.location,
+      '/organizations/0198f334-6dc5-7c20-9af1-91d7e599c7b1',
+    );
     assert.equal(response.headers['x-correlation-id'], 'correlation-123');
     assert.equal(organizations.organizations.length, 1);
     assert.equal(outbox.envelopes.length, 1);

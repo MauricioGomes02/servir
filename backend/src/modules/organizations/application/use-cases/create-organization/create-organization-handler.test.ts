@@ -31,9 +31,15 @@ import type { OrganizationWriteScope } from '../../ports';
 import { CreateOrganizationHandler } from '.';
 
 function fixtureIds() {
-  const organizationId = OrganizationId.create('organization-123');
-  const eventId = parseDomainEventId('event-123');
-  const messageId = parseMessageId('message-123');
+  const organizationId = OrganizationId.create(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
+  );
+  const eventId = parseDomainEventId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
+  );
+  const messageId = parseMessageId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+  );
   const correlationId = parseCorrelationId('correlation-123');
   const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 

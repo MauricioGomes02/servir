@@ -9,8 +9,10 @@ import {
 import { Instant } from '@/shared/domain/instant';
 
 describe('DomainEvent', () => {
+  const EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b2';
+
   it('creates a deeply immutable fact with explicit metadata', () => {
-    const eventId = parseDomainEventId('event-123');
+    const eventId = parseDomainEventId(EVENT_ID);
     const occurredAt = Instant.create(
       '2026-07-27T12:00:00.000Z',
     );
@@ -45,7 +47,7 @@ describe('DomainEvent', () => {
   });
 
   it('preserves the original payload while creating an immutable copy', () => {
-    const eventId = parseDomainEventId('event-123');
+    const eventId = parseDomainEventId(EVENT_ID);
     const occurredAt = Instant.create(
       '2026-07-27T12:00:00.000Z',
     );
@@ -94,12 +96,13 @@ describe('DomainEvent', () => {
     });
   });
 
-  it('accepts an event identity with exactly 128 characters', () => {
-    const input = 'a'.repeat(128);
-
-    assert.deepEqual(parseDomainEventId(input), {
-      success: true,
-      value: input,
+  it('rejects a non-UUID event identity', () => {
+    assert.deepEqual(parseDomainEventId('event-123'), {
+      success: false,
+      error: {
+        code: DomainEventMetadataErrorCodes.InvalidFormat,
+        field: 'eventId',
+      },
     });
   });
 

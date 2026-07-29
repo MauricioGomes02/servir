@@ -7,8 +7,10 @@ import {
 } from '.';
 
 describe('OrganizationId', () => {
-  it('normalizes a valid opaque identity', () => {
-    const result = OrganizationId.create(' organization-123 ');
+  const UUID_V7 = '0198f334-6dc5-7c20-9af1-91d7e599c7b1';
+
+  it('normalizes a canonical UUID identity', () => {
+    const result = OrganizationId.create(` ${UUID_V7.toUpperCase()} `);
 
     assert.equal(result.success, true);
 
@@ -16,8 +18,8 @@ describe('OrganizationId', () => {
       return;
     }
 
-    assert.equal(result.value.toString(), 'organization-123');
-    assert.equal(result.value.toJSON(), 'organization-123');
+    assert.equal(result.value.toString(), UUID_V7);
+    assert.equal(result.value.toJSON(), UUID_V7);
   });
 
   it('rejects an identity with an invalid type', () => {
@@ -44,18 +46,14 @@ describe('OrganizationId', () => {
     });
   });
 
-  it('accepts an identity with exactly 128 characters', () => {
-    const input = 'a'.repeat(128);
-
-    const result = OrganizationId.create(input);
-
-    assert.equal(result.success, true);
-
-    if (!result.success) {
-      return;
-    }
-
-    assert.equal(result.value.toString(), input);
+  it('rejects a non-UUID identity', () => {
+    assert.deepEqual(OrganizationId.create('organization-123'), {
+      success: false,
+      error: {
+        code: OrganizationIdErrorCodes.InvalidFormat,
+        field: 'organizationId',
+      },
+    });
   });
 
   it('rejects an identity longer than 128 characters', () => {

@@ -14,12 +14,16 @@ import {
   parseMessageId,
 } from '.';
 
+const EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b2';
+const MESSAGE_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b3';
+const CAUSATION_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b4';
+
 function fixtures() {
-  const eventId = parseDomainEventId('event-123');
+  const eventId = parseDomainEventId(EVENT_ID);
   const occurredAt = Instant.create(
     '2026-07-27T15:00:00.000Z',
   );
-  const messageId = parseMessageId('message-123');
+  const messageId = parseMessageId(MESSAGE_ID);
   const correlationId = parseCorrelationId('correlation-123');
 
   assert.equal(eventId.success, true);
@@ -65,7 +69,7 @@ describe('EventEnvelope', () => {
 
   it('preserves the message that caused the event', () => {
     const fixture = fixtures();
-    const causationId = parseMessageId('command-123');
+    const causationId = parseMessageId(CAUSATION_ID);
 
     assert.equal(causationId.success, true);
 
@@ -83,12 +87,12 @@ describe('EventEnvelope', () => {
 });
 
 describe('MessageId', () => {
-  it('normalizes an identifier received at the boundary', () => {
-    const result = parseMessageId(' message-123 ');
+  it('normalizes a canonical UUID received at the boundary', () => {
+    const result = parseMessageId(` ${MESSAGE_ID.toUpperCase()} `);
 
     assert.deepEqual(result, {
       success: true,
-      value: 'message-123',
+      value: MESSAGE_ID,
     });
   });
 
@@ -116,12 +120,13 @@ describe('MessageId', () => {
     });
   });
 
-  it('accepts an identifier with exactly 128 characters', () => {
-    const input = 'a'.repeat(128);
-
-    assert.deepEqual(parseMessageId(input), {
-      success: true,
-      value: input,
+  it('rejects a non-UUID message identity', () => {
+    assert.deepEqual(parseMessageId('message-123'), {
+      success: false,
+      error: {
+        code: MessageIdErrorCodes.InvalidFormat,
+        field: 'messageId',
+      },
     });
   });
 

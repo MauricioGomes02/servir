@@ -18,10 +18,16 @@ import {
 } from '.';
 
 function fixture() {
-  const eventId = parseDomainEventId('event-123');
+  const eventId = parseDomainEventId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
+  );
   const occurredAt = Instant.create('2026-07-27T15:00:00.000Z');
-  const messageId = parseMessageId('message-123');
-  const causationId = parseMessageId('message-previous');
+  const messageId = parseMessageId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+  );
+  const causationId = parseMessageId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b4',
+  );
   const correlationId = parseCorrelationId('correlation-123');
 
   assert.equal(eventId.success, true);

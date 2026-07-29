@@ -23,8 +23,12 @@ import {
 
 describe('InMemoryEventOutbox', () => {
   it('stores envelopes in order and exposes an immutable snapshot', async () => {
-    const messageId = parseMessageId('message-123');
-    const eventId = parseDomainEventId('event-123');
+    const messageId = parseMessageId(
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+    );
+    const eventId = parseDomainEventId(
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
+    );
     const correlationId = parseCorrelationId('correlation-123');
     const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 
@@ -71,9 +75,15 @@ describe('InMemoryEventOutbox', () => {
   });
 
   it('rejects acknowledgement outside outbox order', async () => {
-    const storedMessageId = parseMessageId('message-stored');
-    const receivedMessageId = parseMessageId('message-received');
-    const eventId = parseDomainEventId('event-123');
+    const storedMessageId = parseMessageId(
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+    );
+    const receivedMessageId = parseMessageId(
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b4',
+    );
+    const eventId = parseDomainEventId(
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
+    );
     const correlationId = parseCorrelationId('correlation-123');
     const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 

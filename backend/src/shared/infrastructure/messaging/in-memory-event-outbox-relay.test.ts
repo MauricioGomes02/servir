@@ -36,8 +36,12 @@ interface EnvelopeIds {
 
 function ids(): EnvelopeIds {
   const correlationId = parseCorrelationId('correlation-123');
-  const eventId = parseDomainEventId('event-123');
-  const messageId = parseMessageId('message-123');
+  const eventId = parseDomainEventId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
+  );
+  const messageId = parseMessageId(
+    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+  );
 
   assert.equal(correlationId.success, true);
   assert.equal(eventId.success, true);
@@ -102,7 +106,10 @@ describe('InMemoryEventOutboxRelay', () => {
     await relay.flush();
 
     assert.equal(published.length, 1);
-    assert.equal(published[0]?.messageId, 'message-123');
+    assert.equal(
+      published[0]?.messageId,
+      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
+    );
     assert.equal(outbox.envelopes.length, 0);
   });
 
@@ -128,7 +135,7 @@ describe('InMemoryEventOutboxRelay', () => {
     assert.equal(logger.records[0]?.eventName, 'event.outbox.publish.failed');
     assert.deepEqual(logger.records[0]?.context, {
       correlationId: 'correlation-123',
-      messageId: 'message-123',
+      messageId: '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
       causationId: undefined,
     });
   });

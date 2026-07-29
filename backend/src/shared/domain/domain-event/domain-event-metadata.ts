@@ -3,6 +3,7 @@ import {
   success,
   type Result,
 } from '@/shared/core/result';
+import { isCanonicalUuid } from '@/shared/core/uuid';
 
 import {
   DomainEventMetadataErrorCodes,
@@ -47,5 +48,12 @@ export function parseDomainEventId(
     });
   }
 
-  return success(value as DomainEventId);
+  if (!isCanonicalUuid(value)) {
+    return failure({
+      code: DomainEventMetadataErrorCodes.InvalidFormat,
+      field: 'eventId',
+    });
+  }
+
+  return success(value.toLowerCase() as DomainEventId);
 }

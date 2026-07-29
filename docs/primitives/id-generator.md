@@ -39,7 +39,7 @@ export interface IdGenerator<TId> {
 }
 ```
 
-`SequenceIdGenerator<TId>` fornece identidades tipadas em ordem e falha com código estável quando a sequência determinística é esgotada. `UuidV7Generator<TId, TError>` usa UUIDv7 na infraestrutura e delega construção e validação à factory do ID; a fundação não converte texto para um tipo nominal por cast.
+`SequenceIdGenerator<TId>` fornece identidades tipadas em ordem e falha com código estável quando a sequência determinística é esgotada. `UuidV7Generator<TId, TError>` usa UUIDv7 na infraestrutura e delega construção e validação à factory do ID; a fundação não converte texto para um tipo nominal por cast. Para os IDs persistidos atuais, a factory aceita UUIDs canônicos reconhecidos durante reconstituição, enquanto o generator garante UUIDv7 para novas identidades.
 
 ## Relacionamento com outras primitivas
 
