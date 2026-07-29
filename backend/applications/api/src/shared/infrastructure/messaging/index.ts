@@ -44,3 +44,8 @@ export type {
 export type {
   EventHandlerFailure,
 } from './event-dispatch-error';
+
+export {
+  UnmappedDomainEventError,
+  UnmappedDomainEventErrorCode,
+} from './unmapped-domain-event-error';

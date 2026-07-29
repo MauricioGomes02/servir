@@ -1,7 +1,15 @@
 import type { OrganizationWriteScope } from '@/modules/organizations/application';
-import { PostgresOrganizationRepository } from '@/modules/organizations/infrastructure';
+import {
+  mapOrganizationCreatedIntegrationEvent,
+  PostgresOrganizationRepository,
+} from '@/modules/organizations/infrastructure';
+import { isOrganizationCreated } from '@/modules/organizations/domain';
+import type { EventEnvelope } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
-import { PostgresEventOutbox } from '@/shared/infrastructure/messaging';
+import {
+  PostgresEventOutbox,
+  UnmappedDomainEventError,
+} from '@/shared/infrastructure/messaging';
 import { PostgresUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { Pool } from 'pg';
 
@@ -15,10 +23,18 @@ export function createPostgresPersistence(
 ): PostgresPersistence {
   const pool = new Pool({ connectionString });
 
+  function mapIntegrationEvent(envelope: EventEnvelope) {
+    if (isOrganizationCreated(envelope.event)) {
+      return mapOrganizationCreatedIntegrationEvent(envelope.event);
+    }
+
+    throw new UnmappedDomainEventError(envelope.event.name);
+  }
+
   return {
     unitOfWork: new PostgresUnitOfWork(pool, (client) => ({
       organizations: new PostgresOrganizationRepository(client),
-      outbox: new PostgresEventOutbox(client),
+      outbox: new PostgresEventOutbox(client, mapIntegrationEvent),
     })),
     async close(): Promise<void> {
       await pool.end();

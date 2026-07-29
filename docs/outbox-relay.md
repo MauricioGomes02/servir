@@ -44,6 +44,18 @@ sequenceDiagram
 
 O claim seleciona apenas mensagens sem estado terminal, disponíveis pelo relógio do banco e sem lease válida. `FOR UPDATE SKIP LOCKED` permite concorrência entre instâncias. A atualização posterior exige o mesmo `lease_id`, impedindo que um worker confirme trabalho cuja lease expirou e foi assumida por outro.
 
+## Fronteira de escrita
+
+```mermaid
+flowchart LR
+    D[OrganizationCreated<br/>Domain Event] --> M[Mapper de saída]
+    M --> I[OrganizationCreatedIntegrationEventV1]
+    I --> O[(Outbox PostgreSQL)]
+    O -. leitura futura .-> R[Outbox Relay]
+```
+
+O caso de uso entrega o `EventEnvelope` interno ao port de outbox dentro da Unit of Work. No adapter PostgreSQL, um mapper injetado seleciona explicitamente nome, versão, payload público, Aggregate e chave de partição. Um Domain Event sem mapper produz falha técnica codificada antes do `INSERT`, mantendo Aggregate e outbox na mesma decisão transacional. O relay receberá uma representação já pronta para transporte e não conhecerá o Domain Event nem o módulo Organizations.
+
 ## Estado persistido
 
 | Campo | Semântica |
@@ -75,7 +87,6 @@ Cada ciclo, claim e publicação deve produzir spans apropriados. Logs estrutura
 ## Evoluções planejadas
 
 - Criar a aplicação `outbox-relay` com ports orientados ao seu consumidor.
-- Definir o mapper de `OrganizationCreated` para seu primeiro Integration Event.
 - Implementar claim, confirmação e reagendamento PostgreSQL com testes de concorrência.
 - Adicionar o publisher Kafka e propagação OpenTelemetry.
 - Definir operação explícita de reprocessamento e retenção de mensagens publicadas.

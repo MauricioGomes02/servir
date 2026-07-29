@@ -1,5 +1,6 @@
 export {
   createOrganizationCreated,
+  isOrganizationCreated,
 } from './organization-created';
 
 export type {

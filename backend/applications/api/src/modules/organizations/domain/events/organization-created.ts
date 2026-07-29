@@ -37,4 +37,10 @@ export function createOrganizationCreated(
   });
 }
 
+export function isOrganizationCreated(
+  event: DomainEvent,
+): event is OrganizationCreated {
+  return event.name === 'organization.created';
+}
+
 export type OrganizationEvent = OrganizationCreated;

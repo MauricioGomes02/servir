@@ -102,7 +102,13 @@ describe('PostgreSQL organization persistence', () => {
     await committedHandler.handle({ name: 'Committed organization' }, context);
 
     const committed = await inspectionPool.query(
-      `SELECT o.name, m.event_name, m.payload
+      `SELECT o.name,
+              m.event_name,
+              m.event_version,
+              m.aggregate_id,
+              m.partition_key,
+              m.metadata,
+              m.payload
        FROM organizations o
        JOIN outbox_messages m
          ON m.payload->>'organizationId' = o.id::text
@@ -113,6 +119,14 @@ describe('PostgreSQL organization persistence', () => {
     assert.equal(committed.rowCount, 1);
     assert.equal(committed.rows[0]?.name, 'Committed organization');
     assert.equal(committed.rows[0]?.event_name, 'organization.created');
+    assert.equal(committed.rows[0]?.event_version, 1);
+    assert.equal(committed.rows[0]?.aggregate_id, ORGANIZATION_ID);
+    assert.equal(committed.rows[0]?.partition_key, ORGANIZATION_ID);
+    assert.deepEqual(committed.rows[0]?.metadata, {});
+    assert.deepEqual(committed.rows[0]?.payload, {
+      organizationId: ORGANIZATION_ID,
+      name: 'Committed organization',
+    });
 
     const failingHandler = new CreateOrganizationHandler({
       clock: new FixedClock(occurredAt),

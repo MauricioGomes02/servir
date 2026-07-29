@@ -2,6 +2,11 @@ export {
   createEventEnvelope,
 } from './event-envelope';
 
+export type {
+  IntegrationEvent,
+  IntegrationEventMapper,
+} from './integration-event';
+
 export {
   parseMessageId,
 } from './message-id';

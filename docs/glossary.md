@@ -56,6 +56,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | OrganizationId | UUID canônico, nominal e estável de uma Organization; novas identidades usam UUIDv7. | Gerada fora do Aggregate e validada por factory própria. | `0198f334-6dc5-7c20-9af1-91d7e599c7b1`. | Nome ou ID de outro Aggregate reutilizado. |
 | OrganizationName | Nome obrigatório e normalizado de uma Organization, limitado a 120 caracteres. | Compõe Organization e OrganizationCreated. | `Comunidade Servir`. | Texto vazio ou usado como identidade. |
 | OrganizationCreated | Domain Event que registra a criação válida de uma Organization. | Registrado por Organization; publicado fora do domínio. | `organization.created`. | Envio de email dentro da factory. |
+| OrganizationCreatedIntegrationEventV1 | Primeira versão do contrato externo derivado de OrganizationCreated. | Mapper de saída seleciona payload, Aggregate e chave de partição antes da outbox PostgreSQL. | `organization.created`, versão `1`. | Publicar automaticamente toda propriedade do Domain Event. |
 
 ## Regras de evolução
 

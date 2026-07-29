@@ -55,7 +55,7 @@ flowchart TD
 | Notification | Implementação inicial | Acúmulo, imutabilidade e testes decididos |
 | Instant | Implementação inicial | UTC, imutabilidade, igualdade e serialização testadas |
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
-| Message Envelope | Implementação inicial | Identidade, correlação, causalidade e imutabilidade testadas |
+| Message Envelope e Integration Event | Implementação inicial | Envelope interno preserva identidade, correlação e causalidade; primeiro contrato externo versionado e mapper explícito estão testados |
 | Event Bus | Implementação inicial | Ports, concorrência, falhas e subscriptions testados |
 | Outbox Relay | Implementação inicial | Adapter em memória está testado; relay durável possui garantia `at-least-once`, claim por lease, retry e estados terminais definidos, enquanto o executável permanece planejado |
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e confirmação seletiva testados |
@@ -68,7 +68,7 @@ flowchart TD
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, validação canônica dos IDs persistidos e adapter UUIDv7 com factory nominal e falhas técnicas codificadas estão testados |
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto, confirmação seletiva de eventos e adapter PostgreSQL com commit/rollback testados |
-| Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e EventEnvelope atomicamente em memória ou PostgreSQL; relay durável permanece planejado |
+| Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e outbox atomicamente; PostgreSQL traduz `OrganizationCreated` para contrato externo v1 com Aggregate e chave de partição; relay durável permanece planejado |
 | Workspaces de aplicações | Implementação inicial | Raiz coordena workspaces npm; API possui manifesto e ciclo de vida próprios; pacotes compartilhados surgem apenas com reuso comprovado |
 | Aplicação de relay durável | Design definido | Kafka e semântica operacional foram aceitos; worker independente ainda deve implementar claim, publicação, confirmação, retry, idempotência, observabilidade e encerramento seguro |
 | Infraestrutura de banco e migrations | Implementação inicial | PostgreSQL local, changelog Liquibase externo às aplicações, schema inicial e estado operacional do relay estão definidos; execução idempotente deve ser validada após cada novo changeset; credenciais dedicadas de runtime e IaC permanecem planejadas |
