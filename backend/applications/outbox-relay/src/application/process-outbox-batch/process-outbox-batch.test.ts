@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 
 import type { Clock, RetryPolicy } from '@/application/ports';
 import {
+  IntegrationEventPublicationError,
   OutboxLeaseError,
   OutboxLeaseErrorCodes,
   ProcessOutboxBatchConfigError,
@@ -63,6 +64,20 @@ function retryPolicy(retry: boolean): RetryPolicy {
     decide: () => retry
       ? { retry: true, availableAt: RETRY_AT }
       : { retry: false },
+  };
+}
+
+function recordingRetryPolicy(): RetryPolicy & {
+  readonly decisions: Array<Parameters<RetryPolicy['decide']>[0]>;
+} {
+  const decisions: Array<Parameters<RetryPolicy['decide']>[0]> = [];
+
+  return {
+    decisions,
+    decide: (input) => {
+      decisions.push(input);
+      return { retry: false };
+    },
   };
 }
 
@@ -189,6 +204,36 @@ describe('ProcessOutboxBatch', () => {
     });
     assert.equal(store.currentMessages[0]?.failedAt,
       '2026-07-29T15:00:01.000Z');
+  });
+
+  it('passes explicit publication retryability to the retry policy', async () => {
+    const store = new InMemoryOutboxMessageStore([message('message-1')]);
+    const retry = recordingRetryPolicy();
+    const publisher = {
+      publish: async () => {
+        throw new IntegrationEventPublicationError(
+          'kafka.message_rejected',
+          { retryable: false },
+        );
+      },
+    };
+    const worker = new ProcessOutboxBatch({
+      clock: new SequenceClock([
+        CLAIMED_AT,
+        '2026-07-29T15:00:01.000Z',
+      ]),
+      leaseIdGenerator: { generate: () => 'lease-123' },
+      messageStore: store,
+      publisher,
+      retryPolicy: retry,
+      batchSize: 10,
+      leaseDurationMilliseconds: 60_000,
+    });
+
+    await worker.execute();
+
+    assert.equal(retry.decisions[0]?.retryable, false);
+    assert.equal(retry.decisions[0]?.errorCode, 'kafka.message_rejected');
   });
 
   it('propagates an expired confirmation after the broker accepted the message', async () => {

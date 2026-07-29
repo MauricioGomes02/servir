@@ -1,5 +1,5 @@
 import {
-  publicationErrorCode,
+  publicationFailure,
   ProcessOutboxBatchConfigError,
   ProcessOutboxBatchConfigErrorCodes,
 } from '@/application/errors';
@@ -71,12 +71,13 @@ export class ProcessOutboxBatch {
       try {
         await this.dependencies.publisher.publish(message);
       } catch (error) {
-        const errorCode = publicationErrorCode(error);
+        const failure = publicationFailure(error);
         const failedAt = this.dependencies.clock.now();
         const retry = this.dependencies.retryPolicy.decide({
           attemptCount: message.attemptCount,
           failedAt,
-          errorCode,
+          errorCode: failure.code,
+          retryable: failure.retryable,
         });
 
         if (retry.retry) {
@@ -85,7 +86,7 @@ export class ProcessOutboxBatch {
             leaseId: message.leaseId,
             failedAt,
             availableAt: retry.availableAt,
-            errorCode,
+            errorCode: failure.code,
           });
           rescheduled += 1;
           continue;
@@ -95,7 +96,7 @@ export class ProcessOutboxBatch {
           messageId: message.messageId,
           leaseId: message.leaseId,
           failedAt,
-          errorCode,
+          errorCode: failure.code,
         });
         failed += 1;
         continue;

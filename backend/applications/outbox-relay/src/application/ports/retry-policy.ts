@@ -8,5 +8,6 @@ export interface RetryPolicy {
     attemptCount: number;
     failedAt: string;
     errorCode: string;
+    retryable: boolean;
   }>): RetryDecision;
 }

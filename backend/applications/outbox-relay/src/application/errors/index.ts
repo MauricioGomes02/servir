@@ -1,7 +1,10 @@
 export {
   IntegrationEventPublicationError,
   IntegrationEventPublicationErrorCode,
-  publicationErrorCode,
+  publicationFailure,
+} from './integration-event-publication-error';
+export type {
+  PublicationFailure,
 } from './integration-event-publication-error';
 export {
   ProcessOutboxBatchConfigError,
@@ -17,3 +20,10 @@ export {
 export type {
   OutboxLeaseErrorCode,
 } from './outbox-lease-error';
+export {
+  RetryPolicyConfigError,
+  RetryPolicyConfigErrorCodes,
+} from './retry-policy-config-error';
+export type {
+  RetryPolicyConfigErrorCode,
+} from './retry-policy-config-error';

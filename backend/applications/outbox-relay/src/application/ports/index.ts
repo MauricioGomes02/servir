@@ -9,3 +9,4 @@ export type {
   OutboxMessageStore,
 } from './outbox-message-store';
 export type { RetryDecision, RetryPolicy } from './retry-policy';
+export type { RandomSource } from './random-source';

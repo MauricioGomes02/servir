@@ -96,7 +96,11 @@ Não existe coluna `status`: pendência, lease e estados terminais são derivado
 
 Publicação ocorre fora da transação PostgreSQL. Se Kafka confirmar e o processo falhar antes de `markPublished`, a mensagem poderá ser publicada novamente. Esse é o ponto conhecido da garantia `at-least-once`. `message_id` deve acompanhar a mensagem e ser usado para idempotência pelos consumidores.
 
-Falhas transitórias usarão backoff exponencial com jitter calculado a partir de dependências controláveis. A política concreta, os limites e a classificação entre falhas transitórias e terminais permanecem no próximo incremento.
+Falhas transitórias usam `ExponentialBackoffRetryPolicy`. O atraso base dobra a cada claim, é limitado por um teto configurável e recebe jitter proporcional antes do reagendamento. O jitter evita que workers afetados pela mesma indisponibilidade tentem novamente simultaneamente; o atraso final nunca ultrapassa o teto.
+
+O publisher classifica cada falha por código estável e informa explicitamente se ela é retentável. Falhas não retentáveis e tentativas que alcançaram o limite tornam-se terminais sem consultar aleatoriedade ou calcular outro instante. Falhas desconhecidas são tratadas como técnicas e retentáveis, preservando disponibilidade sem depender da mensagem da exceção.
+
+`Clock` e `RandomSource` são ports da Application. A policy não usa `Date`, `Math.random()` nem SDK de broker diretamente, permitindo testes determinísticos dos limites. `RandomSource.next()` deve produzir um valor no intervalo `[0, 1)`; violações do contrato e configurações inválidas geram erros com códigos estáveis.
 
 ## Observabilidade
 
@@ -104,7 +108,6 @@ Cada ciclo, claim e publicação deve produzir spans apropriados. Logs estrutura
 
 ## Evoluções planejadas
 
-- Implementar uma política concreta de retry com backoff exponencial e jitter.
 - Adicionar o publisher Kafka e propagação OpenTelemetry.
 - Compor o processo contínuo com configuração e encerramento seguro.
 - Definir operação explícita de reprocessamento e retenção de mensagens publicadas.

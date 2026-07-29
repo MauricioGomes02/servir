@@ -3,16 +3,34 @@ export const IntegrationEventPublicationErrorCode =
 
 export class IntegrationEventPublicationError extends Error {
   readonly code: string;
+  readonly retryable: boolean;
 
-  constructor(code: string = IntegrationEventPublicationErrorCode) {
+  constructor(
+    code: string = IntegrationEventPublicationErrorCode,
+    options: Readonly<{ retryable?: boolean }> = {},
+  ) {
     super(code);
     this.name = 'IntegrationEventPublicationError';
     this.code = code;
+    this.retryable = options.retryable ?? true;
   }
 }
 
-export function publicationErrorCode(error: unknown): string {
-  return error instanceof IntegrationEventPublicationError
-    ? error.code
-    : IntegrationEventPublicationErrorCode;
+export interface PublicationFailure {
+  readonly code: string;
+  readonly retryable: boolean;
+}
+
+export function publicationFailure(error: unknown): PublicationFailure {
+  if (error instanceof IntegrationEventPublicationError) {
+    return Object.freeze({
+      code: error.code,
+      retryable: error.retryable,
+    });
+  }
+
+  return Object.freeze({
+    code: IntegrationEventPublicationErrorCode,
+    retryable: true,
+  });
 }
