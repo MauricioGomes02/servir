@@ -24,6 +24,15 @@ export {
 } from './in-memory-event-outbox-relay';
 
 export {
+  PostgresEventOutbox,
+} from './postgres-event-outbox';
+
+export {
+  PostgresEventOutboxError,
+  PostgresEventOutboxErrorCode,
+} from './postgres-event-outbox-error';
+
+export {
   InMemoryEventOutboxRelayError,
   InMemoryEventOutboxRelayErrorCodes,
 } from './in-memory-event-outbox-relay-error';

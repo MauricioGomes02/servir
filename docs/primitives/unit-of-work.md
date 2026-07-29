@@ -63,13 +63,14 @@ Coordena Repositories, Aggregate Roots e Event Publisher; pode usar Context e Lo
 
 ## Possíveis evoluções
 
-Integrar a confirmação seletiva com um adapter transacional real. Outbox, inbox, retries, idempotência e sagas entram quando houver requisitos distribuídos reais.
+Integrar o adapter transacional PostgreSQL ao relay durável. Inbox, retries, idempotência e sagas entram quando houver requisitos distribuídos reais.
 
 ## Boas práticas
 
 - Documentar exatamente quando eventos se tornam publicáveis.
 - Manter escopo curto e explícito.
 - Recarregar e reexecutar a decisão em retries; não reutilizar Aggregate alterado após rollback.
+- Compartilhar a mesma conexão entre todos os adapters do escopo transacional.
 
 ## Anti-patterns
 

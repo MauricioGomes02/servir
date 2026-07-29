@@ -12,6 +12,9 @@ describe('readServiceConfig', () => {
     assert.deepEqual(readServiceConfig({}), {
       host: '0.0.0.0',
       port: 3000,
+      persistence: {
+        mode: 'memory',
+      },
     });
   });
 
@@ -22,7 +25,39 @@ describe('readServiceConfig', () => {
     }), {
       host: '127.0.0.1',
       port: 8080,
+      persistence: {
+        mode: 'memory',
+      },
     });
+  });
+
+  it('requires a PostgreSQL URL only in postgres mode', () => {
+    assert.deepEqual(readServiceConfig({
+      PERSISTENCE_MODE: ' postgres ',
+      DATABASE_URL: ' postgresql://runtime:secret@localhost:5432/servir ',
+    }).persistence, {
+      mode: 'postgres',
+      connectionString: 'postgresql://runtime:secret@localhost:5432/servir',
+    });
+
+    for (const databaseUrl of [undefined, '', 'http://localhost/servir']) {
+      assert.throws(
+        () => readServiceConfig({
+          PERSISTENCE_MODE: 'postgres',
+          DATABASE_URL: databaseUrl,
+        }),
+        (error) => error instanceof ServiceConfigError
+          && error.code === ServiceConfigErrorCodes.InvalidDatabaseUrl,
+      );
+    }
+  });
+
+  it('rejects an unsupported persistence mode with a stable code', () => {
+    assert.throws(
+      () => readServiceConfig({ PERSISTENCE_MODE: 'mysql' }),
+      (error) => error instanceof ServiceConfigError
+        && error.code === ServiceConfigErrorCodes.InvalidPersistenceMode,
+    );
   });
 
   it('accepts the minimum and maximum network ports', () => {

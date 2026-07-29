@@ -6,9 +6,58 @@ import {
 const DEFAULT_HOST = '0.0.0.0';
 const DEFAULT_PORT = 3000;
 
+export type PersistenceConfig =
+  | Readonly<{ mode: 'memory' }>
+  | Readonly<{
+    mode: 'postgres';
+    connectionString: string;
+  }>;
+
 export interface ServiceConfig {
   readonly host: string;
   readonly port: number;
+  readonly persistence: PersistenceConfig;
+}
+
+function readPersistenceConfig(
+  environment: NodeJS.ProcessEnv,
+): PersistenceConfig {
+  const mode = environment.PERSISTENCE_MODE?.trim() ?? 'memory';
+
+  if (mode === 'memory') {
+    return Object.freeze({ mode });
+  }
+
+  if (mode !== 'postgres') {
+    throw new ServiceConfigError(
+      ServiceConfigErrorCodes.InvalidPersistenceMode,
+    );
+  }
+
+  const connectionString = environment.DATABASE_URL?.trim();
+
+  if (connectionString === undefined || connectionString.length === 0) {
+    throw new ServiceConfigError(
+      ServiceConfigErrorCodes.InvalidDatabaseUrl,
+    );
+  }
+
+  try {
+    const url = new URL(connectionString);
+
+    if (url.protocol !== 'postgres:' && url.protocol !== 'postgresql:') {
+      throw new Error('Unsupported database protocol');
+    }
+  } catch {
+    throw new ServiceConfigError(
+      ServiceConfigErrorCodes.InvalidDatabaseUrl,
+    );
+  }
+
+  return Object.freeze({
+    mode,
+    connectionString,
+  });
 }
 
 export function readServiceConfig(
@@ -29,5 +78,9 @@ export function readServiceConfig(
     throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidPort);
   }
 
-  return Object.freeze({ host, port });
+  return Object.freeze({
+    host,
+    port,
+    persistence: readPersistenceConfig(environment),
+  });
 }

@@ -6,7 +6,11 @@ import {
 import { JsonStdoutLogger } from '@/shared/infrastructure/logging';
 import type { TelemetryLifecycle } from '@/shared/infrastructure/telemetry';
 
-import { createApplication } from './composition';
+import {
+  createApplication,
+  createPostgresPersistence,
+  type PostgresPersistence,
+} from './composition';
 import { readServiceConfig } from './service-config';
 
 function failureAttributes(error: unknown): LogAttributes {
@@ -54,15 +58,33 @@ export async function startService(
 
   try {
     const config = readServiceConfig(process.env);
-    const app = createApplication({ logger });
+    let postgresPersistence: PostgresPersistence | undefined;
 
-    await app.listen({ ...config });
+    if (config.persistence.mode === 'postgres') {
+      postgresPersistence = createPostgresPersistence(
+        config.persistence.connectionString,
+      );
+    }
+
+    const app = createApplication({
+      logger,
+      organizationUnitOfWork: postgresPersistence?.unitOfWork,
+    });
+
+    if (postgresPersistence !== undefined) {
+      app.addHook('onClose', async () => {
+        await postgresPersistence?.close();
+      });
+    }
+
+    await app.listen({ host: config.host, port: config.port });
     logger.log(createLogRecord({
       level: LogLevels.Info,
       eventName: 'service.started',
       attributes: {
         'server.host': config.host,
         'server.port': config.port,
+        'persistence.mode': config.persistence.mode,
         'telemetry.enabled': telemetry.enabled,
       },
     }));

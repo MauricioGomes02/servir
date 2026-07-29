@@ -20,6 +20,8 @@ docker compose run --rm liquibase status
 
 As credenciais do exemplo pertencem somente ao ambiente local. Em ambientes compartilhados, o pipeline de migrations deve usar uma identidade com permissão de DDL, enquanto cada aplicação usa uma identidade de runtime limitada às operações necessárias. Segredos não devem ser versionados.
 
+Após aplicar as migrations, o backend local pode usar `PERSISTENCE_MODE=postgres` e uma `DATABASE_URL` apontando para esse banco. A credencial simplificada do Compose serve apenas ao desenvolvimento local; criar e rotacionar uma identidade restrita de runtime permanece obrigatório para ambientes compartilhados.
+
 ## Organização
 
 - `compose.yaml`: dependências locais e ferramenta de migration sob demanda.
@@ -27,4 +29,3 @@ As credenciais do exemplo pertencem somente ao ambiente local. Em ambientes comp
 - IaC de ambientes compartilhados será adicionada quando o provedor e a topologia forem decididos.
 
 Novas mudanças de banco devem ser acrescentadas como changesets; changesets já aplicados não devem ser editados. Mudanças incompatíveis devem seguir expand/contract para permitir que versões diferentes das aplicações convivam durante uma implantação.
-

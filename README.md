@@ -56,7 +56,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 
 ## Estado atual
 
-Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e reações pós-commit por relay, ainda com adapters em memória. A infraestrutura externa já define PostgreSQL local, Liquibase e o schema inicial; a integração do backend com esse banco permanece planejada. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
+Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e persistência atômica de Organization + outbox em memória ou PostgreSQL. Reações pós-commit usam relay apenas no modo em memória; o relay durável permanece planejado. PostgreSQL local, Liquibase e o schema inicial são externos ao backend. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
 
 ## Executar o backend localmente
 

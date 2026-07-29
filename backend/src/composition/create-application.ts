@@ -1,4 +1,7 @@
-import { CreateOrganizationHandler } from '@/modules/organizations/application';
+import {
+  CreateOrganizationHandler,
+  type OrganizationWriteScope,
+} from '@/modules/organizations/application';
 import { OrganizationId } from '@/modules/organizations/domain';
 import {
   InMemoryOrganizationRepository,
@@ -15,6 +18,7 @@ import {
 import type { Logger } from '@/shared/application/logging';
 import { parseMessageId } from '@/shared/application/messaging';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
+import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import { SystemClock } from '@/shared/infrastructure/clock';
 import {
   createFastifyApplication,
@@ -39,6 +43,7 @@ import type { FastifyInstance } from 'fastify';
 
 export interface CreateApplicationOptions {
   readonly logger?: Logger;
+  readonly organizationUnitOfWork?: UnitOfWork<OrganizationWriteScope>;
   readonly uuidSource?: UuidV7Source;
 }
 
@@ -56,15 +61,21 @@ export function createApplication(
       ...organizationMessageCatalog['en-US'],
     },
   });
-  const organizations = new InMemoryOrganizationRepository();
-  const outbox = new InMemoryEventOutbox();
   const eventBus = new InMemoryEventBus();
-  const eventRelay = new InMemoryEventOutboxRelay(
-    outbox,
-    eventBus,
-    logger,
-  );
-  const unitOfWork = new DirectUnitOfWork({ organizations, outbox });
+  let unitOfWork = options.organizationUnitOfWork;
+  let eventRelay: InMemoryEventOutboxRelay | undefined;
+
+  if (unitOfWork === undefined) {
+    const organizations = new InMemoryOrganizationRepository();
+    const outbox = new InMemoryEventOutbox();
+
+    eventRelay = new InMemoryEventOutboxRelay(
+      outbox,
+      eventBus,
+      logger,
+    );
+    unitOfWork = new DirectUnitOfWork({ organizations, outbox });
+  }
   const clock = new SystemClock();
   const createOrganizationHandler = new CreateOrganizationHandler({
     clock,
@@ -102,12 +113,14 @@ export function createApplication(
     'organization.created',
     new EventLoggingHandler(logger),
   );
-  app.addHook('onReady', async () => {
-    eventRelay.start();
-  });
-  app.addHook('onClose', async () => {
-    await eventRelay.stop();
-  });
+  if (eventRelay !== undefined) {
+    app.addHook('onReady', async () => {
+      eventRelay?.start();
+    });
+    app.addHook('onClose', async () => {
+      await eventRelay?.stop();
+    });
+  }
 
   registerCreateOrganizationRoute(app, {
     handler: createOrganizationHandler,

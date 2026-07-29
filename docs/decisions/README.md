@@ -22,5 +22,6 @@
 | [018](018-testing-strategy.md) | Design e nomeação de testes comportamentais | Aceita |
 | [019](019-external-database-migrations.md) | Migrations de banco externas às aplicações | Aceita |
 | [020](020-uuid-contract-for-persisted-identifiers.md) | Contrato UUID para identificadores persistidos | Aceita |
+| [021](021-postgresql-transactional-unit-of-work.md) | Unit of Work transacional com PostgreSQL | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.
