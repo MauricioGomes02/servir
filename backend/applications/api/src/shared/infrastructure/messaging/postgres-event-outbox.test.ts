@@ -79,7 +79,7 @@ describe('PostgresEventOutbox', () => {
     const integrationEventMapper: IntegrationEventMapper = (received) => ({
       name: 'organization.created',
       version: 1,
-      occurredAt: received.event.occurredAt,
+      occurredAt: received.event.occurredAt.toISOString(),
       aggregateId: received.event.payload.organizationId as string,
       partitionKey: received.event.payload.organizationId as string,
       payload: {

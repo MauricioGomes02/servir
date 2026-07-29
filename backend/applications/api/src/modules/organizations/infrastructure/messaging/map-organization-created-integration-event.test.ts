@@ -52,7 +52,7 @@ describe('mapOrganizationCreatedIntegrationEvent', () => {
     assert.deepEqual(integrationEvent, {
       name: 'organization.created',
       version: 1,
-      occurredAt: domainEvent.occurredAt,
+      occurredAt: domainEvent.occurredAt.toISOString(),
       aggregateId: domainEvent.payload.organizationId,
       partitionKey: domainEvent.payload.organizationId,
       payload: {

@@ -56,6 +56,16 @@ flowchart LR
 
 O caso de uso entrega o `EventEnvelope` interno ao port de outbox dentro da Unit of Work. No adapter PostgreSQL, um mapper injetado seleciona explicitamente nome, versão, payload público, Aggregate e chave de partição. Um Domain Event sem mapper produz falha técnica codificada antes do `INSERT`, mantendo Aggregate e outbox na mesma decisão transacional. O relay receberá uma representação já pronta para transporte e não conhecerá o Domain Event nem o módulo Organizations.
 
+O tipo serializável de `IntegrationEvent` reside em `backend/packages/integration-messaging`. Ele contém somente strings, números, booleanos, nulos, coleções e objetos JSON; `occurredAt` cruza a fronteira como UTC ISO. API e relay compartilham esse contrato sem compartilhar Domain Events, entidades ou primitivas internas.
+
+## Primeiro comportamento executável
+
+`ProcessOutboxBatch` pertence à application do relay e depende dos ports `OutboxMessageStore`, `IntegrationEventPublisher`, `Clock`, `LeaseIdGenerator` e `RetryPolicy`. O caso de uso cria uma lease, reivindica até o limite configurado e processa cada mensagem. Sucesso no publisher é seguido de confirmação no storage; falha de publicação é classificada por código estável e resulta em reagendamento ou falha terminal conforme a policy.
+
+Falha de confirmação não é tratada como falha de publicação. Ela é propagada e deixa a mensagem recuperável, pois o broker pode já tê-la aceitado. Esse caminho materializa a duplicidade conhecida da entrega `at-least-once`.
+
+Os adapters em memória implementados não substituem PostgreSQL ou Kafka. Eles especificam posse exclusiva durante a lease, recuperação após expiração, incremento de tentativas e rejeição de transições feitas por outro worker.
+
 ## Estado persistido
 
 | Campo | Semântica |
@@ -86,7 +96,8 @@ Cada ciclo, claim e publicação deve produzir spans apropriados. Logs estrutura
 
 ## Evoluções planejadas
 
-- Criar a aplicação `outbox-relay` com ports orientados ao seu consumidor.
 - Implementar claim, confirmação e reagendamento PostgreSQL com testes de concorrência.
+- Implementar uma política concreta de retry com backoff exponencial e jitter.
 - Adicionar o publisher Kafka e propagação OpenTelemetry.
+- Compor o processo contínuo com configuração e encerramento seguro.
 - Definir operação explícita de reprocessamento e retenção de mensagens publicadas.

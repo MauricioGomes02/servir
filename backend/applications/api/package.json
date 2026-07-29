@@ -21,6 +21,7 @@
     "typescript": "^5.8.0"
   },
   "dependencies": {
+    "@servir/integration-messaging": "1.0.0",
     "@fastify/accepts": "^5.0.4",
     "@fastify/otel": "^0.20.1",
     "@opentelemetry/api": "^1.9.1",

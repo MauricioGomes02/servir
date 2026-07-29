@@ -7,7 +7,7 @@ export function mapOrganizationCreatedIntegrationEvent(
   return Object.freeze({
     name: 'organization.created',
     version: 1,
-    occurredAt: event.occurredAt,
+    occurredAt: event.occurredAt.toISOString(),
     aggregateId: event.payload.organizationId,
     partitionKey: event.payload.organizationId,
     payload: Object.freeze({

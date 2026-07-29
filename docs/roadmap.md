@@ -57,7 +57,7 @@ flowchart TD
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
 | Message Envelope e Integration Event | Implementação inicial | Envelope interno preserva identidade, correlação e causalidade; primeiro contrato externo versionado e mapper explícito estão testados |
 | Event Bus | Implementação inicial | Ports, concorrência, falhas e subscriptions testados |
-| Outbox Relay | Implementação inicial | Adapter em memória está testado; relay durável possui garantia `at-least-once`, claim por lease, retry e estados terminais definidos, enquanto o executável permanece planejado |
+| Outbox Relay | Implementação inicial | `ProcessOutboxBatch` coordena claim, publicação, confirmação, retry e falha terminal; adapters em memória testam exclusão por lease, recuperação após expiração e reentrega possível |
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e confirmação seletiva testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
@@ -69,8 +69,8 @@ flowchart TD
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto, confirmação seletiva de eventos e adapter PostgreSQL com commit/rollback testados |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e outbox atomicamente; PostgreSQL traduz `OrganizationCreated` para contrato externo v1 com Aggregate e chave de partição; relay durável permanece planejado |
-| Workspaces de aplicações | Implementação inicial | Raiz coordena workspaces npm; API possui manifesto e ciclo de vida próprios; pacotes compartilhados surgem apenas com reuso comprovado |
-| Aplicação de relay durável | Design definido | Kafka e semântica operacional foram aceitos; worker independente ainda deve implementar claim, publicação, confirmação, retry, idempotência, observabilidade e encerramento seguro |
+| Workspaces de aplicações | Implementação inicial | `backend` coordena workspaces npm; API e relay possuem manifestos próprios; `integration-messaging` é o primeiro pacote extraído por dois consumidores reais |
+| Aplicação de relay durável | Implementação inicial | Primeiro comportamento de lote e ports orientados ao worker estão testados; PostgreSQL, Kafka, política concreta de retry, observabilidade, processo contínuo e encerramento seguro permanecem planejados |
 | Infraestrutura de banco e migrations | Implementação inicial | PostgreSQL local, changelog Liquibase externo às aplicações, schema inicial e estado operacional do relay estão definidos; execução idempotente deve ser validada após cada novo changeset; credenciais dedicadas de runtime e IaC permanecem planejadas |
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado, primeiro Presenter e títulos HTTP localizados estão definidos |
 | Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, negociação de locale, Problem Details RFC 9457, representação direta do recurso, rota `POST /organizations`, composição executável e tracing HTTP/Fastify/PostgreSQL com OpenTelemetry estão testados; spans manuais do relay permanecem planejados |

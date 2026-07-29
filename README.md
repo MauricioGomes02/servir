@@ -34,8 +34,10 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 ├── .codex/skills/      # Guardrails para futuras contribuições assistidas
 ├── backend/
 │   ├── applications/
-│   │   └── api/        # API HTTP e seu composition root
-│   └── packages/       # Pacotes compartilhados somente quando houver reuso comprovado
+│   │   ├── api/        # API HTTP e seu composition root
+│   │   └── outbox-relay/ # Processamento independente da outbox
+│   └── packages/
+│       └── integration-messaging/ # Contrato serializável compartilhado
 ├── frontend/           # Aplicações de apresentação web
 ├── infrastructure/     # Banco local, migrations e futura IaC
 └── docs/
@@ -61,7 +63,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 
 ## Estado atual
 
-Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e persistência atômica de Organization + outbox em memória ou PostgreSQL. No modo PostgreSQL, `OrganizationCreated` é traduzido explicitamente para um Integration Event v1 antes da persistência. Reações pós-commit usam relay apenas no modo em memória; uma aplicação de relay durável permanece planejada. PostgreSQL local, Liquibase e o schema inicial são externos às aplicações. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
+Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e persistência atômica de Organization + outbox em memória ou PostgreSQL. No modo PostgreSQL, `OrganizationCreated` é traduzido explicitamente para um Integration Event v1 antes da persistência. A aplicação `outbox-relay` já possui processamento de lote e adapters em memória; PostgreSQL, Kafka e seu processo contínuo permanecem planejados. O contrato serializável compartilhado limita-se a Integration Events e valores JSON. PostgreSQL local, Liquibase e o schema inicial são externos às aplicações. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos.
 
 ## Executar a API localmente
 

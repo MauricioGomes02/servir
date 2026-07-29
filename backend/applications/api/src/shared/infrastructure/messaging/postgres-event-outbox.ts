@@ -36,7 +36,7 @@ export class PostgresEventOutbox implements EventOutbox {
             envelope.messageId,
             envelope.event.eventId,
             integrationEvent.name,
-            integrationEvent.occurredAt.toISOString(),
+            integrationEvent.occurredAt,
             envelope.correlationId,
             envelope.causationId ?? null,
             integrationEvent.payload,
