@@ -3,6 +3,11 @@ import type {
   LogAttributeValue,
   LogRecord,
 } from '@/shared/application/logging';
+import {
+  context,
+  isSpanContextValid,
+  trace,
+} from '@opentelemetry/api';
 
 const MAX_DEPTH = 8;
 const MAX_ENTRIES = 100;
@@ -10,6 +15,26 @@ const MAX_STRING_LENGTH = 8_192;
 const TRUNCATED_SUFFIX = '...[truncated]';
 
 export type LogLineWriter = (line: string) => void;
+
+export interface ActiveTraceContext {
+  readonly spanId: string;
+  readonly traceId: string;
+}
+
+export type ActiveTraceContextReader = () => ActiveTraceContext | undefined;
+
+function readActiveTraceContext(): ActiveTraceContext | undefined {
+  const spanContext = trace.getSpan(context.active())?.spanContext();
+
+  if (spanContext === undefined || !isSpanContextValid(spanContext)) {
+    return undefined;
+  }
+
+  return {
+    spanId: spanContext.spanId,
+    traceId: spanContext.traceId,
+  };
+}
 
 function truncate(value: string): string {
   if (value.length <= MAX_STRING_LENGTH) {
@@ -56,7 +81,11 @@ function stdoutWriter(line: string): void {
 }
 
 export class JsonStdoutLogger implements Logger {
-  constructor(private readonly writer: LogLineWriter = stdoutWriter) {}
+  constructor(
+    private readonly writer: LogLineWriter = stdoutWriter,
+    private readonly activeTraceContextReader: ActiveTraceContextReader
+      = readActiveTraceContext,
+  ) {}
 
   log(record: LogRecord): void {
     try {
@@ -65,9 +94,11 @@ export class JsonStdoutLogger implements Logger {
           ([key, value]) => [key, limitValue(value)],
         ),
       );
+      const activeTraceContext = this.activeTraceContextReader();
 
       this.writer(`${JSON.stringify({
         ...record,
+        ...activeTraceContext,
         attributes,
       })}\n`);
     } catch {

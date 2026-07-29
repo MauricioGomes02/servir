@@ -56,6 +56,28 @@ describe('JsonStdoutLogger', () => {
     assert.equal(stacktrace.endsWith('...[truncated]'), true);
   });
 
+  it('acrescenta trace e span ativos sem alterar o port de logging', () => {
+    const lines: string[] = [];
+    const logger = new JsonStdoutLogger(
+      (line) => lines.push(line),
+      () => ({
+        traceId: '0af7651916cd43dd8448eb211c80319c',
+        spanId: 'b7ad6b7169203331',
+      }),
+    );
+
+    logger.log(createLogRecord({
+      level: LogLevels.Info,
+      eventName: 'http.request.completed',
+      attributes: {},
+    }));
+
+    const output = JSON.parse(lines[0] ?? '') as Record<string, unknown>;
+
+    assert.equal(output.traceId, '0af7651916cd43dd8448eb211c80319c');
+    assert.equal(output.spanId, 'b7ad6b7169203331');
+  });
+
   it('nao propaga uma falha do destino de observabilidade', () => {
     const logger = new JsonStdoutLogger(() => {
       throw new Error('stdout unavailable');

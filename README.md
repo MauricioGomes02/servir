@@ -54,3 +54,15 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 ## Estado atual
 
 Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP e reações pós-commit por relay, ainda com persistência e outbox em memória. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos. A documentação descreve o contrato desejado; divergências devem ser resolvidas por testes e ADRs antes de expandir a API pública.
+
+## Executar o backend localmente
+
+O backend usa o suporte nativo do Node para carregar `backend/.env` quando o arquivo existir. Copie `backend/.env.example` para personalizar o ambiente local; o `.env` não é versionado e não substitui as variáveis fornecidas pela plataforma em produção.
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+O exemplo mantém o OpenTelemetry desabilitado enquanto não houver um collector local. Para exportar traces, configure `OTEL_SDK_DISABLED=false` e mantenha `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` apontando para o endpoint OTLP/protobuf do collector.

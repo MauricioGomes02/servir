@@ -48,7 +48,7 @@ logger.log(createLogRecord({
 }));
 ```
 
-`LogContext` aceita apenas `CorrelationId`, `RequestId`, `MessageId` e `causationId` nesta etapa. O adapter acrescenta trace/span IDs e resource attributes como serviço, versão e ambiente.
+`LogContext` aceita apenas `CorrelationId`, `RequestId`, `MessageId` e `causationId` nesta etapa. O adapter JSON consulta o contexto ativo do OpenTelemetry e acrescenta `traceId` e `spanId` no momento da escrita, sem alterar o port nem exigir esses dados dos casos de uso. Resource attributes como serviço, versão e ambiente pertencem ao SDK e ao backend de observabilidade, não a cada chamada de log.
 
 ## Relacionamento com outras primitivas
 
@@ -56,7 +56,7 @@ Consome metadados permitidos de Context e Message; handlers de eventos podem tra
 
 ## Possíveis evoluções
 
-O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita. Permanecem planejados o adapter OpenTelemetry, políticas configuráveis de redaction, tratamento estruturado compartilhado de exceções e enriquecimento de resource/trace context.
+O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita e já correlaciona o registro ao span ativo. Permanecem planejados um exporter de logs OpenTelemetry, políticas configuráveis de redaction e tratamento estruturado compartilhado de exceções.
 
 ## Boas práticas
 

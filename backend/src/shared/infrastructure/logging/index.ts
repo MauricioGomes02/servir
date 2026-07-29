@@ -11,5 +11,7 @@ export {
 } from './json-stdout-logger';
 
 export type {
+  ActiveTraceContext,
+  ActiveTraceContextReader,
   LogLineWriter,
 } from './json-stdout-logger';
