@@ -4,14 +4,21 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
+    "dev": "node --env-file-if-exists=.env --import tsx --watch src/index.ts",
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "test": "tsc --noEmit && tsx --test src/**/*.test.ts"
+    "test": "tsc --noEmit && tsx --test src/**/*.test.ts",
+    "start": "node --env-file-if-exists=.env dist/index.js"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/core": "^2.10.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.221.0",
+    "@opentelemetry/instrumentation-pg": "^0.73.0",
+    "@opentelemetry/sdk-node": "^0.221.0",
     "@servir/integration-messaging": "1.0.0",
     "kafkajs": "^2.2.4",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

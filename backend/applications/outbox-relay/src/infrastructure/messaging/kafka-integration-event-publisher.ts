@@ -28,11 +28,11 @@ interface KafkaRecord {
   readonly topic: string;
   readonly acks: -1;
   readonly timeout: number;
-  readonly messages: ReadonlyArray<Readonly<{
+  readonly messages: Array<{
     key: string | null;
     value: string;
-    headers: Readonly<Record<string, string>>;
-  }>>;
+    headers: Record<string, string>;
+  }>;
 }
 
 export interface KafkaProducer {

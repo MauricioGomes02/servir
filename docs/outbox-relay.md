@@ -72,6 +72,25 @@ Os adapters em memória especificam posse exclusiva durante a lease, recuperaç�
 
 O adapter classifica falhas por código estável e pela propriedade estruturada de retentabilidade do cliente. Erros de configuração e serialização são terminais; falhas desconhecidas são retentáveis. Nenhum comportamento consulta mensagens do KafkaJS.
 
+## Processo contínuo
+
+O composition root abre o pool PostgreSQL e o producer Kafka uma vez no startup. `OutboxRelayWorker` executa `ProcessOutboxBatch` repetidamente: um lote que alcança o limite permite o próximo claim imediato; lote parcial, vazio ou falha técnica aguarda o intervalo configurado. A espera é cancelável e não mantém uma transação PostgreSQL aberta.
+
+`SIGINT` e `SIGTERM` impedem novos ciclos e aguardam o ciclo corrente. Em seguida o serviço desconecta o producer, fecha o pool e encerra OpenTelemetry nessa ordem. O startup não cria tópico, não executa migration e não administra ACL. Falhas de um destino de observabilidade não alteram entrega nem encerramento.
+
+Logs de lifecycle e lotes são JSON estruturado com nomes e códigos estáveis. Um lote com trabalho registra apenas contagens; falhas registram `error.code`. Payload, mensagem técnica, stack, credenciais e `tracestate` não são incluídos.
+
+### Configuração local
+
+Copie `backend/applications/outbox-relay/.env.example` para `.env` e configure endpoints existentes. O timeout Kafka deve ser estritamente menor que a lease. Com PostgreSQL e Kafka disponíveis, execute:
+
+```bash
+cd backend
+npm run dev:relay
+```
+
+O serviço exige que o schema Liquibase e `servir.organizations.events` já existam.
+
 ## Storage PostgreSQL
 
 `PostgresOutboxMessageStore` implementa o mesmo port com statements atômicos. O claim usa uma CTE materializada para selecionar mensagens disponíveis em ordem, aplica `FOR UPDATE SKIP LOCKED` e atualiza lease e tentativa antes de retornar as linhas. A transação implícita termina junto com o statement, antes de qualquer publicação no broker.
@@ -114,5 +133,5 @@ Cada ciclo, claim e publicação deve produzir spans apropriados. A API persiste
 
 ## Evoluções planejadas
 
-- Compor o processo contínuo com configuração e encerramento seguro.
+- Adicionar Kafka e o tópico de Organizations à infraestrutura local/IaC.
 - Definir operação explícita de reprocessamento e retenção de mensagens publicadas.
