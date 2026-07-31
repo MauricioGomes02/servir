@@ -39,7 +39,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 │   └── packages/
 │       └── integration-messaging/ # Contrato serializável compartilhado
 ├── frontend/           # Aplicações de apresentação web
-├── infrastructure/     # Banco local, migrations e futura IaC
+├── infrastructure/     # Terraform local, rede, serviços e ferramentas operacionais
 └── docs/
     ├── decisions/      # Architecture Decision Records
     ├── examples/       # Exemplos conceituais, não aplicações completas

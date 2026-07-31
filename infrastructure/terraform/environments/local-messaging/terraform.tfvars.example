@@ -1,0 +1,9 @@
+kafka_bootstrap_servers = ["localhost:29092"]
+
+topics = {
+  organizations_events = {
+    name               = "servir.organizations.events"
+    partitions         = 3
+    replication_factor = 1
+  }
+}

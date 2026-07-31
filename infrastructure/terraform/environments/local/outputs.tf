@@ -1,0 +1,24 @@
+output "network_name" {
+  description = "Docker network consumed by operational Compose jobs."
+  value       = module.platform.network_name
+}
+
+output "postgres_host_endpoint" {
+  description = "PostgreSQL endpoint for API and relay processes on the host."
+  value       = module.platform.postgres_host_endpoint
+}
+
+output "postgres_container_endpoint" {
+  description = "PostgreSQL endpoint for containers on the platform network."
+  value       = module.platform.postgres_container_endpoint
+}
+
+output "kafka_host_endpoint" {
+  description = "Kafka bootstrap endpoint for relay processes on the host."
+  value       = module.platform.kafka_host_endpoint
+}
+
+output "kafka_container_endpoint" {
+  description = "Kafka bootstrap endpoint for containers on the platform network."
+  value       = module.platform.kafka_container_endpoint
+}

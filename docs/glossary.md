@@ -25,6 +25,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Contract | Forma e semântica explícitas entre componentes. | Implementado por ports/adapters. | Interface `Clock`. | Tipo sem garantia comportamental. |
 | Port | Contrato exigido ou oferecido pelo núcleo. | Implementado por Adapter. | `OrganizationRepository`. | Cliente Prisma no domínio. |
 | Adapter | Tradução entre um port e tecnologia/ambiente externo. | Depende do Port. | Repositório PostgreSQL. | Regra de negócio no controller. |
+| Ownership de infraestrutura | Responsabilidade exclusiva de uma ferramenta por reconciliar o ciclo de vida de um recurso. | Terraform administra recursos persistentes; jobs operacionais apenas os utilizam. | Terraform cria `servir-platform`; Compose conecta Liquibase à rede externa. | Terraform e Compose criando o mesmo container. |
 | Repository | Port de coleção para carregar e persistir Aggregates. | Trabalha por Aggregate Root. | `save(organization)`. | CRUD genérico de todas as tabelas. |
 | Context | Metadados imutáveis da execução, independentes do transporte. | Propagado por Application. | `ExecutionContext`. | Objeto HTTP dentro do domínio. |
 | Logger | Port para registrar fatos estruturados de melhor esforço. | Adapters enviam a destinos e podem enriquecer com o trace ativo; não substitui auditoria. | Um único `http.request.completed` com status e duração. | `console.log` em entidade ou um log por query instrumentada. |
