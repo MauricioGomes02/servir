@@ -64,6 +64,7 @@ flowchart TD
 | Specification e Policy | Diretrizes definidas | Tipos concretos são criados quando regras consumidoras demonstrarem reuso ou decisão contextual |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
 | Logger | Implementação inicial | Registro, contexto, imutabilidade, adapter JSON limitado para stdout e um único log HTTP final com duração monotônica estão testados; o adapter enriquece registros com trace/span ativo e exclui mensagem e stack de falhas operacionais; redaction configurável permanece planejada |
+| Schema e governança de logs operacionais | Planejado | Contrato interoperável alinhado ao OpenTelemetry Logs Data Model e às Semantic Conventions estáveis; timestamp do evento, severidade, nome, trace/span, resource, instrumentation scope e atributos tipados definidos; redaction e controle de volume testados; JSON Lines, OTLP e mappings para destinos específicos permanecem responsabilidades de adapters e infraestrutura |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, validação canônica dos IDs persistidos e adapter UUIDv7 com factory nominal e falhas técnicas codificadas estão testados |
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |

@@ -57,7 +57,11 @@ Consome metadados permitidos de Context e Message; adapters implementam o port. 
 
 ## Possíveis evoluções
 
-O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita e já correlaciona o registro ao span ativo. Permanecem planejados um exporter de logs OpenTelemetry, políticas configuráveis de redaction e tratamento estruturado compartilhado de exceções.
+O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita e já correlaciona o registro ao span ativo. Cada linha representa uma única ocorrência nessa codificação, mas JSON Lines não faz parte do contrato do port. Permanecem planejados um exporter OTLP, políticas configuráveis de redaction e tratamento estruturado compartilhado de exceções.
+
+Um incremento próprio alinhará o modelo interoperável ao OpenTelemetry Logs Data Model e às Semantic Conventions que estiverem estáveis, sem expor tipos do SDK no port. O contrato deverá distinguir timestamp do evento e de observação, severidade, nome do evento, trace/span, resource, instrumentation scope e atributos da ocorrência. Convenções ainda instáveis exigirão decisão e versão explícitas antes de adoção.
+
+JSON Lines e OTLP serão codificações de adapters. ECS, `@timestamp`, index templates, data streams, labels e mappings equivalentes pertencerão ao collector ou ao adapter de cada destino. Elasticsearch, Loki, Datadog, CloudWatch ou outro backend poderão ser substituídos sem alterar `Logger`, Application ou domínio. Retenção e políticas específicas de indexação permanecerão na infraestrutura escolhida.
 
 Falhas de adapters PostgreSQL são registradas na fronteira HTTP ou no worker que possui `ExecutionContext`, nunca simultaneamente no adapter que irá relançá-las. A instrumentação automática do driver produz spans técnicos separados com `db.query.text` parametrizado, sem valores dos parâmetros; logs preservam apenas o código estável e o contexto necessário, usando `traceId` para navegação até a query.
 
