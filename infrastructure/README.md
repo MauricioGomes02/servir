@@ -13,6 +13,8 @@ Esta pasta concentra recursos operacionais externos às aplicações. Terraform 
 
 Terraform e Compose nunca devem declarar ownership sobre o mesmo container, volume ou rede.
 
+O Kafka executa sem privilégios com UID/GID `1000:1000`. Antes do broker, o stack executa uma vez o container encerrado `servir-kafka-data-init`, sem rede e somente com a capability `CHOWN`, para preparar o volume persistente. Uma mudança nesse inicializador substitui apenas o container Kafka; o volume protegido e seus dados são preservados.
+
 ## Pré-requisitos
 
 - Docker Engine 20.10.4 ou superior acessível no mesmo ambiente em que Terraform será executado.

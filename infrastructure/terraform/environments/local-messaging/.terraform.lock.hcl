@@ -6,6 +6,7 @@ provider "registry.terraform.io/mongey/kafka" {
   constraints = "0.13.1"
   hashes = [
     "h1:1isC9QFONV5aKdG7fKKJow5cNA09bJvs5jH9mZ0I6RI=",
+    "h1:2dWpkp5Atju6B7j3Cka+6WN+GLLi9OqWspnGVjGwLzU=",
     "zh:1da682f3f3007de4e951441e2ebe24f19c2a9cfa071c7d8e9e1d5f6144edfe4a",
     "zh:25b66c96d1e922cb82af97bbc9893a0a10d259bcea0e18a3dcd60b02a2843dfa",
     "zh:3581fb20f8f5fe3b2d7935dbba1d1a891231b47ea27082de029621c1c6aea90c",

@@ -44,6 +44,11 @@ variable "kafka_image" {
   type        = string
 }
 
+variable "volume_initializer_image" {
+  description = "Pinned minimal image used to initialize persistent volume permissions."
+  type        = string
+}
+
 variable "kafka_external_port" {
   description = "Kafka listener port published on the host loopback interface."
   type        = number

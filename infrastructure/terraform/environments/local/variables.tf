@@ -58,6 +58,12 @@ variable "kafka_image" {
   default     = "apache/kafka:4.1.2"
 }
 
+variable "volume_initializer_image" {
+  description = "Pinned minimal image used to initialize persistent volume permissions."
+  type        = string
+  default     = "busybox:1.37.0"
+}
+
 variable "kafka_external_port" {
   description = "Kafka port published only on host loopback."
   type        = number

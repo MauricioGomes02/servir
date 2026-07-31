@@ -11,7 +11,8 @@ module "platform" {
   postgres_migrator_user     = var.postgres_migrator_user
   postgres_migrator_password = var.postgres_migrator_password
 
-  kafka_image         = var.kafka_image
-  kafka_external_port = var.kafka_external_port
-  kafka_cluster_id    = var.kafka_cluster_id
+  kafka_image              = var.kafka_image
+  volume_initializer_image = var.volume_initializer_image
+  kafka_external_port      = var.kafka_external_port
+  kafka_cluster_id         = var.kafka_cluster_id
 }

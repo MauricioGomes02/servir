@@ -65,6 +65,11 @@ resource "docker_image" "kafka" {
   keep_locally = true
 }
 
+resource "docker_image" "volume_initializer" {
+  name         = var.volume_initializer_image
+  keep_locally = true
+}
+
 resource "docker_container" "postgres" {
   name           = "servir-postgres"
   hostname       = "postgres"
@@ -111,6 +116,50 @@ resource "docker_container" "postgres" {
   labels {
     label = "com.servir.owner"
     value = "terraform"
+  }
+}
+
+resource "docker_container" "kafka_data_permissions" {
+  name         = "servir-kafka-data-init"
+  image        = docker_image.volume_initializer.image_id
+  command      = ["sh", "-c", "chown -R 1000:1000 /data"]
+  user         = "0:0"
+  network_mode = "none"
+  must_run     = false
+  attach       = true
+  logs         = true
+  read_only    = true
+
+  capabilities {
+    add  = ["CHOWN"]
+    drop = ["ALL"]
+  }
+
+  volumes {
+    volume_name    = docker_volume.kafka_data.name
+    container_path = "/data"
+  }
+
+  labels {
+    label = "com.servir.environment"
+    value = "local"
+  }
+
+  labels {
+    label = "com.servir.owner"
+    value = "terraform"
+  }
+
+  labels {
+    label = "com.servir.role"
+    value = "volume-initializer"
+  }
+
+  lifecycle {
+    postcondition {
+      condition     = self.exit_code == 0
+      error_message = "Kafka data volume permission initialization must finish successfully."
+    }
   }
 }
 
@@ -174,5 +223,9 @@ resource "docker_container" "kafka" {
   labels {
     label = "com.servir.owner"
     value = "terraform"
+  }
+
+  lifecycle {
+    replace_triggered_by = [docker_container.kafka_data_permissions.id]
   }
 }

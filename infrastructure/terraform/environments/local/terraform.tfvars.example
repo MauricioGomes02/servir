@@ -8,5 +8,6 @@ postgres_database          = "servir"
 postgres_migrator_user     = "servir_migrator"
 postgres_migrator_password = "servir_migrator_local"
 
-kafka_external_port = 29092
-kafka_cluster_id    = "MkU3OEVBNTcwNTJENDM2Qk"
+kafka_external_port      = 29092
+kafka_cluster_id         = "MkU3OEVBNTcwNTJENDM2Qk"
+volume_initializer_image = "busybox:1.37.0"
