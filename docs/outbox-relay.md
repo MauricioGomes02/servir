@@ -66,6 +66,12 @@ Falha de confirmação não é tratada como falha de publicação. Ela é propag
 
 Os adapters em memória especificam posse exclusiva durante a lease, recuperação após expiração, incremento de tentativas e rejeição de transições feitas por outro worker. Eles não substituem PostgreSQL ou Kafka.
 
+## Publicação Kafka
+
+`KafkaIntegrationEventPublisher` implementa o port sem fazer KafkaJS atravessar a fronteira da Application. Organizations publica em `servir.organizations.events`, usa `partitionKey` como chave e envia um CloudEvent 1.0 estruturado. O `messageId` é o `id` público para deduplicação; o Domain Event ID não integra automaticamente o contrato. Acknowledgement exige todos os replicas, não há timestamp funcional no record e a infraestrutura deve criar o tópico previamente.
+
+O adapter classifica falhas por código estável e pela propriedade estruturada de retentabilidade do cliente. Erros de configuração e serialização são terminais; falhas desconhecidas são retentáveis. Nenhum comportamento consulta mensagens do KafkaJS.
+
 ## Storage PostgreSQL
 
 `PostgresOutboxMessageStore` implementa o mesmo port com statements atômicos. O claim usa uma CTE materializada para selecionar mensagens disponíveis em ordem, aplica `FOR UPDATE SKIP LOCKED` e atualiza lease e tentativa antes de retornar as linhas. A transação implícita termina junto com o statement, antes de qualquer publicação no broker.
@@ -81,7 +87,7 @@ As linhas retornadas são validadas e convertidas para o contrato serializável 
 | `event_version` | Versão positiva do contrato de integração |
 | `aggregate_id` | Identidade opcional usada para correlação e evolução de ordenação |
 | `partition_key` | Chave opcional de partição, sem espaços em branco |
-| `metadata` | Objeto JSON para metadados permitidos; não é extensão arbitrária do payload |
+| `metadata` | Envelope interno que separa metadados funcionais do Integration Event e W3C Trace Context; não é extensão arbitrária do payload |
 | `persisted_at` | Instante em que a mensagem entrou na outbox |
 | `available_at` | Primeiro instante em que uma tentativa pode começar |
 | `attempt_count` | Quantidade não negativa de claims realizados |
@@ -104,10 +110,9 @@ O publisher classifica cada falha por código estável e informa explicitamente 
 
 ## Observabilidade
 
-Cada ciclo, claim e publicação deve produzir spans apropriados. Logs estruturados incluem códigos, `messageId`, tentativa, tópico e contexto de correlação quando necessários; não incluem payload, credenciais, stack trace ou mensagem bruta do driver. Métricas mínimas futuras incluem backlog disponível, idade da mensagem mais antiga, publicações, retries, falhas terminais e duração de publicação.
+Cada ciclo, claim e publicação deve produzir spans apropriados. A API persiste `traceparent` e `tracestate` no limite da outbox; o publisher restaura o pai, cria o span `kafka.publish` quando houver SDK ativo e injeta o contexto no record. Baggage não é propagado. Logs estruturados incluem códigos, `messageId`, tentativa, tópico e contexto de correlação quando necessários; não incluem payload, credenciais, `tracestate`, stack trace ou mensagem bruta do driver. Métricas mínimas futuras incluem backlog disponível, idade da mensagem mais antiga, publicações, retries, falhas terminais e duração de publicação.
 
 ## Evoluções planejadas
 
-- Adicionar o publisher Kafka e propagação OpenTelemetry.
 - Compor o processo contínuo com configuração e encerramento seguro.
 - Definir operação explícita de reprocessamento e retenção de mensagens publicadas.

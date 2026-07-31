@@ -6,6 +6,7 @@ export type { LeaseIdGenerator } from './lease-id-generator';
 export type {
   ClaimedOutboxMessage,
   ClaimOutboxMessages,
+  DistributedTraceContext,
   OutboxMessageStore,
 } from './outbox-message-store';
 export type { RetryDecision, RetryPolicy } from './retry-policy';

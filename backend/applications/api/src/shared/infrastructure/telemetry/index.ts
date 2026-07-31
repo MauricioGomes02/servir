@@ -13,3 +13,5 @@ export type {
 export {
   traceUseCase,
 } from './trace-use-case';
+
+export { captureActiveTraceContext } from './active-trace-context';

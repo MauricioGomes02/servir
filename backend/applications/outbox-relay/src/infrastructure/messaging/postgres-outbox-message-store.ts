@@ -80,6 +80,30 @@ function isOptionalString(value: unknown): value is string | null {
   return value === null || typeof value === 'string';
 }
 
+function readPersistedMetadata(metadata: JsonObject): Readonly<{
+  event: JsonObject;
+  traceContext?: Readonly<{ traceparent: string; tracestate?: string }>;
+}> {
+  const event = metadata.event;
+  const trace = metadata.trace;
+
+  if (!isJsonObject(event) || !isJsonObject(trace)) {
+    return Object.freeze({ event: metadata });
+  }
+
+  const traceparent = trace.traceparent;
+  const tracestate = trace.tracestate;
+  const traceContext = typeof traceparent === 'string'
+    && (tracestate === undefined || typeof tracestate === 'string')
+    ? Object.freeze({ traceparent, tracestate })
+    : undefined;
+
+  return Object.freeze({
+    event: freezeJsonValue(event) as JsonObject,
+    traceContext,
+  });
+}
+
 function isValidClaimedRow(row: ClaimedOutboxRow): boolean {
   return [
     typeof row.message_id === 'string',
@@ -124,6 +148,7 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
     );
   }
 
+  const persistedMetadata = readPersistedMetadata(row.metadata as JsonObject);
   const event: IntegrationEvent = Object.freeze({
     name: row.event_name,
     version: row.event_version,
@@ -131,7 +156,7 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
     aggregateId: row.aggregate_id ?? undefined,
     partitionKey: row.partition_key ?? undefined,
     payload: freezeJsonValue(row.payload as JsonObject) as JsonObject,
-    metadata: freezeJsonValue(row.metadata as JsonObject) as JsonObject,
+    metadata: persistedMetadata.event,
   });
 
   return Object.freeze({
@@ -139,6 +164,7 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
     eventId: row.event_id,
     correlationId: row.correlation_id,
     causationId: row.causation_id ?? undefined,
+    traceContext: persistedMetadata.traceContext,
     event,
     attemptCount: row.attempt_count,
     leaseId: row.lease_id,

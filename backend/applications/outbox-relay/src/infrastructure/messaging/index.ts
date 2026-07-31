@@ -12,6 +12,23 @@ export {
   PostgresOutboxMessageStore,
 } from './postgres-outbox-message-store';
 export {
+  KafkaIntegrationEventPublisher,
+  KafkaPublicationErrorCodes,
+} from './kafka-integration-event-publisher';
+export type {
+  KafkaIntegrationEventPublisherOptions,
+  KafkaProducer,
+} from './kafka-integration-event-publisher';
+export {
+  mapToStructuredCloudEvent,
+} from './cloud-event';
+export type {
+  CloudEventMapping,
+  StructuredCloudEvent,
+} from './cloud-event';
+export { createKafkaJsProducer } from './kafka-js-producer';
+export type { KafkaJsProducerOptions } from './kafka-js-producer';
+export {
   PostgresOutboxMessageStoreError,
   PostgresOutboxMessageStoreErrorCodes,
 } from './postgres-outbox-message-store-error';

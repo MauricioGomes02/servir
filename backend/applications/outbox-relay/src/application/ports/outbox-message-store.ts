@@ -1,5 +1,10 @@
 import type { IntegrationEvent } from '@servir/integration-messaging';
 
+export interface DistributedTraceContext {
+  readonly traceparent: string;
+  readonly tracestate?: string;
+}
+
 export interface ClaimedOutboxMessage<
   TEvent extends IntegrationEvent = IntegrationEvent,
 > {
@@ -7,6 +12,7 @@ export interface ClaimedOutboxMessage<
   readonly eventId: string;
   readonly correlationId: string;
   readonly causationId?: string;
+  readonly traceContext?: DistributedTraceContext;
   readonly event: TEvent;
   readonly attemptCount: number;
   readonly leaseId: string;

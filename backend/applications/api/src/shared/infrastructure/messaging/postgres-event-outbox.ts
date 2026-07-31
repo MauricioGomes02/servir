@@ -7,10 +7,18 @@ import type { PoolClient } from 'pg';
 
 import { PostgresEventOutboxError } from './postgres-event-outbox-error';
 
+export interface DistributedTraceContext {
+  readonly traceparent: string;
+  readonly tracestate?: string;
+}
+
+export type ActiveTraceContextProvider = () => DistributedTraceContext | undefined;
+
 export class PostgresEventOutbox implements EventOutbox {
   constructor(
     private readonly client: PoolClient,
     private readonly mapIntegrationEvent: IntegrationEventMapper,
+    private readonly activeTraceContext: ActiveTraceContextProvider = () => undefined,
   ) {}
 
   async add(envelopes: ReadonlyArray<EventEnvelope>): Promise<void> {
@@ -43,7 +51,10 @@ export class PostgresEventOutbox implements EventOutbox {
             integrationEvent.version,
             integrationEvent.aggregateId ?? null,
             integrationEvent.partitionKey ?? null,
-            integrationEvent.metadata,
+            {
+              event: integrationEvent.metadata,
+              trace: this.activeTraceContext() ?? {},
+            },
           ],
         );
       }

@@ -27,6 +27,11 @@ export {
   PostgresEventOutbox,
 } from './postgres-event-outbox';
 
+export type {
+  ActiveTraceContextProvider,
+  DistributedTraceContext,
+} from './postgres-event-outbox';
+
 export {
   PostgresEventOutboxError,
   PostgresEventOutboxErrorCode,

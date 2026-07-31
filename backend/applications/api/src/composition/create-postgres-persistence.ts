@@ -10,6 +10,7 @@ import {
   PostgresEventOutbox,
   UnmappedDomainEventError,
 } from '@/shared/infrastructure/messaging';
+import { captureActiveTraceContext } from '@/shared/infrastructure/telemetry';
 import { PostgresUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { Pool } from 'pg';
 
@@ -34,7 +35,11 @@ export function createPostgresPersistence(
   return {
     unitOfWork: new PostgresUnitOfWork(pool, (client) => ({
       organizations: new PostgresOrganizationRepository(client),
-      outbox: new PostgresEventOutbox(client, mapIntegrationEvent),
+      outbox: new PostgresEventOutbox(
+        client,
+        mapIntegrationEvent,
+        captureActiveTraceContext,
+      ),
     })),
     async close(): Promise<void> {
       await pool.end();

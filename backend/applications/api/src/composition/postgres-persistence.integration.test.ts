@@ -122,7 +122,10 @@ describe('PostgreSQL organization persistence', () => {
     assert.equal(committed.rows[0]?.event_version, 1);
     assert.equal(committed.rows[0]?.aggregate_id, ORGANIZATION_ID);
     assert.equal(committed.rows[0]?.partition_key, ORGANIZATION_ID);
-    assert.deepEqual(committed.rows[0]?.metadata, {});
+    assert.deepEqual(committed.rows[0]?.metadata, {
+      event: {},
+      trace: {},
+    });
     assert.deepEqual(committed.rows[0]?.payload, {
       organizationId: ORGANIZATION_ID,
       name: 'Committed organization',

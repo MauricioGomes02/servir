@@ -27,5 +27,6 @@
 | [023](023-application-workspaces.md) | Aplicações independentes em npm workspaces | Aceita |
 | [024](024-kafka-durable-outbox-relay.md) | Relay durável de outbox com Kafka | Aceita |
 | [025](025-http-request-logging-and-use-case-tracing.md) | Logging de requisição e tracing de casos de uso | Aceita |
+| [026](026-kafka-cloudevents-publication.md) | Publicação Kafka com CloudEvents | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

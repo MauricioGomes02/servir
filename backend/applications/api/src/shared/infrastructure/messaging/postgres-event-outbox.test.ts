@@ -90,6 +90,10 @@ describe('PostgresEventOutbox', () => {
     const outbox = new PostgresEventOutbox(
       fixture.client,
       integrationEventMapper,
+      () => ({
+        traceparent: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
+        tracestate: 'vendor=value',
+      }),
     );
 
     await outbox.add([envelope()]);
@@ -102,7 +106,13 @@ describe('PostgresEventOutbox', () => {
       1,
       '0198f334-6dc5-7c20-9af1-91d7e599f002',
       '0198f334-6dc5-7c20-9af1-91d7e599f002',
-      {},
+      {
+        event: {},
+        trace: {
+          traceparent: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
+          tracestate: 'vendor=value',
+        },
+      },
     ]);
     assert.equal(
       JSON.stringify(fixture.queries[0]?.values).includes('not-public'),
