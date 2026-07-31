@@ -49,12 +49,14 @@ function requestId(value: string): RequestId {
 
 function application(generatedCorrelationId = 'correlation-generated') {
   const logger = new InMemoryLogger();
+  const monotonicInstants = [100, 125];
   const app = createFastifyApplication({
     correlationIdGenerator: new SequenceIdGenerator([
       correlationId(generatedCorrelationId),
     ]),
     logger,
     messageTranslator: new InMemoryMessageTranslator(catalog),
+    monotonicNow: () => monotonicInstants.shift() ?? 125,
     requestIdGenerator: new SequenceIdGenerator([
       requestId(REQUEST_ID),
     ]),
@@ -65,7 +67,7 @@ function application(generatedCorrelationId = 'correlation-generated') {
 
 describe('createFastifyApplication', () => {
   it('creates context from the request and exposes effective IDs', async () => {
-    const { app } = application();
+    const { app, logger } = application();
     app.get('/context', async (request) => ({
       correlationId: request.executionContext?.correlationId,
       requestId: request.executionContext?.requestId,
@@ -89,6 +91,20 @@ describe('createFastifyApplication', () => {
       correlationId: 'correlation-received',
       requestId: REQUEST_ID,
       locale: 'en-US',
+    });
+    assert.deepEqual(logger.records[0], {
+      level: 'info',
+      eventName: 'http.request.completed',
+      context: {
+        correlationId: 'correlation-received',
+        requestId: REQUEST_ID,
+      },
+      attributes: {
+        'http.request.method': 'GET',
+        'http.route': '/context',
+        'http.response.status_code': 200,
+        'duration.ms': 25,
+      },
     });
   });
 
@@ -163,13 +179,7 @@ describe('createFastifyApplication', () => {
     assert.equal(logger.records.length, 1);
     const [record] = logger.records;
     assert.ok(record);
-    assert.deepEqual({
-      ...record,
-      attributes: {
-        ...record.attributes,
-        'exception.stacktrace': undefined,
-      },
-    }, {
+    assert.deepEqual(record, {
       level: 'error',
       eventName: 'http.request.failed',
       context: {
@@ -180,18 +190,14 @@ describe('createFastifyApplication', () => {
         'http.request.method': 'GET',
         'http.route': '/failure',
         'http.response.status_code': 500,
+        'duration.ms': 25,
         'error.type': 'Error',
-        'exception.message': 'secret technical detail',
-        'exception.stacktrace': undefined,
       },
     });
-    assert.equal(
-      typeof record.attributes['exception.stacktrace'],
-      'string',
-    );
+    assert.equal(JSON.stringify(record).includes('secret technical detail'), false);
   });
 
-  it('does not automatically log an expected client failure', async () => {
+  it('logs an expected client response as a completed request', async () => {
     const { app, logger } = application();
     app.get('/invalid', async () => {
       throw Object.assign(new Error('invalid input'), { statusCode: 400 });
@@ -211,7 +217,21 @@ describe('createFastifyApplication', () => {
       instance: `urn:servir:request:${REQUEST_ID}`,
       correlationId: 'correlation-generated',
     });
-    assert.equal(logger.records.length, 0);
+    assert.equal(logger.records.length, 1);
+    assert.deepEqual(logger.records[0], {
+      level: 'info',
+      eventName: 'http.request.completed',
+      context: {
+        correlationId: 'correlation-generated',
+        requestId: REQUEST_ID,
+      },
+      attributes: {
+        'http.request.method': 'GET',
+        'http.route': '/invalid',
+        'http.response.status_code': 400,
+        'duration.ms': 25,
+      },
+    });
   });
 
   it('logs a stable persistence code without exposing its cause', async () => {
@@ -267,6 +287,11 @@ describe('createFastifyApplication', () => {
       instance: `urn:servir:request:${REQUEST_ID}`,
       correlationId: 'correlation-generated',
     });
-    assert.equal(logger.records.length, 0);
+    assert.equal(logger.records.length, 1);
+    assert.equal(logger.records[0]?.eventName, 'http.request.completed');
+    assert.equal(
+      logger.records[0]?.attributes['http.response.status_code'],
+      400,
+    );
   });
 });

@@ -9,3 +9,7 @@ export type {
   StartOpenTelemetryOptions,
   TelemetryLifecycle,
 } from './open-telemetry';
+
+export {
+  traceUseCase,
+} from './trace-use-case';

@@ -5,6 +5,7 @@ import {
   HttpProblemMessageCodes,
 } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator } from '@/shared/presentation';
+import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import type { FastifyInstance } from 'fastify';
 
 import { CreateOrganizationRouteContextError } from './create-organization-route-context-error';
@@ -38,9 +39,12 @@ export function registerCreateOrganizationRoute(
       throw new CreateOrganizationRouteContextError();
     }
 
-    const result = await dependencies.handler.handle(
-      { name: organizationName(request.body) },
-      context,
+    const result = await traceUseCase(
+      'CreateOrganization',
+      () => dependencies.handler.handle(
+        { name: organizationName(request.body) },
+        context,
+      ),
     );
     const view = dependencies.presenter.present(
       result,

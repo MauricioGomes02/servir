@@ -27,7 +27,7 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Adapter | Tradução entre um port e tecnologia/ambiente externo. | Depende do Port. | Repositório PostgreSQL. | Regra de negócio no controller. |
 | Repository | Port de coleção para carregar e persistir Aggregates. | Trabalha por Aggregate Root. | `save(organization)`. | CRUD genérico de todas as tabelas. |
 | Context | Metadados imutáveis da execução, independentes do transporte. | Propagado por Application. | `ExecutionContext`. | Objeto HTTP dentro do domínio. |
-| Logger | Port para registrar fatos estruturados. | Adaptadores enviam a destinos. | `logger.info(fact)`. | `console.log` em entidade. |
+| Logger | Port para registrar fatos estruturados de melhor esforço. | Adapters enviam a destinos e podem enriquecer com o trace ativo; não substitui auditoria. | Um único `http.request.completed` com status e duração. | `console.log` em entidade ou um log por query instrumentada. |
 | Locale | Identificador canônico do idioma usado na apresentação, distinto de timezone. | Resolvido pelo adapter de entrada e consumido pelo Presenter. | `pt-BR`. | Usar `America/Sao_Paulo` como idioma. |
 | Timezone | Identificador IANA que representa as regras civis de uma localidade, distinto de locale e offset fixo. | Converte `Instant` para apresentação e compõe agendamentos civis quando o caso de uso exigir. | `America/Rio_Branco`. | Persistir `-05:00` como regra permanente da localidade. |
 | Message Translator | Port da apresentação que traduz um código estável com parâmetros para um locale suportado. | Implementado por adapter; usa catálogos de apresentação. | Traduzir `organization.name.empty`. | Mensagem localizada dentro do erro de domínio. |

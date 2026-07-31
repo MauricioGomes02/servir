@@ -30,7 +30,6 @@ import {
 } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import {
-  EventLoggingHandler,
   JsonStdoutLogger,
 } from '@/shared/infrastructure/logging';
 import {
@@ -43,6 +42,7 @@ import type { FastifyInstance } from 'fastify';
 
 export interface CreateApplicationOptions {
   readonly logger?: Logger;
+  readonly monotonicNow?: () => number;
   readonly organizationUnitOfWork?: UnitOfWork<OrganizationWriteScope>;
   readonly uuidSource?: UuidV7Source;
 }
@@ -103,16 +103,13 @@ export function createApplication(
     ),
     logger,
     messageTranslator: translator,
+    monotonicNow: options.monotonicNow,
     requestIdGenerator: new UuidV7Generator(
       parseRequestId,
       options.uuidSource,
     ),
   });
 
-  eventBus.subscribe(
-    'organization.created',
-    new EventLoggingHandler(logger),
-  );
   if (eventRelay !== undefined) {
     app.addHook('onReady', async () => {
       eventRelay?.start();

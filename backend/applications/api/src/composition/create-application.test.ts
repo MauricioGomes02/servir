@@ -17,8 +17,10 @@ describe('createApplication', () => {
   it('composes the first executable vertical slice', async () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
+    const monotonicInstants = [100, 142];
     const app = createApplication({
       logger,
+      monotonicNow: () => monotonicInstants.shift() ?? 142,
       uuidSource: () => {
         const id = ids.shift();
 
@@ -49,11 +51,16 @@ describe('createApplication', () => {
     assert.equal(response.headers.location, `/organizations/${UUIDS[2]}`);
     assert.equal(ids.length, 0);
     assert.equal(logger.records.length, 1);
-    assert.equal(logger.records[0]?.eventName, 'organization.created');
+    assert.equal(logger.records[0]?.eventName, 'http.request.completed');
     assert.deepEqual(logger.records[0]?.context, {
       correlationId: UUIDS[1],
-      messageId: UUIDS[4],
-      causationId: undefined,
+      requestId: UUIDS[0],
+    });
+    assert.deepEqual(logger.records[0]?.attributes, {
+      'http.request.method': 'POST',
+      'http.route': '/organizations',
+      'http.response.status_code': 201,
+      'duration.ms': 42,
     });
   });
 });

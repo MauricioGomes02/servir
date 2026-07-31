@@ -14,6 +14,14 @@ export {
   FastifyRequestContextError,
 } from './fastify-request-context-error';
 
+export {
+  FastifyRequestLogger,
+} from './fastify-request-logger';
+
+export type {
+  MonotonicNow,
+} from './fastify-request-logger';
+
 export type {
   CreateFastifyApplicationDependencies,
 } from './create-fastify-application';

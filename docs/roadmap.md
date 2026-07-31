@@ -63,7 +63,7 @@ flowchart TD
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
 | Specification e Policy | Diretrizes definidas | Tipos concretos são criados quando regras consumidoras demonstrarem reuso ou decisão contextual |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
-| Logger | Implementação inicial | Registro, contexto, imutabilidade, adapter de teste e adapter JSON limitado para stdout definidos; o adapter enriquece registros com o trace/span ativo sem acoplar o port ao OpenTelemetry; redaction configurável permanece planejada |
+| Logger | Implementação inicial | Registro, contexto, imutabilidade, adapter JSON limitado para stdout e um único log HTTP final com duração monotônica estão testados; o adapter enriquece registros com trace/span ativo e exclui mensagem e stack de falhas operacionais; redaction configurável permanece planejada |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, validação canônica dos IDs persistidos e adapter UUIDv7 com factory nominal e falhas técnicas codificadas estão testados |
 | Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
@@ -73,7 +73,7 @@ flowchart TD
 | Aplicação de relay durável | Implementação inicial | Comportamento de lote, storage PostgreSQL e retry exponencial com jitter determinístico estão testados; Kafka, observabilidade, processo contínuo e encerramento seguro permanecem planejados |
 | Infraestrutura de banco e migrations | Implementação inicial | PostgreSQL local, changelog Liquibase externo às aplicações, schema inicial e estado operacional do relay estão definidos; execução idempotente deve ser validada após cada novo changeset; credenciais dedicadas de runtime e IaC permanecem planejadas |
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado, primeiro Presenter e títulos HTTP localizados estão definidos |
-| Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, negociação de locale, Problem Details RFC 9457, representação direta do recurso, rota `POST /organizations`, composição executável e tracing HTTP/Fastify/PostgreSQL com OpenTelemetry estão testados; spans manuais do relay permanecem planejados |
+| Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, Problem Details, representação direta do recurso, log final de requisição e span semântico de `CreateOrganization` estão testados; HTTP/Fastify/PostgreSQL permanecem instrumentados automaticamente e spans manuais do relay seguem planejados |
 | Apresentação temporal e datas civis | Planejado | API preserva `Instant` UTC; apresentação converte com locale e timezone IANA; agendamentos modelam data civil, horário civil e zona separadamente; precedência entre timezone da operação, usuário, organização e aplicação permanece por definir com o primeiro consumidor |
 
 ## Exemplos

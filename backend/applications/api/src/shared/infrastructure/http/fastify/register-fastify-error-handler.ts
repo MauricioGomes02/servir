@@ -1,16 +1,7 @@
-import {
-  parseCorrelationId,
-  parseRequestId,
-  type ExecutionContext,
-} from '@/shared/application/context';
-import {
-  createLogRecord,
-  LogLevels,
-  type LogAttributes,
-  type Logger,
-} from '@/shared/application/logging';
 import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
+
+import { FastifyRequestLogger } from './fastify-request-logger';
 
 import {
   createHttpProblemDetails,
@@ -20,10 +11,6 @@ import {
 
 interface HttpErrorLike {
   readonly statusCode?: number;
-}
-
-interface CodedErrorLike {
-  readonly code?: unknown;
 }
 
 function errorStatus(error: unknown): number {
@@ -46,68 +33,17 @@ function errorStatus(error: unknown): number {
   return 500;
 }
 
-function errorAttributes(error: unknown): LogAttributes {
-  if (!(error instanceof Error)) {
-    return {
-      'error.type': typeof error,
-    };
-  }
-
-  const attributes: Record<string, string> = {
-    'error.type': error.name,
-    'exception.message': error.message,
-  };
-  const code = (error as CodedErrorLike).code;
-
-  if (typeof code === 'string') {
-    attributes['error.code'] = code;
-  }
-
-  if (error.stack !== undefined) {
-    attributes['exception.stacktrace'] = error.stack;
-  }
-
-  return attributes;
-}
-
-function fallbackContext(requestId: string): ExecutionContext | undefined {
-  const correlationId = parseCorrelationId(requestId);
-  const parsedRequestId = parseRequestId(requestId);
-
-  if (!correlationId.success) {
-    return undefined;
-  }
-
-  return {
-    correlationId: correlationId.value,
-    requestId: parsedRequestId.success
-      ? parsedRequestId.value
-      : undefined,
-  };
-}
-
 export function registerFastifyErrorHandler(
   app: FastifyInstance,
-  logger: Logger,
+  requestLogger: FastifyRequestLogger,
   messageTranslator: MessageTranslator,
 ): void {
   app.setErrorHandler((error, request, reply) => {
     const statusCode = errorStatus(error);
-    const context = request.executionContext
-      ?? fallbackContext(request.id);
+    const context = requestLogger.context(request);
 
     if (statusCode >= 500) {
-      logger.log(createLogRecord({
-        level: LogLevels.Error,
-        eventName: 'http.request.failed',
-        context,
-        attributes: {
-          'http.request.method': request.method,
-          'http.route': request.routeOptions.url ?? 'unmatched',
-          'http.response.status_code': statusCode,
-          ...errorAttributes(error),
-        },
-      }));
+      requestLogger.markFailed(request, error);
     }
 
     const isInternalError = statusCode >= 500;

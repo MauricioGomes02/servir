@@ -12,11 +12,17 @@ import Fastify, {
 
 import { registerFastifyErrorHandler } from './register-fastify-error-handler';
 import { registerFastifyRequestContext } from './register-fastify-request-context';
+import { registerFastifyRequestLogging } from './register-fastify-request-logging';
+import {
+  FastifyRequestLogger,
+  type MonotonicNow,
+} from './fastify-request-logger';
 
 export interface CreateFastifyApplicationDependencies {
   readonly correlationIdGenerator: IdGenerator<CorrelationId>;
   readonly logger: Logger;
   readonly messageTranslator: MessageTranslator;
+  readonly monotonicNow?: MonotonicNow;
   readonly requestIdGenerator: IdGenerator<RequestId>;
 }
 
@@ -30,10 +36,15 @@ export function createFastifyApplication(
   });
 
   void app.register(accepts);
+  const requestLogger = new FastifyRequestLogger(
+    dependencies.logger,
+    dependencies.monotonicNow,
+  );
+  registerFastifyRequestLogging(app, requestLogger);
   registerFastifyRequestContext(app, dependencies.correlationIdGenerator);
   registerFastifyErrorHandler(
     app,
-    dependencies.logger,
+    requestLogger,
     dependencies.messageTranslator,
   );
 
