@@ -10,6 +10,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 - [Filosofia e princípios](docs/philosophy.md)
 - [Roadmap](docs/roadmap.md)
 - [Vocabulário ubíquo](docs/glossary.md)
+- [Descoberta do domínio](docs/domain/README.md)
 - [Primitivas arquiteturais](docs/primitives/README.md)
 - [Decisões arquiteturais](docs/decisions/README.md)
 - [Estratégia de testes](docs/testing-strategy.md)
@@ -42,6 +43,7 @@ Fundação arquitetural para aplicações orientadas a domínio, composição e 
 ├── infrastructure/     # Terraform local, rede, serviços e ferramentas operacionais
 └── docs/
     ├── decisions/      # Architecture Decision Records
+    ├── domain/         # Contextos, linguagem e modelos em descoberta
     ├── examples/       # Exemplos conceituais, não aplicações completas
     └── primitives/     # Contratos das primitivas arquiteturais
 ```

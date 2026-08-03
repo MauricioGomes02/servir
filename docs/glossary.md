@@ -63,6 +63,29 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | OrganizationCreated | Domain Event que registra a criação válida de uma Organization. | Registrado por Organization; publicado fora do domínio. | `organization.created`. | Envio de email dentro da factory. |
 | OrganizationCreatedIntegrationEventV1 | Primeira versão do contrato externo derivado de OrganizationCreated. | Mapper de saída seleciona payload, Aggregate e chave de partição antes da outbox PostgreSQL. | `organization.created`, versão `1`. | Publicar automaticamente toda propriedade do Domain Event. |
 
+## Escalas ministeriais — descoberta
+
+Os termos abaixo são candidatos confirmados pela descoberta, mas ainda não representam tipos implementados.
+
+| Termo | Definição e responsabilidade | Relações | Exemplo | Anti-exemplo |
+|---|---|---|---|---|
+| Member | Pessoa conhecida pela organização e apta a participar do domínio sem necessariamente possuir acesso autenticado. | Pode vincular-se futuramente a User e participar de ministérios. | Voluntário cadastrado pela liderança. | Credencial, conta ou usuário técnico. |
+| User | Identidade autenticável do contexto Identity & Access. | Pode ser associada a Member sem substituí-lo. | Pessoa com login ativo. | Todos os dados ministeriais da pessoa. |
+| Ministry | Aggregate que representa uma área ministerial e define suas funções. | Pertence a Organization; possui times e vínculos por referência. | Louvor, Mídia, Recepção. | Coleção dentro de Organization carregada em toda operação. |
+| MinistryRole | Função estável definida por um ministério. | É usada por qualificações, necessidades e atribuições. | Guitarra, vocal, câmera. | Papel técnico de autorização. |
+| MinistryMembership | Vínculo aprovado e histórico entre Member e Ministry. | Sustenta qualificações e participação em times. | João aprovado no Louvor. | Adicionar ID a uma lista sem decisão. |
+| MinistryRoleQualification | Aptidão ativa de um membro para exercer uma função ministerial. | Exigida por ScheduleAssignment. | João qualificado para guitarra e baixo. | Permissão HTTP para editar escala. |
+| MinistryTeam | Unidade operacional de um ministério que possui participantes e liderança. | É dono funcional de TeamSchedule. | Louvor A. | Hierarquia recursiva genérica sem regra. |
+| TeamMembership | Participação histórica de um vínculo ministerial em um time. | Exige MinistryMembership ativa. | João participa do Louvor A. | Qualificação automática para qualquer função. |
+| Activity | Evento planejado do negócio, distinto de Domain Event. | Possui ministérios participantes, recorrências e ocorrências. | Culto de domingo. | `SchedulePublished`. |
+| ActivityOccurrence | Execução concreta, manual ou gerada, de uma Activity. | É referenciada por planos e atribuições de vários times. | Culto de 09/08/2026 às 10h. | Regra “todo domingo”. |
+| AvailabilityDeclaration | Disponibilidade ou indisponibilidade vigente de um membro. | É resolvida para ActivityOccurrence; indisponibilidade prevalece. | Indisponível em 09/08 pela manhã. | Ausência de resposta interpretada como disponível. |
+| AvailabilityRequest | Coleta aberta por um time para um período e prazo explícitos. | Orienta respostas antes de TeamSchedule. | Disponibilidade de agosto a outubro. | Período global obrigatório para todos os ministérios. |
+| TeamStaffingTemplate | Versão das quantidades e funções normalmente necessárias a um time. | Inicializa planos sem fixar pessoas. | Dois vocais e uma guitarra. | Sobrescrever escalas antigas ao mudar o template. |
+| TeamSchedule | Aggregate que planeja um time durante um período explícito. | Contém planos por ocorrência e publicações versionadas. | Escala do Louvor A para agosto. | Escala única de todos os ministérios. |
+| StaffingRequirement | Necessidade de quantidade para uma função numa ocorrência. | É preenchida por ScheduleAssignments. | Quatro câmeras num culto especial. | Nome de pessoa previamente fixado. |
+| ScheduleAssignment | Atribuição histórica de um membro qualificado a uma função e ocorrência. | Pertence a TeamSchedule e pode ser substituída. | Maria no vocal do culto das 10h. | Editar memberId numa publicação antiga. |
+
 ## Regras de evolução
 
 - Antes de criar um termo, verificar se ele já existe com outro nome.
