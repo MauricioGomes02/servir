@@ -1,75 +1,131 @@
 # Servir
 
-Fundação arquitetural para aplicações orientadas a domínio, composição e contratos explícitos. O primeiro domínio consumidor será a gestão de escalas e equipes ministeriais, mas as primitivas devem permanecer reutilizáveis e independentes de framework.
+### Gestão ministerial orientada a domínio, eventos e decisões explícitas
 
-> Status: fundação com implementações iniciais. O primeiro corte vertical de caso de uso está liberado para validar os contratos; APIs e adapters tecnológicos entram somente conforme necessidades concretas.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-ES2022-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-persistência-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-eventos-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-observabilidade-425CC7?logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
 
-## Índice
+Servir é uma plataforma em construção para organizar membros, ministérios, times, atividades, disponibilidade e escalas de uma igreja local. O projeto explora como aplicar DDD e arquitetura orientada a eventos em um produto real, mantendo regras de negócio independentes de frameworks, bancos e brokers.
 
-- [Visão geral](docs/architecture.md)
-- [Filosofia e princípios](docs/philosophy.md)
-- [Roadmap](docs/roadmap.md)
-- [Vocabulário ubíquo](docs/glossary.md)
-- [Descoberta do domínio](docs/domain/README.md)
-- [Primitivas arquiteturais](docs/primitives/README.md)
-- [Decisões arquiteturais](docs/decisions/README.md)
-- [Estratégia de testes](docs/testing-strategy.md)
-- [Relay durável de outbox](docs/outbox-relay.md)
-- [Infraestrutura local e migrations](infrastructure/README.md)
-- [Exemplos conceituais](docs/examples/README.md)
-- [Como contribuir](#como-contribuir)
+Mais do que reunir tecnologias, o repositório registra as decisões, os limites e os trade-offs que sustentam cada incremento.
 
-## Princípios
+> **Estado atual:** a fundação arquitetural e o primeiro fluxo distribuído estão executáveis. Organizations possui um corte vertical completo; Membership está em evolução incremental. Consulte o [roadmap](docs/roadmap.md) para distinguir o que já existe do que está planejado.
 
-- Modelar antes de implementar.
-- Manter o domínio independente de frameworks e infraestrutura.
-- Preferir composição, imutabilidade, tipos fortes e contratos explícitos.
-- Tratar falhas esperadas como valores, não como exceções.
-- Comunicar fatos por mensagens sem acoplar produtores e consumidores.
-- Fazer cada abstração justificar uma responsabilidade indivisível.
+## Por que este projeto é diferente?
 
-## Estrutura do projeto
+- **Domínio independente:** Aggregates, Value Objects, Policies e Domain Events não conhecem Fastify, PostgreSQL, Kafka ou SDKs.
+- **CQRS pragmático:** Commands usam Repositories orientados a Aggregates; Queries terão Readers e Read Models específicos por consumidor.
+- **Decisões nomeadas:** Readers fornecem fatos e Policies puras concentram regras de negócio.
+- **Consistência explícita:** Aggregate e outbox são persistidos na mesma transação por uma Unit of Work.
+- **Eventos duráveis:** um relay independente publica Integration Events versionados no Kafka com entrega at-least-once.
+- **Contratos interoperáveis:** mensagens externas usam CloudEvents e propagação W3C Trace Context.
+- **Observabilidade desacoplada:** logs JSON estruturados e OpenTelemetry preservam correlação sem contaminar casos de uso.
+- **Infraestrutura governada:** Terraform administra recursos persistentes; Liquibase administra migrations fora do lifecycle das aplicações.
+- **Falhas seguras:** erros esperados possuem códigos estáveis, localização e representação HTTP por Problem Details.
+- **Testes como especificação:** caminhos, condições, fluxo de dados, partições e limites orientam casos comportamentais determinísticos.
 
-```text
-.
-├── .codex/skills/      # Guardrails para futuras contribuições assistidas
-├── backend/
-│   ├── applications/
-│   │   ├── api/        # API HTTP e seu composition root
-│   │   └── outbox-relay/ # Processamento independente da outbox
-│   └── packages/
-│       └── integration-messaging/ # Contrato serializável compartilhado
-├── frontend/           # Aplicações de apresentação web
-├── infrastructure/     # Terraform local, rede, serviços e ferramentas operacionais
-└── docs/
-    ├── decisions/      # Architecture Decision Records
-    ├── domain/         # Contextos, linguagem e modelos em descoberta
-    ├── examples/       # Exemplos conceituais, não aplicações completas
-    └── primitives/     # Contratos das primitivas arquiteturais
+## Arquitetura em uma visão
+
+```mermaid
+flowchart LR
+    Client[Cliente HTTP] --> API[Fastify API]
+    API --> APP[Application<br/>Commands · Queries]
+    APP --> DOMAIN[Domain<br/>Aggregates · Policies · Events]
+    APP --> UOW[Unit of Work]
+    UOW --> PG[(PostgreSQL<br/>estado + outbox)]
+    PG --> RELAY[Outbox Relay]
+    RELAY --> KAFKA[(Kafka)]
+    API -. traces .-> OTEL[OpenTelemetry]
+    RELAY -. traces .-> OTEL
 ```
 
-## Roadmap resumido
+As dependências de código apontam para o núcleo. Ports pertencem às necessidades da Application; adapters traduzem HTTP, persistência, mensageria, tempo, identidade e telemetria.
 
-1. Consolidar vocabulário e decisões.
-2. Especificar relações entre primitivas.
-3. Implementar e testar cada primitiva na ordem definida no [roadmap](docs/roadmap.md).
-4. Validar a fundação com cortes verticais e introduzir somente os ports e adapters exigidos por consumidores reais.
+O fluxo distribuído já implementado é:
 
-## Como contribuir
+```text
+POST /organizations
+  → CreateOrganization
+  → OrganizationCreated
+  → PostgreSQL: Organization + outbox no mesmo commit
+  → outbox-relay reivindica a mensagem sob lease
+  → CloudEvent organization.created.v1
+  → Kafka servir.organizations.events
+  → confirmação da outbox
+```
 
-1. Consulte o [glossário](docs/glossary.md) antes de nomear um conceito.
-2. Confirme a etapa ativa no [roadmap](docs/roadmap.md).
-3. Registre decisões com impacto duradouro em um ADR.
-4. Atualize documentação, diagramas e testes junto com o código.
-5. Não introduza dependências de transporte, persistência ou framework no domínio.
+Leia a [visão arquitetural](docs/architecture.md) e os [Architecture Decision Records](docs/decisions/README.md) para conhecer as razões por trás do desenho.
 
-## Estado atual
+## Domínio do produto
 
-Há implementações iniciais das primitivas centrais de domínio, mensagens, contexto, logging, localização de erros, tempo, identidade e Unit of Work. O primeiro corte vertical possui composição executável, rota HTTP, log estruturado final, tracing semântico do caso de uso e persistência atômica de Organization + outbox em memória ou PostgreSQL. No modo PostgreSQL, `OrganizationCreated` é traduzido explicitamente para um Integration Event v1 antes da persistência. A aplicação `outbox-relay` possui processamento de lote, storage PostgreSQL, retry com jitter, publisher Kafka/CloudEvents, W3C Trace Context e processo contínuo com encerramento seguro. O contrato serializável compartilhado limita-se a Integration Events e valores JSON. PostgreSQL local, Liquibase e o schema inicial são externos às aplicações. Repository, Specification e Policy permanecem orientados pelos primeiros consumidores concretos.
+O modelo parte da igreja local como fronteira operacional, sem impedir redes ou estruturas maiores no futuro.
 
-## Executar a API localmente
+```mermaid
+flowchart TD
+    O[Organization] --> M[Member]
+    O --> MIN[Ministry]
+    MIN --> TEAM[Ministry Team]
+    M --> MM[Ministry Membership]
+    MM --> TEAM
+    O --> A[Activity]
+    A --> AO[Activity Occurrence]
+    TEAM --> S[Team Schedule]
+    AO --> S
+    M --> AV[Availability]
+    AV --> S
+```
 
-O backend usa npm workspaces. A API usa o suporte nativo do Node para carregar `backend/applications/api/.env` quando o arquivo existir. Copie `backend/applications/api/.env.example` para personalizar o ambiente local; o `.env` não é versionado e não substitui as variáveis fornecidas pela plataforma em produção.
+O domínio considera atividades manuais ou recorrentes, várias execuções de uma mesma atividade, escalas independentes por time, qualificações por função, indisponibilidade prioritária e histórico preservado. Os conceitos ainda em descoberta estão claramente separados dos já implementados na [documentação do domínio](docs/domain/README.md).
+
+## Tecnologias e responsabilidades
+
+| Tecnologia | Responsabilidade no Servir |
+|---|---|
+| TypeScript e Node.js | Domínio tipado, aplicações e adapters |
+| Fastify | Adapter HTTP e ciclo de requisição |
+| PostgreSQL | Estado transacional e outbox durável |
+| Kafka | Transporte de Integration Events |
+| CloudEvents | Envelope público interoperável |
+| OpenTelemetry | Traces e propagação de contexto |
+| Liquibase | Evolução externa e versionada do schema |
+| Terraform | Ownership da infraestrutura local persistente |
+| Docker | Execução isolada dos serviços e ferramentas |
+
+## Estrutura do repositório
+
+```text
+servir/
+├── backend/
+│   ├── applications/
+│   │   ├── api/                  # API HTTP e composition root
+│   │   └── outbox-relay/         # Worker independente da outbox
+│   └── packages/
+│       └── integration-messaging/ # Contratos serializáveis compartilhados
+├── frontend/                     # Aplicações web futuras
+├── infrastructure/
+│   ├── database/liquibase/       # Migrations canônicas
+│   └── terraform/                # Plataforma local e tópicos Kafka
+├── docs/
+│   ├── decisions/                # ADRs
+│   ├── domain/                   # Descoberta e modelagem do negócio
+│   └── primitives/               # Contratos arquiteturais
+└── .codex/skills/                # Guardrails de contribuição assistida
+```
+
+## Comece em poucos minutos
+
+### Pré-requisitos
+
+- Node.js compatível com ES2022 e npm workspaces.
+- Docker, Terraform e Docker Compose somente para o fluxo completo.
+- No Windows, a infraestrutura foi preparada para execução pelo WSL com acesso ao Docker Engine.
+
+### API em memória
+
+Essa opção não exige PostgreSQL nem Kafka:
 
 ```bash
 cd backend
@@ -77,4 +133,81 @@ npm install
 npm run dev:api
 ```
 
-O exemplo mantém o OpenTelemetry desabilitado enquanto não houver um collector local. Para exportar traces, configure `OTEL_SDK_DISABLED=false` e mantenha `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` apontando para o endpoint OTLP/protobuf do collector.
+Em outro terminal:
+
+```bash
+curl -X POST http://localhost:3000/organizations \
+  -H "Content-Type: application/json" \
+  -H "Accept-Language: pt-BR" \
+  -d '{"name":"Igreja Batista Filadélfia de Canoas"}'
+```
+
+Uma criação válida responde com `201 Created` e a representação direta do recurso. Falhas esperadas usam `application/problem+json` conforme RFC 9457.
+
+### Testes e build
+
+```bash
+cd backend
+npm test
+npm run build
+```
+
+### Fluxo completo com PostgreSQL e Kafka
+
+O fluxo completo possui quatro etapas:
+
+1. Provisionar PostgreSQL, Kafka, rede e volumes com Terraform.
+2. Provisionar o tópico Kafka com o state de mensageria.
+3. Aplicar o schema com o job Liquibase.
+4. Executar API e outbox relay em processos separados.
+
+Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no guia de [infraestrutura local e migrations](infrastructure/README.md). Os arquivos `.env.example` da [API](backend/applications/api/.env.example) e do [relay](backend/applications/outbox-relay/.env.example) documentam a configuração de cada processo.
+
+## Estado atual
+
+### Implementado
+
+- Primitivas de domínio, Result, Notification, Instant e IDs nominais com UUIDv7.
+- Contexto de execução com correlação e request; locale é resolvido na apresentação e o trace é propagado pelos adapters.
+- Logging estruturado, instrumentação HTTP/PostgreSQL e tracing de casos de uso.
+- Representação REST de sucesso e Problem Details localizado para falhas.
+- `CreateOrganization` completo em memória e PostgreSQL.
+- Outbox transacional com Integration Event versionado.
+- Relay PostgreSQL independente, lease, retry exponencial com jitter e falha terminal.
+- Publicação Kafka em CloudEvents com entrega at-least-once.
+- Infraestrutura local com Terraform e migrations externas com Liquibase.
+- Núcleo de Membership, `RegisterMember`, Reader de fatos e `MemberRegistrationPolicy`.
+
+### Em evolução
+
+- Persistência e apresentação HTTP de Membership.
+- Ministérios, funções, participação, aprovação e times.
+- Atividades, recorrência e ocorrências com modelagem temporal explícita.
+- Disponibilidade e escalas versionadas por time.
+- Auditoria durável, notificações e consumidores idempotentes.
+- Collector e backend local para visualização de telemetria.
+- Frontend e documentação bilíngue.
+
+O [roadmap completo](docs/roadmap.md) preserva critérios de saída e evita apresentar intenção como funcionalidade pronta.
+
+## Documentação
+
+- [Arquitetura](docs/architecture.md)
+- [Filosofia e princípios](docs/philosophy.md)
+- [Vocabulário ubíquo](docs/glossary.md)
+- [Domínio ministerial](docs/domain/README.md)
+- [Primitivas arquiteturais](docs/primitives/README.md)
+- [Architecture Decision Records](docs/decisions/README.md)
+- [Estratégia de testes](docs/testing-strategy.md)
+- [Relay durável de outbox](docs/outbox-relay.md)
+- [Infraestrutura e migrations](infrastructure/README.md)
+- [Roadmap](docs/roadmap.md)
+
+> A documentação em português é atualmente a fonte canônica. Uma versão em inglês está registrada no roadmap.
+
+## Autor
+
+Desenvolvido por **Maurício Andrade Gomes**.
+
+- [LinkedIn](https://www.linkedin.com/in/mauricioandradegomes/)
+- [mauricioandradegomes@gmail.com](mailto:mauricioandradegomes@gmail.com)
