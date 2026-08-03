@@ -11,7 +11,6 @@ import {
 } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import {
-  failure,
   success,
   type Result,
 } from '@/shared/core/result';
@@ -19,16 +18,14 @@ import type { DomainEventId } from '@/shared/domain/domain-event';
 
 import {
   Member,
+  MemberRegistrationPolicy,
   type MemberId,
   type MemberNameError,
+  type MemberRegistrationPolicyError,
 } from '../../../domain';
-import {
-  MemberRegistrationErrorCodes,
-  type MemberRegistrationError,
-} from '../../errors';
 import type {
   MemberWriteScope,
-  OrganizationMembershipEligibility,
+  OrganizationRegistrationFactsReader,
 } from '../../ports';
 import type { RegisterMemberCommand } from './register-member-command';
 
@@ -43,14 +40,16 @@ export interface RegisterMemberDependencies {
   readonly memberIdGenerator: IdGenerator<MemberId>;
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
-  readonly organizationEligibility: OrganizationMembershipEligibility;
+  readonly organizationRegistrationFacts:
+    OrganizationRegistrationFactsReader;
+  readonly registrationPolicy: MemberRegistrationPolicy;
   readonly unitOfWork: UnitOfWork<MemberWriteScope>;
 }
 
 type RegisterMemberError =
   | OrganizationIdError
   | MemberNameError
-  | MemberRegistrationError;
+  | MemberRegistrationPolicyError;
 
 export class RegisterMemberHandler {
   constructor(
@@ -67,14 +66,14 @@ export class RegisterMemberHandler {
       return organizationId;
     }
 
-    const isEligible = await this.dependencies.organizationEligibility
-      .allowsMemberRegistration(organizationId.value);
+    const organization = await this.dependencies.organizationRegistrationFacts
+      .findById(organizationId.value);
+    const permission = this.dependencies.registrationPolicy.evaluate({
+      organization,
+    });
 
-    if (!isEligible) {
-      return failure({
-        code: MemberRegistrationErrorCodes.OrganizationNotEligible,
-        field: 'organizationId',
-      });
+    if (!permission.success) {
+      return permission;
     }
 
     const member = Member.register({

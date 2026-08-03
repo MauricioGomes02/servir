@@ -7,5 +7,5 @@ export type {
 } from './member-write-scope';
 
 export type {
-  OrganizationMembershipEligibility,
-} from './organization-membership-eligibility';
+  OrganizationRegistrationFactsReader,
+} from './readers';

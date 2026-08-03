@@ -28,12 +28,13 @@ import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import {
   MemberId,
   MemberNameErrorCodes,
+  MemberRegistrationPolicy,
+  MemberRegistrationPolicyErrorCodes,
 } from '../../../domain';
 import {
   InMemoryMemberRepository,
-  InMemoryOrganizationMembershipEligibility,
+  InMemoryOrganizationRegistrationFactsReader,
 } from '../../../infrastructure';
-import { MemberRegistrationErrorCodes } from '../../errors';
 import type { MemberWriteScope } from '../../ports';
 import { RegisterMemberHandler } from '.';
 
@@ -82,13 +83,13 @@ function fixtureIds() {
 }
 
 function createFixture(options?: {
-  readonly eligible?: boolean;
+  readonly organizationExists?: boolean;
   readonly outbox?: EventOutbox;
 }) {
   const ids = fixtureIds();
   const members = new InMemoryMemberRepository();
   const outbox = options?.outbox ?? new InMemoryEventOutbox();
-  const eligibleOrganizations = options?.eligible === false
+  const organizations = options?.organizationExists === false
     ? []
     : [ids.organizationId];
   const scope: MemberWriteScope = { members, outbox };
@@ -101,8 +102,11 @@ function createFixture(options?: {
     messageIdGenerator: new SequenceIdGenerator<MessageId>([
       ids.messageId,
     ]),
-    organizationEligibility:
-      new InMemoryOrganizationMembershipEligibility(eligibleOrganizations),
+    organizationRegistrationFacts:
+      new InMemoryOrganizationRegistrationFactsReader(
+        organizations,
+      ),
+    registrationPolicy: new MemberRegistrationPolicy(),
     unitOfWork: new DirectUnitOfWork(scope),
   });
   const context = createExecutionContext({
@@ -173,8 +177,8 @@ describe('RegisterMemberHandler', () => {
     assert.deepEqual(fixture.members.members, []);
   });
 
-  it('rejects registration when the organization is not eligible', async () => {
-    const fixture = createFixture({ eligible: false });
+  it('rejects registration when the organization does not exist', async () => {
+    const fixture = createFixture({ organizationExists: false });
 
     const result = await fixture.handler.handle({
       organizationId: fixture.ids.organizationId.toString(),
@@ -189,7 +193,7 @@ describe('RegisterMemberHandler', () => {
 
     assert.equal(
       result.error.code,
-      MemberRegistrationErrorCodes.OrganizationNotEligible,
+      MemberRegistrationPolicyErrorCodes.OrganizationNotFound,
     );
     assert.deepEqual(fixture.members.members, []);
   });

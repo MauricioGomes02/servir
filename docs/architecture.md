@@ -49,6 +49,8 @@ flowchart LR
 
 Essa separação não implica bancos ou serviços distintos. A topologia física evolui somente com uma necessidade concreta. A decisão completa está no [ADR 029](decisions/029-command-query-responsibility-separation.md).
 
+Quando um Command depende de estado externo ao Aggregate que será alterado, um Reader pode fornecer fatos mínimos para uma Policy pura e nomeada. O Reader não retorna a decisão pronta: adapters obtêm dados, Policies decidem negócio e handlers orquestram o fluxo.
+
 ## Exemplos
 
 - Um agregado registra `OrderCreated`; um publicador externo encaminha o evento.

@@ -62,7 +62,7 @@ flowchart TD
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e confirmação seletiva testados |
 | Entity | Implementação inicial | Identidade, igualdade e construção testadas |
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
-| Specification e Policy | Diretrizes definidas | Tipos concretos são criados quando regras consumidoras demonstrarem reuso ou decisão contextual |
+| Specification e Policy | Implementação inicial | `MemberRegistrationPolicy` é a primeira decisão contextual concreta: recebe fatos explícitos de Reader, não consulta infraestrutura e possui testes próprios |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
 | Logger | Implementação inicial | Registro, contexto, imutabilidade, adapter JSON limitado para stdout e um único log HTTP final com duração monotônica estão testados; o adapter enriquece registros com trace/span ativo e exclui mensagem e stack de falhas operacionais; redaction configurável permanece planejada |
 | Schema e governança de logs operacionais | Planejado | Contrato interoperável alinhado ao OpenTelemetry Logs Data Model e às Semantic Conventions estáveis; timestamp do evento, severidade, nome, trace/span, resource, instrumentation scope e atributos tipados definidos; redaction e controle de volume testados; JSON Lines, OTLP e mappings para destinos específicos permanecem responsabilidades de adapters e infraestrutura |
@@ -72,7 +72,7 @@ flowchart TD
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto, confirmação seletiva de eventos e adapter PostgreSQL com commit/rollback testados |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e outbox atomicamente; PostgreSQL traduz `OrganizationCreated` para contrato externo v1; relay publica o CloudEvent no Kafka e confirma a outbox; fluxo real validado manualmente, com teste de sistema automatizado ainda planejado |
 | Descoberta do domínio ministerial | Em andamento | Contextos de Organizations, Membership, Ministries, Activities e Scheduling mapeados; linguagem confirmada separada de hipóteses; primeiro incremento selecionado após fechar questões do Aggregate consumidor |
-| Member e vínculo organizacional | Application inicial | Núcleo Member separado de User e RegisterMember implementados; elegibilidade organizacional é consultada por port e Member + envelope usam a mesma Unit of Work; adapters PostgreSQL, integração e apresentação permanecem planejados |
+| Member e vínculo organizacional | Application inicial | Núcleo Member e RegisterMember implementados; Reader fornece fatos organizacionais, MemberRegistrationPolicy decide a regra e Member + envelope usam a mesma Unit of Work; adapters PostgreSQL, integração e apresentação permanecem planejados |
 | Ministry e funções | Planejado | Aggregate, funções internas, invariantes, eventos e caso de uso CreateMinistry estabilizados antes de times e escalas |
 | Participação e qualificação ministerial | Planejado | Solicitação, aprovação, estados históricos e qualificação por função testados |
 | Times ministeriais | Planejado | MinistryTeam, TeamMembership, liderança vigente e responsabilidade por escala definidos |

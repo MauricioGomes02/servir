@@ -18,7 +18,7 @@ Adotar separação pragmática de responsabilidades entre Commands e Queries den
 - Queries expressam pedidos de informação sem alterar estado observável e são tratadas por query handlers.
 - Cada Query define seu Read Model e depende de um Reader port específico para a projeção exigida pelo consumidor.
 - Readers podem consultar projeções, executar joins, filtros e paginação sem reconstituir Aggregates, mas não expõem ORM, SQL ou query builders à Application.
-- Ports de consulta usados como precondição de Commands, como `OrganizationMembershipEligibility`, permanecem contratos específicos da decisão e não são apresentados artificialmente como Queries de leitura.
+- Readers usados por Commands fornecem fatos explícitos para Policies nomeadas; não escondem a decisão dentro do adapter nem são apresentados artificialmente como Queries de leitura.
 
 A separação é lógica. Commands e Queries podem usar o mesmo PostgreSQL e o mesmo schema enquanto não houver necessidade concreta de modelos físicos, bancos ou processos independentes. Pastas, Readers e Read Models só são criados junto ao primeiro consumidor real.
 
