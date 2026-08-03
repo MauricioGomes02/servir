@@ -33,6 +33,7 @@ Organizations, Membership, Ministries, Activities e Scheduling são fronteiras c
 
 ## Documentos
 
+- [Membership](membership.md)
 - [Ministérios, atividades, disponibilidade e escalas](ministry-scheduling.md)
 
 ## Regras de descoberta

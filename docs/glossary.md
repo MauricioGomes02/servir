@@ -65,11 +65,14 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 
 ## Escalas ministeriais — descoberta
 
-Os termos abaixo são candidatos confirmados pela descoberta, mas ainda não representam tipos implementados.
+Os termos abaixo foram confirmados pela descoberta. `Member` possui núcleo de domínio inicial implementado; os demais ainda são candidatos até seu primeiro caso de uso.
 
 | Termo | Definição e responsabilidade | Relações | Exemplo | Anti-exemplo |
 |---|---|---|---|---|
-| Member | Pessoa conhecida pela organização e apta a participar do domínio sem necessariamente possuir acesso autenticado. | Pode vincular-se futuramente a User e participar de ministérios. | Voluntário cadastrado pela liderança. | Credencial, conta ou usuário técnico. |
+| Member | Aggregate Root de uma pessoa conhecida por uma organização, sem exigir acesso autenticado; nasce ativa após registro válido. | Identificado por MemberId, pertence a OrganizationId e pode vincular-se futuramente a User e ministérios. | Voluntário cadastrado pela liderança. | Credencial, conta ou usuário técnico. |
+| MemberId | UUID canônico e nominal que identifica um Member dentro de seu ciclo. | Novas identidades usam UUIDv7; não substitui UserId. | `0198f334-6dc5-7c20-9af1-91d7e599d7b1`. | Nome ou e-mail usado como identidade. |
+| MemberName | Nome obrigatório, normalizado e limitado a 120 caracteres. | Compõe Member e MemberRegistered. | `Maria da Silva`. | Identidade global ou credencial. |
+| MemberRegistered | Domain Event que registra a criação válida de um Member ativo numa Organization. | É registrado por Member; ainda não possui Integration Event. | `member.registered`. | Enviar convite dentro da factory. |
 | User | Identidade autenticável do contexto Identity & Access. | Pode ser associada a Member sem substituí-lo. | Pessoa com login ativo. | Todos os dados ministeriais da pessoa. |
 | Ministry | Aggregate que representa uma área ministerial e define suas funções. | Pertence a Organization; possui times e vínculos por referência. | Louvor, Mídia, Recepção. | Coleção dentro de Organization carregada em toda operação. |
 | MinistryRole | Função estável definida por um ministério. | É usada por qualificações, necessidades e atribuições. | Guitarra, vocal, câmera. | Papel técnico de autorização. |
