@@ -1,6 +1,6 @@
 export type {
   OrganizationRepository,
-} from './organization-repository';
+} from './repositories';
 
 export type {
   OrganizationWriteScope,

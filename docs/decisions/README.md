@@ -30,5 +30,6 @@
 | [026](026-kafka-cloudevents-publication.md) | Publicação Kafka com CloudEvents | Aceita |
 | [027](027-local-infrastructure-terraform-ownership.md) | Ownership da infraestrutura local por Terraform | Aceita |
 | [028](028-kafka-topic-terraform-ownership.md) | Ownership dos tópicos Kafka por Terraform | Aceita |
+| [029](029-command-query-responsibility-separation.md) | Separação de responsabilidades entre Commands e Queries | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

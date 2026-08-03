@@ -41,7 +41,8 @@ flowchart TD
     UC -. define quando necessário .-> S[Specifications]
     S -. pode compor .-> P[Policies]
     UC -. define quando necessário .-> P
-    UC -. define por consumidor .-> RC[Repository Ports específicos]
+    UC -. Commands definem .-> RC[Repository Ports específicos]
+    UC -. Queries definem .-> RP[Readers e Read Models específicos]
     UC --> PL[Apresentação e localização de erros]
     PL --> HTTP[Adapter HTTP e Composition Root]
     PL --> TP[Apresentação temporal e datas civis]
@@ -67,7 +68,7 @@ flowchart TD
 | Schema e governança de logs operacionais | Planejado | Contrato interoperável alinhado ao OpenTelemetry Logs Data Model e às Semantic Conventions estáveis; timestamp do evento, severidade, nome, trace/span, resource, instrumentation scope e atributos tipados definidos; redaction e controle de volume testados; JSON Lines, OTLP e mappings para destinos específicos permanecem responsabilidades de adapters e infraestrutura |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, validação canônica dos IDs persistidos e adapter UUIDv7 com factory nominal e falhas técnicas codificadas estão testados |
-| Repository | Diretriz definida | Ports específicos são criados com o primeiro caso de uso, sem contrato genérico compartilhado |
+| Commands, Queries e Repository | Diretriz definida | Commands usam Repositories orientados a Aggregates; Queries usam Readers e Read Models específicos; nenhum contrato genérico ou separação física é antecipado |
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto, confirmação seletiva de eventos e adapter PostgreSQL com commit/rollback testados |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e outbox atomicamente; PostgreSQL traduz `OrganizationCreated` para contrato externo v1; relay publica o CloudEvent no Kafka e confirma a outbox; fluxo real validado manualmente, com teste de sistema automatizado ainda planejado |
 | Descoberta do domínio ministerial | Em andamento | Contextos de Organizations, Membership, Ministries, Activities e Scheduling mapeados; linguagem confirmada separada de hipóteses; primeiro incremento selecionado após fechar questões do Aggregate consumidor |

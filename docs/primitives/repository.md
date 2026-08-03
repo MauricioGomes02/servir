@@ -10,7 +10,7 @@ ORMs e consultas técnicas no domínio acoplam regras ao esquema, lifecycle e ca
 
 ## Responsabilidades
 
-- Carregar Aggregate Roots por identidade ou consultas necessárias ao consumidor.
+- Carregar Aggregate Roots quando uma decisão de domínio exige seu estado e comportamento.
 - Persistir mudanças na fronteira do Aggregate.
 - Explicitar ausência e falhas relevantes por contrato.
 
@@ -33,7 +33,7 @@ flowchart LR
 
 ## Exemplos
 
-`OrganizationRepository.findById` e `save`; consultas de leitura podem usar ports próprios quando não precisam reconstituir Aggregate.
+`OrganizationRepository.findById` e `save` operam `Organization`. Uma Query como `GetMemberDetails` define um `MemberDetails` Read Model e usa um `MemberDetailsReader`, sem adicionar projeções ao `MemberRepository`.
 
 O port nasce junto ao primeiro consumidor que demonstra essas operações. A fundação não fornece uma interface compartilhada de Repository apenas para antecipar contratos ainda desconhecidos.
 
@@ -43,7 +43,7 @@ Opera Aggregate Roots e EntityIds; participa de Unit of Work; adapters usam Mapp
 
 ## Possíveis evoluções
 
-Criar os primeiros ports específicos junto aos casos de uso consumidores. Definir concorrência otimista, paginação e separação de read models somente quando esses consumidores exigirem.
+Criar os primeiros Repository ports específicos junto aos Commands consumidores. Queries, Readers, paginação e Read Models nascem juntos à primeira necessidade concreta de leitura. Separar armazenamento físico de escrita e leitura somente quando houver motivo operacional.
 
 ## Boas práticas
 
@@ -56,3 +56,5 @@ Criar os primeiros ports específicos junto aos casos de uso consumidores. Defin
 - `GenericRepository<T>`.
 - Expor query builder ao application/domain.
 - Repository por tabela ou entidade interna.
+- Retornar DTO ou Read Model de apresentação por Repository.
+- Criar `GenericReadRepository<T>` para consultas sem consumidor definido.

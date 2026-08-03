@@ -34,6 +34,21 @@ flowchart LR
 
 Dependências de código apontam para dentro: adaptadores conhecem contratos da aplicação e do domínio; o domínio não conhece adaptadores.
 
+## Commands e Queries
+
+A Application aplica separação pragmática de responsabilidades. Commands alteram estado por meio de Aggregates, Repository ports e, quando necessário, Unit of Work. Queries não reconstituem Aggregates sem necessidade: cada consulta define um Read Model e um Reader port orientados ao consumidor.
+
+```mermaid
+flowchart LR
+    C[Command Handler] --> R[Repository]
+    R --> G[Aggregate]
+    C --> U[Unit of Work]
+    Q[Query Handler] --> P[Reader específico]
+    P --> M[Read Model]
+```
+
+Essa separação não implica bancos ou serviços distintos. A topologia física evolui somente com uma necessidade concreta. A decisão completa está no [ADR 029](decisions/029-command-query-responsibility-separation.md).
+
 ## Exemplos
 
 - Um agregado registra `OrderCreated`; um publicador externo encaminha o evento.

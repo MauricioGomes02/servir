@@ -1,4 +1,4 @@
-import type { Member } from '../../domain';
+import type { Member } from '../../../domain';
 
 export interface MemberRepository {
   save(member: Member): Promise<void>;

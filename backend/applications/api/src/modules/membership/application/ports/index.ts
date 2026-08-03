@@ -1,6 +1,6 @@
 export type {
   MemberRepository,
-} from './member-repository';
+} from './repositories';
 
 export type {
   MemberWriteScope,
