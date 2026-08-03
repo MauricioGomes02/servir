@@ -2,7 +2,7 @@
 
 ## Estado
 
-Núcleo de domínio inicial implementado. O caso de uso `RegisterMember`, persistência, integração e apresentação permanecem planejados.
+Núcleo de domínio e caso de uso `RegisterMember` implementados. A persistência PostgreSQL, o contrato de integração e a apresentação permanecem planejados.
 
 ## Motivação
 
@@ -22,7 +22,7 @@ Representar pessoas conhecidas pela igreja sem exigir que possuam credenciais e 
 - Não representa participação ou qualificação num ministério.
 - Não tenta deduplicar a mesma pessoa entre organizações.
 - Contato, endereço, nascimento e documentos não existem sem consumidor e regras de privacidade concretos.
-- O núcleo atual não verifica existência ou estado da Organization; essa decisão pertence ao futuro caso de uso.
+- O domínio não consulta existência ou estado da Organization. `RegisterMember` delega essa decisão ao port `OrganizationMembershipEligibility` antes de criar o Aggregate.
 
 ## Modelo inicial
 
@@ -40,17 +40,28 @@ Member
 
 ```mermaid
 sequenceDiagram
-    participant A as Application futura
+    participant A as RegisterMember
+    participant O as OrganizationMembershipEligibility
     participant M as Member
-    participant E as MemberRegistered
-    A->>M: register(id, organizationId, name, eventId, occurredAt)
-    alt nome válido
-        M->>E: registra member.registered
-        M-->>A: Result success com Member active
-    else nome inválido
-        M-->>A: Result failure sem Member nem evento
+    participant U as UnitOfWork
+    A->>O: allowsMemberRegistration(organizationId)
+    alt Organization elegível
+        A->>M: register(id, organizationId, name, eventId, occurredAt)
+        alt nome válido
+            M->>M: registra member.registered
+            A->>U: save(Member) + add(envelope)
+            U-->>A: commit
+            A->>M: acknowledgeDomainEvents
+            A-->>A: Result success
+        else nome inválido
+            M-->>A: Result failure sem Member nem evento
+        end
+    else Organization inelegível
+        A-->>A: member.registration.organization_not_eligible
     end
 ```
+
+O caso de uso recebe dados ainda não confiáveis, valida `OrganizationId`, consulta elegibilidade e somente então cria o Aggregate. `MemberRepository` e `EventOutbox` participam do mesmo `MemberWriteScope`; a garantia transacional concreta caberá ao adapter PostgreSQL. O evento só é reconhecido no Aggregate depois que a Unit of Work conclui.
 
 O payload interno do fato contém somente `memberId`, `organizationId` e o nome normalizado. Ator, correlação e request pertencem ao envelope/contexto; nenhum contrato de integração foi definido.
 
@@ -63,7 +74,9 @@ O payload interno do fato contém somente `memberId`, `organizationId` e o nome 
 
 ## Próximos comportamentos candidatos
 
-- `RegisterMember` verifica se a Organization permite cadastro e persiste Member + outbox atomicamente.
+- Implementar os adapters PostgreSQL de `MemberRepository`, `OrganizationMembershipEligibility` e `MemberWriteScope`.
+- Definir o contrato de integração de `MemberRegistered` somente quando existir consumidor.
+- Expor `RegisterMember` por uma entrada HTTP com Problem Details e localização.
 - Desativação e reativação preservam histórico por eventos próprios.
 - Renomeação registra fato sem alterar publicações históricas que guardem snapshots.
 

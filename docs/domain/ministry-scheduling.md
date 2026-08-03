@@ -2,7 +2,7 @@
 
 ## Estado
 
-Descoberta em andamento. O núcleo de domínio de `Member` está implementado; os demais tipos deste documento e o caso de uso `RegisterMember` permanecem planejados.
+Descoberta em andamento. O núcleo de domínio de `Member` e o caso de uso `RegisterMember` estão implementados; os demais tipos deste documento permanecem planejados.
 
 ## Objetivo
 
@@ -211,7 +211,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 
 ## Sequência incremental candidata
 
-1. Criar `Member` separado de `User` e o vínculo com Organization.
+1. Criar `Member` separado de `User` e registrar seu vínculo com Organization. **Concluído no núcleo e na Application; persistência e apresentação pendentes.**
 2. Implementar `Ministry`, `MinistryRole` e criação de ministério.
 3. Implementar solicitação/aprovação de `MinistryMembership` e qualificações.
 4. Implementar `MinistryTeam`, participação e liderança.
