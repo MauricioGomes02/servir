@@ -23,6 +23,9 @@ function message(): ClaimedOutboxMessage {
       tracestate: 'vendor=value',
     },
     event: {
+      channel: 'servir.organizations.events',
+      source: 'urn:servir:organizations',
+      type: 'servir.organizations.organization.created.v1',
       name: 'organization.created',
       version: 1,
       occurredAt: '2026-07-31T15:00:00.000Z',
@@ -43,9 +46,6 @@ function message(): ClaimedOutboxMessage {
 function publisher(producer: KafkaProducer) {
   return new KafkaIntegrationEventPublisher({
     producer,
-    topic: 'servir.organizations.events',
-    source: 'urn:servir:organizations',
-    typePrefix: 'com.servir.organizations',
     timeoutMs: 10_000,
   });
 }
@@ -89,7 +89,7 @@ describe('KafkaIntegrationEventPublisher', () => {
       specversion: '1.0',
       id: '0198f334-6dc5-7c20-9af1-91d7e599c001',
       source: 'urn:servir:organizations',
-      type: 'com.servir.organizations.organization.created.v1',
+      type: 'servir.organizations.organization.created.v1',
       subject: '0198f334-6dc5-7c20-9af1-91d7e599c004',
       time: '2026-07-31T15:00:00.000Z',
       datacontenttype: 'application/json',
@@ -102,6 +102,33 @@ describe('KafkaIntegrationEventPublisher', () => {
     });
     assert.equal('eventId' in cloudEvent, false);
     assert.equal('timestamp' in (kafkaMessage ?? {}), false);
+  });
+
+  it('routes each message through its persisted channel and identity', async () => {
+    const records: Array<{ topic: string; messages: Array<{ value: string }> }> = [];
+    const producer: KafkaProducer = {
+      async send(record) {
+        records.push(record);
+      },
+    };
+    const organizationMessage = message();
+    const membershipMessage: ClaimedOutboxMessage = {
+      ...organizationMessage,
+      event: {
+        ...organizationMessage.event,
+        channel: 'servir.membership.events',
+        source: 'urn:servir:membership',
+        type: 'servir.membership.member.registered.v1',
+        name: 'member.registered',
+      },
+    };
+
+    await publisher(producer).publish(membershipMessage);
+
+    assert.equal(records[0]?.topic, 'servir.membership.events');
+    const cloudEvent = JSON.parse(records[0]?.messages[0]?.value ?? '{}');
+    assert.equal(cloudEvent.source, 'urn:servir:membership');
+    assert.equal(cloudEvent.type, 'servir.membership.member.registered.v1');
   });
 
   it('classifies explicit non-retryable Kafka failures by stable code', async () => {
@@ -143,9 +170,6 @@ describe('KafkaIntegrationEventPublisher', () => {
       assert.throws(
         () => new KafkaIntegrationEventPublisher({
           producer,
-          topic: 'servir.organizations.events',
-          source: 'urn:servir:organizations',
-          typePrefix: 'com.servir.organizations',
           timeoutMs,
         }),
         (error: unknown) => error instanceof IntegrationEventPublicationError

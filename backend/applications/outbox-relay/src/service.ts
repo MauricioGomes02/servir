@@ -85,9 +85,6 @@ export async function startRelayService(
       messageStore: new PostgresOutboxMessageStore(pool),
       publisher: new KafkaIntegrationEventPublisher({
         producer,
-        topic: config.kafkaTopic,
-        source: 'urn:servir:organizations',
-        typePrefix: 'com.servir.organizations',
         timeoutMs: config.publishTimeoutMilliseconds,
       }),
       retryPolicy,
@@ -104,7 +101,6 @@ export async function startRelayService(
 
     log(logger, clock, 'info', 'outbox.relay.started', {
       'telemetry.enabled': telemetry.enabled,
-      topic: config.kafkaTopic,
       'batch.size': config.batchSize,
     });
     await worker.run(controller.signal);

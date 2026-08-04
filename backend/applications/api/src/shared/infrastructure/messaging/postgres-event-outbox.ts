@@ -38,8 +38,11 @@ export class PostgresEventOutbox implements EventOutbox {
              event_version,
              aggregate_id,
              partition_key,
-             metadata
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+             metadata,
+             publication_channel,
+             event_source,
+             event_type
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
           [
             envelope.messageId,
             envelope.event.eventId,
@@ -55,6 +58,9 @@ export class PostgresEventOutbox implements EventOutbox {
               event: integrationEvent.metadata,
               trace: this.activeTraceContext() ?? {},
             },
+            integrationEvent.channel,
+            integrationEvent.source,
+            integrationEvent.type,
           ],
         );
       }

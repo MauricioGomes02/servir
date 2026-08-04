@@ -1,0 +1,149 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import { RegisterMemberHandler } from '@/modules/membership/application';
+import {
+  MemberId,
+  MemberRegistrationPolicy,
+} from '@/modules/membership/domain';
+import { OrganizationId } from '@/modules/organizations/domain';
+import {
+  createExecutionContext,
+  parseCorrelationId,
+} from '@/shared/application/context';
+import {
+  parseMessageId,
+  type MessageId,
+} from '@/shared/application/messaging';
+import {
+  parseDomainEventId,
+  type DomainEventId,
+} from '@/shared/domain/domain-event';
+import { Instant } from '@/shared/domain/instant';
+import { FixedClock } from '@/shared/infrastructure/clock';
+import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
+import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
+import { Pool } from 'pg';
+
+import { createPostgresPersistence } from './create-postgres-persistence';
+
+const databaseUrl = process.env.TEST_DATABASE_URL;
+const integrationIt = databaseUrl === undefined ? it.skip : it;
+
+function requireValue<TValue>(result: Readonly<
+  | { success: true; value: TValue }
+  | { success: false }
+>): TValue {
+  assert.equal(result.success, true);
+  if (!result.success) throw new Error('Invalid deterministic fixture');
+  return result.value;
+}
+
+describe('PostgreSQL member persistence', () => {
+  integrationIt('commits member and outbox atomically and rolls both back on failure', async (testContext) => {
+    assert.notEqual(databaseUrl, undefined);
+    if (databaseUrl === undefined) return;
+
+    const organizationIdText = '0198f334-6dc5-7c20-9af1-91d7e599a101';
+    const memberIdText = '0198f334-6dc5-7c20-9af1-91d7e599a102';
+    const rolledBackMemberIdText = '0198f334-6dc5-7c20-9af1-91d7e599a103';
+    const messageIdText = '0198f334-6dc5-7c20-9af1-91d7e599a104';
+    const pool = new Pool({ connectionString: databaseUrl });
+    const persistence = createPostgresPersistence(databaseUrl);
+
+    async function cleanup(): Promise<void> {
+      await pool.query('DELETE FROM outbox_messages WHERE message_id = $1', [messageIdText]);
+      await pool.query('DELETE FROM members WHERE organization_id = $1', [organizationIdText]);
+      await pool.query('DELETE FROM organizations WHERE id = $1', [organizationIdText]);
+    }
+
+    await cleanup();
+    await pool.query(
+      'INSERT INTO organizations (id, name) VALUES ($1, $2)',
+      [organizationIdText, 'Membership integration organization'],
+    );
+    testContext.after(async () => {
+      await cleanup();
+      await persistence.close();
+      await pool.end();
+    });
+
+    const organizationId = requireValue(OrganizationId.create(organizationIdText));
+    const registeredAt = requireValue(Instant.create('2026-08-04T15:00:00.000Z'));
+    const context = createExecutionContext({
+      correlationId: requireValue(parseCorrelationId('membership-integration')),
+    });
+
+    function handler(memberId: string, eventId: string) {
+      return new RegisterMemberHandler({
+        clock: new FixedClock(registeredAt),
+        memberIdGenerator: new SequenceIdGenerator([
+          requireValue(MemberId.create(memberId)),
+        ]),
+        domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([
+          requireValue(parseDomainEventId(eventId)),
+        ]),
+        messageIdGenerator: new SequenceIdGenerator<MessageId>([
+          requireValue(parseMessageId(messageIdText)),
+        ]),
+        organizationRegistrationFacts:
+          persistence.organizationRegistrationFacts,
+        registrationPolicy: new MemberRegistrationPolicy(),
+        unitOfWork: persistence.memberUnitOfWork,
+      });
+    }
+
+    await handler(
+      memberIdText,
+      '0198f334-6dc5-7c20-9af1-91d7e599a105',
+    ).handle({ organizationId: organizationId.toString(), name: 'Maria' }, context);
+
+    const committed = await pool.query(
+      `SELECT m.name, m.status, m.registered_at, o.event_name,
+              o.publication_channel, o.event_source, o.event_type,
+              o.event_version, o.aggregate_id, o.partition_key, o.payload
+       FROM members m
+       JOIN outbox_messages o ON o.aggregate_id = m.id
+       WHERE m.id = $1`,
+      [memberIdText],
+    );
+
+    assert.equal(committed.rowCount, 1);
+    assert.equal(committed.rows[0]?.name, 'Maria');
+    assert.equal(committed.rows[0]?.status, 1);
+    assert.equal(committed.rows[0]?.registered_at.toISOString(), registeredAt.toISOString());
+    assert.equal(committed.rows[0]?.event_name, 'member.registered');
+    assert.equal(
+      committed.rows[0]?.publication_channel,
+      'servir.membership.events',
+    );
+    assert.equal(committed.rows[0]?.event_source, 'urn:servir:membership');
+    assert.equal(
+      committed.rows[0]?.event_type,
+      'servir.membership.member.registered.v1',
+    );
+    assert.equal(committed.rows[0]?.event_version, 1);
+    assert.equal(committed.rows[0]?.aggregate_id, memberIdText);
+    assert.equal(committed.rows[0]?.partition_key, organizationIdText);
+    assert.deepEqual(committed.rows[0]?.payload, {
+      memberId: memberIdText,
+      organizationId: organizationIdText,
+      name: 'Maria',
+      registeredAt: registeredAt.toISOString(),
+    });
+
+    await assert.rejects(
+      handler(
+        rolledBackMemberIdText,
+        '0198f334-6dc5-7c20-9af1-91d7e599a106',
+      ).handle({ organizationId: organizationId.toString(), name: 'Joana' }, context),
+      (error: unknown) => error instanceof PostgresEventOutboxError,
+    );
+
+    const rolledBack = await pool.query(
+      'SELECT 1 FROM members WHERE id = $1',
+      [rolledBackMemberIdText],
+    );
+    assert.equal(rolledBack.rowCount, 0);
+  });
+});

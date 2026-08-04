@@ -56,7 +56,7 @@ flowchart TD
 | Notification | Implementação inicial | Acúmulo, imutabilidade e testes decididos |
 | Instant | Implementação inicial | UTC, imutabilidade, igualdade e serialização testadas |
 | Domain Event | Implementação inicial | Identidade, instante, imutabilidade e testes definidos |
-| Message Envelope e Integration Event | Implementação inicial | Envelope interno preserva identidade, correlação e causalidade; primeiro contrato externo versionado e mapper explícito estão testados |
+| Message Envelope e Integration Event | Implementação inicial | Contratos externos versionados definem canal, source e type; Organization e Membership possuem mappers explícitos e roteamento persistido por mensagem |
 | Event Bus | Implementação inicial | Ports, concorrência, falhas e subscriptions testados |
 | Outbox Relay | Implementação inicial | `ProcessOutboxBatch` coordena as transições; adapters em memória e PostgreSQL validam claim concorrente, limite, disponibilidade temporal, posse, expiração, recuperação e estados terminais |
 | Aggregate Root | Implementação inicial | Registro, snapshot, ordem e confirmação seletiva testados |
@@ -72,7 +72,7 @@ flowchart TD
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto, confirmação seletiva de eventos e adapter PostgreSQL com commit/rollback testados |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e outbox atomicamente; PostgreSQL traduz `OrganizationCreated` para contrato externo v1; relay publica o CloudEvent no Kafka e confirma a outbox; fluxo real validado manualmente, com teste de sistema automatizado ainda planejado |
 | Descoberta do domínio ministerial | Em andamento | Contextos de Organizations, Membership, Ministries, Activities e Scheduling mapeados; linguagem confirmada separada de hipóteses; primeiro incremento selecionado após fechar questões do Aggregate consumidor |
-| Member e vínculo organizacional | Application inicial | Núcleo Member e RegisterMember implementados; Reader fornece fatos organizacionais, MemberRegistrationPolicy decide a regra e Member + envelope usam a mesma Unit of Work; adapters PostgreSQL, integração e apresentação permanecem planejados |
+| Member e vínculo organizacional | Persistência inicial | Núcleo, RegisterMember, Policy, Reader PostgreSQL, MemberRepository PostgreSQL, schema com status numérico e Integration Event v1 implementados; apresentação HTTP permanece planejada |
 | Ministry e funções | Planejado | Aggregate, funções internas, invariantes, eventos e caso de uso CreateMinistry estabilizados antes de times e escalas |
 | Participação e qualificação ministerial | Planejado | Solicitação, aprovação, estados históricos e qualificação por função testados |
 | Times ministeriais | Planejado | MinistryTeam, TeamMembership, liderança vigente e responsabilidade por escala definidos |

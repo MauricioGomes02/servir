@@ -104,6 +104,9 @@ describe('PostgreSQL organization persistence', () => {
     const committed = await inspectionPool.query(
       `SELECT o.name,
               m.event_name,
+              m.publication_channel,
+              m.event_source,
+              m.event_type,
               m.event_version,
               m.aggregate_id,
               m.partition_key,
@@ -119,6 +122,15 @@ describe('PostgreSQL organization persistence', () => {
     assert.equal(committed.rowCount, 1);
     assert.equal(committed.rows[0]?.name, 'Committed organization');
     assert.equal(committed.rows[0]?.event_name, 'organization.created');
+    assert.equal(
+      committed.rows[0]?.publication_channel,
+      'servir.organizations.events',
+    );
+    assert.equal(committed.rows[0]?.event_source, 'urn:servir:organizations');
+    assert.equal(
+      committed.rows[0]?.event_type,
+      'servir.organizations.organization.created.v1',
+    );
     assert.equal(committed.rows[0]?.event_version, 1);
     assert.equal(committed.rows[0]?.aggregate_id, ORGANIZATION_ID);
     assert.equal(committed.rows[0]?.partition_key, ORGANIZATION_ID);

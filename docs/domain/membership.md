@@ -2,7 +2,7 @@
 
 ## Estado
 
-Núcleo de domínio e caso de uso `RegisterMember` implementados. A persistência PostgreSQL, o contrato de integração e a apresentação permanecem planejados.
+Núcleo de domínio, `RegisterMember`, persistência PostgreSQL e contrato de integração v1 implementados. A apresentação permanece planejada.
 
 ## Motivação
 
@@ -31,10 +31,11 @@ Member
 ├── MemberId
 ├── OrganizationId
 ├── MemberName
-└── MemberStatus: active | inactive
+├── MemberStatus: active | inactive
+└── registeredAt: Instant
 ```
 
-`MemberId` aceita UUID canônico reconhecido e usa UUIDv7 para novas identidades por meio do adapter de geração. `MemberName` remove espaços externos, exige conteúdo e aceita até 120 caracteres. Nomes iguais não definem igualdade nem implicam duplicidade.
+`MemberId` aceita UUID canônico reconhecido e usa UUIDv7 para novas identidades por meio do adapter de geração. `MemberName` remove espaços externos, exige conteúdo e aceita até 120 caracteres. Nomes iguais não definem igualdade nem implicam duplicidade. `registeredAt` representa o instante absoluto do registro e também fornece o `occurredAt` do fato, sem inferir tempo do UUID.
 
 ## Registro
 
@@ -66,7 +67,9 @@ sequenceDiagram
 
 O caso de uso recebe dados ainda não confiáveis, valida `OrganizationId`, solicita fatos ao Reader e entrega a decisão à Policy antes de criar o Aggregate. O adapter não decide negócio. `MemberRepository` e `EventOutbox` participam do mesmo `MemberWriteScope`; a garantia transacional concreta caberá ao adapter PostgreSQL. O evento só é reconhecido no Aggregate depois que a Unit of Work conclui.
 
-O payload interno do fato contém somente `memberId`, `organizationId` e o nome normalizado. Ator, correlação e request pertencem ao envelope/contexto; nenhum contrato de integração foi definido.
+O payload interno do fato contém somente `memberId`, `organizationId` e o nome normalizado. Ator, correlação e request pertencem ao envelope/contexto. O mapper externo produz `member.registered` v1 com `memberId`, `organizationId`, `name` e `registeredAt`; usa `memberId` como Aggregate ID, `organizationId` como chave de partição e `servir.membership.events` como canal.
+
+No PostgreSQL, `registeredAt` usa `timestamptz`. O estado é persistido como `smallint` protegido por `CHECK`: `1` representa `active` e `2`, `inactive`. A tradução fica no adapter; códigos numéricos não entram no domínio.
 
 ## Relações
 
@@ -77,8 +80,6 @@ O payload interno do fato contém somente `memberId`, `organizationId` e o nome 
 
 ## Próximos comportamentos candidatos
 
-- Implementar os adapters PostgreSQL de `MemberRepository`, `OrganizationRegistrationFactsReader` e `MemberWriteScope`.
-- Definir o contrato de integração de `MemberRegistered` somente quando existir consumidor.
 - Expor `RegisterMember` por uma entrada HTTP com Problem Details e localização.
 - Desativação e reativação preservam histórico por eventos próprios.
 - Renomeação registra fato sem alterar publicações históricas que guardem snapshots.

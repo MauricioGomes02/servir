@@ -41,9 +41,6 @@ export interface KafkaProducer {
 
 export interface KafkaIntegrationEventPublisherOptions {
   readonly producer: KafkaProducer;
-  readonly topic: string;
-  readonly source: string;
-  readonly typePrefix: string;
   readonly timeoutMs: number;
 }
 
@@ -57,10 +54,7 @@ function assertConfiguration(
   options: KafkaIntegrationEventPublisherOptions,
 ): void {
   if (
-    options.topic.trim().length === 0
-    || options.source.trim().length === 0
-    || options.typePrefix.trim().length === 0
-    || !Number.isInteger(options.timeoutMs)
+    !Number.isInteger(options.timeoutMs)
     || options.timeoutMs <= 0
   ) {
     throw new IntegrationEventPublicationError(
@@ -100,15 +94,14 @@ implements IntegrationEventPublisher {
       async (span) => {
         span.setAttributes({
           'servir.messaging.system': 'kafka',
-          'servir.messaging.topic': this.options.topic,
+          'servir.messaging.topic': message.event.channel,
         });
 
         try {
-          const cloudEvent = mapToStructuredCloudEvent(message, this.options);
           let value: string;
 
           try {
-            value = JSON.stringify(cloudEvent);
+            value = JSON.stringify(mapToStructuredCloudEvent(message));
           } catch (cause) {
             throw new IntegrationEventPublicationError(
               KafkaPublicationErrorCodes.SerializationFailed,
@@ -132,7 +125,7 @@ implements IntegrationEventPublisher {
           }
 
           await this.options.producer.send({
-            topic: this.options.topic,
+            topic: message.event.channel,
             acks: -1,
             timeout: this.options.timeoutMs,
             messages: [{

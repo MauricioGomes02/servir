@@ -24,6 +24,7 @@ interface MemberProps {
   readonly organizationId: OrganizationId;
   readonly name: MemberName;
   readonly status: MemberStatus;
+  readonly registeredAt: Instant;
 }
 
 export interface RegisterMemberProps {
@@ -31,7 +32,7 @@ export interface RegisterMemberProps {
   readonly organizationId: OrganizationId;
   readonly name: unknown;
   readonly eventId: DomainEventId;
-  readonly occurredAt: Instant;
+  readonly registeredAt: Instant;
 }
 
 export class Member extends AggregateRoot<
@@ -56,11 +57,12 @@ export class Member extends AggregateRoot<
       organizationId: input.organizationId,
       name: name.value,
       status: 'active',
+      registeredAt: input.registeredAt,
     });
 
     member.recordDomainEvent(createMemberRegistered({
       eventId: input.eventId,
-      occurredAt: input.occurredAt,
+      occurredAt: input.registeredAt,
       memberId: input.id,
       organizationId: input.organizationId,
       name: name.value,
@@ -79,5 +81,9 @@ export class Member extends AggregateRoot<
 
   get status(): MemberStatus {
     return this.props.status;
+  }
+
+  get registeredAt(): Instant {
+    return this.props.registeredAt;
   }
 }

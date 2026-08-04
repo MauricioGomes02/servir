@@ -18,7 +18,6 @@ describe('readRelayServiceConfig', () => {
       databaseUrl: REQUIRED.DATABASE_URL,
       kafkaBrokers: ['localhost:9092'],
       kafkaClientId: 'servir-outbox-relay',
-      kafkaTopic: 'servir.organizations.events',
       batchSize: 100,
       leaseDurationMilliseconds: 60_000,
       pollIntervalMilliseconds: 1_000,

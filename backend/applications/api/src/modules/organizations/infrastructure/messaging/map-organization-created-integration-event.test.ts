@@ -50,6 +50,9 @@ describe('mapOrganizationCreatedIntegrationEvent', () => {
     const integrationEvent = mapOrganizationCreatedIntegrationEvent(domainEvent);
 
     assert.deepEqual(integrationEvent, {
+      channel: 'servir.organizations.events',
+      source: 'urn:servir:organizations',
+      type: 'servir.organizations.organization.created.v1',
       name: 'organization.created',
       version: 1,
       occurredAt: domainEvent.occurredAt.toISOString(),

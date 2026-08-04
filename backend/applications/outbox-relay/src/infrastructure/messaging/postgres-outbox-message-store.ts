@@ -25,6 +25,9 @@ interface ClaimedOutboxRow extends QueryResultRow {
   readonly message_id: string;
   readonly event_id: string;
   readonly event_name: string;
+  readonly publication_channel: string;
+  readonly event_source: string;
+  readonly event_type: string;
   readonly event_version: number;
   readonly occurred_at: Date;
   readonly aggregate_id: string | null;
@@ -109,6 +112,10 @@ function isValidClaimedRow(row: ClaimedOutboxRow): boolean {
     typeof row.message_id === 'string',
     typeof row.event_id === 'string',
     typeof row.event_name === 'string' && row.event_name.length > 0,
+    typeof row.publication_channel === 'string'
+      && row.publication_channel.length > 0,
+    typeof row.event_source === 'string' && row.event_source.length > 0,
+    typeof row.event_type === 'string' && row.event_type.length > 0,
     Number.isInteger(row.event_version) && row.event_version > 0,
     row.occurred_at instanceof Date
       && !Number.isNaN(row.occurred_at.getTime()),
@@ -150,6 +157,9 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
 
   const persistedMetadata = readPersistedMetadata(row.metadata as JsonObject);
   const event: IntegrationEvent = Object.freeze({
+    channel: row.publication_channel,
+    source: row.event_source,
+    type: row.event_type,
     name: row.event_name,
     version: row.event_version,
     occurredAt: row.occurred_at.toISOString(),

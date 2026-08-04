@@ -15,20 +15,14 @@ export interface StructuredCloudEvent {
   readonly data: JsonObject;
 }
 
-export interface CloudEventMapping {
-  readonly source: string;
-  readonly typePrefix: string;
-}
-
 export function mapToStructuredCloudEvent(
   message: ClaimedOutboxMessage,
-  mapping: CloudEventMapping,
 ): StructuredCloudEvent {
   return Object.freeze({
     specversion: '1.0',
     id: message.messageId,
-    source: mapping.source,
-    type: `${mapping.typePrefix}.${message.event.name}.v${message.event.version}`,
+    source: message.event.source,
+    type: message.event.type,
     subject: message.event.aggregateId,
     time: message.event.occurredAt,
     datacontenttype: 'application/json',

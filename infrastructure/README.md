@@ -59,12 +59,13 @@ terraform plan -out=local-messaging.tfplan
 terraform apply local-messaging.tfplan
 ```
 
-Esse state é separado porque o provider Kafka precisa alcançar o broker criado pelo stack `local`. O catálogo declara `servir.organizations.events` com três partições e replication factor 1. A versão da imagem do broker não é configurada como versão de protocolo do provider; são conceitos diferentes e o provider negocia uma versão compatível.
+Esse state é separado porque o provider Kafka precisa alcançar o broker criado pelo stack `local`. O catálogo declara `servir.organizations.events` e `servir.membership.events`, cada um com três partições e replication factor 1. A versão da imagem do broker não é configurada como versão de protocolo do provider; são conceitos diferentes e o provider negocia uma versão compatível.
 
 Para consultar o recurso gerenciado sem alterá-lo:
 
 ```bash
 terraform state show 'module.messaging.kafka_topic.managed["organizations_events"]'
+terraform state show 'module.messaging.kafka_topic.managed["membership_events"]'
 terraform plan
 ```
 

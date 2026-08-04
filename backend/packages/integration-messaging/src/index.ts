@@ -12,6 +12,9 @@ export interface IntegrationEvent<
   TVersion extends number = number,
   TPayload extends JsonObject = JsonObject,
 > {
+  readonly channel: string;
+  readonly source: string;
+  readonly type: string;
   readonly name: TName;
   readonly version: TVersion;
   readonly occurredAt: string;

@@ -5,3 +5,9 @@ databaseChangeLog:
   - include:
       file: changes/002-add-outbox-relay-delivery-state.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/003-create-members.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/004-add-outbox-publication-route.sql
+      relativeToChangelogFile: true

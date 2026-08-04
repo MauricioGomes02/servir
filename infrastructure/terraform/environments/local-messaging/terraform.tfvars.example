@@ -6,4 +6,9 @@ topics = {
     partitions         = 3
     replication_factor = 1
   }
+  membership_events = {
+    name               = "servir.membership.events"
+    partitions         = 3
+    replication_factor = 1
+  }
 }

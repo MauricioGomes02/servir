@@ -54,7 +54,7 @@ flowchart LR
     O -. leitura futura .-> R[Outbox Relay]
 ```
 
-O caso de uso entrega o `EventEnvelope` interno ao port de outbox dentro da Unit of Work. No adapter PostgreSQL, um mapper injetado seleciona explicitamente nome, versão, payload público, Aggregate e chave de partição. Um Domain Event sem mapper produz falha técnica codificada antes do `INSERT`, mantendo Aggregate e outbox na mesma decisão transacional. O relay receberá uma representação já pronta para transporte e não conhecerá o Domain Event nem o módulo Organizations.
+O caso de uso entrega o `EventEnvelope` interno ao port de outbox dentro da Unit of Work. No adapter PostgreSQL, um mapper injetado seleciona explicitamente nome, versão, payload público, Aggregate, chave de partição, canal, source e type. Um Domain Event sem mapper produz falha técnica codificada antes do `INSERT`, mantendo Aggregate e outbox na mesma decisão transacional. O relay recebe uma representação pronta para publicação e não conhece Domain Events nem módulos da API.
 
 O tipo serializável de `IntegrationEvent` reside em `backend/packages/integration-messaging`. Ele contém somente strings, números, booleanos, nulos, coleções e objetos JSON; `occurredAt` cruza a fronteira como UTC ISO. API e relay compartilham esse contrato sem compartilhar Domain Events, entidades ou primitivas internas.
 
@@ -68,7 +68,7 @@ Os adapters em memória especificam posse exclusiva durante a lease, recuperaç�
 
 ## Publicação Kafka
 
-`KafkaIntegrationEventPublisher` implementa o port sem fazer KafkaJS atravessar a fronteira da Application. Organizations publica em `servir.organizations.events`, usa `partitionKey` como chave e envia um CloudEvent 1.0 estruturado. O `messageId` é o `id` público para deduplicação; o Domain Event ID não integra automaticamente o contrato. Acknowledgement exige todos os replicas, não há timestamp funcional no record e a infraestrutura deve criar o tópico previamente.
+`KafkaIntegrationEventPublisher` implementa o port sem fazer KafkaJS atravessar a fronteira da Application. Cada mensagem traz um `channel`, traduzido pelo adapter para tópico Kafka: Organizations usa `servir.organizations.events` e Membership usa `servir.membership.events`. `partitionKey` vira a chave do record e `source`/`type` são preservados no CloudEvent 1.0 estruturado. O `messageId` é o `id` público para deduplicação; o Domain Event ID não integra automaticamente o contrato. Acknowledgement exige todos os replicas, não há timestamp funcional no record e a infraestrutura deve criar os tópicos previamente.
 
 O adapter classifica falhas por código estável e pela propriedade estruturada de retentabilidade do cliente. Erros de configuração e serialização são terminais; falhas desconhecidas são retentáveis. Nenhum comportamento consulta mensagens do KafkaJS.
 
@@ -89,7 +89,7 @@ cd backend
 npm run dev:relay
 ```
 
-O serviço exige que o schema Liquibase e `servir.organizations.events` já existam.
+O serviço exige que o schema Liquibase e todos os canais persistidos como tópicos já existam. Não há `KAFKA_TOPIC` global: o destino pertence à mensagem.
 
 ## Storage PostgreSQL
 
@@ -103,6 +103,8 @@ As linhas retornadas são validadas e convertidas para o contrato serializável 
 
 | Campo | Semântica |
 |---|---|
+| `publication_channel` | Canal lógico traduzido pelo adapter Kafka para tópico |
+| `event_source` e `event_type` | Identidade pública completa do CloudEvent |
 | `event_version` | Versão positiva do contrato de integração |
 | `aggregate_id` | Identidade opcional usada para correlação e evolução de ordenação |
 | `partition_key` | Chave opcional de partição, sem espaços em branco |
@@ -133,5 +135,4 @@ Cada ciclo, claim e publicação deve produzir spans apropriados. A API persiste
 
 ## Evoluções planejadas
 
-- Adicionar Kafka e o tópico de Organizations à infraestrutura local/IaC.
 - Definir operação explícita de reprocessamento e retenção de mensagens publicadas.

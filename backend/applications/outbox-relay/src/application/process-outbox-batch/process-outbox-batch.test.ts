@@ -27,6 +27,9 @@ function message(messageId: string) {
     correlationId: 'correlation-123',
     availableAt: CLAIMED_AT,
     event: {
+      channel: 'servir.organizations.events',
+      source: 'urn:servir:organizations',
+      type: 'servir.organizations.organization.created.v1',
       name: 'organization.created',
       version: 1,
       occurredAt: CLAIMED_AT,

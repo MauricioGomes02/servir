@@ -81,7 +81,7 @@ export class RegisterMemberHandler {
       organizationId: organizationId.value,
       name: command.name,
       eventId: this.dependencies.domainEventIdGenerator.generate(),
-      occurredAt: this.dependencies.clock.now(),
+      registeredAt: this.dependencies.clock.now(),
     });
 
     if (!member.success) {

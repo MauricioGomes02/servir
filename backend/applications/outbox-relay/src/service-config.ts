@@ -22,7 +22,6 @@ export interface RelayServiceConfig {
   readonly databaseUrl: string;
   readonly kafkaBrokers: readonly string[];
   readonly kafkaClientId: string;
-  readonly kafkaTopic: string;
   readonly batchSize: number;
   readonly leaseDurationMilliseconds: number;
   readonly pollIntervalMilliseconds: number;
@@ -118,8 +117,6 @@ export function readRelayServiceConfig(
     databaseUrl,
     kafkaBrokers: Object.freeze(kafkaBrokers),
     kafkaClientId: environment.KAFKA_CLIENT_ID?.trim() || 'servir-outbox-relay',
-    kafkaTopic: environment.KAFKA_TOPIC?.trim()
-      || 'servir.organizations.events',
     batchSize: positiveInteger(environment.OUTBOX_BATCH_SIZE, 100),
     leaseDurationMilliseconds,
     pollIntervalMilliseconds: positiveInteger(

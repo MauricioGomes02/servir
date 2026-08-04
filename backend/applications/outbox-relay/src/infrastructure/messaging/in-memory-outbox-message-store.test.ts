@@ -15,6 +15,9 @@ const MESSAGE = {
   correlationId: 'correlation-1',
   availableAt: '2026-07-29T15:00:00.000Z',
   event: {
+    channel: 'servir.organizations.events',
+    source: 'urn:servir:organizations',
+    type: 'servir.organizations.organization.created.v1',
     name: 'organization.created',
     version: 1,
     occurredAt: '2026-07-29T14:59:00.000Z',

@@ -77,6 +77,9 @@ describe('PostgresEventOutbox', () => {
   it('persists only the mapped versioned integration contract', async () => {
     const fixture = createClient();
     const integrationEventMapper: IntegrationEventMapper = (received) => ({
+      channel: 'servir.organizations.events',
+      source: 'urn:servir:organizations',
+      type: 'servir.organizations.organization.created.v1',
       name: 'organization.created',
       version: 1,
       occurredAt: received.event.occurredAt.toISOString(),
@@ -113,6 +116,9 @@ describe('PostgresEventOutbox', () => {
           tracestate: 'vendor=value',
         },
       },
+      'servir.organizations.events',
+      'urn:servir:organizations',
+      'servir.organizations.organization.created.v1',
     ]);
     assert.equal(
       JSON.stringify(fixture.queries[0]?.values).includes('not-public'),

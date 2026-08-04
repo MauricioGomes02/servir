@@ -23,7 +23,6 @@ export {
   mapToStructuredCloudEvent,
 } from './cloud-event';
 export type {
-  CloudEventMapping,
   StructuredCloudEvent,
 } from './cloud-event';
 export { createKafkaJsProducer } from './kafka-js-producer';

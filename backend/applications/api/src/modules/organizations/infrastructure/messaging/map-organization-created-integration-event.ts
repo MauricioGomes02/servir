@@ -5,6 +5,9 @@ export function mapOrganizationCreatedIntegrationEvent(
   event: OrganizationCreated,
 ): OrganizationCreatedIntegrationEventV1 {
   return Object.freeze({
+    channel: 'servir.organizations.events',
+    source: 'urn:servir:organizations',
+    type: 'servir.organizations.organization.created.v1',
     name: 'organization.created',
     version: 1,
     occurredAt: event.occurredAt.toISOString(),

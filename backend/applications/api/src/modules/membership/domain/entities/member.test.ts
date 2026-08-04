@@ -39,7 +39,7 @@ function validMetadata() {
     id: id.value,
     organizationId: organizationId.value,
     eventId: eventId.value,
-    occurredAt: occurredAt.value,
+    registeredAt: occurredAt.value,
   };
 }
 
@@ -62,10 +62,11 @@ describe('Member', () => {
     assert.equal(result.value.organizationId, metadata.organizationId);
     assert.equal(result.value.name.toString(), 'Maria da Silva');
     assert.equal(result.value.status, 'active');
+    assert.equal(result.value.registeredAt, metadata.registeredAt);
     assert.deepEqual(result.value.pendingDomainEvents, [{
       eventId: metadata.eventId,
       name: 'member.registered',
-      occurredAt: metadata.occurredAt,
+      occurredAt: metadata.registeredAt,
       payload: {
         memberId: '0198f334-6dc5-7c20-9af1-91d7e599d7b1',
         organizationId: '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
