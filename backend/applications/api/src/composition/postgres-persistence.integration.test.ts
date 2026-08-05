@@ -18,6 +18,7 @@ import {
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
+import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import {
   PostgresEventOutboxError,
   PostgresEventOutboxErrorCode,
@@ -97,6 +98,7 @@ describe('PostgreSQL organization persistence', () => {
       domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([eventId]),
       messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
       unitOfWork: persistence.unitOfWork,
+      logger: new InMemoryLogger(),
     });
 
     await committedHandler.handle({ name: 'Committed organization' }, context);
@@ -153,6 +155,7 @@ describe('PostgreSQL organization persistence', () => {
       ]),
       messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
       unitOfWork: persistence.unitOfWork,
+      logger: new InMemoryLogger(),
     });
 
     await assert.rejects(

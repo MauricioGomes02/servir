@@ -15,6 +15,7 @@ describe('readServiceConfig', () => {
       persistence: {
         mode: 'memory',
       },
+      logLevel: 'info',
     });
   });
 
@@ -28,6 +29,7 @@ describe('readServiceConfig', () => {
       persistence: {
         mode: 'memory',
       },
+      logLevel: 'info',
     });
   });
 
@@ -81,5 +83,14 @@ describe('readServiceConfig', () => {
           && error.code === ServiceConfigErrorCodes.InvalidPort,
       );
     }
+  });
+
+  it('normalizes a supported log level and rejects unsupported values', () => {
+    assert.equal(readServiceConfig({ LOG_LEVEL: ' DEBUG ' }).logLevel, 'debug');
+    assert.throws(
+      () => readServiceConfig({ LOG_LEVEL: 'verbose' }),
+      (error) => error instanceof ServiceConfigError
+        && error.code === ServiceConfigErrorCodes.InvalidLogLevel,
+    );
   });
 });

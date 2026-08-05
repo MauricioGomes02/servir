@@ -23,6 +23,7 @@ export function registerOrganizationsModule(
         domainEventIdGenerator: dependencies.domainEventIdGenerator,
         messageIdGenerator: dependencies.messageIdGenerator,
         unitOfWork: dependencies.organizationUnitOfWork,
+        logger: dependencies.logger,
       })
     )).singleton(),
     createOrganizationPresenter: asFunction((dependencies: ApplicationCradle) => (

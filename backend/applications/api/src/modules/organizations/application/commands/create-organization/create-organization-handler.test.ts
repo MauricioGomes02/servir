@@ -21,6 +21,7 @@ import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
+import { InMemoryLogger } from '@/shared/infrastructure/logging';
 
 import {
   OrganizationId,
@@ -76,6 +77,7 @@ function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
     outbox,
   };
   const unitOfWork = new DirectUnitOfWork(scope);
+  const logger = new InMemoryLogger();
   const handler = new CreateOrganizationHandler({
     clock: new FixedClock(ids.occurredAt),
     organizationIdGenerator: new SequenceIdGenerator([ids.organizationId]),
@@ -86,6 +88,7 @@ function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
       ids.messageId,
     ]),
     unitOfWork,
+    logger,
   });
   const context = createExecutionContext({
     correlationId: ids.correlationId,
@@ -97,6 +100,7 @@ function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
     ids,
     organizations,
     outbox,
+    logger,
   };
 }
 
@@ -141,6 +145,48 @@ describe('CreateOrganizationHandler', () => {
       fixture.outbox.envelopes[0]?.event.name,
       'organization.created',
     );
+  });
+
+  it('records the successful business process without personal data', async () => {
+    const fixture = createFixture();
+
+    await fixture.handler.handle({ name: 'Comunidade Servir' }, fixture.context);
+
+    assert.deepEqual(
+      fixture.logger.records.map((record) => record.eventName),
+      [
+        'organization.creation.started',
+        'organization.creation.validated',
+        'organization.creation.persisted',
+        'organization.creation.completed',
+      ],
+    );
+    assert.equal(
+      JSON.stringify(fixture.logger.records).includes('Comunidade Servir'),
+      false,
+    );
+    assert.deepEqual(fixture.logger.records[2]?.attributes, {
+      'organization.id': fixture.ids.organizationId.value,
+      'domain_event.count': 1,
+    });
+  });
+
+  it('records an expected rejection without persistence milestones', async () => {
+    const fixture = createFixture();
+
+    await fixture.handler.handle({ name: '   ' }, fixture.context);
+
+    assert.deepEqual(
+      fixture.logger.records.map((record) => record.eventName),
+      [
+        'organization.creation.started',
+        'organization.creation.rejected',
+      ],
+    );
+    assert.deepEqual(fixture.logger.records[1]?.attributes, {
+      'error.code': OrganizationNameErrorCodes.Empty,
+      'error.field': 'name',
+    });
   });
 
   it('returns an expected failure without persisting state or event', async () => {

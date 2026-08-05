@@ -2,6 +2,7 @@ import {
   ServiceConfigError,
   ServiceConfigErrorCodes,
 } from './service-config-error';
+import { LogLevels, type LogLevel } from '@/shared/application/logging';
 
 const DEFAULT_HOST = '0.0.0.0';
 const DEFAULT_PORT = 3000;
@@ -17,6 +18,7 @@ export interface ServiceConfig {
   readonly host: string;
   readonly port: number;
   readonly persistence: PersistenceConfig;
+  readonly logLevel: LogLevel;
 }
 
 function readPersistenceConfig(
@@ -78,9 +80,17 @@ export function readServiceConfig(
     throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidPort);
   }
 
+  const logLevel = environment.LOG_LEVEL?.trim().toLowerCase() ?? LogLevels.Info;
+  const supportedLogLevels = Object.values(LogLevels) as string[];
+
+  if (!supportedLogLevels.includes(logLevel)) {
+    throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidLogLevel);
+  }
+
   return Object.freeze({
     host,
     port,
     persistence: readPersistenceConfig(environment),
+    logLevel: logLevel as LogLevel,
   });
 }

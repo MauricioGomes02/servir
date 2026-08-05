@@ -2,6 +2,13 @@ import type { Clock } from '@/shared/application/clock';
 import type { ExecutionContext } from '@/shared/application/context';
 import type { IdGenerator } from '@/shared/application/id-generator';
 import {
+  createLogRecord,
+  LogLevels,
+  type Logger,
+  type LogAttributes,
+  type LogLevel,
+} from '@/shared/application/logging';
+import {
   createEventEnvelope,
   type MessageId,
 } from '@/shared/application/messaging';
@@ -31,6 +38,7 @@ export interface CreateOrganizationDependencies {
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
   readonly unitOfWork: UnitOfWork<OrganizationWriteScope>;
+  readonly logger: Logger;
 }
 
 export class CreateOrganizationHandler {
@@ -42,6 +50,8 @@ export class CreateOrganizationHandler {
     command: CreateOrganizationCommand,
     context: ExecutionContext,
   ): Promise<Result<CreateOrganizationOutput, OrganizationNameError>> {
+    this.log(LogLevels.Debug, 'organization.creation.started', context, {});
+
     const organization = Organization.create({
       id: this.dependencies.organizationIdGenerator.generate(),
       name: command.name,
@@ -50,10 +60,18 @@ export class CreateOrganizationHandler {
     });
 
     if (!organization.success) {
+      this.log(LogLevels.Info, 'organization.creation.rejected', context, {
+        'error.code': organization.error.code,
+        'error.field': organization.error.field ?? 'name',
+      });
       return organization;
     }
 
     const pendingEvents = organization.value.pendingDomainEvents;
+    this.log(LogLevels.Debug, 'organization.creation.validated', context, {
+      'organization.id': organization.value.id.value,
+      'domain_event.count': pendingEvents.length,
+    });
     const envelopes = pendingEvents.map((event) => createEventEnvelope({
       messageId: this.dependencies.messageIdGenerator.generate(),
       correlationId: context.correlationId,
@@ -65,11 +83,34 @@ export class CreateOrganizationHandler {
       await scope.outbox.add(envelopes);
     });
 
+    this.log(LogLevels.Info, 'organization.creation.persisted', context, {
+      'organization.id': organization.value.id.value,
+      'domain_event.count': pendingEvents.length,
+    });
+
     organization.value.acknowledgeDomainEvents(pendingEvents);
+
+    this.log(LogLevels.Info, 'organization.creation.completed', context, {
+      'organization.id': organization.value.id.value,
+    });
 
     return success(Object.freeze({
       organizationId: organization.value.id,
       name: organization.value.name.toString(),
+    }));
+  }
+
+  private log(
+    level: LogLevel,
+    eventName: string,
+    context: ExecutionContext,
+    attributes: LogAttributes,
+  ): void {
+    this.dependencies.logger.log(createLogRecord({
+      level,
+      eventName,
+      context,
+      attributes,
     }));
   }
 }

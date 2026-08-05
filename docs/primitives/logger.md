@@ -67,12 +67,15 @@ Falhas de adapters PostgreSQL são registradas na fronteira HTTP ou no worker qu
 
 A API emite `http.request.completed` para respostas abaixo de 500 e `http.request.failed` para falhas técnicas. O registro contém duração total monotônica, método, rota normalizada e status. Mensagem e stack trace da exceção não são copiadas; spans automáticos e o span semântico do caso de uso fornecem a decomposição temporal correlacionada.
 
+Processos de negócio relevantes podem emitir uma sequência curta de marcos semânticos na Application. Esses registros explicam intenção, decisão, persistência e conclusão; não repetem queries, durações internas nem detalhes de framework já presentes no trace. `LOG_LEVEL` permite manter decisões intermediárias em `debug` e fatos concluídos ou rejeições em `info`.
+
 ## Boas práticas
 
 - Usar nomes estáveis e atributos pesquisáveis.
 - Remover segredos e minimizar dados pessoais.
 - Preferir IDs, códigos, contagens, duração e resultado da operação.
-- Emitir um único registro final por requisição em vez de logs de início e fim.
+- Emitir um único resumo HTTP por requisição e somente os marcos de negócio necessários para reconstruir uma operação.
+- Usar `debug` para decisões intermediárias e `info` para fatos persistidos, conclusões e rejeições esperadas.
 - Manter atributos de resource e trace fora das chamadas da application.
 
 ## Anti-patterns
@@ -82,4 +85,5 @@ A API emite `http.request.completed` para respostas abaixo de 500 e `http.reques
 - Capturar e ignorar erro após logar.
 - Copiar payload, headers, tokens, entidades ou dados pessoais por conveniência.
 - Repetir em logs a query e as durações já disponíveis no trace PostgreSQL.
+- Registrar cada método, copiar Commands ou usar logs como dump do estado interno.
 - Usar IDs de alta cardinalidade como dimensões de métricas automaticamente.

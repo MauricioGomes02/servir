@@ -3,6 +3,7 @@ export const ServiceConfigErrorCodes = {
   InvalidPort: 'service.configuration.port.invalid',
   InvalidPersistenceMode: 'service.configuration.persistence_mode.invalid',
   InvalidDatabaseUrl: 'service.configuration.database_url.invalid',
+  InvalidLogLevel: 'service.configuration.log_level.invalid',
 } as const;
 
 export type ServiceConfigErrorCode =

@@ -2,6 +2,7 @@ import type {
   Logger,
   LogAttributeValue,
   LogRecord,
+  LogLevel,
 } from '@/shared/application/logging';
 import {
   context,
@@ -13,6 +14,14 @@ const MAX_DEPTH = 8;
 const MAX_ENTRIES = 100;
 const MAX_STRING_LENGTH = 8_192;
 const TRUNCATED_SUFFIX = '...[truncated]';
+const LOG_LEVEL_WEIGHT: Readonly<Record<LogLevel, number>> = {
+  trace: 10,
+  debug: 20,
+  info: 30,
+  warn: 40,
+  error: 50,
+  fatal: 60,
+};
 
 export type LogLineWriter = (line: string) => void;
 
@@ -85,9 +94,14 @@ export class JsonStdoutLogger implements Logger {
     private readonly writer: LogLineWriter = stdoutWriter,
     private readonly activeTraceContextReader: ActiveTraceContextReader
       = readActiveTraceContext,
+    private readonly minimumLevel: LogLevel = 'info',
   ) {}
 
   log(record: LogRecord): void {
+    if (LOG_LEVEL_WEIGHT[record.level] < LOG_LEVEL_WEIGHT[this.minimumLevel]) {
+      return;
+    }
+
     try {
       const attributes = Object.fromEntries(
         Object.entries(record.attributes).map(

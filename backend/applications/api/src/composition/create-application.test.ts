@@ -88,25 +88,36 @@ describe('createApplication', () => {
       status: 'active',
     });
     assert.equal(ids.length, 0);
-    assert.equal(logger.records.length, 3);
-    assert.equal(logger.records[0]?.eventName, 'http.request.completed');
-    assert.deepEqual(logger.records[0]?.context, {
+    assert.deepEqual(
+      logger.records.slice(0, 4).map((record) => record.eventName),
+      [
+        'organization.creation.started',
+        'organization.creation.validated',
+        'organization.creation.persisted',
+        'organization.creation.completed',
+      ],
+    );
+    const requestRecords = logger.records.filter(
+      (record) => record.eventName === 'http.request.completed',
+    );
+    assert.equal(requestRecords.length, 3);
+    assert.deepEqual(requestRecords[0]?.context, {
       correlationId: UUIDS[1],
       requestId: UUIDS[0],
     });
-    assert.deepEqual(logger.records[0]?.attributes, {
+    assert.deepEqual(requestRecords[0]?.attributes, {
       'http.request.method': 'POST',
       'http.route': '/organizations',
       'http.response.status_code': 201,
       'duration.ms': 42,
     });
-    assert.deepEqual(logger.records[1]?.attributes, {
+    assert.deepEqual(requestRecords[1]?.attributes, {
       'http.request.method': 'POST',
       'http.route': '/organizations/:organizationId/members',
       'http.response.status_code': 201,
       'duration.ms': 50,
     });
-    assert.deepEqual(logger.records[2]?.attributes, {
+    assert.deepEqual(requestRecords[2]?.attributes, {
       'http.request.method': 'GET',
       'http.route': '/organizations/:organizationId/members/:memberId',
       'http.response.status_code': 200,

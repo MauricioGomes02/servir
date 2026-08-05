@@ -54,10 +54,11 @@ export function reportBootstrapFailure(error: unknown): void {
 export async function startService(
   telemetry: TelemetryLifecycle,
 ): Promise<void> {
-  const logger = new JsonStdoutLogger();
+  let logger = new JsonStdoutLogger();
 
   try {
     const config = readServiceConfig(process.env);
+    logger = new JsonStdoutLogger(undefined, undefined, config.logLevel);
     let postgresPersistence: PostgresPersistence | undefined;
 
     if (config.persistence.mode === 'postgres') {
@@ -90,6 +91,7 @@ export async function startService(
         'server.port': config.port,
         'persistence.mode': config.persistence.mode,
         'telemetry.enabled': telemetry.enabled,
+        'log.level': config.logLevel,
       },
     }));
 

@@ -62,6 +62,7 @@ function fixture() {
 
   const organizations = new InMemoryOrganizationRepository();
   const outbox = new InMemoryEventOutbox();
+  const logger = new InMemoryLogger();
   const translator = new InMemoryMessageTranslator({
     'pt-BR': {
       ...httpProblemMessageCatalog['pt-BR'],
@@ -84,13 +85,14 @@ function fixture() {
       messageId.value,
     ]),
     unitOfWork: new DirectUnitOfWork({ organizations, outbox }),
+    logger,
   });
   const presenter = new CreateOrganizationPresenter(translator);
   const app = createFastifyApplication({
     correlationIdGenerator: new SequenceIdGenerator([
       correlationId.value,
     ]),
-    logger: new InMemoryLogger(),
+    logger,
     messageTranslator: translator,
     requestIdGenerator: new SequenceIdGenerator([
       requestId.value,

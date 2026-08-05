@@ -64,7 +64,7 @@ flowchart TD
 | Value Object | Implementação inicial | Imutabilidade e igualdade testadas |
 | Specification e Policy | Implementação inicial | `MemberRegistrationPolicy` é a primeira decisão contextual concreta: recebe fatos explícitos de Reader, não consulta infraestrutura e possui testes próprios |
 | Context | Implementação inicial | IDs fortes, imutabilidade e testes definidos |
-| Logger | Implementação inicial | Registro, contexto, imutabilidade, adapter JSON limitado para stdout e um único log HTTP final com duração monotônica estão testados; o adapter enriquece registros com trace/span ativo e exclui mensagem e stack de falhas operacionais; redaction configurável permanece planejada |
+| Logger | Implementação inicial | Registro, contexto, imutabilidade, filtro por `LOG_LEVEL`, adapter JSON para stdout, resumo HTTP e primeira narrativa de negócio em `CreateOrganization` estão testados; registros recebem trace/span ativo e excluem payload, dados pessoais, mensagem e stack de falhas operacionais; redaction configurável permanece planejada |
 | Schema e governança de logs operacionais | Planejado | Contrato interoperável alinhado ao OpenTelemetry Logs Data Model e às Semantic Conventions estáveis; timestamp do evento, severidade, nome, trace/span, resource, instrumentation scope e atributos tipados definidos; redaction e controle de volume testados; JSON Lines, OTLP e mappings para destinos específicos permanecem responsabilidades de adapters e infraestrutura |
 | Clock | Implementação inicial | Port, SystemClock, FixedClock e testes definidos |
 | Id Generator | Implementação inicial | Port tipado, sequência determinística, validação canônica dos IDs persistidos e adapter UUIDv7 com factory nominal e falhas técnicas codificadas estão testados |

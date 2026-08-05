@@ -89,4 +89,24 @@ describe('JsonStdoutLogger', () => {
       attributes: {},
     })));
   });
+
+  it('writes only records at or above the configured minimum level', () => {
+    const lines: string[] = [];
+    const logger = new JsonStdoutLogger(
+      (line) => lines.push(line),
+      () => undefined,
+      LogLevels.Warn,
+    );
+
+    for (const level of [LogLevels.Debug, LogLevels.Info, LogLevels.Warn]) {
+      logger.log(createLogRecord({
+        level,
+        eventName: `operation.${level}`,
+        attributes: {},
+      }));
+    }
+
+    assert.equal(lines.length, 1);
+    assert.equal(JSON.parse(lines[0] ?? '{}').level, LogLevels.Warn);
+  });
 });
