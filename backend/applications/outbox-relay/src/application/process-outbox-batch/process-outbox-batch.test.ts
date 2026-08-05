@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import type { Clock, RetryPolicy } from '@/application/ports';
+import type {
+  Clock,
+  RelayTelemetry,
+  RetryPolicy,
+} from '@/application/ports';
 import {
   IntegrationEventPublicationError,
   OutboxLeaseError,
@@ -102,6 +106,95 @@ function processBatch(input: Readonly<{
 }
 
 describe('ProcessOutboxBatch', () => {
+  it('traces only claimed work with message outcomes and batch totals', async () => {
+    const calls: string[] = [];
+    const attributes: Array<Readonly<Record<string, string | number | boolean>>> = [];
+    const telemetry: RelayTelemetry = {
+      async traceBatch(operation, completed) {
+        calls.push('batch.started');
+        const result = await operation();
+        completed?.(result);
+        calls.push('batch.completed');
+        return result;
+      },
+      async traceMessage(claimedMessage, operation) {
+        calls.push(`message.started:${claimedMessage.messageId}`);
+        const result = await operation();
+        calls.push(`message.completed:${claimedMessage.messageId}`);
+        return result;
+      },
+      addEvent(name) {
+        calls.push(name);
+      },
+      setAttributes(value) {
+        attributes.push(value);
+      },
+    };
+    let observed = 0;
+    const process = new ProcessOutboxBatch({
+      clock: new SequenceClock([CLAIMED_AT, '2026-07-29T15:00:01.000Z']),
+      leaseIdGenerator: { generate: () => 'lease-123' },
+      messageStore: new InMemoryOutboxMessageStore([message('message-1')]),
+      publisher: new InMemoryIntegrationEventPublisher(),
+      retryPolicy: retryPolicy(true),
+      batchSize: 10,
+      leaseDurationMilliseconds: 60_000,
+      telemetry,
+      onBatchCompleted: (result) => { observed = result.published; },
+    });
+
+    await process.execute();
+
+    assert.deepEqual(calls, [
+      'batch.started',
+      'message.started:message-1',
+      'outbox.message.published',
+      'message.completed:message-1',
+      'batch.completed',
+    ]);
+    assert.equal(observed, 1);
+    assert.deepEqual(attributes, [{
+      'servir.outbox.claimed': 1,
+      'servir.outbox.published': 1,
+      'servir.outbox.rescheduled': 0,
+      'servir.outbox.failed': 0,
+      'servir.outbox.batch_size': 10,
+    }]);
+  });
+
+  it('does not create semantic telemetry for an empty poll', async () => {
+    let traced = false;
+    const telemetry: RelayTelemetry = {
+      async traceBatch(operation) {
+        traced = true;
+        return operation();
+      },
+      async traceMessage(_message, operation) {
+        return operation();
+      },
+      addEvent() {},
+      setAttributes() {},
+    };
+    const process = new ProcessOutboxBatch({
+      clock: new SequenceClock([CLAIMED_AT]),
+      leaseIdGenerator: { generate: () => 'lease-123' },
+      messageStore: new InMemoryOutboxMessageStore([]),
+      publisher: new InMemoryIntegrationEventPublisher(),
+      retryPolicy: retryPolicy(true),
+      batchSize: 10,
+      leaseDurationMilliseconds: 60_000,
+      telemetry,
+    });
+
+    assert.deepEqual(await process.execute(), {
+      claimed: 0,
+      published: 0,
+      rescheduled: 0,
+      failed: 0,
+    });
+    assert.equal(traced, false);
+  });
+
   it('rejects every non-positive or fractional processing limit', () => {
     const store = new InMemoryOutboxMessageStore([]);
     const publisher = new InMemoryIntegrationEventPublisher();

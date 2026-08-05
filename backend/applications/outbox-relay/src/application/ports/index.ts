@@ -11,3 +11,7 @@ export type {
 } from './outbox-message-store';
 export type { RetryDecision, RetryPolicy } from './retry-policy';
 export type { RandomSource } from './random-source';
+export type {
+  RelayTelemetry,
+  RelayTraceAttribute,
+} from './relay-telemetry';

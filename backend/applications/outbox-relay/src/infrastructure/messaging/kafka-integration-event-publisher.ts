@@ -1,10 +1,8 @@
 import {
   context,
   propagation,
-  ROOT_CONTEXT,
   SpanStatusCode,
   trace,
-  type TextMapGetter,
 } from '@opentelemetry/api';
 
 import {
@@ -45,11 +43,6 @@ export interface KafkaIntegrationEventPublisherOptions {
 }
 
 const tracer = trace.getTracer('@servir/outbox-relay');
-const headerGetter: TextMapGetter<Record<string, string>> = {
-  keys: (carrier) => Object.keys(carrier),
-  get: (carrier, key) => carrier[key],
-};
-
 function assertConfiguration(
   options: KafkaIntegrationEventPublisherOptions,
 ): void {
@@ -80,16 +73,7 @@ implements IntegrationEventPublisher {
   }
 
   async publish(message: ClaimedOutboxMessage): Promise<void> {
-    const parentCarrier = message.traceContext === undefined
-      ? {}
-      : { ...message.traceContext };
-    const parentContext = propagation.extract(
-      ROOT_CONTEXT,
-      parentCarrier,
-      headerGetter,
-    );
-
-    await context.with(parentContext, () => tracer.startActiveSpan(
+    await tracer.startActiveSpan(
       'kafka.publish',
       async (span) => {
         span.setAttributes({
@@ -152,6 +136,6 @@ implements IntegrationEventPublisher {
           span.end();
         }
       },
-    ));
+    );
   }
 }

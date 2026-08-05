@@ -78,15 +78,6 @@ export class OutboxRelayWorker {
         continue;
       }
 
-      if (result.claimed > 0) {
-        this.log('info', 'outbox.relay.batch.completed', {
-          claimed: result.claimed,
-          published: result.published,
-          rescheduled: result.rescheduled,
-          failed: result.failed,
-        });
-      }
-
       if (result.claimed < this.dependencies.batchSize) {
         await this.delay(this.dependencies.pollIntervalMilliseconds, signal);
       }

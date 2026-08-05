@@ -5,6 +5,8 @@ export interface RelayLogRecord {
   readonly timestamp: string;
   readonly severity: RelayLogSeverity;
   readonly name: string;
+  readonly traceId?: string;
+  readonly spanId?: string;
   readonly attributes?: Readonly<Record<string, RelayLogAttribute>>;
 }
 

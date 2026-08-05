@@ -22,7 +22,7 @@ Mais do que reunir tecnologias, o repositório registra as decisões, os limites
 - **Consistência explícita:** Aggregate e outbox são persistidos na mesma transação por uma Unit of Work.
 - **Eventos duráveis:** um relay independente publica Integration Events versionados no Kafka com entrega at-least-once.
 - **Contratos interoperáveis:** mensagens externas usam CloudEvents e propagação W3C Trace Context.
-- **Observabilidade desacoplada:** logs JSON estruturados e OpenTelemetry preservam correlação sem contaminar casos de uso.
+- **Observabilidade desacoplada:** logs JSON correlacionados e traces semânticos por request, caso de uso, lote e mensagem preservam causalidade sem contaminar o domínio.
 - **Infraestrutura governada:** Terraform administra recursos persistentes; Liquibase administra migrations fora do lifecycle das aplicações.
 - **Falhas seguras:** erros esperados possuem códigos estáveis, localização e representação HTTP por Problem Details.
 - **Composição modular:** Awilix monta dependências e lifetimes somente na composition root, sem Service Locator no núcleo ou nas rotas.

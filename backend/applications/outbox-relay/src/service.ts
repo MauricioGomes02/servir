@@ -3,6 +3,7 @@ import {
   createKafkaJsProducer,
   JsonStdoutRelayLogger,
   KafkaIntegrationEventPublisher,
+  OpenTelemetryRelayTelemetry,
   PostgresOutboxMessageStore,
   SystemClock,
   SystemRandomSource,
@@ -90,6 +91,15 @@ export async function startRelayService(
       retryPolicy,
       batchSize: config.batchSize,
       leaseDurationMilliseconds: config.leaseDurationMilliseconds,
+      telemetry: new OpenTelemetryRelayTelemetry(),
+      onBatchCompleted: (result) => {
+        log(logger, clock, 'info', 'outbox.relay.batch.completed', {
+          claimed: result.claimed,
+          published: result.published,
+          rescheduled: result.rescheduled,
+          failed: result.failed,
+        });
+      },
     });
     const worker = new OutboxRelayWorker({
       batchProcessor,

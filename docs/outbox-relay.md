@@ -131,7 +131,9 @@ O publisher classifica cada falha por código estável e informa explicitamente 
 
 ## Observabilidade
 
-Cada ciclo, claim e publicação deve produzir spans apropriados. A API persiste `traceparent` e `tracestate` no limite da outbox; o publisher restaura o pai, cria o span `kafka.publish` quando houver SDK ativo e injeta o contexto no record. Baggage não é propagado. Logs estruturados incluem códigos, `messageId`, tentativa, tópico e contexto de correlação quando necessários; não incluem payload, credenciais, `tracestate`, stack trace ou mensagem bruta do driver. Métricas mínimas futuras incluem backlog disponível, idade da mensagem mais antiga, publicações, retries, falhas terminais e duração de publicação.
+Um claim com trabalho inicia um trace próprio com `outbox.relay.batch`; cada mensagem recebe `outbox.message.process`, contendo a publicação Kafka e a transição PostgreSQL correspondentes. O resultado aparece como evento de span (`published`, `rescheduled` ou `failed`) e as contagens finais ficam no lote. Polls vazios não geram span semântico nem log de conclusão.
+
+A API persiste `traceparent` e `tracestate` no limite da outbox. O relay usa esse contexto como link causal, não como pai direto, e injeta seu contexto ativo no record Kafka. Baggage não é propagado. O log estruturado de conclusão carrega `traceId` e `spanId` do lote; logs permanecem documentos JSON no stdout, enquanto eventos de span são visualizados no Jaeger. Payload, credenciais, contexto W3C bruto, stack e mensagem técnica do driver não são incluídos. Métricas mínimas futuras incluem backlog disponível, idade da mensagem mais antiga, publicações, retries, falhas terminais e duração de publicação.
 
 ## Evoluções planejadas
 
