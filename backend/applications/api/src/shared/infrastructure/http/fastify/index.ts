@@ -18,6 +18,20 @@ export {
   FastifyRequestLogger,
 } from './fastify-request-logger';
 
+export {
+  HttpExecutionContextUnavailableError,
+  HttpExecutionContextUnavailableErrorCode,
+} from './http-execution-context-unavailable-error';
+
+export { requireHttpExecutionContext } from './require-http-execution-context';
+
+export { sendPresentedProblem } from './send-presented-problem';
+
+export type {
+  PresentedHttpProblem,
+  SendPresentedProblemInput,
+} from './send-presented-problem';
+
 export type {
   MonotonicNow,
 } from './fastify-request-logger';

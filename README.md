@@ -25,6 +25,7 @@ Mais do que reunir tecnologias, o repositório registra as decisões, os limites
 - **Observabilidade desacoplada:** logs JSON estruturados e OpenTelemetry preservam correlação sem contaminar casos de uso.
 - **Infraestrutura governada:** Terraform administra recursos persistentes; Liquibase administra migrations fora do lifecycle das aplicações.
 - **Falhas seguras:** erros esperados possuem códigos estáveis, localização e representação HTTP por Problem Details.
+- **Composição modular:** Awilix monta dependências e lifetimes somente na composition root, sem Service Locator no núcleo ou nas rotas.
 - **Testes como especificação:** caminhos, condições, fluxo de dados, partições e limites orientam casos comportamentais determinísticos.
 
 ## Arquitetura em uma visão
@@ -87,6 +88,7 @@ O domínio considera atividades manuais ou recorrentes, várias execuções de u
 |---|---|
 | TypeScript e Node.js | Domínio tipado, aplicações e adapters |
 | Fastify | Adapter HTTP e ciclo de requisição |
+| Awilix | Container tipado da composition root |
 | PostgreSQL | Estado transacional e outbox durável |
 | Kafka | Transporte de Integration Events |
 | CloudEvents | Envelope público interoperável |
@@ -173,6 +175,7 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Contexto de execução com correlação e request; locale é resolvido na apresentação e o trace é propagado pelos adapters.
 - Logging estruturado, instrumentação HTTP/PostgreSQL e tracing de casos de uso.
 - Representação REST de sucesso e Problem Details localizado para falhas.
+- Container de dependências estrito com registros compartilhados, de persistência e por bounded context.
 - `CreateOrganization` completo em memória e PostgreSQL.
 - Outbox transacional com Integration Event versionado.
 - Relay PostgreSQL independente, lease, retry exponencial com jitter e falha terminal.

@@ -1,14 +1,16 @@
 import type { CreateOrganizationHandler } from '@/modules/organizations/application';
 import type { CreateOrganizationPresenter } from '@/modules/organizations/presentation';
 import {
-  createValidationProblemDetails,
   HttpProblemMessageCodes,
+  HttpProblemTypes,
 } from '@/shared/infrastructure/http/problem-details';
+import {
+  requireHttpExecutionContext,
+  sendPresentedProblem,
+} from '@/shared/infrastructure/http/fastify';
 import type { MessageTranslator } from '@/shared/presentation';
 import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import type { FastifyInstance } from 'fastify';
-
-import { CreateOrganizationRouteContextError } from './create-organization-route-context-error';
 
 export interface CreateOrganizationRouteDependencies {
   readonly handler: CreateOrganizationHandler;
@@ -33,11 +35,7 @@ export function registerCreateOrganizationRoute(
   dependencies: CreateOrganizationRouteDependencies,
 ): void {
   app.post('/organizations', async (request, reply) => {
-    const context = request.executionContext;
-
-    if (context === null) {
-      throw new CreateOrganizationRouteContextError();
-    }
+    const context = requireHttpExecutionContext(request.executionContext);
 
     const result = await traceUseCase(
       'CreateOrganization',
@@ -53,20 +51,17 @@ export function registerCreateOrganizationRoute(
     );
 
     if (view.kind === 'failure') {
-      return reply
-        .status(422)
-        .type('application/problem+json')
-        .header('content-language', request.locale)
-        .send(createValidationProblemDetails({
-          title: dependencies.messageTranslator.translate({
-            code: HttpProblemMessageCodes.ValidationErrorTitle,
-            locale: request.locale,
-          }),
+      return sendPresentedProblem(reply, {
+        context,
+        error: view.error,
+        locale: request.locale,
+        problem: {
           status: 422,
-          correlationId: context.correlationId,
-          requestId: context.requestId,
-          errors: [view.error],
-        }));
+          type: HttpProblemTypes.ValidationError,
+          titleCode: HttpProblemMessageCodes.ValidationErrorTitle,
+        },
+        translator: dependencies.messageTranslator,
+      });
     }
 
     return reply

@@ -34,6 +34,8 @@ flowchart LR
 
 Dependências de código apontam para dentro: adaptadores conhecem contratos da aplicação e do domínio; o domínio não conhece adaptadores.
 
+A API usa um container Awilix tipado somente na composition root. Registros são separados entre dependências compartilhadas, persistência e bounded contexts; o bootstrap resolve objetos e os injeta explicitamente. Rotas, casos de uso, presenters e domínio não consultam o container. O `ExecutionContext` permanece um dado da execução, criado na borda e passado ao handler, não uma dependência global ou request-scoped escondida.
+
 ## Commands e Queries
 
 A Application aplica separação pragmática de responsabilidades. Commands alteram estado por meio de Aggregates, Repository ports e, quando necessário, Unit of Work. Queries não reconstituem Aggregates sem necessidade: cada consulta define um Read Model e um Reader port orientados ao consumidor.

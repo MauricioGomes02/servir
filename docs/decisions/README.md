@@ -33,5 +33,6 @@
 | [029](029-command-query-responsibility-separation.md) | Separação de responsabilidades entre Commands e Queries | Aceita |
 | [030](030-message-owned-publication-routing.md) | Roteamento de publicação definido pela mensagem | Aceita |
 | [031](031-local-trace-visualization.md) | Visualização local de traces por Collector e Jaeger | Aceita |
+| [032](032-composition-root-dependency-container.md) | Container de dependências na composition root | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.
