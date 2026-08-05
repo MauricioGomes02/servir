@@ -6,12 +6,14 @@ import {
 import { isOrganizationCreated } from '@/modules/organizations/domain';
 import type {
   MemberWriteScope,
+  MemberDetailsReader,
   OrganizationRegistrationFactsReader,
 } from '@/modules/membership/application';
 import { isMemberRegistered } from '@/modules/membership/domain';
 import {
   mapMemberRegisteredIntegrationEvent,
   PostgresMemberRepository,
+  PostgresMemberDetailsReader,
   PostgresOrganizationRegistrationFactsReader,
 } from '@/modules/membership/infrastructure';
 import type { EventEnvelope } from '@/shared/application/messaging';
@@ -27,6 +29,7 @@ import { Pool } from 'pg';
 export interface PostgresPersistence {
   readonly unitOfWork: UnitOfWork<OrganizationWriteScope>;
   readonly memberUnitOfWork: UnitOfWork<MemberWriteScope>;
+  readonly memberDetailsReader: MemberDetailsReader;
   readonly organizationRegistrationFacts:
     OrganizationRegistrationFactsReader;
   close(): Promise<void>;
@@ -66,6 +69,7 @@ export function createPostgresPersistence(
         captureActiveTraceContext,
       ),
     })),
+    memberDetailsReader: new PostgresMemberDetailsReader(pool),
     organizationRegistrationFacts:
       new PostgresOrganizationRegistrationFactsReader(pool),
     async close(): Promise<void> {

@@ -1,10 +1,15 @@
 import type {
+  GetMemberDetailsHandler,
+  MemberDetailsReader,
   MemberWriteScope,
   OrganizationRegistrationFactsReader,
   RegisterMemberHandler,
 } from '@/modules/membership/application';
 import type { MemberId } from '@/modules/membership/domain';
-import type { RegisterMemberPresenter } from '@/modules/membership/presentation';
+import type {
+  GetMemberDetailsPresenter,
+  RegisterMemberPresenter,
+} from '@/modules/membership/presentation';
 import type {
   CreateOrganizationHandler,
   OrganizationWriteScope,
@@ -35,6 +40,7 @@ export interface ApplicationCradle {
   readonly clock: Clock;
   readonly organizationUnitOfWork: UnitOfWork<OrganizationWriteScope>;
   readonly memberUnitOfWork: UnitOfWork<MemberWriteScope>;
+  readonly memberDetailsReader: MemberDetailsReader;
   readonly organizationRegistrationFacts: OrganizationRegistrationFactsReader;
   readonly eventRelayLifecycle: EventRelayLifecycle;
   readonly organizationIdGenerator: IdGenerator<OrganizationId>;
@@ -47,6 +53,8 @@ export interface ApplicationCradle {
   readonly createOrganizationPresenter: CreateOrganizationPresenter;
   readonly registerMemberHandler: RegisterMemberHandler;
   readonly registerMemberPresenter: RegisterMemberPresenter;
+  readonly getMemberDetailsHandler: GetMemberDetailsHandler;
+  readonly getMemberDetailsPresenter: GetMemberDetailsPresenter;
 }
 
 export type ApplicationContainer = AwilixContainer<ApplicationCradle>;

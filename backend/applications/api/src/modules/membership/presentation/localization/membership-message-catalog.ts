@@ -10,6 +10,11 @@ export const membershipMessageCatalog: MessageCatalog = Object.freeze({
     'member.name.empty': 'Informe o nome do membro.',
     'member.name.too_long': 'O nome do membro deve ter no máximo {maxLength} caracteres.',
     'member.registration.organization_not_found': 'A organização informada não foi encontrada.',
+    'member.id.invalid_type': 'O identificador do membro deve ser um texto.',
+    'member.id.empty': 'Informe o identificador do membro.',
+    'member.id.too_long': 'O identificador do membro deve ter no máximo {maxLength} caracteres.',
+    'member.id.invalid_format': 'O identificador do membro é inválido.',
+    'member.details.not_found': 'O membro informado não foi encontrado nesta organização.',
   }),
   'en-US': Object.freeze({
     'organization.id.invalid_type': 'The organization identifier must be text.',
@@ -20,5 +25,10 @@ export const membershipMessageCatalog: MessageCatalog = Object.freeze({
     'member.name.empty': 'Enter the member name.',
     'member.name.too_long': 'The member name must have at most {maxLength} characters.',
     'member.registration.organization_not_found': 'The specified organization was not found.',
+    'member.id.invalid_type': 'The member identifier must be text.',
+    'member.id.empty': 'Enter the member identifier.',
+    'member.id.too_long': 'The member identifier must have at most {maxLength} characters.',
+    'member.id.invalid_format': 'The member identifier is invalid.',
+    'member.details.not_found': 'The specified member was not found in this organization.',
   }),
 });

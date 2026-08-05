@@ -15,3 +15,7 @@ Accept-Language: pt-BR
 {
   "name": "Maria da Silva"
 }
+
+### Get member details
+GET http://localhost:3000/organizations/{{organizationId}}/members/{{memberId}}
+Accept-Language: pt-BR

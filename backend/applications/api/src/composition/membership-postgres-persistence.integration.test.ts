@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { RegisterMemberHandler } from '@/modules/membership/application';
+import {
+  createMemberDetails,
+  RegisterMemberHandler,
+} from '@/modules/membership/application';
 import {
   MemberId,
   MemberRegistrationPolicy,
@@ -23,6 +26,7 @@ import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
+import { assertMemberDetailsReaderContract } from '@/modules/membership/infrastructure/persistence/member-details-reader.contract';
 import { Pool } from 'pg';
 
 import { createPostgresPersistence } from './create-postgres-persistence';
@@ -130,6 +134,22 @@ describe('PostgreSQL member persistence', () => {
       organizationId: organizationIdText,
       name: 'Maria',
       registeredAt: registeredAt.toISOString(),
+    });
+
+    await assertMemberDetailsReaderContract({
+      reader: persistence.memberDetailsReader,
+      expected: createMemberDetails({
+        id: requireValue(MemberId.create(memberIdText)),
+        organizationId,
+        name: 'Maria',
+        status: 'active',
+      }),
+      anotherOrganizationId: requireValue(OrganizationId.create(
+        '0198f334-6dc5-7c20-9af1-91d7e599a107',
+      )),
+      missingMemberId: requireValue(MemberId.create(
+        '0198f334-6dc5-7c20-9af1-91d7e599a108',
+      )),
     });
 
     await assert.rejects(

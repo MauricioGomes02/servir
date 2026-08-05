@@ -1,6 +1,12 @@
-import { RegisterMemberHandler } from '@/modules/membership/application';
+import {
+  GetMemberDetailsHandler,
+  RegisterMemberHandler,
+} from '@/modules/membership/application';
 import { MemberId, MemberRegistrationPolicy } from '@/modules/membership/domain';
-import { RegisterMemberPresenter } from '@/modules/membership/presentation';
+import {
+  GetMemberDetailsPresenter,
+  RegisterMemberPresenter,
+} from '@/modules/membership/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import { asFunction } from 'awilix';
 
@@ -30,6 +36,12 @@ export function registerMembershipModule(
     )).singleton(),
     registerMemberPresenter: asFunction((dependencies: ApplicationCradle) => (
       new RegisterMemberPresenter(dependencies.translator)
+    )).singleton(),
+    getMemberDetailsHandler: asFunction((dependencies: ApplicationCradle) => (
+      new GetMemberDetailsHandler(dependencies.memberDetailsReader)
+    )).singleton(),
+    getMemberDetailsPresenter: asFunction((dependencies: ApplicationCradle) => (
+      new GetMemberDetailsPresenter(dependencies.translator)
     )).singleton(),
   });
 }

@@ -1,4 +1,5 @@
 import type {
+  MemberDetailsReader,
   MemberWriteScope,
   OrganizationRegistrationFactsReader,
 } from '@/modules/membership/application';
@@ -11,6 +12,7 @@ export interface CreateApplicationOptions {
   readonly logger?: Logger;
   readonly monotonicNow?: () => number;
   readonly memberUnitOfWork?: UnitOfWork<MemberWriteScope>;
+  readonly memberDetailsReader?: MemberDetailsReader;
   readonly organizationRegistrationFacts?: OrganizationRegistrationFactsReader;
   readonly organizationUnitOfWork?: UnitOfWork<OrganizationWriteScope>;
   readonly uuidSource?: UuidV7Source;

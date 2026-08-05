@@ -16,13 +16,15 @@ const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7b8',
   '0198f334-6dc5-7c20-9af1-91d7e599c7b9',
   '0198f334-6dc5-7c20-9af1-91d7e599c7ba',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7bb',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7bc',
 ];
 
 describe('createApplication', () => {
   it('composes the first executable vertical slice', async () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
-    const monotonicInstants = [100, 142, 200, 250];
+    const monotonicInstants = [100, 142, 200, 250, 300, 325];
     const app = createApplication({
       logger,
       monotonicNow: () => monotonicInstants.shift() ?? 142,
@@ -59,8 +61,6 @@ describe('createApplication', () => {
         name: 'Maria da Silva',
       },
     });
-    await app.close();
-
     assert.equal(memberResponse.statusCode, 201);
     assert.equal(memberResponse.headers['x-request-id'], UUIDS[5]);
     assert.equal(memberResponse.headers['x-correlation-id'], UUIDS[6]);
@@ -73,8 +73,22 @@ describe('createApplication', () => {
       memberResponse.headers.location,
       `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
     );
+
+    const detailsResponse = await app.inject({
+      method: 'GET',
+      url: `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
+    });
+    await app.close();
+
+    assert.equal(detailsResponse.statusCode, 200);
+    assert.deepEqual(detailsResponse.json(), {
+      id: UUIDS[7],
+      organizationId: UUIDS[2],
+      name: 'Maria da Silva',
+      status: 'active',
+    });
     assert.equal(ids.length, 0);
-    assert.equal(logger.records.length, 2);
+    assert.equal(logger.records.length, 3);
     assert.equal(logger.records[0]?.eventName, 'http.request.completed');
     assert.deepEqual(logger.records[0]?.context, {
       correlationId: UUIDS[1],
@@ -92,11 +106,17 @@ describe('createApplication', () => {
       'http.response.status_code': 201,
       'duration.ms': 50,
     });
+    assert.deepEqual(logger.records[2]?.attributes, {
+      'http.request.method': 'GET',
+      'http.route': '/organizations/:organizationId/members/:memberId',
+      'http.response.status_code': 200,
+      'duration.ms': 25,
+    });
   });
 
   it('distinguishes malformed and missing organization resources', async () => {
-    const ids = [...UUIDS.slice(0, 4)];
-    const instants = [0, 1, 2, 3];
+    const ids = [...UUIDS.slice(0, 6)];
+    const instants = [0, 1, 2, 3, 4, 5];
     const app = createApplication({
       logger: new InMemoryLogger(),
       monotonicNow: () => instants.shift() ?? 3,
@@ -122,6 +142,11 @@ describe('createApplication', () => {
       headers: { 'accept-language': 'en-US' },
       payload: { name: 'Maria da Silva' },
     });
+    const missingMemberResponse = await app.inject({
+      method: 'GET',
+      url: `/organizations/${UUIDS[4]}/members/${UUIDS[5]}`,
+      headers: { 'accept-language': 'en-US' },
+    });
     await app.close();
 
     assert.equal(malformedResponse.statusCode, 400);
@@ -142,6 +167,15 @@ describe('createApplication', () => {
     assert.equal(
       missingResponse.json().errors[0].code,
       'member.registration.organization_not_found',
+    );
+    assert.equal(missingMemberResponse.statusCode, 404);
+    assert.equal(
+      missingMemberResponse.json().type,
+      '/problems/resource-not-found',
+    );
+    assert.equal(
+      missingMemberResponse.json().errors[0].code,
+      'member.details.not_found',
     );
   });
 });

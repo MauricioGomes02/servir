@@ -1,5 +1,6 @@
 import {
   InMemoryMemberRepository,
+  InMemoryMemberDetailsReader,
   InMemoryOrganizationRegistrationFactsReader,
 } from '@/modules/membership/infrastructure';
 import { InMemoryOrganizationRepository } from '@/modules/organizations/infrastructure';
@@ -18,6 +19,7 @@ import type { CreateApplicationOptions } from '../create-application-options';
 function hasNoPersistenceOverrides(options: CreateApplicationOptions): boolean {
   return options.organizationUnitOfWork === undefined
     && options.memberUnitOfWork === undefined
+    && options.memberDetailsReader === undefined
     && options.organizationRegistrationFacts === undefined;
 }
 
@@ -42,6 +44,9 @@ export function registerPersistence(
       memberUnitOfWork: asValue(
         new DirectUnitOfWork({ members, outbox }),
       ),
+      memberDetailsReader: asValue(
+        new InMemoryMemberDetailsReader(() => members.members),
+      ),
       organizationRegistrationFacts: asValue(
         new InMemoryOrganizationRegistrationFactsReader(
           () => organizations.organizations.map(
@@ -57,6 +62,7 @@ export function registerPersistence(
   if (
     options.organizationUnitOfWork === undefined
     || options.memberUnitOfWork === undefined
+    || options.memberDetailsReader === undefined
     || options.organizationRegistrationFacts === undefined
   ) {
     throw new ApplicationPersistenceConfigurationError();
@@ -65,6 +71,7 @@ export function registerPersistence(
   container.register({
     organizationUnitOfWork: asValue(options.organizationUnitOfWork),
     memberUnitOfWork: asValue(options.memberUnitOfWork),
+    memberDetailsReader: asValue(options.memberDetailsReader),
     organizationRegistrationFacts: asValue(
       options.organizationRegistrationFacts,
     ),

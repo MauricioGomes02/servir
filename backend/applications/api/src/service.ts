@@ -69,6 +69,7 @@ export async function startService(
     const app = createApplication({
       logger,
       memberUnitOfWork: postgresPersistence?.memberUnitOfWork,
+      memberDetailsReader: postgresPersistence?.memberDetailsReader,
       organizationRegistrationFacts:
         postgresPersistence?.organizationRegistrationFacts,
       organizationUnitOfWork: postgresPersistence?.unitOfWork,

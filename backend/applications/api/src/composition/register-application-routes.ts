@@ -1,4 +1,7 @@
-import { registerMemberRoute } from '@/modules/membership/infrastructure';
+import {
+  registerGetMemberDetailsRoute,
+  registerMemberRoute,
+} from '@/modules/membership/infrastructure';
 import { registerCreateOrganizationRoute } from '@/modules/organizations/infrastructure';
 import type { FastifyInstance } from 'fastify';
 
@@ -19,5 +22,10 @@ export function registerApplicationRoutes(
     handler: dependencies.registerMemberHandler,
     messageTranslator: dependencies.translator,
     presenter: dependencies.registerMemberPresenter,
+  });
+  registerGetMemberDetailsRoute(app, {
+    handler: dependencies.getMemberDetailsHandler,
+    messageTranslator: dependencies.translator,
+    presenter: dependencies.getMemberDetailsPresenter,
   });
 }

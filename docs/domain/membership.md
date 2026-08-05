@@ -2,7 +2,7 @@
 
 ## Estado
 
-Núcleo de domínio, `RegisterMember`, persistência PostgreSQL, contrato de integração v1 e entrada HTTP implementados.
+Núcleo de domínio, `RegisterMember`, `GetMemberDetails`, persistência PostgreSQL, contrato de integração v1 e entradas HTTP implementados.
 
 ## Motivação
 
@@ -84,9 +84,19 @@ No PostgreSQL, `registeredAt` usa `timestamptz`. O estado é persistido como `sm
 
 No modo em memória, o Reader recebe da composition root uma fonte viva de identidades de Organizations. Membership continua dependendo apenas de seu port de fatos, sem importar o Repository ou o adapter de outro módulo. No PostgreSQL, o mesmo port é atendido por consulta própria.
 
+## Consulta de detalhes
+
+`GetMemberDetails` é a primeira Query concreta do projeto. Ela valida `OrganizationId` e `MemberId`, consulta `MemberDetailsReader` e retorna o Read Model imutável `MemberDetails` com identidade, organização, nome e estado. Ausência usa o código estável `member.details.not_found` sem revelar se o Member existe em outra Organization.
+
+`GET /organizations/{organizationId}/members/{memberId}` devolve a representação direta com `200 OK`. Identificadores malformados produzem `400`; Member ausente ou pertencente a outra Organization produz `404`. A consulta cria o span semântico `GetMemberDetails`.
+
+O adapter PostgreSQL projeta somente `name` e `status`, usando os IDs já validados da Query. Ele traduz o `smallint` persistido para `active | inactive`. O adapter em memória lê uma fonte viva do mesmo storage usado pelo Command. Ambos seguem a mesma suíte de contrato, sem reconstituir o Aggregate para leitura.
+
+`registeredAt` permanece fora dessa representação até a implementação da estratégia de apresentação temporal e timezone registrada no roadmap.
+
 ## Próximos comportamentos candidatos
 
-- Implementar Queries específicas de leitura para Membership.
+- Definir a Query paginada de membros exigida pela primeira tela consumidora.
 - Desativação e reativação preservam histórico por eventos próprios.
 - Renomeação registra fato sem alterar publicações históricas que guardem snapshots.
 

@@ -181,11 +181,11 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Relay PostgreSQL independente, lease, retry exponencial com jitter e falha terminal.
 - Publicação Kafka em CloudEvents com entrega at-least-once.
 - Infraestrutura local com Terraform e migrations externas com Liquibase.
-- Membership com `RegisterMember`, Policy, Reader de fatos, persistência PostgreSQL, entrada HTTP localizada e Integration Event v1.
+- Membership com `RegisterMember`, `GetMemberDetails`, Readers específicos, persistência PostgreSQL, entradas HTTP localizadas e Integration Event v1.
 
 ### Em evolução
 
-- Queries de Membership.
+- Listagem paginada de Membership orientada pela primeira tela consumidora.
 - Ministérios, funções, participação, aprovação e times.
 - Atividades, recorrência e ocorrências com modelagem temporal explícita.
 - Disponibilidade e escalas versionadas por time.
