@@ -72,7 +72,7 @@ flowchart TD
 | Unit of Work | Implementação inicial | Port com escopo tipado, adapter direto, confirmação seletiva de eventos e adapter PostgreSQL com commit/rollback testados |
 | Primeiro corte vertical | Implementação inicial | CreateOrganization persiste Organization e outbox atomicamente; PostgreSQL traduz `OrganizationCreated` para contrato externo v1; relay publica o CloudEvent no Kafka e confirma a outbox; fluxo real validado manualmente, com teste de sistema automatizado ainda planejado |
 | Descoberta do domínio ministerial | Em andamento | Contextos de Organizations, Membership, Ministries, Activities e Scheduling mapeados; linguagem confirmada separada de hipóteses; primeiro incremento selecionado após fechar questões do Aggregate consumidor |
-| Member e vínculo organizacional | Persistência inicial | Núcleo, RegisterMember, Policy, Reader PostgreSQL, MemberRepository PostgreSQL, schema com status numérico e Integration Event v1 implementados; apresentação HTTP permanece planejada |
+| Member e vínculo organizacional | Corte vertical inicial | Núcleo, RegisterMember, Policy, Readers, persistência PostgreSQL, schema com status numérico, Integration Event v1 e entrada HTTP localizada implementados; Queries permanecem planejadas |
 | Ministry e funções | Planejado | Aggregate, funções internas, invariantes, eventos e caso de uso CreateMinistry estabilizados antes de times e escalas |
 | Participação e qualificação ministerial | Planejado | Solicitação, aprovação, estados históricos e qualificação por função testados |
 | Times ministeriais | Planejado | MinistryTeam, TeamMembership, liderança vigente e responsabilidade por escala definidos |

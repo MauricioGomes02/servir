@@ -11,13 +11,18 @@ const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
   '0198f334-6dc5-7c20-9af1-91d7e599c7b4',
   '0198f334-6dc5-7c20-9af1-91d7e599c7b5',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7b6',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7b7',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7b8',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7b9',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7ba',
 ];
 
 describe('createApplication', () => {
   it('composes the first executable vertical slice', async () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
-    const monotonicInstants = [100, 142];
+    const monotonicInstants = [100, 142, 200, 250];
     const app = createApplication({
       logger,
       monotonicNow: () => monotonicInstants.shift() ?? 142,
@@ -39,8 +44,6 @@ describe('createApplication', () => {
         name: 'Comunidade Servir',
       },
     });
-    await app.close();
-
     assert.equal(response.statusCode, 201);
     assert.equal(response.headers['x-request-id'], UUIDS[0]);
     assert.equal(response.headers['x-correlation-id'], UUIDS[1]);
@@ -49,8 +52,29 @@ describe('createApplication', () => {
       name: 'Comunidade Servir',
     });
     assert.equal(response.headers.location, `/organizations/${UUIDS[2]}`);
+    const memberResponse = await app.inject({
+      method: 'POST',
+      url: `/organizations/${UUIDS[2]}/members`,
+      payload: {
+        name: 'Maria da Silva',
+      },
+    });
+    await app.close();
+
+    assert.equal(memberResponse.statusCode, 201);
+    assert.equal(memberResponse.headers['x-request-id'], UUIDS[5]);
+    assert.equal(memberResponse.headers['x-correlation-id'], UUIDS[6]);
+    assert.deepEqual(memberResponse.json(), {
+      id: UUIDS[7],
+      organizationId: UUIDS[2],
+      name: 'Maria da Silva',
+    });
+    assert.equal(
+      memberResponse.headers.location,
+      `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
+    );
     assert.equal(ids.length, 0);
-    assert.equal(logger.records.length, 1);
+    assert.equal(logger.records.length, 2);
     assert.equal(logger.records[0]?.eventName, 'http.request.completed');
     assert.deepEqual(logger.records[0]?.context, {
       correlationId: UUIDS[1],
@@ -62,5 +86,62 @@ describe('createApplication', () => {
       'http.response.status_code': 201,
       'duration.ms': 42,
     });
+    assert.deepEqual(logger.records[1]?.attributes, {
+      'http.request.method': 'POST',
+      'http.route': '/organizations/:organizationId/members',
+      'http.response.status_code': 201,
+      'duration.ms': 50,
+    });
+  });
+
+  it('distinguishes malformed and missing organization resources', async () => {
+    const ids = [...UUIDS.slice(0, 4)];
+    const instants = [0, 1, 2, 3];
+    const app = createApplication({
+      logger: new InMemoryLogger(),
+      monotonicNow: () => instants.shift() ?? 3,
+      uuidSource: () => {
+        const id = ids.shift();
+
+        if (id === undefined) {
+          throw new Error('Deterministic UUID source exhausted');
+        }
+
+        return id;
+      },
+    });
+
+    const malformedResponse = await app.inject({
+      method: 'POST',
+      url: '/organizations/not-a-uuid/members',
+      payload: { name: 'Maria da Silva' },
+    });
+    const missingResponse = await app.inject({
+      method: 'POST',
+      url: `/organizations/${UUIDS[4]}/members`,
+      headers: { 'accept-language': 'en-US' },
+      payload: { name: 'Maria da Silva' },
+    });
+    await app.close();
+
+    assert.equal(malformedResponse.statusCode, 400);
+    assert.equal(malformedResponse.json().type, '/problems/invalid-request');
+    assert.equal(
+      malformedResponse.json().errors[0].code,
+      'organization.id.invalid_format',
+    );
+    assert.equal(missingResponse.statusCode, 404);
+    assert.equal(
+      missingResponse.json().type,
+      '/problems/resource-not-found',
+    );
+    assert.equal(
+      missingResponse.json().title,
+      'The requested resource was not found.',
+    );
+    assert.equal(
+      missingResponse.json().errors[0].code,
+      'member.registration.organization_not_found',
+    );
   });
 });

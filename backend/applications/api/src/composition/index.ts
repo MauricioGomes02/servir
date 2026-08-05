@@ -13,3 +13,4 @@ export type {
 export type {
   CreateApplicationOptions,
 } from './create-application';
+export { ApplicationPersistenceConfigurationError } from './application-persistence-configuration-error';

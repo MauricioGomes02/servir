@@ -2,7 +2,7 @@
 
 ## Estado
 
-Núcleo de domínio, `RegisterMember`, persistência PostgreSQL e contrato de integração v1 implementados. A apresentação permanece planejada.
+Núcleo de domínio, `RegisterMember`, persistência PostgreSQL, contrato de integração v1 e entrada HTTP implementados.
 
 ## Motivação
 
@@ -78,9 +78,15 @@ No PostgreSQL, `registeredAt` usa `timestamptz`. O estado é persistido como `sm
 - Scheduling usará `MemberId` em disponibilidade e atribuições.
 - Identity & Access poderá associar `User` e `Member` por um fluxo futuro sem colocar credenciais no Aggregate.
 
+## Entrada HTTP
+
+`POST /organizations/{organizationId}/members` recebe o nome e devolve a representação direta do membro com `201 Created` e `Location`. A rota distingue identificador malformado (`400`), Organization inexistente (`404`) e nome inválido (`422`). Falhas esperadas seguem Problem Details, códigos estáveis e localização por `Accept-Language`; a execução cria o span semântico `RegisterMember`.
+
+No modo em memória, o Reader recebe da composition root uma fonte viva de identidades de Organizations. Membership continua dependendo apenas de seu port de fatos, sem importar o Repository ou o adapter de outro módulo. No PostgreSQL, o mesmo port é atendido por consulta própria.
+
 ## Próximos comportamentos candidatos
 
-- Expor `RegisterMember` por uma entrada HTTP com Problem Details e localização.
+- Implementar Queries específicas de leitura para Membership.
 - Desativação e reativação preservam histórico por eventos próprios.
 - Renomeação registra fato sem alterar publicações históricas que guardem snapshots.
 

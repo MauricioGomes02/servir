@@ -12,7 +12,7 @@ Servir é uma plataforma em construção para organizar membros, ministérios, t
 
 Mais do que reunir tecnologias, o repositório registra as decisões, os limites e os trade-offs que sustentam cada incremento.
 
-> **Estado atual:** a fundação arquitetural e o primeiro fluxo distribuído estão executáveis. Organizations possui um corte vertical completo; Membership está em evolução incremental. Consulte o [roadmap](docs/roadmap.md) para distinguir o que já existe do que está planejado.
+> **Estado atual:** a fundação arquitetural e o primeiro fluxo distribuído estão executáveis. Organizations e o registro inicial de Membership possuem cortes verticais completos. Consulte o [roadmap](docs/roadmap.md) para distinguir o que já existe do que está planejado.
 
 ## Por que este projeto é diferente?
 
@@ -178,11 +178,11 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Relay PostgreSQL independente, lease, retry exponencial com jitter e falha terminal.
 - Publicação Kafka em CloudEvents com entrega at-least-once.
 - Infraestrutura local com Terraform e migrations externas com Liquibase.
-- Membership com `RegisterMember`, Policy, Reader de fatos, persistência PostgreSQL e Integration Event v1.
+- Membership com `RegisterMember`, Policy, Reader de fatos, persistência PostgreSQL, entrada HTTP localizada e Integration Event v1.
 
 ### Em evolução
 
-- Apresentação HTTP e Queries de Membership.
+- Queries de Membership.
 - Ministérios, funções, participação, aprovação e times.
 - Atividades, recorrência e ocorrências com modelagem temporal explícita.
 - Disponibilidade e escalas versionadas por time.

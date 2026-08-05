@@ -6,3 +6,12 @@ Accept-Language: pt-BR
 {
   "name": "Igreja Batista Filadélfia de Canoas"
 }
+
+### Register a member in an organization
+POST http://localhost:3000/organizations/{{organizationId}}/members
+Content-Type: application/json
+Accept-Language: pt-BR
+
+{
+  "name": "Maria da Silva"
+}

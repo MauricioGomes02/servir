@@ -7,6 +7,7 @@ import type { PresentedError } from '@/shared/presentation';
 export const HttpProblemTypes = {
   InternalError: '/problems/internal-error',
   InvalidRequest: '/problems/invalid-request',
+  ResourceNotFound: '/problems/resource-not-found',
   ValidationError: '/problems/validation-error',
 } as const;
 
@@ -38,6 +39,7 @@ interface CreateHttpProblemDetailsInput {
 }
 
 interface CreateValidationProblemDetailsInput {
+  readonly type?: string;
   readonly title: string;
   readonly status: number;
   readonly requestId?: RequestId;
@@ -78,7 +80,7 @@ export function createValidationProblemDetails(
 ): ValidationProblemDetails {
   return Object.freeze({
     ...createHttpProblemDetails({
-      type: HttpProblemTypes.ValidationError,
+      type: input.type ?? HttpProblemTypes.ValidationError,
       title: input.title,
       status: input.status,
       requestId: input.requestId,

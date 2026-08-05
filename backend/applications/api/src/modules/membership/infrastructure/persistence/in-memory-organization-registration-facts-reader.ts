@@ -5,21 +5,30 @@ import type { OrganizationRegistrationFacts } from '../../domain';
 
 export class InMemoryOrganizationRegistrationFactsReader
 implements OrganizationRegistrationFactsReader {
-  private readonly organizationsById:
-    ReadonlyMap<string, OrganizationRegistrationFacts>;
+  private readonly organizationIds: () => ReadonlyArray<OrganizationId>;
 
-  constructor(organizationIds: ReadonlyArray<OrganizationId>) {
-    this.organizationsById = new Map(
-      organizationIds.map((organizationId) => [
-        organizationId.toString(),
-        Object.freeze({ organizationId }),
-      ]),
-    );
+  constructor(
+    source: ReadonlyArray<OrganizationId>
+      | (() => ReadonlyArray<OrganizationId>),
+  ) {
+    if (typeof source === 'function') {
+      this.organizationIds = source;
+      return;
+    }
+
+    const snapshot = Object.freeze([...source]);
+    this.organizationIds = () => snapshot;
   }
 
   async findById(
     organizationId: OrganizationId,
   ): Promise<OrganizationRegistrationFacts | undefined> {
-    return this.organizationsById.get(organizationId.toString());
+    const found = this.organizationIds().find(
+      (candidate) => candidate.equals(organizationId),
+    );
+
+    return found === undefined
+      ? undefined
+      : Object.freeze({ organizationId: found });
   }
 }
