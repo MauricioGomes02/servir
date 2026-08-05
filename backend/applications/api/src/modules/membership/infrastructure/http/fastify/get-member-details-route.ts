@@ -71,7 +71,7 @@ export function registerGetMemberDetailsRoute(
         () => dependencies.handler.handle({
           organizationId: pathValue(request.params, 'organizationId'),
           memberId: pathValue(request.params, 'memberId'),
-        }),
+        }, context),
       );
       const view = dependencies.presenter.present(
         result,

@@ -24,6 +24,7 @@ import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
+import { InMemoryLogger } from '@/shared/infrastructure/logging';
 
 import {
   MemberId,
@@ -93,6 +94,7 @@ function createFixture(options?: {
     ? []
     : [ids.organizationId];
   const scope: MemberWriteScope = { members, outbox };
+  const logger = new InMemoryLogger();
   const handler = new RegisterMemberHandler({
     clock: new FixedClock(ids.occurredAt),
     memberIdGenerator: new SequenceIdGenerator([ids.memberId]),
@@ -108,15 +110,62 @@ function createFixture(options?: {
       ),
     registrationPolicy: new MemberRegistrationPolicy(),
     unitOfWork: new DirectUnitOfWork(scope),
+    logger,
   });
   const context = createExecutionContext({
     correlationId: ids.correlationId,
   });
 
-  return { handler, context, ids, members, outbox };
+  return { handler, context, ids, members, outbox, logger };
 }
 
 describe('RegisterMemberHandler', () => {
+  it('records eligibility and persistence without personal data', async () => {
+    const fixture = createFixture();
+
+    await fixture.handler.handle({
+      organizationId: fixture.ids.organizationId.value,
+      name: 'Maria da Silva',
+    }, fixture.context);
+
+    assert.deepEqual(fixture.logger.records.map((record) => record.eventName), [
+      'member.registration.started',
+      'member.registration.organization.validated',
+      'member.registration.eligibility.accepted',
+      'member.registration.validated',
+      'member.registration.persisted',
+      'member.registration.completed',
+    ]);
+    assert.equal(
+      JSON.stringify(fixture.logger.records).includes('Maria da Silva'),
+      false,
+    );
+  });
+
+  it('records the policy rejection without persistence milestones', async () => {
+    const fixture = createFixture({ organizationExists: false });
+
+    await fixture.handler.handle({
+      organizationId: fixture.ids.organizationId.value,
+      name: 'Maria da Silva',
+    }, fixture.context);
+
+    assert.equal(
+      fixture.logger.records.at(-1)?.eventName,
+      'member.registration.rejected',
+    );
+    assert.equal(
+      fixture.logger.records.at(-1)?.attributes['error.code'],
+      MemberRegistrationPolicyErrorCodes.OrganizationNotFound,
+    );
+    assert.equal(
+      fixture.logger.records.some(
+        (record) => record.eventName === 'member.registration.persisted',
+      ),
+      false,
+    );
+  });
+
   it('persists the member and envelope in the same scope', async () => {
     const fixture = createFixture();
 

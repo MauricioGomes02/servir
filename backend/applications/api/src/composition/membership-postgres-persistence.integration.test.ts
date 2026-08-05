@@ -25,6 +25,7 @@ import {
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
+import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
 import { assertMemberDetailsReaderContract } from '@/modules/membership/infrastructure/persistence/member-details-reader.contract';
 import { Pool } from 'pg';
@@ -94,6 +95,7 @@ describe('PostgreSQL member persistence', () => {
           persistence.organizationRegistrationFacts,
         registrationPolicy: new MemberRegistrationPolicy(),
         unitOfWork: persistence.memberUnitOfWork,
+        logger: new InMemoryLogger(),
       });
     }
 

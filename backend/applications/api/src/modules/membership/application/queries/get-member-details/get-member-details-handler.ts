@@ -7,6 +7,13 @@ import {
   type OrganizationIdError,
 } from '@/modules/organizations/domain';
 import { failure, type Result, success } from '@/shared/core/result';
+import type { ExecutionContext } from '@/shared/application/context';
+import {
+  createLogRecord,
+  LogLevels,
+  type Logger,
+  type LogAttributes,
+} from '@/shared/application/logging';
 
 import {
   GetMemberDetailsErrorCodes,
@@ -21,33 +28,78 @@ type GetMemberDetailsFailure = OrganizationIdError
   | GetMemberDetailsError;
 
 export class GetMemberDetailsHandler {
-  constructor(private readonly reader: MemberDetailsReader) {}
+  constructor(
+    private readonly reader: MemberDetailsReader,
+    private readonly logger: Logger,
+  ) {}
 
   async handle(
     query: GetMemberDetailsQuery,
+    context: ExecutionContext,
   ): Promise<Result<MemberDetails, GetMemberDetailsFailure>> {
+    this.log('member.details.retrieval.started', context, {}, LogLevels.Debug);
     const organizationId = OrganizationId.create(query.organizationId);
 
     if (!organizationId.success) {
+      this.logRejection(context, organizationId.error.code,
+        organizationId.error.field);
       return organizationId;
     }
 
     const memberId = MemberId.create(query.memberId);
 
     if (!memberId.success) {
+      this.logRejection(context, memberId.error.code, memberId.error.field, {
+        'organization.id': organizationId.value.value,
+      });
       return memberId;
     }
+
+    const criteria = {
+      'organization.id': organizationId.value.value,
+      'member.id': memberId.value.value,
+    };
+    this.log('member.details.retrieval.criteria_validated', context, criteria,
+      LogLevels.Debug);
 
     const details = await this.reader.findById(
       organizationId.value,
       memberId.value,
     );
 
-    return details === undefined
-      ? failure({
+    if (details === undefined) {
+      this.log('member.details.retrieval.not_found', context, criteria,
+        LogLevels.Info);
+      return failure({
         code: GetMemberDetailsErrorCodes.NotFound,
         field: 'memberId',
-      })
-      : success(details);
+      });
+    }
+
+    this.log('member.details.retrieval.completed', context, criteria,
+      LogLevels.Info);
+    return success(details);
+  }
+
+  private logRejection(
+    context: ExecutionContext,
+    code: string,
+    field?: string,
+    attributes: LogAttributes = {},
+  ): void {
+    this.log('member.details.retrieval.rejected', context, {
+      ...attributes,
+      'error.code': code,
+      ...(field === undefined ? {} : { 'error.field': field }),
+    }, LogLevels.Info);
+  }
+
+  private log(
+    eventName: string,
+    context: ExecutionContext,
+    attributes: LogAttributes,
+    level: typeof LogLevels.Debug | typeof LogLevels.Info,
+  ): void {
+    this.logger.log(createLogRecord({ level, eventName, context, attributes }));
   }
 }

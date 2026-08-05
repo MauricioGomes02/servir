@@ -32,13 +32,17 @@ export function registerMembershipModule(
           dependencies.organizationRegistrationFacts,
         registrationPolicy: new MemberRegistrationPolicy(),
         unitOfWork: dependencies.memberUnitOfWork,
+        logger: dependencies.logger,
       })
     )).singleton(),
     registerMemberPresenter: asFunction((dependencies: ApplicationCradle) => (
       new RegisterMemberPresenter(dependencies.translator)
     )).singleton(),
     getMemberDetailsHandler: asFunction((dependencies: ApplicationCradle) => (
-      new GetMemberDetailsHandler(dependencies.memberDetailsReader)
+      new GetMemberDetailsHandler(
+        dependencies.memberDetailsReader,
+        dependencies.logger,
+      )
     )).singleton(),
     getMemberDetailsPresenter: asFunction((dependencies: ApplicationCradle) => (
       new GetMemberDetailsPresenter(dependencies.translator)
