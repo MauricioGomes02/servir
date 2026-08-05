@@ -58,3 +58,23 @@ variable "kafka_cluster_id" {
   description = "Stable KRaft cluster identity for the persisted local broker."
   type        = string
 }
+
+variable "otel_collector_image" {
+  description = "Pinned OpenTelemetry Collector Contrib image used locally."
+  type        = string
+}
+
+variable "otel_http_port" {
+  description = "OTLP/HTTP receiver port published on the host loopback interface."
+  type        = number
+}
+
+variable "jaeger_image" {
+  description = "Pinned Jaeger all-in-one image used locally."
+  type        = string
+}
+
+variable "jaeger_ui_port" {
+  description = "Jaeger UI port published on the host loopback interface."
+  type        = number
+}

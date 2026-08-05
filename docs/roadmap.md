@@ -84,6 +84,7 @@ flowchart TD
 | Infraestrutura local e migrations | Implementação inicial | Stacks Terraform de plataforma e mensageria, permissões do volume Kafka, Liquibase e fluxo local PostgreSQL/outbox/Kafka foram validados; credenciais de runtime e IaC de ambientes compartilhados permanecem planejadas |
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado, primeiro Presenter e títulos HTTP localizados estão definidos |
 | Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, contexto por request, Problem Details, representação direta do recurso, log final de requisição e span semântico de `CreateOrganization` estão testados; HTTP/Fastify/PostgreSQL permanecem instrumentados automaticamente e spans manuais do relay seguem planejados |
+| Visualização local de traces | Implementação inicial | Terraform provisiona Collector vendor-neutral e Jaeger efêmero; API e relay exportam por OTLP/HTTP e a UI permite avaliar spans antes de ampliar logging ou instrumentação |
 | Apresentação temporal e datas civis | Planejado | API preserva `Instant` UTC; apresentação converte com locale e timezone IANA; agendamentos modelam data civil, horário civil e zona separadamente; precedência entre timezone da operação, usuário, organização e aplicação permanece por definir com o primeiro consumidor |
 
 ## Exemplos

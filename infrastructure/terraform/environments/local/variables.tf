@@ -80,3 +80,37 @@ variable "kafka_cluster_id" {
   type        = string
   default     = "MkU3OEVBNTcwNTJENDM2Qk"
 }
+
+variable "otel_collector_image" {
+  description = "Pinned OpenTelemetry Collector Contrib image used locally."
+  type        = string
+  default     = "otel/opentelemetry-collector-contrib:0.157.0"
+}
+
+variable "otel_http_port" {
+  description = "OTLP/HTTP receiver port published only on host loopback."
+  type        = number
+  default     = 4318
+
+  validation {
+    condition     = var.otel_http_port >= 1 && var.otel_http_port <= 65535
+    error_message = "otel_http_port must be between 1 and 65535."
+  }
+}
+
+variable "jaeger_image" {
+  description = "Pinned Jaeger all-in-one image used locally."
+  type        = string
+  default     = "cr.jaegertracing.io/jaegertracing/jaeger:2.20.0"
+}
+
+variable "jaeger_ui_port" {
+  description = "Jaeger UI port published only on host loopback."
+  type        = number
+  default     = 16686
+
+  validation {
+    condition     = var.jaeger_ui_port >= 1 && var.jaeger_ui_port <= 65535
+    error_message = "jaeger_ui_port must be between 1 and 65535."
+  }
+}

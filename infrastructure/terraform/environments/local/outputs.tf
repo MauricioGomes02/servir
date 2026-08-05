@@ -22,3 +22,18 @@ output "kafka_container_endpoint" {
   description = "Kafka bootstrap endpoint for containers on the platform network."
   value       = module.platform.kafka_container_endpoint
 }
+
+output "otel_http_host_endpoint" {
+  description = "OTLP/HTTP traces endpoint for API and relay processes on the host."
+  value       = module.platform.otel_http_host_endpoint
+}
+
+output "otel_http_container_endpoint" {
+  description = "OTLP/HTTP traces endpoint for containers on the platform network."
+  value       = module.platform.otel_http_container_endpoint
+}
+
+output "jaeger_ui_url" {
+  description = "Jaeger trace exploration UI available on the host."
+  value       = module.platform.jaeger_ui_url
+}

@@ -38,8 +38,9 @@ flowchart LR
     UOW --> PG[(PostgreSQL<br/>estado + outbox)]
     PG --> RELAY[Outbox Relay]
     RELAY --> KAFKA[(Kafka)]
-    API -. traces .-> OTEL[OpenTelemetry]
-    RELAY -. traces .-> OTEL
+    API -. OTLP traces .-> OTEL[OpenTelemetry Collector]
+    RELAY -. OTLP traces .-> OTEL
+    OTEL --> JAEGER[Jaeger UI]
 ```
 
 As dependências de código apontam para o núcleo. Ports pertencem às necessidades da Application; adapters traduzem HTTP, persistência, mensageria, tempo, identidade e telemetria.
@@ -90,6 +91,7 @@ O domínio considera atividades manuais ou recorrentes, várias execuções de u
 | Kafka | Transporte de Integration Events |
 | CloudEvents | Envelope público interoperável |
 | OpenTelemetry | Traces e propagação de contexto |
+| Jaeger | Busca e visualização local de traces |
 | Liquibase | Evolução externa e versionada do schema |
 | Terraform | Ownership da infraestrutura local persistente |
 | Docker | Execução isolada dos serviços e ferramentas |
@@ -185,7 +187,7 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Atividades, recorrência e ocorrências com modelagem temporal explícita.
 - Disponibilidade e escalas versionadas por time.
 - Auditoria durável, notificações e consumidores idempotentes.
-- Collector e backend local para visualização de telemetria.
+- Avaliação dos traces locais e evolução orientada por lacunas observadas.
 - Frontend e documentação bilíngue.
 
 O [roadmap completo](docs/roadmap.md) preserva critérios de saída e evita apresentar intenção como funcionalidade pronta.

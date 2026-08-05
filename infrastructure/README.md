@@ -6,7 +6,7 @@ Esta pasta concentra recursos operacionais externos às aplicações. Terraform 
 
 | Responsável | Recursos |
 |---|---|
-| Terraform `local` | Rede, IPAM, volumes protegidos, imagens e containers PostgreSQL/Kafka |
+| Terraform `local` | Rede, IPAM, volumes protegidos, imagens e containers PostgreSQL/Kafka/Collector/Jaeger |
 | Terraform `local-messaging` | Tópicos e suas configurações persistentes |
 | Compose | Execuções sob demanda de Liquibase |
 | Aplicações | Consumo dos endpoints e contratos já provisionados |
@@ -39,10 +39,10 @@ O primeiro `terraform init` gera `.terraform.lock.hcl`, que deve ser versionado 
 
 Os outputs distinguem endpoints por origem:
 
-| Consumidor | PostgreSQL | Kafka |
-|---|---|---|
-| Processo no host/WSL | `localhost:5432` | `localhost:29092` |
-| Container na rede | `postgres:5432` | `kafka:9092` |
+| Consumidor | PostgreSQL | Kafka | OTLP/HTTP |
+|---|---|---|---|
+| Processo no host/WSL | `localhost:5432` | `localhost:29092` | `http://localhost:4318/v1/traces` |
+| Container na rede | `postgres:5432` | `kafka:9092` | `http://otel-collector:4318/v1/traces` |
 
 A rede bridge `servir-platform` usa por padrão `172.28.0.0/24` e gateway `172.28.0.1`. Altere ambos no `terraform.tfvars` antes do primeiro apply se houver sobreposição com VPN ou outra rede Docker. Containers usam DNS; IPs fixos não fazem parte do contrato.
 
@@ -98,6 +98,8 @@ DATABASE_URL=postgresql://servir_migrator:servir_migrator_local@localhost:5432/s
 # backend/applications/outbox-relay/.env
 DATABASE_URL=postgresql://servir_migrator:servir_migrator_local@localhost:5432/servir
 KAFKA_BROKERS=localhost:29092
+OTEL_SDK_DISABLED=false
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
 ```
 
 Em outro terminal:
@@ -110,10 +112,23 @@ npm run dev:relay
 
 As credenciais simplificadas existem apenas para desenvolvimento local. Ambientes compartilhados exigem identidades separadas e permissões mínimas.
 
+## Visualizar traces
+
+Collector e Jaeger são provisionados pelo mesmo stack `local`. O Collector recebe OTLP/HTTP em `127.0.0.1:4318`, processa os spans com proteção de memória e batch e os encaminha ao Jaeger pela rede interna. Acesse:
+
+```text
+http://localhost:16686
+```
+
+Reinicie API e relay após habilitar `OTEL_SDK_DISABLED=false`. Gere uma requisição, selecione `servir-api` ou `servir-outbox-relay` no campo **Service** do Jaeger e execute **Find Traces**. O armazenamento é efêmero e será perdido quando o container do Jaeger for recriado.
+
+Esse incremento transporta somente traces. Logs continuam estruturados no stdout; métricas e exportação OTLP de logs não fazem parte deste pipeline.
+
 ## Rede e segurança local
 
 - A bridge definida pelo usuário fornece DNS e isolamento da bridge padrão.
 - PostgreSQL e Kafka publicam portas apenas em `127.0.0.1`.
+- Collector e Jaeger publicam OTLP/HTTP e UI apenas em `127.0.0.1`.
 - O listener `INTERNAL` do Kafka anuncia `kafka:9092`; o listener `EXTERNAL` anuncia `localhost:29092`.
 - PLAINTEXT é aceito somente neste ambiente local; produção requer autenticação e criptografia definidas pela IaC do ambiente.
 - O nó Kafka combina broker e controller em KRaft. Essa topologia não representa alta disponibilidade.
@@ -135,6 +150,11 @@ infrastructure/
     ├── environments/local-messaging/    # composition root e state dos tópicos
     ├── modules/local-platform/          # rede, volumes e serviços persistentes
     └── modules/local-messaging/         # catálogo de tópicos Kafka
+```
+
+```text
+infrastructure/observability/
+└── otel-collector.yaml                  # pipeline local de traces
 ```
 
 Novas migrations são novos changesets imutáveis. Mudanças incompatíveis seguem expand/contract. Novos recursos persistentes entram no Terraform; operações repetíveis e descartáveis permanecem fora do state. O stack de plataforma deve ser aplicado antes do stack de mensageria.

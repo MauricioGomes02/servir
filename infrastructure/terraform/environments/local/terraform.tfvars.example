@@ -11,3 +11,8 @@ postgres_migrator_password = "servir_migrator_local"
 kafka_external_port      = 29092
 kafka_cluster_id         = "MkU3OEVBNTcwNTJENDM2Qk"
 volume_initializer_image = "busybox:1.37.0"
+
+otel_collector_image = "otel/opentelemetry-collector-contrib:0.157.0"
+otel_http_port       = 4318
+jaeger_image         = "cr.jaegertracing.io/jaegertracing/jaeger:2.20.0"
+jaeger_ui_port       = 16686

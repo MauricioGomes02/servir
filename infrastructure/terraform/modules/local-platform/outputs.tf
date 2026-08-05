@@ -22,3 +22,18 @@ output "kafka_container_endpoint" {
   description = "Kafka bootstrap endpoint for containers attached to the platform network."
   value       = "kafka:9092"
 }
+
+output "otel_http_host_endpoint" {
+  description = "OTLP/HTTP traces endpoint for applications running on the host."
+  value       = "http://localhost:${var.otel_http_port}/v1/traces"
+}
+
+output "otel_http_container_endpoint" {
+  description = "OTLP/HTTP traces endpoint for containers attached to the platform network."
+  value       = "http://otel-collector:4318/v1/traces"
+}
+
+output "jaeger_ui_url" {
+  description = "Jaeger trace exploration UI available on the host."
+  value       = "http://localhost:${var.jaeger_ui_port}"
+}

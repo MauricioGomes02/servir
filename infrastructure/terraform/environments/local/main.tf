@@ -15,4 +15,9 @@ module "platform" {
   volume_initializer_image = var.volume_initializer_image
   kafka_external_port      = var.kafka_external_port
   kafka_cluster_id         = var.kafka_cluster_id
+
+  otel_collector_image = var.otel_collector_image
+  otel_http_port       = var.otel_http_port
+  jaeger_image         = var.jaeger_image
+  jaeger_ui_port       = var.jaeger_ui_port
 }

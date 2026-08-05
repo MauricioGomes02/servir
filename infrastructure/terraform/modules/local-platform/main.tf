@@ -9,12 +9,12 @@ resource "docker_network" "platform" {
   }
 
   labels {
-    label = "com.servir.environment"
+    label = "servir.environment"
     value = "local"
   }
 
   labels {
-    label = "com.servir.owner"
+    label = "servir.owner"
     value = "terraform"
   }
 }
@@ -23,12 +23,12 @@ resource "docker_volume" "postgres_data" {
   name = "servir-postgres-data"
 
   labels {
-    label = "com.servir.environment"
+    label = "servir.environment"
     value = "local"
   }
 
   labels {
-    label = "com.servir.owner"
+    label = "servir.owner"
     value = "terraform"
   }
 
@@ -41,12 +41,12 @@ resource "docker_volume" "kafka_data" {
   name = "servir-kafka-data"
 
   labels {
-    label = "com.servir.environment"
+    label = "servir.environment"
     value = "local"
   }
 
   labels {
-    label = "com.servir.owner"
+    label = "servir.owner"
     value = "terraform"
   }
 
@@ -67,6 +67,16 @@ resource "docker_image" "kafka" {
 
 resource "docker_image" "volume_initializer" {
   name         = var.volume_initializer_image
+  keep_locally = true
+}
+
+resource "docker_image" "otel_collector" {
+  name         = var.otel_collector_image
+  keep_locally = true
+}
+
+resource "docker_image" "jaeger" {
+  name         = var.jaeger_image
   keep_locally = true
 }
 
@@ -109,12 +119,12 @@ resource "docker_container" "postgres" {
   }
 
   labels {
-    label = "com.servir.environment"
+    label = "servir.environment"
     value = "local"
   }
 
   labels {
-    label = "com.servir.owner"
+    label = "servir.owner"
     value = "terraform"
   }
 }
@@ -131,7 +141,7 @@ resource "docker_container" "kafka_data_permissions" {
   read_only    = true
 
   capabilities {
-    add  = ["CHOWN"]
+    add  = ["CAP_CHOWN"]
     drop = ["ALL"]
   }
 
@@ -141,17 +151,17 @@ resource "docker_container" "kafka_data_permissions" {
   }
 
   labels {
-    label = "com.servir.environment"
+    label = "servir.environment"
     value = "local"
   }
 
   labels {
-    label = "com.servir.owner"
+    label = "servir.owner"
     value = "terraform"
   }
 
   labels {
-    label = "com.servir.role"
+    label = "servir.role"
     value = "volume-initializer"
   }
 
@@ -216,16 +226,101 @@ resource "docker_container" "kafka" {
   }
 
   labels {
-    label = "com.servir.environment"
+    label = "servir.environment"
     value = "local"
   }
 
   labels {
-    label = "com.servir.owner"
+    label = "servir.owner"
     value = "terraform"
   }
 
   lifecycle {
     replace_triggered_by = [docker_container.kafka_data_permissions.id]
   }
+}
+
+resource "docker_container" "jaeger" {
+  name      = "servir-jaeger"
+  hostname  = "jaeger"
+  image     = docker_image.jaeger.image_id
+  restart   = "unless-stopped"
+  must_run  = true
+  read_only = true
+
+  networks_advanced {
+    name    = docker_network.platform.name
+    aliases = ["jaeger"]
+  }
+
+  ports {
+    internal = 16686
+    external = var.jaeger_ui_port
+    ip       = "127.0.0.1"
+  }
+
+  labels {
+    label = "servir.environment"
+    value = "local"
+  }
+
+  labels {
+    label = "servir.owner"
+    value = "terraform"
+  }
+
+  labels {
+    label = "servir.role"
+    value = "trace-backend"
+  }
+}
+
+resource "docker_container" "otel_collector" {
+  name      = "servir-otel-collector"
+  hostname  = "otel-collector"
+  image     = docker_image.otel_collector.image_id
+  restart   = "unless-stopped"
+  must_run  = true
+  read_only = true
+
+  command = ["--config=/etc/otelcol-contrib/config.yaml"]
+
+  networks_advanced {
+    name    = docker_network.platform.name
+    aliases = ["otel-collector"]
+  }
+
+  ports {
+    internal = 4318
+    external = var.otel_http_port
+    ip       = "127.0.0.1"
+  }
+
+  volumes {
+    host_path      = abspath("${path.module}/../../../observability/otel-collector.yaml")
+    container_path = "/etc/otelcol-contrib/config.yaml"
+    read_only      = true
+  }
+
+  labels {
+    label = "servir.environment"
+    value = "local"
+  }
+
+  labels {
+    label = "servir.owner"
+    value = "terraform"
+  }
+
+  labels {
+    label = "servir.role"
+    value = "telemetry-gateway"
+  }
+
+  labels {
+    label = "servir.configuration"
+    value = filesha256("${path.module}/../../../observability/otel-collector.yaml")
+  }
+
+  depends_on = [docker_container.jaeger]
 }
