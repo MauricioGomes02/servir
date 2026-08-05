@@ -5,55 +5,22 @@ import type {
 } from '@/application';
 import {
   context,
-  propagation,
   ROOT_CONTEXT,
-  SpanStatusCode,
   trace,
   type Context,
-  type Span,
-  type SpanOptions,
-  type TextMapGetter,
 } from '@opentelemetry/api';
+import {
+  extractTraceContext,
+  runInSpan,
+} from '@servir/node-observability';
 
 const tracer = trace.getTracer('@servir/outbox-relay');
-const headerGetter: TextMapGetter<Record<string, string>> = {
-  keys: (carrier) => Object.keys(carrier),
-  get: (carrier, key) => carrier[key],
-};
-
-function recordFailure(span: Span, error: unknown): void {
-  span.recordException(error instanceof Error ? error : String(error));
-  span.setStatus({ code: SpanStatusCode.ERROR });
-}
-
-async function runInSpan<T>(
-  name: string,
-  parent: Context,
-  options: SpanOptions,
-  operation: () => Promise<T>,
-): Promise<T> {
-  return tracer.startActiveSpan(name, options, parent, async (span) => {
-    try {
-      return await operation();
-    } catch (error) {
-      recordFailure(span, error);
-      throw error;
-    } finally {
-      span.end();
-    }
-  });
-}
-
 function linkedContext(message: ClaimedOutboxMessage): Context | undefined {
   if (message.traceContext === undefined) {
     return undefined;
   }
 
-  return propagation.extract(
-    ROOT_CONTEXT,
-    { ...message.traceContext },
-    headerGetter,
-  );
+  return extractTraceContext(message.traceContext);
 }
 
 export class OpenTelemetryRelayTelemetry implements RelayTelemetry {
@@ -61,7 +28,7 @@ export class OpenTelemetryRelayTelemetry implements RelayTelemetry {
     operation: () => Promise<T>,
     completed?: (result: T) => void,
   ): Promise<T> {
-    return runInSpan('outbox.relay.batch', ROOT_CONTEXT, {}, async () => {
+    return runInSpan(tracer, 'outbox.relay.batch', ROOT_CONTEXT, {}, async () => {
       const result = await operation();
 
       try {
@@ -84,6 +51,7 @@ export class OpenTelemetryRelayTelemetry implements RelayTelemetry {
       : trace.getSpanContext(origin);
 
     return runInSpan(
+      tracer,
       'outbox.message.process',
       context.active(),
       {

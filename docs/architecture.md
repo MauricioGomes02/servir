@@ -34,7 +34,7 @@ flowchart LR
 
 Dependências de código apontam para dentro: adaptadores conhecem contratos da aplicação e do domínio; o domínio não conhece adaptadores.
 
-Capacidades transversais usadas por mais de uma aplicação residem em pacotes nomeados, não em um diretório `shared` genérico. `application-foundation` contém contratos independentes de runtime; `node-observability` implementa adapters de observabilidade para Node. API e relay dependem desses pacotes, enquanto decisões semânticas de cada processo permanecem locais.
+Capacidades transversais usadas por mais de uma aplicação residem em pacotes nomeados, não em um diretório `shared` genérico. `application-foundation` contém contratos independentes de runtime; `node-observability` implementa adapters de observabilidade e a mecânica comum do OpenTelemetry para Node. API e relay escolhem explicitamente suas instrumentações e dependem desses pacotes, enquanto nomes, atributos, links e decisões semânticas de cada processo permanecem locais.
 
 A API usa um container Awilix tipado somente na composition root. Registros são separados entre dependências compartilhadas, persistência e bounded contexts; o bootstrap resolve objetos e os injeta explicitamente. Rotas, casos de uso, presenters e domínio não consultam o container. O `ExecutionContext` permanece um dado da execução, criado na borda e passado ao handler, não uma dependência global ou request-scoped escondida.
 

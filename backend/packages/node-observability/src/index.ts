@@ -4,3 +4,21 @@ export type {
   ActiveTraceContextReader,
   LogLineWriter,
 } from './json-stdout-logger.js';
+
+export {
+  captureActiveTraceContext,
+  createPgInstrumentation,
+  extractTraceContext,
+  OpenTelemetryError,
+  OpenTelemetryErrorCodes,
+  recordSpanFailure,
+  runInSpan,
+  startOpenTelemetry,
+} from './open-telemetry.js';
+export type {
+  DistributedTraceContext,
+  OpenTelemetryErrorCode,
+  StartOpenTelemetryOptions,
+  TelemetryLifecycle,
+  TelemetrySdk,
+} from './open-telemetry.js';

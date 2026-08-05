@@ -37,5 +37,6 @@
 | [033](033-outbox-relay-semantic-tracing.md) | Tracing semântico do outbox relay | Aceita |
 | [034](034-business-process-logging.md) | Narrativa operacional dos processos de negócio | Aceita |
 | [035](035-shared-application-and-observability-packages.md) | Pacotes compartilhados de Application e observabilidade Node | Aceita |
+| [036](036-shared-opentelemetry-mechanics.md) | Mecânica compartilhada do OpenTelemetry | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

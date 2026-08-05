@@ -108,7 +108,7 @@ servir/
 │   │   └── outbox-relay/         # Worker independente da outbox
 │   └── packages/
 │       ├── application-foundation/ # Contratos transversais sem runtime
-│       ├── node-observability/     # Adapters comuns de observabilidade Node
+│       ├── node-observability/     # Logging e mecânica OpenTelemetry para Node
 │       └── integration-messaging/  # Contratos serializáveis compartilhados
 ├── frontend/                     # Aplicações web futuras
 ├── infrastructure/

@@ -1,10 +1,8 @@
 export {
-  OpenTelemetryError,
-  OpenTelemetryErrorCodes,
   startOpenTelemetry,
 } from './open-telemetry';
 export type {
-  StartOpenTelemetryOptions,
+  RelayOpenTelemetryOptions,
   TelemetryLifecycle,
 } from './open-telemetry';
 

@@ -11,10 +11,6 @@
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
-    "@opentelemetry/core": "^2.10.0",
-    "@opentelemetry/exporter-trace-otlp-proto": "^0.221.0",
-    "@opentelemetry/instrumentation-pg": "^0.73.0",
-    "@opentelemetry/sdk-node": "^0.221.0",
     "@servir/integration-messaging": "1.0.0",
     "@servir/application-foundation": "1.0.0",
     "@servir/node-observability": "1.0.0",

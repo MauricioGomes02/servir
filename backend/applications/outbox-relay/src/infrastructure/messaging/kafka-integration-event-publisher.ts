@@ -1,9 +1,9 @@
 import {
   context,
   propagation,
-  SpanStatusCode,
   trace,
 } from '@opentelemetry/api';
+import { recordSpanFailure } from '@servir/node-observability';
 
 import {
   IntegrationEventPublicationError,
@@ -119,8 +119,7 @@ implements IntegrationEventPublisher {
             }],
           });
         } catch (cause) {
-          span.recordException(cause instanceof Error ? cause : String(cause));
-          span.setStatus({ code: SpanStatusCode.ERROR });
+          recordSpanFailure(span, cause);
 
           if (cause instanceof IntegrationEventPublicationError) {
             throw cause;
