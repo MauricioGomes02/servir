@@ -55,6 +55,8 @@ logger.log(createLogRecord({
 
 Consome metadados permitidos de Context e Message; adapters implementam o port. A borda HTTP registra conclusão ou falha uma única vez, enquanto Domain Events permanecem reservados a reações orientadas a fatos de negócio. Logger é observabilidade de melhor esforço e não substitui um `AuditWriter` durável.
 
+O contrato canônico reside em `@servir/application-foundation`; o adapter JSON Lines compartilhado por API e relay reside em `@servir/node-observability`. Timestamps atravessam esse limite como UTC ISO. Fachadas locais podem reexportar os tipos durante migrações, mas não mantêm implementações próprias.
+
 ## Possíveis evoluções
 
 O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita e já correlaciona o registro ao span ativo. Cada linha representa uma única ocorrência nessa codificação, mas JSON Lines não faz parte do contrato do port. Permanecem planejados um exporter OTLP, políticas configuráveis de redaction e tratamento estruturado compartilhado de exceções.

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import type { Clock } from '@/application';
-import type { RelayLogRecord, RelayLogger } from '@/infrastructure';
+import type { Logger, LogRecord } from '@servir/application-foundation';
 
 import { OutboxRelayWorker } from './outbox-relay-worker';
 
@@ -11,7 +11,7 @@ const clock: Clock = {
   after: () => '2026-07-31T15:01:00.000Z',
 };
 
-function logger(records: RelayLogRecord[]): RelayLogger {
+function logger(records: LogRecord[]): Logger {
   return { log: (record) => records.push(record) };
 }
 
@@ -71,7 +71,7 @@ describe('OutboxRelayWorker', () => {
 
   it('logs a stable failure code and retries after the polling interval', async () => {
     const controller = new AbortController();
-    const records: RelayLogRecord[] = [];
+    const records: LogRecord[] = [];
     let executions = 0;
     const worker = new OutboxRelayWorker({
       batchSize: 10,
@@ -99,9 +99,10 @@ describe('OutboxRelayWorker', () => {
 
     assert.equal(executions, 2);
     assert.deepEqual(records, [{
-      timestamp: '2026-07-31T15:00:00.000Z',
-      severity: 'error',
-      name: 'outbox.relay.cycle.failed',
+      occurredAt: '2026-07-31T15:00:00.000Z',
+      level: 'error',
+      eventName: 'outbox.relay.cycle.failed',
+      context: undefined,
       attributes: { 'error.code': 'outbox.claim_failed' },
     }]);
     assert.equal(JSON.stringify(records).includes('sensitive details'), false);

@@ -44,7 +44,7 @@ describe('LogRecord', () => {
     const record = createLogRecord({
       level: LogLevels.Info,
       eventName: 'organization.created',
-      occurredAt: occurredAt.value,
+      occurredAt: occurredAt.value.toISOString(),
       context: {
         correlationId: correlationId.value,
         messageId: messageId.value,
@@ -61,7 +61,7 @@ describe('LogRecord', () => {
     assert.deepEqual(record.attributes, {
       'organization.id': 'organization-123',
     });
-    assert.equal(record.occurredAt, occurredAt.value);
+    assert.equal(record.occurredAt, occurredAt.value.toISOString());
   });
 
   it('creates a deeply immutable copy without freezing the source', () => {

@@ -1,0 +1,26 @@
+{
+  "name": "@servir/node-observability",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc --noEmit && tsx --test src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.1",
+    "@servir/application-foundation": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  }
+}

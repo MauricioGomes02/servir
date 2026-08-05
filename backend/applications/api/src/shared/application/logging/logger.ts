@@ -1,5 +1,1 @@
-import type { LogRecord } from './log-record';
-
-export interface Logger {
-  log(record: LogRecord): void;
-}
+export type { Logger } from '@servir/application-foundation';

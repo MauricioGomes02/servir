@@ -1,9 +1,12 @@
+import { LogLevels, type LogLevel } from '@servir/application-foundation';
+
 export const RelayServiceConfigErrorCodes = {
   MissingDatabaseUrl: 'relay.config.database_url.missing',
   MissingKafkaBrokers: 'relay.config.kafka_brokers.missing',
   InvalidInteger: 'relay.config.integer.invalid',
   InvalidRatio: 'relay.config.ratio.invalid',
   InvalidPublishTimeout: 'relay.config.publish_timeout.invalid',
+  InvalidLogLevel: 'relay.config.log_level.invalid',
 } as const;
 
 export type RelayServiceConfigErrorCode = typeof RelayServiceConfigErrorCodes[
@@ -31,6 +34,7 @@ export interface RelayServiceConfig {
   readonly retryBaseDelayMilliseconds: number;
   readonly retryMaximumDelayMilliseconds: number;
   readonly retryJitterRatio: number;
+  readonly logLevel: LogLevel;
 }
 
 function required(
@@ -113,6 +117,13 @@ export function readRelayServiceConfig(
     );
   }
 
+  const logLevel = environment.LOG_LEVEL?.trim().toLowerCase() ?? LogLevels.Info;
+  if (!(Object.values(LogLevels) as string[]).includes(logLevel)) {
+    throw new RelayServiceConfigError(
+      RelayServiceConfigErrorCodes.InvalidLogLevel,
+    );
+  }
+
   return Object.freeze({
     databaseUrl,
     kafkaBrokers: Object.freeze(kafkaBrokers),
@@ -135,5 +146,6 @@ export function readRelayServiceConfig(
       300_000,
     ),
     retryJitterRatio: ratio(environment.OUTBOX_RETRY_JITTER_RATIO, 0.2),
+    logLevel: logLevel as LogLevel,
   });
 }

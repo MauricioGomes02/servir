@@ -107,7 +107,9 @@ servir/
 │   │   ├── api/                  # API HTTP e composition root
 │   │   └── outbox-relay/         # Worker independente da outbox
 │   └── packages/
-│       └── integration-messaging/ # Contratos serializáveis compartilhados
+│       ├── application-foundation/ # Contratos transversais sem runtime
+│       ├── node-observability/     # Adapters comuns de observabilidade Node
+│       └── integration-messaging/  # Contratos serializáveis compartilhados
 ├── frontend/                     # Aplicações web futuras
 ├── infrastructure/
 │   ├── database/liquibase/       # Migrations canônicas

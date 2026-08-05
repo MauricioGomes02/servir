@@ -27,6 +27,7 @@ describe('readRelayServiceConfig', () => {
       retryBaseDelayMilliseconds: 1_000,
       retryMaximumDelayMilliseconds: 300_000,
       retryJitterRatio: 0.2,
+      logLevel: 'info',
     });
   });
 
@@ -98,5 +99,17 @@ describe('readRelayServiceConfig', () => {
           && error.code === RelayServiceConfigErrorCodes.InvalidPublishTimeout,
       );
     }
+  });
+
+  it('normalizes a supported log level and rejects unsupported values', () => {
+    assert.equal(readRelayServiceConfig({
+      ...REQUIRED,
+      LOG_LEVEL: ' DEBUG ',
+    }).logLevel, 'debug');
+    assert.throws(
+      () => readRelayServiceConfig({ ...REQUIRED, LOG_LEVEL: 'verbose' }),
+      (error: unknown) => error instanceof RelayServiceConfigError
+        && error.code === RelayServiceConfigErrorCodes.InvalidLogLevel,
+    );
   });
 });

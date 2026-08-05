@@ -1,13 +1,14 @@
 export {
   createLogRecord,
   LogLevels,
-} from '@servir/application-foundation';
+} from './logging.js';
 
 export type {
+  Logger,
   LogAttributes,
   LogAttributeScalar,
   LogAttributeValue,
   LogContext,
   LogLevel,
   LogRecord,
-} from '@servir/application-foundation';
+} from './logging.js';

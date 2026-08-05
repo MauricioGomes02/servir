@@ -1,22 +1,23 @@
 import { startOpenTelemetry } from '@/infrastructure';
+import {
+  createLogRecord,
+  LogLevels,
+} from '@servir/application-foundation';
+import { JsonStdoutLogger } from '@servir/node-observability';
 
 function reportStartupFailure(error: unknown): void {
-  try {
-    const code = typeof error === 'object'
-      && error !== null
-      && 'code' in error
-      && typeof error.code === 'string'
-      ? error.code
-      : 'outbox.relay.start_failed';
-    process.stdout.write(`${JSON.stringify({
-      timestamp: new Date().toISOString(),
-      severity: 'error',
-      name: 'outbox.relay.start.failed',
-      attributes: { 'error.code': code },
-    })}\n`);
-  } catch {
-    // Process exit must not depend on the logging destination.
-  }
+  const code = typeof error === 'object'
+    && error !== null
+    && 'code' in error
+    && typeof error.code === 'string'
+    ? error.code
+    : 'outbox.relay.start_failed';
+  new JsonStdoutLogger().log(createLogRecord({
+    occurredAt: new Date().toISOString(),
+    level: LogLevels.Error,
+    eventName: 'outbox.relay.start.failed',
+    attributes: { 'error.code': code },
+  }));
 }
 
 async function main(): Promise<void> {

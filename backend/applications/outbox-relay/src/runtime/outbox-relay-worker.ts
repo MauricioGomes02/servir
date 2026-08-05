@@ -1,6 +1,12 @@
 import type { ProcessOutboxBatchResult } from '@/application';
 import type { Clock } from '@/application';
-import type { RelayLogger, RelayLogSeverity } from '@/infrastructure';
+import {
+  createLogRecord,
+  LogLevels,
+  type Logger,
+  type LogAttributes,
+  type LogLevel,
+} from '@servir/application-foundation';
 
 export interface OutboxBatchProcessor {
   execute(): Promise<ProcessOutboxBatchResult>;
@@ -16,7 +22,7 @@ export interface OutboxRelayWorkerDependencies {
   readonly batchSize: number;
   readonly pollIntervalMilliseconds: number;
   readonly clock: Clock;
-  readonly logger: RelayLogger;
+  readonly logger: Logger;
   readonly delay?: RelayDelay;
 }
 
@@ -71,7 +77,7 @@ export class OutboxRelayWorker {
       try {
         result = await this.dependencies.batchProcessor.execute();
       } catch (error) {
-        this.log('error', 'outbox.relay.cycle.failed', {
+        this.log(LogLevels.Error, 'outbox.relay.cycle.failed', {
           'error.code': errorCode(error),
         });
         await this.delay(this.dependencies.pollIntervalMilliseconds, signal);
@@ -85,17 +91,17 @@ export class OutboxRelayWorker {
   }
 
   private log(
-    severity: RelayLogSeverity,
-    name: string,
-    attributes?: Readonly<Record<string, string | number | boolean>>,
+    level: LogLevel,
+    eventName: string,
+    attributes: LogAttributes = {},
   ): void {
     try {
-      this.dependencies.logger.log({
-        timestamp: this.dependencies.clock.now(),
-        severity,
-        name,
+      this.dependencies.logger.log(createLogRecord({
+        occurredAt: this.dependencies.clock.now(),
+        level,
+        eventName,
         attributes,
-      });
+      }));
     } catch {
       // Observability cannot change durable delivery behavior.
     }

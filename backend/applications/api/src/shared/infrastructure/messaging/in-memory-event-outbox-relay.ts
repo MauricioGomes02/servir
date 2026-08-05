@@ -103,7 +103,7 @@ export class InMemoryEventOutboxRelay {
         this.logger.log(createLogRecord({
           level: LogLevels.Error,
           eventName: 'event.outbox.publish.failed',
-          occurredAt: envelope.event.occurredAt,
+          occurredAt: envelope.event.occurredAt.toISOString(),
           context: {
             correlationId: envelope.correlationId,
             messageId: envelope.messageId,

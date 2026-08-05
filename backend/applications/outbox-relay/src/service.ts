@@ -1,16 +1,22 @@
 import { ProcessOutboxBatch, ExponentialBackoffRetryPolicy } from '@/application';
 import {
   createKafkaJsProducer,
-  JsonStdoutRelayLogger,
+  JsonStdoutLogger,
   KafkaIntegrationEventPublisher,
   OpenTelemetryRelayTelemetry,
   PostgresOutboxMessageStore,
   SystemClock,
   SystemRandomSource,
   UuidV7LeaseIdGenerator,
-  type RelayLogger,
   type TelemetryLifecycle,
 } from '@/infrastructure';
+import {
+  createLogRecord,
+  LogLevels,
+  type Logger,
+  type LogAttributes,
+  type LogLevel,
+} from '@servir/application-foundation';
 import { OutboxRelayWorker } from '@/runtime';
 import { Pool } from 'pg';
 
@@ -30,14 +36,19 @@ function failureCode(error: unknown): string {
 }
 
 function log(
-  logger: RelayLogger,
+  logger: Logger,
   clock: SystemClock,
-  severity: 'info' | 'error',
-  name: string,
-  attributes?: Readonly<Record<string, string | number | boolean>>,
+  level: LogLevel,
+  eventName: string,
+  attributes: LogAttributes = {},
 ): void {
   try {
-    logger.log({ timestamp: clock.now(), severity, name, attributes });
+    logger.log(createLogRecord({
+      occurredAt: clock.now(),
+      level,
+      eventName,
+      attributes,
+    }));
   } catch {
     // Service lifecycle cannot depend on an observability destination.
   }
@@ -46,13 +57,13 @@ function log(
 export async function startRelayService(
   telemetry: TelemetryLifecycle,
 ): Promise<void> {
-  const logger = new JsonStdoutRelayLogger();
+  let logger = new JsonStdoutLogger();
   const clock = new SystemClock();
   let pool: Pool | undefined;
   let producer: ReturnType<typeof createKafkaJsProducer> | undefined;
   const controller = new AbortController();
   const stopOnSignal = (): void => {
-    log(logger, clock, 'info', 'outbox.relay.shutdown.requested');
+    log(logger, clock, LogLevels.Info, 'outbox.relay.shutdown.requested');
     controller.abort();
   };
 
@@ -61,6 +72,7 @@ export async function startRelayService(
 
   try {
     const config = readRelayServiceConfig(process.env);
+    logger = new JsonStdoutLogger(undefined, undefined, config.logLevel);
     pool = new Pool({ connectionString: config.databaseUrl });
     await pool.query('SELECT 1');
     producer = createKafkaJsProducer({
@@ -93,7 +105,7 @@ export async function startRelayService(
       leaseDurationMilliseconds: config.leaseDurationMilliseconds,
       telemetry: new OpenTelemetryRelayTelemetry(),
       onBatchCompleted: (result) => {
-        log(logger, clock, 'info', 'outbox.relay.batch.completed', {
+        log(logger, clock, LogLevels.Info, 'outbox.relay.batch.completed', {
           claimed: result.claimed,
           published: result.published,
           rescheduled: result.rescheduled,
@@ -109,13 +121,14 @@ export async function startRelayService(
       logger,
     });
 
-    log(logger, clock, 'info', 'outbox.relay.started', {
+    log(logger, clock, LogLevels.Info, 'outbox.relay.started', {
       'telemetry.enabled': telemetry.enabled,
       'batch.size': config.batchSize,
+      'log.level': config.logLevel,
     });
     await worker.run(controller.signal);
   } catch (error) {
-    log(logger, clock, 'error', 'outbox.relay.service.failed', {
+    log(logger, clock, LogLevels.Error, 'outbox.relay.service.failed', {
       'error.code': failureCode(error),
     });
     throw error;
@@ -128,7 +141,7 @@ export async function startRelayService(
         await producer.disconnect();
       } catch (error) {
         process.exitCode = 1;
-        log(logger, clock, 'error', 'outbox.relay.kafka.disconnect.failed', {
+        log(logger, clock, LogLevels.Error, 'outbox.relay.kafka.disconnect.failed', {
           'error.code': failureCode(error),
         });
       }
@@ -139,7 +152,7 @@ export async function startRelayService(
         await pool.end();
       } catch (error) {
         process.exitCode = 1;
-        log(logger, clock, 'error', 'outbox.relay.postgres.close.failed', {
+        log(logger, clock, LogLevels.Error, 'outbox.relay.postgres.close.failed', {
           'error.code': failureCode(error),
         });
       }
@@ -149,11 +162,11 @@ export async function startRelayService(
       await telemetry.shutdown();
     } catch (error) {
       process.exitCode = 1;
-      log(logger, clock, 'error', 'outbox.relay.telemetry.shutdown.failed', {
+      log(logger, clock, LogLevels.Error, 'outbox.relay.telemetry.shutdown.failed', {
         'error.code': failureCode(error),
       });
     }
 
-    log(logger, clock, 'info', 'outbox.relay.stopped');
+    log(logger, clock, LogLevels.Info, 'outbox.relay.stopped');
   }
 }
