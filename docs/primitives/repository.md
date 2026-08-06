@@ -35,6 +35,10 @@ flowchart LR
 
 `OrganizationRepository.findById` e `save` operam `Organization`. Uma Query como `GetMemberDetails` define um `MemberDetails` Read Model e usa um `MemberDetailsReader`, sem adicionar projeções ao `MemberRepository`.
 
+Quando um mesmo Repository atende criação e alteração, os verbos podem distinguir o ciclo esperado do Aggregate. `add(aggregate)` introduz uma root nova na coleção e deve rejeitar colisões em vez de atualizar estado existente. `save(aggregate)` persiste mudanças de uma root previamente carregada, preservando sua identidade. Essa distinção não representa diretamente `INSERT`, `UPDATE` ou `UPSERT`: o adapter escolhe as operações físicas necessárias e não transforma uma criação em atualização silenciosa.
+
+No módulo Ministries, `add(ministry)` atende `CreateMinistry`, enquanto `findById` seguido de `save(ministry)` atende `DefineMinistryRole`. A separação impede que uma colisão de `MinistryId` durante criação seja interpretada como alteração de outro Aggregate e deixa explícita a pré-condição de cada operação.
+
 O port nasce junto ao primeiro consumidor que demonstra essas operações. A fundação não fornece uma interface compartilhada de Repository apenas para antecipar contratos ainda desconhecidos.
 
 ## Relacionamento com outras primitivas
@@ -49,6 +53,7 @@ Criar os primeiros Repository ports específicos junto aos Commands consumidores
 
 - Desenhar pelo consumidor, não pela API do banco.
 - Manter contrato pequeno e específico do Aggregate.
+- Distinguir adição de root nova e persistência de root carregada quando os consumidores exigirem garantias diferentes.
 - Tratar ausência esperada sem convertê-la em falha técnica; o caso de uso atribui a semântica de negócio.
 
 ## Anti-patterns

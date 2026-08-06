@@ -3,9 +3,10 @@ import type {
   MinistryCreationFactsReader,
   MinistryWriteScope,
 } from '@/modules/ministries/application';
-import { isMinistryCreated } from '@/modules/ministries/domain';
+import { isMinistryCreated, isMinistryRoleDefined } from '@/modules/ministries/domain';
 import {
   mapMinistryCreatedIntegrationEvent,
+  mapMinistryRoleDefinedIntegrationEvent,
   PostgresMinistryCreationFactsReader,
   PostgresMinistryRepository,
 } from '@/modules/ministries/infrastructure';
@@ -63,6 +64,9 @@ export function createPostgresPersistence(
 
     if (isMinistryCreated(envelope.event)) {
       return mapMinistryCreatedIntegrationEvent(envelope.event);
+    }
+    if (isMinistryRoleDefined(envelope.event)) {
+      return mapMinistryRoleDefinedIntegrationEvent(envelope.event);
     }
 
     throw new UnmappedDomainEventError(envelope.event.name);

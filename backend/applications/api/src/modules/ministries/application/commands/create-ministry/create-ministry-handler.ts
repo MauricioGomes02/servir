@@ -82,7 +82,7 @@ export class CreateMinistryHandler {
     }));
 
     const persisted = await this.dependencies.unitOfWork.execute(async (scope) => {
-      const saved = await scope.ministries.save(ministry.value);
+      const saved = await scope.ministries.add(ministry.value);
       if (!saved.success) return saved;
       await scope.outbox.add(envelopes);
       return success();

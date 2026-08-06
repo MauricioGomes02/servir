@@ -38,6 +38,7 @@ describe('PostgreSQL ministry persistence', () => {
 
     async function cleanup() {
       await inspection.query('DELETE FROM outbox_messages WHERE message_id = $1', [MESSAGE_ID]);
+      await inspection.query('DELETE FROM ministry_roles WHERE ministry_id = $1', [MINISTRY_ID]);
       await inspection.query('DELETE FROM ministries WHERE id = ANY($1::uuid[])', [[MINISTRY_ID, ROLLED_BACK_MINISTRY_ID]]);
       await inspection.query('DELETE FROM organizations WHERE id = $1', [ORGANIZATION_ID]);
     }

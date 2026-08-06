@@ -25,8 +25,8 @@ function ministry(id: string, name: string) {
 describe('InMemoryMinistryRepository', () => {
   it('rejects a second active name ignoring case without changing stored state', async () => {
     const repository = new InMemoryMinistryRepository();
-    assert.equal((await repository.save(ministry('0198f334-6dc5-7c20-9af1-91d7e599e031', 'Louvor'))).success, true);
-    const duplicate = await repository.save(ministry('0198f334-6dc5-7c20-9af1-91d7e599e032', 'louvor'));
+    assert.equal((await repository.add(ministry('0198f334-6dc5-7c20-9af1-91d7e599e031', 'Louvor'))).success, true);
+    const duplicate = await repository.add(ministry('0198f334-6dc5-7c20-9af1-91d7e599e032', 'louvor'));
     assert.equal(duplicate.success, false);
     if (!duplicate.success) assert.equal(duplicate.error.code, MinistryCreationPolicyErrorCodes.ActiveNameAlreadyExists);
     assert.equal(repository.ministries.length, 1);
@@ -34,8 +34,8 @@ describe('InMemoryMinistryRepository', () => {
 
   it('preserves accents when comparing active names', async () => {
     const repository = new InMemoryMinistryRepository();
-    await repository.save(ministry('0198f334-6dc5-7c20-9af1-91d7e599e033', 'Mídia'));
-    assert.equal((await repository.save(ministry('0198f334-6dc5-7c20-9af1-91d7e599e034', 'Midia'))).success, true);
+    await repository.add(ministry('0198f334-6dc5-7c20-9af1-91d7e599e033', 'Mídia'));
+    assert.equal((await repository.add(ministry('0198f334-6dc5-7c20-9af1-91d7e599e034', 'Midia'))).success, true);
     assert.equal(repository.ministries.length, 2);
   });
 });

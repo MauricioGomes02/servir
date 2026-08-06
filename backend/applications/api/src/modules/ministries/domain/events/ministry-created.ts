@@ -36,4 +36,5 @@ export function isMinistryCreated(event: DomainEvent): event is MinistryCreated 
   return event.name === 'ministry.created';
 }
 
-export type MinistryEvent = MinistryCreated;
+import type { MinistryRoleDefined } from './ministry-role-defined';
+export type MinistryEvent = MinistryCreated | MinistryRoleDefined;

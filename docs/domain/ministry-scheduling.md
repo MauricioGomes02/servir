@@ -56,7 +56,7 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 ### Ministry
 
-É um Aggregate Root separado de Organization e mantém inicialmente identidade, `OrganizationId`, nome e estado ativo. O nome ativo é único por organização, ignorando caixa e preservando acentos. `MinistryRole` entra depois como entidade interna por `DefineMinistryRole`, com ID estável e nome único entre funções ativas. Uma função desativada permanece referenciável pelo histórico.
+É um Aggregate Root separado de Organization e mantém identidade, `OrganizationId`, nome, estado e suas funções internas. O nome ativo é único por organização, ignorando caixa e preservando acentos. `MinistryRole` é uma entidade interna definida por `DefineMinistryRole`, com ID estável e nome único entre funções ativas. Uma função desativada permanece referenciável pelo histórico.
 
 ### MinistryTeam
 
@@ -213,7 +213,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 
 1. Criar `Member` separado de `User` e registrar seu vínculo com Organization. **Concluído.**
 2. Implementar `Ministry` e `CreateMinistry`, sem antecipar funções. **Concluído.**
-3. Implementar `MinistryRole` por `DefineMinistryRole`.
+3. Implementar `MinistryRole` por `DefineMinistryRole`. **Concluído.**
 4. Implementar solicitação/aprovação de `MinistryMembership` e qualificações.
 5. Implementar `MinistryTeam`, participação e liderança.
 6. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
