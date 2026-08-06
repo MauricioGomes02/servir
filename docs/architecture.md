@@ -36,6 +36,8 @@ Dependências de código apontam para dentro: adaptadores conhecem contratos da 
 
 Capacidades transversais usadas por mais de uma aplicação residem em pacotes nomeados, não em um diretório `shared` genérico. `application-foundation` contém contratos independentes de runtime, como `Logger` e `IdGenerator<TId>`; `node-observability` implementa adapters de observabilidade e a mecânica comum do OpenTelemetry para Node. API e relay especializam os contratos conforme suas necessidades e escolhem explicitamente suas instrumentações, enquanto nomes, atributos, links e decisões semânticas de cada processo permanecem locais.
 
+Mecânicas pequenas e equivalentes, como parsing de severidade e extração segura de atributos técnicos, também podem ser compartilhadas. Lifecycle, sinais, ordem de shutdown, códigos fallback e configuração específica permanecem nas applications porque expressam garantias operacionais distintas.
+
 A API usa um container Awilix tipado somente na composition root. Registros são separados entre dependências compartilhadas, persistência e bounded contexts; o bootstrap resolve objetos e os injeta explicitamente. Rotas, casos de uso, presenters e domínio não consultam o container. O `ExecutionContext` permanece um dado da execução, criado na borda e passado ao handler, não uma dependência global ou request-scoped escondida.
 
 ## Commands e Queries

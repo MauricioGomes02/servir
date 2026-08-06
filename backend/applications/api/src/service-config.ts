@@ -2,7 +2,7 @@ import {
   ServiceConfigError,
   ServiceConfigErrorCodes,
 } from './service-config-error';
-import { LogLevels, type LogLevel } from '@/shared/application/logging';
+import { parseLogLevel, type LogLevel } from '@/shared/application/logging';
 
 const DEFAULT_HOST = '0.0.0.0';
 const DEFAULT_PORT = 3000;
@@ -80,10 +80,9 @@ export function readServiceConfig(
     throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidPort);
   }
 
-  const logLevel = environment.LOG_LEVEL?.trim().toLowerCase() ?? LogLevels.Info;
-  const supportedLogLevels = Object.values(LogLevels) as string[];
+  const logLevel = parseLogLevel(environment.LOG_LEVEL);
 
-  if (!supportedLogLevels.includes(logLevel)) {
+  if (logLevel === undefined) {
     throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidLogLevel);
   }
 
@@ -91,6 +90,6 @@ export function readServiceConfig(
     host,
     port,
     persistence: readPersistenceConfig(environment),
-    logLevel: logLevel as LogLevel,
+    logLevel,
   });
 }

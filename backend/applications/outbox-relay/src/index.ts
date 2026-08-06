@@ -3,20 +3,20 @@ import {
   createLogRecord,
   LogLevels,
 } from '@servir/application-foundation';
-import { JsonStdoutLogger } from '@servir/node-observability';
+import {
+  createErrorLogAttributes,
+  JsonStdoutLogger,
+} from '@servir/node-observability';
 
 function reportStartupFailure(error: unknown): void {
-  const code = typeof error === 'object'
-    && error !== null
-    && 'code' in error
-    && typeof error.code === 'string'
-    ? error.code
-    : 'outbox.relay.start_failed';
   new JsonStdoutLogger().log(createLogRecord({
     occurredAt: new Date().toISOString(),
     level: LogLevels.Error,
     eventName: 'outbox.relay.start.failed',
-    attributes: { 'error.code': code },
+    attributes: createErrorLogAttributes(error, {
+      fallbackCode: 'outbox.relay.start_failed',
+      includeDetails: process.env.NODE_ENV === 'development',
+    }),
   }));
 }
 

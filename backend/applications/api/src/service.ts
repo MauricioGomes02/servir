@@ -1,9 +1,11 @@
 import {
   createLogRecord,
   LogLevels,
-  type LogAttributes,
 } from '@/shared/application/logging';
-import { JsonStdoutLogger } from '@/shared/infrastructure/logging';
+import {
+  createErrorLogAttributes,
+  JsonStdoutLogger,
+} from '@/shared/infrastructure/logging';
 import type { TelemetryLifecycle } from '@/shared/infrastructure/telemetry';
 
 import {
@@ -13,27 +15,6 @@ import {
 } from './composition';
 import { readServiceConfig } from './service-config';
 
-function failureAttributes(error: unknown): LogAttributes {
-  if (!(error instanceof Error)) {
-    return { 'error.type': typeof error };
-  }
-
-  const attributes: Record<string, string> = {
-    'error.type': error.name,
-    'exception.message': error.message,
-  };
-
-  if ('code' in error && typeof error.code === 'string') {
-    attributes['error.code'] = error.code;
-  }
-
-  if (error.stack !== undefined) {
-    attributes['exception.stacktrace'] = error.stack;
-  }
-
-  return attributes;
-}
-
 function reportFailure(
   logger: JsonStdoutLogger,
   eventName: string,
@@ -42,7 +23,10 @@ function reportFailure(
   logger.log(createLogRecord({
     level: LogLevels.Fatal,
     eventName,
-    attributes: failureAttributes(error),
+    attributes: createErrorLogAttributes(error, {
+      fallbackCode: eventName,
+      includeDetails: process.env.NODE_ENV === 'development',
+    }),
   }));
 }
 

@@ -39,5 +39,6 @@
 | [035](035-shared-application-and-observability-packages.md) | Pacotes compartilhados de Application e observabilidade Node | Aceita |
 | [036](036-shared-opentelemetry-mechanics.md) | Mecânica compartilhada do OpenTelemetry | Aceita |
 | [037](037-shared-id-generator-and-nominal-lease-id.md) | Id Generator compartilhado e LeaseId nominal | Aceita |
+| [038](038-safe-shared-operational-primitives.md) | Primitivas operacionais compartilhadas e seguras | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

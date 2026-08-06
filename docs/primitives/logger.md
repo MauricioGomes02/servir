@@ -59,7 +59,7 @@ O contrato canônico reside em `@servir/application-foundation`; o adapter JSON 
 
 ## Possíveis evoluções
 
-O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita e já correlaciona o registro ao span ativo. Cada linha representa uma única ocorrência nessa codificação, mas JSON Lines não faz parte do contrato do port. Permanecem planejados um exporter OTLP, políticas configuráveis de redaction e tratamento estruturado compartilhado de exceções.
+O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributos antes da escrita e já correlaciona o registro ao span ativo. Cada linha representa uma única ocorrência nessa codificação, mas JSON Lines não faz parte do contrato do port. `node-observability` também compartilha a extração segura de falhas técnicas: tipo e código são o padrão; mensagem e stack exigem habilitação explícita. Permanecem planejados um exporter OTLP e políticas configuráveis de redaction.
 
 Um incremento próprio alinhará o modelo interoperável ao OpenTelemetry Logs Data Model e às Semantic Conventions que estiverem estáveis, sem expor tipos do SDK no port. O contrato deverá distinguir timestamp do evento e de observação, severidade, nome do evento, trace/span, resource, instrumentation scope e atributos da ocorrência. Convenções ainda instáveis exigirão decisão e versão explícitas antes de adoção.
 
@@ -68,6 +68,8 @@ JSON Lines e OTLP serão codificações de adapters. ECS, `@timestamp`, index te
 Falhas de adapters PostgreSQL são registradas na fronteira HTTP ou no worker que possui `ExecutionContext`, nunca simultaneamente no adapter que irá relançá-las. A instrumentação automática do driver produz spans técnicos separados com `db.query.text` parametrizado, sem valores dos parâmetros; logs preservam apenas o código estável e o contexto necessário, usando `traceId` para navegação até a query.
 
 A API emite `http.request.completed` para respostas abaixo de 500 e `http.request.failed` para falhas técnicas. O registro contém duração total monotônica, método, rota normalizada e status. Mensagem e stack trace da exceção não são copiadas; spans automáticos e o span semântico do caso de uso fornecem a decomposição temporal correlacionada.
+
+Falhas fatais de bootstrap e shutdown seguem política diferente dos registros HTTP: em produção preservam somente tipo e código estáveis; em desenvolvimento podem incluir mensagem e stack quando `NODE_ENV=development`. A opção é explícita e não altera a classificação da falha.
 
 Processos de negócio relevantes podem emitir uma sequência curta de marcos semânticos na Application. Esses registros explicam intenção, decisão, persistência e conclusão; não repetem queries, durações internas nem detalhes de framework já presentes no trace. `LOG_LEVEL` permite manter decisões intermediárias em `debug` e fatos concluídos ou rejeições em `info`.
 

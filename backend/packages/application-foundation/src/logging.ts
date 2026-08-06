@@ -34,6 +34,25 @@ export interface Logger {
   log(record: LogRecord): void;
 }
 
+export function parseLogLevel(
+  input: unknown,
+  fallback: LogLevel = LogLevels.Info,
+): LogLevel | undefined {
+  if (input === undefined) {
+    return fallback;
+  }
+
+  if (typeof input !== 'string') {
+    return undefined;
+  }
+
+  const normalized = input.trim().toLowerCase();
+
+  return (Object.values(LogLevels) as string[]).includes(normalized)
+    ? normalized as LogLevel
+    : undefined;
+}
+
 function freezeAttributeValue<TValue extends LogAttributeValue>(value: TValue): TValue {
   if (Array.isArray(value)) {
     return Object.freeze(value.map((item) => freezeAttributeValue(item))) as TValue;

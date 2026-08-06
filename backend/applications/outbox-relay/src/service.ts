@@ -17,22 +17,20 @@ import {
   type LogAttributes,
   type LogLevel,
 } from '@servir/application-foundation';
+import { createErrorLogAttributes } from '@servir/node-observability';
 import { OutboxRelayWorker } from '@/runtime';
 import { Pool } from 'pg';
 
 import { readRelayServiceConfig } from './service-config';
 
-function failureCode(error: unknown): string {
-  if (
-    typeof error === 'object'
-    && error !== null
-    && 'code' in error
-    && typeof error.code === 'string'
-  ) {
-    return error.code;
-  }
-
-  return 'outbox.relay.service_failed';
+function failureAttributes(
+  error: unknown,
+  fallbackCode: string,
+): LogAttributes {
+  return createErrorLogAttributes(error, {
+    fallbackCode,
+    includeDetails: process.env.NODE_ENV === 'development',
+  });
 }
 
 function log(
@@ -128,9 +126,13 @@ export async function startRelayService(
     });
     await worker.run(controller.signal);
   } catch (error) {
-    log(logger, clock, LogLevels.Error, 'outbox.relay.service.failed', {
-      'error.code': failureCode(error),
-    });
+    log(
+      logger,
+      clock,
+      LogLevels.Error,
+      'outbox.relay.service.failed',
+      failureAttributes(error, 'outbox.relay.service_failed'),
+    );
     throw error;
   } finally {
     process.removeListener('SIGINT', stopOnSignal);
@@ -141,9 +143,13 @@ export async function startRelayService(
         await producer.disconnect();
       } catch (error) {
         process.exitCode = 1;
-        log(logger, clock, LogLevels.Error, 'outbox.relay.kafka.disconnect.failed', {
-          'error.code': failureCode(error),
-        });
+        log(
+          logger,
+          clock,
+          LogLevels.Error,
+          'outbox.relay.kafka.disconnect.failed',
+          failureAttributes(error, 'outbox.relay.service_failed'),
+        );
       }
     }
 
@@ -152,9 +158,13 @@ export async function startRelayService(
         await pool.end();
       } catch (error) {
         process.exitCode = 1;
-        log(logger, clock, LogLevels.Error, 'outbox.relay.postgres.close.failed', {
-          'error.code': failureCode(error),
-        });
+        log(
+          logger,
+          clock,
+          LogLevels.Error,
+          'outbox.relay.postgres.close.failed',
+          failureAttributes(error, 'outbox.relay.service_failed'),
+        );
       }
     }
 
@@ -162,9 +172,13 @@ export async function startRelayService(
       await telemetry.shutdown();
     } catch (error) {
       process.exitCode = 1;
-      log(logger, clock, LogLevels.Error, 'outbox.relay.telemetry.shutdown.failed', {
-        'error.code': failureCode(error),
-      });
+      log(
+        logger,
+        clock,
+        LogLevels.Error,
+        'outbox.relay.telemetry.shutdown.failed',
+        failureAttributes(error, 'outbox.relay.service_failed'),
+      );
     }
 
     log(logger, clock, LogLevels.Info, 'outbox.relay.stopped');

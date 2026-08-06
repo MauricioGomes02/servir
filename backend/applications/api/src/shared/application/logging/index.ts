@@ -1,6 +1,7 @@
 export {
   createLogRecord,
   LogLevels,
+  parseLogLevel,
 } from './log-record';
 
 export type {

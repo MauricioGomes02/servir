@@ -3,6 +3,7 @@ export {
 } from './in-memory-logger';
 
 export {
+  createErrorLogAttributes,
   JsonStdoutLogger,
 } from './json-stdout-logger';
 

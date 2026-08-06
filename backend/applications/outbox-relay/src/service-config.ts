@@ -1,4 +1,4 @@
-import { LogLevels, type LogLevel } from '@servir/application-foundation';
+import { parseLogLevel, type LogLevel } from '@servir/application-foundation';
 
 export const RelayServiceConfigErrorCodes = {
   MissingDatabaseUrl: 'relay.config.database_url.missing',
@@ -117,8 +117,8 @@ export function readRelayServiceConfig(
     );
   }
 
-  const logLevel = environment.LOG_LEVEL?.trim().toLowerCase() ?? LogLevels.Info;
-  if (!(Object.values(LogLevels) as string[]).includes(logLevel)) {
+  const logLevel = parseLogLevel(environment.LOG_LEVEL);
+  if (logLevel === undefined) {
     throw new RelayServiceConfigError(
       RelayServiceConfigErrorCodes.InvalidLogLevel,
     );
@@ -146,6 +146,6 @@ export function readRelayServiceConfig(
       300_000,
     ),
     retryJitterRatio: ratio(environment.OUTBOX_RETRY_JITTER_RATIO, 0.2),
-    logLevel: logLevel as LogLevel,
+    logLevel,
   });
 }

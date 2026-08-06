@@ -5,6 +5,9 @@ export type {
   LogLineWriter,
 } from './json-stdout-logger.js';
 
+export { createErrorLogAttributes } from './error-log-attributes.js';
+export type { ErrorLogAttributeOptions } from './error-log-attributes.js';
+
 export {
   captureActiveTraceContext,
   createPgInstrumentation,
