@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { Pool } from 'pg';
 
+import { createLeaseId } from '@/application';
+
 import { PostgresOutboxMessageStore } from './postgres-outbox-message-store';
 import {
   PostgresOutboxMessageStoreError,
@@ -9,7 +11,7 @@ import {
 } from './postgres-outbox-message-store-error';
 
 const CLAIM = {
-  leaseId: '0198f334-6dc5-7c20-9af1-91d7e599c001',
+  leaseId: createLeaseId('0198f334-6dc5-7c20-9af1-91d7e599c001'),
   claimedAt: '2026-07-29T15:00:00.000Z',
   leaseExpiresAt: '2026-07-29T15:01:00.000Z',
   limit: 10,

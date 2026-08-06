@@ -6,12 +6,14 @@ import type {
 import type { Pool, QueryResultRow } from 'pg';
 
 import {
+  createLeaseId,
   OutboxLeaseError,
   OutboxLeaseErrorCodes,
 } from '@/application';
 import type {
   ClaimedOutboxMessage,
   ClaimOutboxMessages,
+  LeaseId,
   OutboxMessageStore,
 } from '@/application';
 
@@ -155,6 +157,16 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
     );
   }
 
+  let leaseId: LeaseId;
+
+  try {
+    leaseId = createLeaseId(row.lease_id);
+  } catch {
+    throw new PostgresOutboxMessageStoreError(
+      PostgresOutboxMessageStoreErrorCodes.InvalidRow,
+    );
+  }
+
   const persistedMetadata = readPersistedMetadata(row.metadata as JsonObject);
   const event: IntegrationEvent = Object.freeze({
     channel: row.publication_channel,
@@ -177,7 +189,7 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
     traceContext: persistedMetadata.traceContext,
     event,
     attemptCount: row.attempt_count,
-    leaseId: row.lease_id,
+    leaseId,
     leaseExpiresAt: row.lease_expires_at.toISOString(),
   });
 }
@@ -231,7 +243,7 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
 
   async markPublished(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     publishedAt: string;
   }>): Promise<void> {
     await this.transition(
@@ -253,7 +265,7 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
 
   async reschedule(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     failedAt: string;
     availableAt: string;
     errorCode: string;
@@ -288,7 +300,7 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
 
   async markFailed(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     failedAt: string;
     errorCode: string;
   }>): Promise<void> {
@@ -319,7 +331,7 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
     parameters: readonly unknown[],
     ownership: Readonly<{
       messageId: string;
-      leaseId: string;
+      leaseId: LeaseId;
       transitionAt?: string;
       publishedAt?: string;
     }>,

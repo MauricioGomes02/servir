@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import { LeaseIdError, LeaseIdErrorCodes } from '@/application';
+
 import {
   LeaseIdGenerationError,
   UuidV7LeaseIdGenerator,
@@ -21,6 +23,19 @@ describe('UuidV7LeaseIdGenerator', () => {
       () => generator.generate(),
       (error: unknown) => error instanceof LeaseIdGenerationError
         && error.cause === cause,
+    );
+  });
+
+  it('rejects an invalid identity returned by the configured source', () => {
+    const generator = new UuidV7LeaseIdGenerator(
+      () => '550e8400-e29b-41d4-a716-446655440000',
+    );
+
+    assert.throws(
+      () => generator.generate(),
+      (error: unknown) => error instanceof LeaseIdGenerationError
+        && error.cause instanceof LeaseIdError
+        && error.cause.code === LeaseIdErrorCodes.Invalid,
     );
   });
 });

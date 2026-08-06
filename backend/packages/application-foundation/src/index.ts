@@ -12,3 +12,5 @@ export type {
   LogLevel,
   LogRecord,
 } from './logging.js';
+
+export type { IdGenerator } from './id-generator.js';

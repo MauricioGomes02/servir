@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import { Pool } from 'pg';
 
 import {
+  createLeaseId,
   OutboxLeaseError,
   OutboxLeaseErrorCodes,
 } from '@/application';
@@ -35,9 +36,9 @@ const EVENT_IDS = [
 ] as const;
 
 const LEASE_IDS = [
-  '0198f334-6dc5-7c20-9af1-91d7e599c001',
-  '0198f334-6dc5-7c20-9af1-91d7e599c002',
-  '0198f334-6dc5-7c20-9af1-91d7e599c003',
+  createLeaseId('0198f334-6dc5-7c20-9af1-91d7e599c001'),
+  createLeaseId('0198f334-6dc5-7c20-9af1-91d7e599c002'),
+  createLeaseId('0198f334-6dc5-7c20-9af1-91d7e599c003'),
 ] as const;
 
 async function insertMessage(

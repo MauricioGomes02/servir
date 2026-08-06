@@ -1,4 +1,4 @@
-import type { LeaseIdGenerator } from '@/application';
+import { createLeaseId, type LeaseId, type LeaseIdGenerator } from '@/application';
 import { v7 } from 'uuid';
 
 export const LeaseIdGenerationErrorCode = 'lease_id.generation_failed' as const;
@@ -14,9 +14,9 @@ export class LeaseIdGenerationError extends Error {
 export class UuidV7LeaseIdGenerator implements LeaseIdGenerator {
   constructor(private readonly source: () => string = v7) {}
 
-  generate(): string {
+  generate(): LeaseId {
     try {
-      return this.source();
+      return createLeaseId(this.source());
     } catch (cause) {
       throw new LeaseIdGenerationError({ cause });
     }

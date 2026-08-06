@@ -1,5 +1,7 @@
 import type { IntegrationEvent } from '@servir/integration-messaging';
 
+import type { LeaseId } from '@/application/lease-id';
+
 export interface DistributedTraceContext {
   readonly traceparent: string;
   readonly tracestate?: string;
@@ -15,12 +17,12 @@ export interface ClaimedOutboxMessage<
   readonly traceContext?: DistributedTraceContext;
   readonly event: TEvent;
   readonly attemptCount: number;
-  readonly leaseId: string;
+  readonly leaseId: LeaseId;
   readonly leaseExpiresAt: string;
 }
 
 export interface ClaimOutboxMessages {
-  readonly leaseId: string;
+  readonly leaseId: LeaseId;
   readonly claimedAt: string;
   readonly leaseExpiresAt: string;
   readonly limit: number;
@@ -30,19 +32,19 @@ export interface OutboxMessageStore {
   claim(input: ClaimOutboxMessages): Promise<readonly ClaimedOutboxMessage[]>;
   markPublished(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     publishedAt: string;
   }>): Promise<void>;
   reschedule(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     failedAt: string;
     availableAt: string;
     errorCode: string;
   }>): Promise<void>;
   markFailed(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     failedAt: string;
     errorCode: string;
   }>): Promise<void>;

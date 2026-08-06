@@ -3,6 +3,7 @@ import type { IntegrationEvent } from '@servir/integration-messaging';
 import type {
   ClaimedOutboxMessage,
   ClaimOutboxMessages,
+  LeaseId,
   OutboxMessageStore,
 } from '@/application';
 import {
@@ -24,7 +25,7 @@ interface StoredOutboxMessage
 extends Omit<InMemoryOutboxMessage, 'availableAt' | 'attemptCount'> {
   availableAt: string;
   attemptCount: number;
-  leaseId?: string;
+  leaseId?: LeaseId;
   leaseExpiresAt?: string;
   publishedAt?: string;
   failedAt?: string;
@@ -33,7 +34,7 @@ extends Omit<InMemoryOutboxMessage, 'availableAt' | 'attemptCount'> {
 
 export interface OutboxMessageSnapshot extends InMemoryOutboxMessage {
   readonly attemptCount: number;
-  readonly leaseId?: string;
+  readonly leaseId?: LeaseId;
   readonly leaseExpiresAt?: string;
   readonly publishedAt?: string;
   readonly failedAt?: string;
@@ -98,7 +99,7 @@ export class InMemoryOutboxMessageStore implements OutboxMessageStore {
 
   async markPublished(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     publishedAt: string;
   }>): Promise<void> {
     const message = this.requireLease(
@@ -112,7 +113,7 @@ export class InMemoryOutboxMessageStore implements OutboxMessageStore {
 
   async reschedule(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     failedAt: string;
     availableAt: string;
     errorCode: string;
@@ -129,7 +130,7 @@ export class InMemoryOutboxMessageStore implements OutboxMessageStore {
 
   async markFailed(input: Readonly<{
     messageId: string;
-    leaseId: string;
+    leaseId: LeaseId;
     failedAt: string;
     errorCode: string;
   }>): Promise<void> {
@@ -145,7 +146,7 @@ export class InMemoryOutboxMessageStore implements OutboxMessageStore {
 
   private requireLease(
     messageId: string,
-    leaseId: string,
+    leaseId: LeaseId,
     transitionAt: string,
   ): StoredOutboxMessage {
     const message = this.messages.find(

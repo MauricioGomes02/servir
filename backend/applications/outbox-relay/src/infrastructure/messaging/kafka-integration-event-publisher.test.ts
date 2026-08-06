@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  createLeaseId,
   IntegrationEventPublicationError,
 } from '@/application';
 import type { ClaimedOutboxMessage } from '@/application';
@@ -38,7 +39,7 @@ function message(): ClaimedOutboxMessage {
       metadata: {},
     },
     attemptCount: 1,
-    leaseId: '0198f334-6dc5-7c20-9af1-91d7e599c005',
+    leaseId: createLeaseId('0198f334-6dc5-7c20-9af1-91d7e599c005'),
     leaseExpiresAt: '2026-07-31T15:01:00.000Z',
   };
 }

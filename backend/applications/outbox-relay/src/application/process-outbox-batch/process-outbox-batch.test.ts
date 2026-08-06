@@ -13,6 +13,7 @@ import {
   ProcessOutboxBatchConfigError,
   ProcessOutboxBatchConfigErrorCodes,
 } from '@/application/errors';
+import { createLeaseId } from '@/application/lease-id';
 import {
   InMemoryIntegrationEventPublisher,
   InMemoryOutboxMessageStore,
@@ -23,6 +24,7 @@ import { ProcessOutboxBatch } from './process-outbox-batch';
 const CLAIMED_AT = '2026-07-29T15:00:00.000Z';
 const LEASE_EXPIRES_AT = '2026-07-29T15:01:00.000Z';
 const RETRY_AT = '2026-07-29T15:05:00.000Z';
+const LEASE_ID = createLeaseId('0198f334-6dc5-7c20-9af1-91d7e599c001');
 
 function message(messageId: string) {
   return {
@@ -96,7 +98,7 @@ function processBatch(input: Readonly<{
 }>) {
   return new ProcessOutboxBatch({
     clock: input.clock,
-    leaseIdGenerator: { generate: () => 'lease-123' },
+    leaseIdGenerator: { generate: () => LEASE_ID },
     messageStore: input.store,
     publisher: input.publisher,
     retryPolicy: input.retryPolicy,
@@ -133,7 +135,7 @@ describe('ProcessOutboxBatch', () => {
     let observed = 0;
     const process = new ProcessOutboxBatch({
       clock: new SequenceClock([CLAIMED_AT, '2026-07-29T15:00:01.000Z']),
-      leaseIdGenerator: { generate: () => 'lease-123' },
+      leaseIdGenerator: { generate: () => LEASE_ID },
       messageStore: new InMemoryOutboxMessageStore([message('message-1')]),
       publisher: new InMemoryIntegrationEventPublisher(),
       retryPolicy: retryPolicy(true),
@@ -177,7 +179,7 @@ describe('ProcessOutboxBatch', () => {
     };
     const process = new ProcessOutboxBatch({
       clock: new SequenceClock([CLAIMED_AT]),
-      leaseIdGenerator: { generate: () => 'lease-123' },
+      leaseIdGenerator: { generate: () => LEASE_ID },
       messageStore: new InMemoryOutboxMessageStore([]),
       publisher: new InMemoryIntegrationEventPublisher(),
       retryPolicy: retryPolicy(true),
@@ -203,7 +205,7 @@ describe('ProcessOutboxBatch', () => {
       assert.throws(
         () => new ProcessOutboxBatch({
           clock: new SequenceClock([CLAIMED_AT]),
-          leaseIdGenerator: { generate: () => 'lease-123' },
+          leaseIdGenerator: { generate: () => LEASE_ID },
           messageStore: store,
           publisher,
           retryPolicy: retryPolicy(true),
@@ -224,7 +226,7 @@ describe('ProcessOutboxBatch', () => {
       assert.throws(
         () => new ProcessOutboxBatch({
           clock: new SequenceClock([CLAIMED_AT]),
-          leaseIdGenerator: { generate: () => 'lease-123' },
+          leaseIdGenerator: { generate: () => LEASE_ID },
           messageStore: store,
           publisher,
           retryPolicy: retryPolicy(true),
@@ -318,7 +320,7 @@ describe('ProcessOutboxBatch', () => {
         CLAIMED_AT,
         '2026-07-29T15:00:01.000Z',
       ]),
-      leaseIdGenerator: { generate: () => 'lease-123' },
+      leaseIdGenerator: { generate: () => LEASE_ID },
       messageStore: store,
       publisher,
       retryPolicy: retry,

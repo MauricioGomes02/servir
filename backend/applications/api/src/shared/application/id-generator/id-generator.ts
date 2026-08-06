@@ -1,3 +1,1 @@
-export interface IdGenerator<TId> {
-  generate(): TId;
-}
+export type { IdGenerator } from '@servir/application-foundation';
