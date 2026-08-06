@@ -16,6 +16,13 @@ import type {
 } from '@/modules/organizations/application';
 import type { OrganizationId } from '@/modules/organizations/domain';
 import type { CreateOrganizationPresenter } from '@/modules/organizations/presentation';
+import type {
+  CreateMinistryHandler,
+  MinistryCreationFactsReader,
+  MinistryWriteScope,
+} from '@/modules/ministries/application';
+import type { MinistryId } from '@/modules/ministries/domain';
+import type { CreateMinistryPresenter } from '@/modules/ministries/presentation';
 import type { Clock } from '@/shared/application/clock';
 import type {
   CorrelationId,
@@ -42,9 +49,12 @@ export interface ApplicationCradle {
   readonly memberUnitOfWork: UnitOfWork<MemberWriteScope>;
   readonly memberDetailsReader: MemberDetailsReader;
   readonly organizationRegistrationFacts: OrganizationRegistrationFactsReader;
+  readonly ministryUnitOfWork: UnitOfWork<MinistryWriteScope>;
+  readonly ministryCreationFacts: MinistryCreationFactsReader;
   readonly eventRelayLifecycle: EventRelayLifecycle;
   readonly organizationIdGenerator: IdGenerator<OrganizationId>;
   readonly memberIdGenerator: IdGenerator<MemberId>;
+  readonly ministryIdGenerator: IdGenerator<MinistryId>;
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
   readonly requestIdGenerator: IdGenerator<RequestId>;
@@ -55,6 +65,8 @@ export interface ApplicationCradle {
   readonly registerMemberPresenter: RegisterMemberPresenter;
   readonly getMemberDetailsHandler: GetMemberDetailsHandler;
   readonly getMemberDetailsPresenter: GetMemberDetailsPresenter;
+  readonly createMinistryHandler: CreateMinistryHandler;
+  readonly createMinistryPresenter: CreateMinistryPresenter;
 }
 
 export type ApplicationContainer = AwilixContainer<ApplicationCradle>;

@@ -18,13 +18,20 @@ const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7ba',
   '0198f334-6dc5-7c20-9af1-91d7e599c7bb',
   '0198f334-6dc5-7c20-9af1-91d7e599c7bc',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7bd',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7be',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7bf',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7c0',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7c1',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7c2',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7c3',
 ];
 
 describe('createApplication', () => {
   it('composes the first executable vertical slice', async () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
-    const monotonicInstants = [100, 142, 200, 250, 300, 325];
+    const monotonicInstants = [100, 142, 200, 250, 300, 325, 400, 410, 500, 525];
     const app = createApplication({
       logger,
       monotonicNow: () => monotonicInstants.shift() ?? 142,
@@ -74,6 +81,35 @@ describe('createApplication', () => {
       `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
     );
 
+    const ministryResponse = await app.inject({
+      method: 'POST',
+      url: `/organizations/${UUIDS[2]}/ministries`,
+      payload: { name: 'Louvor' },
+    });
+    assert.equal(ministryResponse.statusCode, 201);
+    assert.deepEqual(ministryResponse.json(), {
+      id: UUIDS[12],
+      organizationId: UUIDS[2],
+      name: 'Louvor',
+      status: 'active',
+    });
+    assert.equal(
+      ministryResponse.headers.location,
+      `/organizations/${UUIDS[2]}/ministries/${UUIDS[12]}`,
+    );
+
+    const conflictResponse = await app.inject({
+      method: 'POST',
+      url: `/organizations/${UUIDS[2]}/ministries`,
+      payload: { name: 'louvor' },
+    });
+    assert.equal(conflictResponse.statusCode, 409);
+    assert.equal(conflictResponse.json().type, '/problems/resource-conflict');
+    assert.equal(
+      conflictResponse.json().errors[0].code,
+      'ministry.creation.active_name_already_exists',
+    );
+
     const detailsResponse = await app.inject({
       method: 'GET',
       url: `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
@@ -100,7 +136,7 @@ describe('createApplication', () => {
     const requestRecords = logger.records.filter(
       (record) => record.eventName === 'http.request.completed',
     );
-    assert.equal(requestRecords.length, 3);
+    assert.equal(requestRecords.length, 5);
     assert.deepEqual(requestRecords[0]?.context, {
       correlationId: UUIDS[1],
       requestId: UUIDS[0],
@@ -118,6 +154,18 @@ describe('createApplication', () => {
       'duration.ms': 50,
     });
     assert.deepEqual(requestRecords[2]?.attributes, {
+      'http.request.method': 'POST',
+      'http.route': '/organizations/:organizationId/ministries',
+      'http.response.status_code': 201,
+      'duration.ms': 25,
+    });
+    assert.deepEqual(requestRecords[3]?.attributes, {
+      'http.request.method': 'POST',
+      'http.route': '/organizations/:organizationId/ministries',
+      'http.response.status_code': 409,
+      'duration.ms': 10,
+    });
+    assert.deepEqual(requestRecords[4]?.attributes, {
       'http.request.method': 'GET',
       'http.route': '/organizations/:organizationId/members/:memberId',
       'http.response.status_code': 200,

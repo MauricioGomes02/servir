@@ -184,11 +184,12 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Publicação Kafka em CloudEvents com entrega at-least-once.
 - Infraestrutura local com Terraform e migrations externas com Liquibase.
 - Membership com `RegisterMember`, `GetMemberDetails`, Readers específicos, persistência PostgreSQL, entradas HTTP localizadas e Integration Event v1.
+- Ministries com `CreateMinistry`, unicidade de nome ativo por organização, persistência/outbox atômicas, entrada HTTP localizada e Integration Event v1.
 
 ### Em evolução
 
 - Listagem paginada de Membership orientada pela primeira tela consumidora.
-- Ministérios, funções, participação, aprovação e times.
+- Funções ministeriais, participação, aprovação e times.
 - Atividades, recorrência e ocorrências com modelagem temporal explícita.
 - Disponibilidade e escalas versionadas por time.
 - Auditoria durável, notificações e consumidores idempotentes.

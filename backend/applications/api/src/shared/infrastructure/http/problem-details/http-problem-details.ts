@@ -7,6 +7,7 @@ import type { PresentedError } from '@/shared/presentation';
 export const HttpProblemTypes = {
   InternalError: '/problems/internal-error',
   InvalidRequest: '/problems/invalid-request',
+  ResourceConflict: '/problems/resource-conflict',
   ResourceNotFound: '/problems/resource-not-found',
   ValidationError: '/problems/validation-error',
 } as const;

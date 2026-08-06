@@ -58,6 +58,8 @@ export async function startService(
       organizationRegistrationFacts:
         postgresPersistence?.organizationRegistrationFacts,
       organizationUnitOfWork: postgresPersistence?.unitOfWork,
+      ministryUnitOfWork: postgresPersistence?.ministryUnitOfWork,
+      ministryCreationFacts: postgresPersistence?.ministryCreationFacts,
     });
 
     if (postgresPersistence !== undefined) {

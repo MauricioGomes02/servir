@@ -2,7 +2,7 @@
 
 ## Estado
 
-Descoberta em andamento. O núcleo de domínio de `Member` e o caso de uso `RegisterMember` estão implementados; os demais tipos deste documento permanecem planejados.
+Descoberta em andamento. Os cortes verticais iniciais de `Member` e `Ministry` estão implementados; os demais tipos deste documento permanecem planejados.
 
 ## Objetivo
 
@@ -56,7 +56,7 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 ### Ministry
 
-Mantém identidade, nome, estado e funções do ministério. `MinistryRole` começa como entidade interna com ID estável e nome único entre funções ativas. Uma função desativada permanece referenciável pelo histórico.
+É um Aggregate Root separado de Organization e mantém inicialmente identidade, `OrganizationId`, nome e estado ativo. O nome ativo é único por organização, ignorando caixa e preservando acentos. `MinistryRole` entra depois como entidade interna por `DefineMinistryRole`, com ID estável e nome único entre funções ativas. Uma função desativada permanece referenciável pelo histórico.
 
 ### MinistryTeam
 
@@ -211,14 +211,15 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 
 ## Sequência incremental candidata
 
-1. Criar `Member` separado de `User` e registrar seu vínculo com Organization. **Concluído no núcleo e na Application; persistência e apresentação pendentes.**
-2. Implementar `Ministry`, `MinistryRole` e criação de ministério.
-3. Implementar solicitação/aprovação de `MinistryMembership` e qualificações.
-4. Implementar `MinistryTeam`, participação e liderança.
-5. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
-6. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
-7. Implementar disponibilidade e sua coleta por período.
-8. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
-9. Implementar publicação versionada, substituições e reações de auditoria/notificação.
+1. Criar `Member` separado de `User` e registrar seu vínculo com Organization. **Concluído.**
+2. Implementar `Ministry` e `CreateMinistry`, sem antecipar funções. **Concluído.**
+3. Implementar `MinistryRole` por `DefineMinistryRole`.
+4. Implementar solicitação/aprovação de `MinistryMembership` e qualificações.
+5. Implementar `MinistryTeam`, participação e liderança.
+6. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
+7. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
+8. Implementar disponibilidade e sua coleta por período.
+9. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
+10. Implementar publicação versionada, substituições e reações de auditoria/notificação.
 
 Cada incremento inclui Aggregate, testes, Repository específico, Unit of Work/outbox quando houver fatos externos, apresentação e documentação. Banco, API e eventos entram apenas com o caso de uso do incremento.

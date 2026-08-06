@@ -26,6 +26,11 @@ variable "topics" {
       partitions         = 3
       replication_factor = 1
     }
+    ministries_events = {
+      name               = "servir.ministries.events"
+      partitions         = 3
+      replication_factor = 1
+    }
   }
 
   validation {

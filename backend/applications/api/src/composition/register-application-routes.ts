@@ -3,6 +3,7 @@ import {
   registerMemberRoute,
 } from '@/modules/membership/infrastructure';
 import { registerCreateOrganizationRoute } from '@/modules/organizations/infrastructure';
+import { registerCreateMinistryRoute } from '@/modules/ministries/infrastructure';
 import type { FastifyInstance } from 'fastify';
 
 import type { ApplicationContainer } from './container';
@@ -27,5 +28,10 @@ export function registerApplicationRoutes(
     handler: dependencies.getMemberDetailsHandler,
     messageTranslator: dependencies.translator,
     presenter: dependencies.getMemberDetailsPresenter,
+  });
+  registerCreateMinistryRoute(app, {
+    handler: dependencies.createMinistryHandler,
+    messageTranslator: dependencies.translator,
+    presenter: dependencies.createMinistryPresenter,
   });
 }

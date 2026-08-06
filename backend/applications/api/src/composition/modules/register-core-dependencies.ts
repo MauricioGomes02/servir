@@ -12,6 +12,7 @@ import { JsonStdoutLogger } from '@/shared/infrastructure/logging';
 import { asFunction, asValue } from 'awilix';
 
 import { membershipMessageCatalog } from '@/modules/membership/presentation';
+import { ministryMessageCatalog } from '@/modules/ministries/presentation';
 import { organizationMessageCatalog } from '@/modules/organizations/presentation';
 import type { ApplicationContainer } from '../container';
 import type { CreateApplicationOptions } from '../create-application-options';
@@ -27,11 +28,13 @@ export function registerCoreDependencies(
       'pt-BR': {
         ...httpProblemMessageCatalog['pt-BR'],
         ...membershipMessageCatalog['pt-BR'],
+        ...ministryMessageCatalog['pt-BR'],
         ...organizationMessageCatalog['pt-BR'],
       },
       'en-US': {
         ...httpProblemMessageCatalog['en-US'],
         ...membershipMessageCatalog['en-US'],
+        ...ministryMessageCatalog['en-US'],
         ...organizationMessageCatalog['en-US'],
       },
     })).singleton(),

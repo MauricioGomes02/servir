@@ -5,6 +5,10 @@ import {
 } from '@/modules/membership/infrastructure';
 import { InMemoryOrganizationRepository } from '@/modules/organizations/infrastructure';
 import {
+  InMemoryMinistryCreationFactsReader,
+  InMemoryMinistryRepository,
+} from '@/modules/ministries/infrastructure';
+import {
   InMemoryEventBus,
   InMemoryEventOutbox,
   InMemoryEventOutboxRelay,
@@ -20,7 +24,9 @@ function hasNoPersistenceOverrides(options: CreateApplicationOptions): boolean {
   return options.organizationUnitOfWork === undefined
     && options.memberUnitOfWork === undefined
     && options.memberDetailsReader === undefined
-    && options.organizationRegistrationFacts === undefined;
+    && options.organizationRegistrationFacts === undefined
+    && options.ministryUnitOfWork === undefined
+    && options.ministryCreationFacts === undefined;
 }
 
 export function registerPersistence(
@@ -30,6 +36,7 @@ export function registerPersistence(
   if (hasNoPersistenceOverrides(options)) {
     const organizations = new InMemoryOrganizationRepository();
     const members = new InMemoryMemberRepository();
+    const ministries = new InMemoryMinistryRepository();
     const outbox = new InMemoryEventOutbox();
     const relay = new InMemoryEventOutboxRelay(
       outbox,
@@ -44,6 +51,9 @@ export function registerPersistence(
       memberUnitOfWork: asValue(
         new DirectUnitOfWork({ members, outbox }),
       ),
+      ministryUnitOfWork: asValue(
+        new DirectUnitOfWork({ ministries, outbox }),
+      ),
       memberDetailsReader: asValue(
         new InMemoryMemberDetailsReader(() => members.members),
       ),
@@ -52,6 +62,12 @@ export function registerPersistence(
           () => organizations.organizations.map(
             (organization) => organization.id,
           ),
+        ),
+      ),
+      ministryCreationFacts: asValue(
+        new InMemoryMinistryCreationFactsReader(
+          () => organizations.organizations.map((organization) => organization.id),
+          () => ministries.ministries,
         ),
       ),
       eventRelayLifecycle: asValue(Object.freeze({ relay })),
@@ -64,6 +80,8 @@ export function registerPersistence(
     || options.memberUnitOfWork === undefined
     || options.memberDetailsReader === undefined
     || options.organizationRegistrationFacts === undefined
+    || options.ministryUnitOfWork === undefined
+    || options.ministryCreationFacts === undefined
   ) {
     throw new ApplicationPersistenceConfigurationError();
   }
@@ -75,6 +93,8 @@ export function registerPersistence(
     organizationRegistrationFacts: asValue(
       options.organizationRegistrationFacts,
     ),
+    ministryUnitOfWork: asValue(options.ministryUnitOfWork),
+    ministryCreationFacts: asValue(options.ministryCreationFacts),
     eventRelayLifecycle: asValue(Object.freeze({})),
   });
 }

@@ -1,4 +1,14 @@
 import type { OrganizationWriteScope } from '@/modules/organizations/application';
+import type {
+  MinistryCreationFactsReader,
+  MinistryWriteScope,
+} from '@/modules/ministries/application';
+import { isMinistryCreated } from '@/modules/ministries/domain';
+import {
+  mapMinistryCreatedIntegrationEvent,
+  PostgresMinistryCreationFactsReader,
+  PostgresMinistryRepository,
+} from '@/modules/ministries/infrastructure';
 import {
   mapOrganizationCreatedIntegrationEvent,
   PostgresOrganizationRepository,
@@ -29,9 +39,11 @@ import { Pool } from 'pg';
 export interface PostgresPersistence {
   readonly unitOfWork: UnitOfWork<OrganizationWriteScope>;
   readonly memberUnitOfWork: UnitOfWork<MemberWriteScope>;
+  readonly ministryUnitOfWork: UnitOfWork<MinistryWriteScope>;
   readonly memberDetailsReader: MemberDetailsReader;
   readonly organizationRegistrationFacts:
     OrganizationRegistrationFactsReader;
+  readonly ministryCreationFacts: MinistryCreationFactsReader;
   close(): Promise<void>;
 }
 
@@ -47,6 +59,10 @@ export function createPostgresPersistence(
 
     if (isMemberRegistered(envelope.event)) {
       return mapMemberRegisteredIntegrationEvent(envelope.event);
+    }
+
+    if (isMinistryCreated(envelope.event)) {
+      return mapMinistryCreatedIntegrationEvent(envelope.event);
     }
 
     throw new UnmappedDomainEventError(envelope.event.name);
@@ -69,9 +85,18 @@ export function createPostgresPersistence(
         captureActiveTraceContext,
       ),
     })),
+    ministryUnitOfWork: new PostgresUnitOfWork(pool, (client) => ({
+      ministries: new PostgresMinistryRepository(client),
+      outbox: new PostgresEventOutbox(
+        client,
+        mapIntegrationEvent,
+        captureActiveTraceContext,
+      ),
+    })),
     memberDetailsReader: new PostgresMemberDetailsReader(pool),
     organizationRegistrationFacts:
       new PostgresOrganizationRegistrationFactsReader(pool),
+    ministryCreationFacts: new PostgresMinistryCreationFactsReader(pool),
     async close(): Promise<void> {
       await pool.end();
     },
