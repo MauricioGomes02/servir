@@ -49,8 +49,7 @@ describe('readRelayServiceConfig', () => {
     for (const [environment, code] of partitions) {
       assert.throws(
         () => readRelayServiceConfig(environment),
-        (error: unknown) => error instanceof RelayServiceConfigError
-          && error.code === code,
+        (error: unknown) => error instanceof RelayServiceConfigError && error.code === code,
       );
     }
   });
@@ -59,30 +58,39 @@ describe('readRelayServiceConfig', () => {
     for (const value of ['0', '-1', '1.5', 'text']) {
       assert.throws(
         () => readRelayServiceConfig({ ...REQUIRED, OUTBOX_BATCH_SIZE: value }),
-        (error: unknown) => error instanceof RelayServiceConfigError
-          && error.code === RelayServiceConfigErrorCodes.InvalidInteger,
+        (error: unknown) =>
+          error instanceof RelayServiceConfigError &&
+          error.code === RelayServiceConfigErrorCodes.InvalidInteger,
       );
     }
   });
 
   it('accepts the jitter boundaries and rejects values outside them', () => {
-    assert.equal(readRelayServiceConfig({
-      ...REQUIRED,
-      OUTBOX_RETRY_JITTER_RATIO: '0',
-    }).retryJitterRatio, 0);
-    assert.equal(readRelayServiceConfig({
-      ...REQUIRED,
-      OUTBOX_RETRY_JITTER_RATIO: '1',
-    }).retryJitterRatio, 1);
+    assert.equal(
+      readRelayServiceConfig({
+        ...REQUIRED,
+        OUTBOX_RETRY_JITTER_RATIO: '0',
+      }).retryJitterRatio,
+      0,
+    );
+    assert.equal(
+      readRelayServiceConfig({
+        ...REQUIRED,
+        OUTBOX_RETRY_JITTER_RATIO: '1',
+      }).retryJitterRatio,
+      1,
+    );
 
     for (const value of ['-0.01', '1.01', 'text']) {
       assert.throws(
-        () => readRelayServiceConfig({
-          ...REQUIRED,
-          OUTBOX_RETRY_JITTER_RATIO: value,
-        }),
-        (error: unknown) => error instanceof RelayServiceConfigError
-          && error.code === RelayServiceConfigErrorCodes.InvalidRatio,
+        () =>
+          readRelayServiceConfig({
+            ...REQUIRED,
+            OUTBOX_RETRY_JITTER_RATIO: value,
+          }),
+        (error: unknown) =>
+          error instanceof RelayServiceConfigError &&
+          error.code === RelayServiceConfigErrorCodes.InvalidRatio,
       );
     }
   });
@@ -90,26 +98,32 @@ describe('readRelayServiceConfig', () => {
   it('requires the publication timeout to remain below the lease', () => {
     for (const timeout of ['60000', '60001']) {
       assert.throws(
-        () => readRelayServiceConfig({
-          ...REQUIRED,
-          OUTBOX_LEASE_DURATION_MS: '60000',
-          KAFKA_PUBLISH_TIMEOUT_MS: timeout,
-        }),
-        (error: unknown) => error instanceof RelayServiceConfigError
-          && error.code === RelayServiceConfigErrorCodes.InvalidPublishTimeout,
+        () =>
+          readRelayServiceConfig({
+            ...REQUIRED,
+            OUTBOX_LEASE_DURATION_MS: '60000',
+            KAFKA_PUBLISH_TIMEOUT_MS: timeout,
+          }),
+        (error: unknown) =>
+          error instanceof RelayServiceConfigError &&
+          error.code === RelayServiceConfigErrorCodes.InvalidPublishTimeout,
       );
     }
   });
 
   it('normalizes a supported log level and rejects unsupported values', () => {
-    assert.equal(readRelayServiceConfig({
-      ...REQUIRED,
-      LOG_LEVEL: ' DEBUG ',
-    }).logLevel, 'debug');
+    assert.equal(
+      readRelayServiceConfig({
+        ...REQUIRED,
+        LOG_LEVEL: ' DEBUG ',
+      }).logLevel,
+      'debug',
+    );
     assert.throws(
       () => readRelayServiceConfig({ ...REQUIRED, LOG_LEVEL: 'verbose' }),
-      (error: unknown) => error instanceof RelayServiceConfigError
-        && error.code === RelayServiceConfigErrorCodes.InvalidLogLevel,
+      (error: unknown) =>
+        error instanceof RelayServiceConfigError &&
+        error.code === RelayServiceConfigErrorCodes.InvalidLogLevel,
     );
   });
 });

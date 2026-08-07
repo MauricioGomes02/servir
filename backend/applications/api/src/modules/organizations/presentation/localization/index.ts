@@ -1,3 +1,1 @@
-export {
-  organizationMessageCatalog,
-} from './organization-message-catalog';
+export { organizationMessageCatalog } from './organization-message-catalog';

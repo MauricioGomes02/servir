@@ -1,11 +1,5 @@
-export {
-  FixedClock,
-} from './fixed-clock';
+export { FixedClock } from './fixed-clock';
 
-export {
-  SystemClock,
-} from './system-clock';
+export { SystemClock } from './system-clock';
 
-export {
-  SystemClockError,
-} from './system-clock-error';
+export { SystemClockError } from './system-clock-error';

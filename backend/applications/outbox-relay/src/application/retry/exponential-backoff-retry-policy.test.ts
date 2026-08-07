@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import type { Clock, RandomSource } from '@/application/ports';
-import {
-  RetryPolicyConfigError,
-  RetryPolicyConfigErrorCodes,
-} from '@/application/errors';
+import { RetryPolicyConfigError, RetryPolicyConfigErrorCodes } from '@/application/errors';
 
 import { ExponentialBackoffRetryPolicy } from './exponential-backoff-retry-policy';
 
@@ -32,13 +29,15 @@ class FixedRandomSource implements RandomSource {
   }
 }
 
-function policy(input: Readonly<{
-  randomValue?: number;
-  maximumAttempts?: number;
-  baseDelayMilliseconds?: number;
-  maximumDelayMilliseconds?: number;
-  jitterRatio?: number;
-}> = {}) {
+function policy(
+  input: Readonly<{
+    randomValue?: number;
+    maximumAttempts?: number;
+    baseDelayMilliseconds?: number;
+    maximumDelayMilliseconds?: number;
+    jitterRatio?: number;
+  }> = {},
+) {
   const clock = new RecordingClock();
 
   return {
@@ -139,8 +138,7 @@ describe('ExponentialBackoffRetryPolicy', () => {
     for (const invalid of invalidConfigurations) {
       assert.throws(
         () => policy(invalid.values),
-        (error: unknown) => error instanceof RetryPolicyConfigError
-          && error.code === invalid.code,
+        (error: unknown) => error instanceof RetryPolicyConfigError && error.code === invalid.code,
       );
     }
   });
@@ -151,8 +149,9 @@ describe('ExponentialBackoffRetryPolicy', () => {
 
       assert.throws(
         () => retryPolicy.decide(failure(1)),
-        (error: unknown) => error instanceof RetryPolicyConfigError
-          && error.code === RetryPolicyConfigErrorCodes.InvalidRandomValue,
+        (error: unknown) =>
+          error instanceof RetryPolicyConfigError &&
+          error.code === RetryPolicyConfigErrorCodes.InvalidRandomValue,
       );
     }
   });

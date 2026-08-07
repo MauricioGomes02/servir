@@ -40,7 +40,9 @@ describe('createApplication', () => {
   it('composes the first executable vertical slice', async () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
-    const monotonicInstants = [100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725];
+    const monotonicInstants = [
+      100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725,
+    ];
     const app = createApplication({
       logger,
       monotonicNow: () => monotonicInstants.shift() ?? 142,
@@ -85,10 +87,7 @@ describe('createApplication', () => {
       organizationId: UUIDS[2],
       name: 'Maria da Silva',
     });
-    assert.equal(
-      memberResponse.headers.location,
-      `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
-    );
+    assert.equal(memberResponse.headers.location, `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`);
 
     const ministryResponse = await app.inject({
       method: 'POST',
@@ -126,10 +125,16 @@ describe('createApplication', () => {
     });
     assert.equal(roleResponse.statusCode, 201);
     assert.deepEqual(roleResponse.json(), {
-      id: UUIDS[19], ministryId: UUIDS[12], organizationId: UUIDS[2], name: 'Vocal', status: 'active',
+      id: UUIDS[19],
+      ministryId: UUIDS[12],
+      organizationId: UUIDS[2],
+      name: 'Vocal',
+      status: 'active',
     });
-    assert.equal(roleResponse.headers.location,
-      `/organizations/${UUIDS[2]}/ministries/${UUIDS[12]}/roles/${UUIDS[19]}`);
+    assert.equal(
+      roleResponse.headers.location,
+      `/organizations/${UUIDS[2]}/ministries/${UUIDS[12]}/roles/${UUIDS[19]}`,
+    );
 
     const roleConflictResponse = await app.inject({
       method: 'POST',
@@ -137,8 +142,10 @@ describe('createApplication', () => {
       payload: { name: 'vocal' },
     });
     assert.equal(roleConflictResponse.statusCode, 409);
-    assert.equal(roleConflictResponse.json().errors[0].code,
-      'ministry_role.definition.active_name_already_exists');
+    assert.equal(
+      roleConflictResponse.json().errors[0].code,
+      'ministry_role.definition.active_name_already_exists',
+    );
 
     const detailsResponse = await app.inject({
       method: 'GET',
@@ -252,31 +259,16 @@ describe('createApplication', () => {
 
     assert.equal(malformedResponse.statusCode, 400);
     assert.equal(malformedResponse.json().type, '/problems/invalid-request');
-    assert.equal(
-      malformedResponse.json().errors[0].code,
-      'organization.id.invalid_format',
-    );
+    assert.equal(malformedResponse.json().errors[0].code, 'organization.id.invalid_format');
     assert.equal(missingResponse.statusCode, 404);
-    assert.equal(
-      missingResponse.json().type,
-      '/problems/resource-not-found',
-    );
-    assert.equal(
-      missingResponse.json().title,
-      'The requested resource was not found.',
-    );
+    assert.equal(missingResponse.json().type, '/problems/resource-not-found');
+    assert.equal(missingResponse.json().title, 'The requested resource was not found.');
     assert.equal(
       missingResponse.json().errors[0].code,
       'member.registration.organization_not_found',
     );
     assert.equal(missingMemberResponse.statusCode, 404);
-    assert.equal(
-      missingMemberResponse.json().type,
-      '/problems/resource-not-found',
-    );
-    assert.equal(
-      missingMemberResponse.json().errors[0].code,
-      'member.details.not_found',
-    );
+    assert.equal(missingMemberResponse.json().type, '/problems/resource-not-found');
+    assert.equal(missingMemberResponse.json().errors[0].code, 'member.details.not_found');
   });
 });

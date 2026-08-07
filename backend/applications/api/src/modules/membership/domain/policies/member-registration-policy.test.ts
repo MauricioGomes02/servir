@@ -3,15 +3,10 @@ import { describe, it } from 'node:test';
 
 import { OrganizationId } from '@/modules/organizations/domain';
 
-import {
-  MemberRegistrationPolicy,
-  MemberRegistrationPolicyErrorCodes,
-} from '.';
+import { MemberRegistrationPolicy, MemberRegistrationPolicyErrorCodes } from '.';
 
 function organizationRegistrationFacts() {
-  const organizationId = OrganizationId.create(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-  );
+  const organizationId = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
 
   assert.equal(organizationId.success, true);
 
@@ -28,12 +23,15 @@ describe('MemberRegistrationPolicy', () => {
   it('allows registration when the organization exists', () => {
     const policy = new MemberRegistrationPolicy();
 
-    assert.deepEqual(policy.evaluate({
-      organization: organizationRegistrationFacts(),
-    }), {
-      success: true,
-      value: undefined,
-    });
+    assert.deepEqual(
+      policy.evaluate({
+        organization: organizationRegistrationFacts(),
+      }),
+      {
+        success: true,
+        value: undefined,
+      },
+    );
   });
 
   it('rejects registration when the organization does not exist', () => {

@@ -1,5 +1,4 @@
-export const HttpExecutionContextUnavailableErrorCode =
-  'http.execution_context_unavailable';
+export const HttpExecutionContextUnavailableErrorCode = 'http.execution_context_unavailable';
 
 export class HttpExecutionContextUnavailableError extends Error {
   readonly code = HttpExecutionContextUnavailableErrorCode;

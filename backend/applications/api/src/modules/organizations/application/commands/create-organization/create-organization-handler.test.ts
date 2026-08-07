@@ -1,21 +1,14 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createExecutionContext,
-  parseCorrelationId,
-} from '@/shared/application/context';
+import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 import {
   parseMessageId,
   type EventEnvelope,
   type EventOutbox,
   type MessageId,
 } from '@/shared/application/messaging';
-import type { UnitOfWork } from '@/shared/application/unit-of-work';
-import {
-  parseDomainEventId,
-  type DomainEventId,
-} from '@/shared/domain/domain-event';
+import { parseDomainEventId, type DomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
@@ -23,24 +16,15 @@ import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 
-import {
-  OrganizationId,
-  OrganizationNameErrorCodes,
-} from '../../../domain';
+import { OrganizationId, OrganizationNameErrorCodes } from '../../../domain';
 import { InMemoryOrganizationRepository } from '../../../infrastructure';
 import type { OrganizationWriteScope } from '../../ports';
 import { CreateOrganizationHandler } from '.';
 
 function fixtureIds() {
-  const organizationId = OrganizationId.create(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-  );
-  const eventId = parseDomainEventId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
-  );
-  const messageId = parseMessageId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-  );
+  const organizationId = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+  const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
+  const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
   const correlationId = parseCorrelationId('correlation-123');
   const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 
@@ -51,11 +35,11 @@ function fixtureIds() {
   assert.equal(occurredAt.success, true);
 
   if (
-    !organizationId.success
-    || !eventId.success
-    || !messageId.success
-    || !correlationId.success
-    || !occurredAt.success
+    !organizationId.success ||
+    !eventId.success ||
+    !messageId.success ||
+    !correlationId.success ||
+    !occurredAt.success
   ) {
     throw new Error('Invalid deterministic test fixture');
   }
@@ -81,12 +65,8 @@ function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
   const handler = new CreateOrganizationHandler({
     clock: new FixedClock(ids.occurredAt),
     organizationIdGenerator: new SequenceIdGenerator([ids.organizationId]),
-    domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([
-      ids.eventId,
-    ]),
-    messageIdGenerator: new SequenceIdGenerator<MessageId>([
-      ids.messageId,
-    ]),
+    domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([ids.eventId]),
+    messageIdGenerator: new SequenceIdGenerator<MessageId>([ids.messageId]),
     unitOfWork,
     logger,
   });
@@ -108,9 +88,12 @@ describe('CreateOrganizationHandler', () => {
   it('persists the organization and envelope in the same scope', async () => {
     const fixture = createFixture();
 
-    const result = await fixture.handler.handle({
-      name: 'Comunidade Servir',
-    }, fixture.context);
+    const result = await fixture.handler.handle(
+      {
+        name: 'Comunidade Servir',
+      },
+      fixture.context,
+    );
 
     assert.equal(result.success, true);
 
@@ -121,10 +104,7 @@ describe('CreateOrganizationHandler', () => {
     assert.equal(result.value.organizationId, fixture.ids.organizationId);
     assert.equal(result.value.name, 'Comunidade Servir');
     assert.equal(fixture.organizations.organizations.length, 1);
-    assert.deepEqual(
-      fixture.organizations.organizations[0]?.pendingDomainEvents,
-      [],
-    );
+    assert.deepEqual(fixture.organizations.organizations[0]?.pendingDomainEvents, []);
 
     assert.equal(fixture.outbox instanceof InMemoryEventOutbox, true);
 
@@ -133,18 +113,9 @@ describe('CreateOrganizationHandler', () => {
     }
 
     assert.equal(fixture.outbox.envelopes.length, 1);
-    assert.equal(
-      fixture.outbox.envelopes[0]?.correlationId,
-      fixture.ids.correlationId,
-    );
-    assert.equal(
-      fixture.outbox.envelopes[0]?.messageId,
-      fixture.ids.messageId,
-    );
-    assert.equal(
-      fixture.outbox.envelopes[0]?.event.name,
-      'organization.created',
-    );
+    assert.equal(fixture.outbox.envelopes[0]?.correlationId, fixture.ids.correlationId);
+    assert.equal(fixture.outbox.envelopes[0]?.messageId, fixture.ids.messageId);
+    assert.equal(fixture.outbox.envelopes[0]?.event.name, 'organization.created');
   });
 
   it('records the successful business process without personal data', async () => {
@@ -161,10 +132,7 @@ describe('CreateOrganizationHandler', () => {
         'organization.creation.completed',
       ],
     );
-    assert.equal(
-      JSON.stringify(fixture.logger.records).includes('Comunidade Servir'),
-      false,
-    );
+    assert.equal(JSON.stringify(fixture.logger.records).includes('Comunidade Servir'), false);
     assert.deepEqual(fixture.logger.records[2]?.attributes, {
       'organization.id': fixture.ids.organizationId.value,
       'domain_event.count': 1,
@@ -178,10 +146,7 @@ describe('CreateOrganizationHandler', () => {
 
     assert.deepEqual(
       fixture.logger.records.map((record) => record.eventName),
-      [
-        'organization.creation.started',
-        'organization.creation.rejected',
-      ],
+      ['organization.creation.started', 'organization.creation.rejected'],
     );
     assert.deepEqual(fixture.logger.records[1]?.attributes, {
       'error.code': OrganizationNameErrorCodes.Empty,
@@ -192,9 +157,12 @@ describe('CreateOrganizationHandler', () => {
   it('returns an expected failure without persisting state or event', async () => {
     const fixture = createFixture();
 
-    const result = await fixture.handler.handle({
-      name: '   ',
-    }, fixture.context);
+    const result = await fixture.handler.handle(
+      {
+        name: '   ',
+      },
+      fixture.context,
+    );
 
     assert.equal(result.success, false);
 
@@ -224,17 +192,17 @@ describe('CreateOrganizationHandler', () => {
     const fixture = createFixture(failingOutbox);
 
     await assert.rejects(
-      fixture.handler.handle({
-        name: 'Comunidade Servir',
-      }, fixture.context),
+      fixture.handler.handle(
+        {
+          name: 'Comunidade Servir',
+        },
+        fixture.context,
+      ),
       (error: unknown) => error === failure,
     );
 
     assert.equal(received.length, 1);
     assert.equal(fixture.organizations.organizations.length, 1);
-    assert.equal(
-      fixture.organizations.organizations[0]?.pendingDomainEvents.length,
-      1,
-    );
+    assert.equal(fixture.organizations.organizations[0]?.pendingDomainEvents.length, 1);
   });
 });

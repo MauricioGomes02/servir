@@ -6,7 +6,7 @@ import {
 } from '@/shared/application/logging';
 import type { EventPublisher } from '@/shared/application/messaging';
 
-import { InMemoryEventOutbox } from './in-memory-event-outbox';
+import { type InMemoryEventOutbox } from './in-memory-event-outbox';
 import {
   InMemoryEventOutboxRelayError,
   InMemoryEventOutboxRelayErrorCodes,
@@ -61,13 +61,8 @@ export class InMemoryEventOutboxRelay {
   }
 
   start(intervalMilliseconds = DEFAULT_INTERVAL_MILLISECONDS): void {
-    if (
-      !Number.isInteger(intervalMilliseconds)
-      || intervalMilliseconds <= 0
-    ) {
-      throw new InMemoryEventOutboxRelayError(
-        InMemoryEventOutboxRelayErrorCodes.InvalidInterval,
-      );
+    if (!Number.isInteger(intervalMilliseconds) || intervalMilliseconds <= 0) {
+      throw new InMemoryEventOutboxRelayError(InMemoryEventOutboxRelayErrorCodes.InvalidInterval);
     }
 
     if (this.timer !== undefined) {
@@ -100,20 +95,22 @@ export class InMemoryEventOutboxRelay {
       try {
         await this.publisher.publish(envelope);
       } catch (cause) {
-        this.logger.log(createLogRecord({
-          level: LogLevels.Error,
-          eventName: 'event.outbox.publish.failed',
-          occurredAt: envelope.event.occurredAt.toISOString(),
-          context: {
-            correlationId: envelope.correlationId,
-            messageId: envelope.messageId,
-            causationId: envelope.causationId,
-          },
-          attributes: {
-            'event.name': envelope.event.name,
-            ...errorAttributes(cause),
-          },
-        }));
+        this.logger.log(
+          createLogRecord({
+            level: LogLevels.Error,
+            eventName: 'event.outbox.publish.failed',
+            occurredAt: envelope.event.occurredAt.toISOString(),
+            context: {
+              correlationId: envelope.correlationId,
+              messageId: envelope.messageId,
+              causationId: envelope.causationId,
+            },
+            attributes: {
+              'event.name': envelope.event.name,
+              ...errorAttributes(cause),
+            },
+          }),
+        );
 
         throw new InMemoryEventOutboxRelayError(
           InMemoryEventOutboxRelayErrorCodes.PublishFailed,

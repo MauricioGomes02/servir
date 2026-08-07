@@ -2,7 +2,13 @@ import { OrganizationId, type OrganizationIdError } from '@/modules/organization
 import type { Clock } from '@/shared/application/clock';
 import type { ExecutionContext } from '@/shared/application/context';
 import type { IdGenerator } from '@/shared/application/id-generator';
-import { createLogRecord, LogLevels, type Logger, type LogAttributes, type LogLevel } from '@/shared/application/logging';
+import {
+  createLogRecord,
+  LogLevels,
+  type Logger,
+  type LogAttributes,
+  type LogLevel,
+} from '@/shared/application/logging';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import { failure, success, type Result } from '@/shared/core/result';
@@ -38,23 +44,33 @@ export interface CreateMinistryDependencies {
   readonly logger: Logger;
 }
 
-type CreateMinistryError = OrganizationIdError | MinistryNameError
-  | MinistryCreationPolicyError | MinistryActiveNameConflictError;
+type CreateMinistryError =
+  | OrganizationIdError
+  | MinistryNameError
+  | MinistryCreationPolicyError
+  | MinistryActiveNameConflictError;
 
 export class CreateMinistryHandler {
   constructor(private readonly dependencies: CreateMinistryDependencies) {}
 
-  async handle(command: CreateMinistryCommand, context: ExecutionContext): Promise<Result<CreateMinistryOutput, CreateMinistryError>> {
+  async handle(
+    command: CreateMinistryCommand,
+    context: ExecutionContext,
+  ): Promise<Result<CreateMinistryOutput, CreateMinistryError>> {
     this.log(LogLevels.Debug, 'ministry.creation.started', context, {});
     const organizationId = OrganizationId.create(command.organizationId);
     if (!organizationId.success) return this.reject(context, organizationId.error);
 
     const name = MinistryName.create(command.name);
-    if (!name.success) return this.reject(context, name.error, { 'organization.id': organizationId.value.value });
+    if (!name.success)
+      return this.reject(context, name.error, { 'organization.id': organizationId.value.value });
 
     const facts = await this.dependencies.creationFacts.find(organizationId.value, name.value);
     const permission = this.dependencies.creationPolicy.evaluate(facts);
-    if (!permission.success) return this.reject(context, permission.error, { 'organization.id': organizationId.value.value });
+    if (!permission.success)
+      return this.reject(context, permission.error, {
+        'organization.id': organizationId.value.value,
+      });
 
     this.log(LogLevels.Debug, 'ministry.creation.eligibility.accepted', context, {
       'organization.id': organizationId.value.value,
@@ -67,7 +83,10 @@ export class CreateMinistryHandler {
       eventId: this.dependencies.domainEventIdGenerator.generate(),
       occurredAt: this.dependencies.clock.now(),
     });
-    if (!ministry.success) return this.reject(context, ministry.error, { 'organization.id': organizationId.value.value });
+    if (!ministry.success)
+      return this.reject(context, ministry.error, {
+        'organization.id': organizationId.value.value,
+      });
 
     const pendingEvents = ministry.value.pendingDomainEvents;
     this.log(LogLevels.Debug, 'ministry.creation.validated', context, {
@@ -75,11 +94,13 @@ export class CreateMinistryHandler {
       'ministry.id': ministry.value.id.value,
       'domain_event.count': pendingEvents.length,
     });
-    const envelopes = pendingEvents.map((event) => createEventEnvelope({
-      messageId: this.dependencies.messageIdGenerator.generate(),
-      correlationId: context.correlationId,
-      event,
-    }));
+    const envelopes = pendingEvents.map((event) =>
+      createEventEnvelope({
+        messageId: this.dependencies.messageIdGenerator.generate(),
+        correlationId: context.correlationId,
+        event,
+      }),
+    );
 
     const persisted = await this.dependencies.unitOfWork.execute(async (scope) => {
       const saved = await scope.ministries.add(ministry.value);
@@ -87,7 +108,10 @@ export class CreateMinistryHandler {
       await scope.outbox.add(envelopes);
       return success();
     });
-    if (!persisted.success) return this.reject(context, persisted.error, { 'organization.id': organizationId.value.value });
+    if (!persisted.success)
+      return this.reject(context, persisted.error, {
+        'organization.id': organizationId.value.value,
+      });
 
     this.log(LogLevels.Info, 'ministry.creation.persisted', context, {
       'organization.id': organizationId.value.value,
@@ -99,15 +123,21 @@ export class CreateMinistryHandler {
       'organization.id': organizationId.value.value,
       'ministry.id': ministry.value.id.value,
     });
-    return success(Object.freeze({
-      ministryId: ministry.value.id,
-      organizationId: ministry.value.organizationId,
-      name: ministry.value.name.toString(),
-      status: 'active',
-    }));
+    return success(
+      Object.freeze({
+        ministryId: ministry.value.id,
+        organizationId: ministry.value.organizationId,
+        name: ministry.value.name.toString(),
+        status: 'active',
+      }),
+    );
   }
 
-  private reject<TError extends { readonly code: string; readonly field?: string }>(context: ExecutionContext, error: TError, attributes: LogAttributes = {}): Result<never, TError> {
+  private reject<TError extends { readonly code: string; readonly field?: string }>(
+    context: ExecutionContext,
+    error: TError,
+    attributes: LogAttributes = {},
+  ): Result<never, TError> {
     this.log(LogLevels.Info, 'ministry.creation.rejected', context, {
       ...attributes,
       'error.code': error.code,
@@ -116,7 +146,12 @@ export class CreateMinistryHandler {
     return failure(error);
   }
 
-  private log(level: LogLevel, eventName: string, context: ExecutionContext, attributes: LogAttributes): void {
+  private log(
+    level: LogLevel,
+    eventName: string,
+    context: ExecutionContext,
+    attributes: LogAttributes,
+  ): void {
     this.dependencies.logger.log(createLogRecord({ level, eventName, context, attributes }));
   }
 }

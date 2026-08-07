@@ -10,14 +10,16 @@ export const HttpProblemMessageCodes = {
 
 export const httpProblemMessageCatalog: MessageCatalog = Object.freeze({
   'pt-BR': Object.freeze({
-    [HttpProblemMessageCodes.ResourceConflictTitle]: 'A requisição conflita com o estado atual do recurso.',
+    [HttpProblemMessageCodes.ResourceConflictTitle]:
+      'A requisição conflita com o estado atual do recurso.',
     [HttpProblemMessageCodes.ResourceNotFoundTitle]: 'O recurso solicitado não foi encontrado.',
     [HttpProblemMessageCodes.InternalErrorTitle]: 'Não foi possível processar a solicitação.',
     [HttpProblemMessageCodes.InvalidRequestTitle]: 'A requisição é inválida.',
     [HttpProblemMessageCodes.ValidationErrorTitle]: 'A requisição contém dados inválidos.',
   }),
   'en-US': Object.freeze({
-    [HttpProblemMessageCodes.ResourceConflictTitle]: 'The request conflicts with the current resource state.',
+    [HttpProblemMessageCodes.ResourceConflictTitle]:
+      'The request conflicts with the current resource state.',
     [HttpProblemMessageCodes.ResourceNotFoundTitle]: 'The requested resource was not found.',
     [HttpProblemMessageCodes.InternalErrorTitle]: 'The request could not be processed.',
     [HttpProblemMessageCodes.InvalidRequestTitle]: 'The request is invalid.',

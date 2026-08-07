@@ -9,14 +9,9 @@ import {
 
 export type { TelemetryLifecycle } from '@servir/node-observability';
 
-export type ApiOpenTelemetryOptions = Omit<
-  StartOpenTelemetryOptions,
-  'instrumentations'
->;
+export type ApiOpenTelemetryOptions = Omit<StartOpenTelemetryOptions, 'instrumentations'>;
 
-export function startOpenTelemetry(
-  options: ApiOpenTelemetryOptions = {},
-): TelemetryLifecycle {
+export function startOpenTelemetry(options: ApiOpenTelemetryOptions = {}): TelemetryLifecycle {
   return startNodeOpenTelemetry({
     ...options,
     instrumentations: [

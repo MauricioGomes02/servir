@@ -21,12 +21,14 @@ import type { ApplicationContainer } from '../container';
 import type { CreateApplicationOptions } from '../create-application-options';
 
 function hasNoPersistenceOverrides(options: CreateApplicationOptions): boolean {
-  return options.organizationUnitOfWork === undefined
-    && options.memberUnitOfWork === undefined
-    && options.memberDetailsReader === undefined
-    && options.organizationRegistrationFacts === undefined
-    && options.ministryUnitOfWork === undefined
-    && options.ministryCreationFacts === undefined;
+  return (
+    options.organizationUnitOfWork === undefined &&
+    options.memberUnitOfWork === undefined &&
+    options.memberDetailsReader === undefined &&
+    options.organizationRegistrationFacts === undefined &&
+    options.ministryUnitOfWork === undefined &&
+    options.ministryCreationFacts === undefined
+  );
 }
 
 export function registerPersistence(
@@ -45,23 +47,13 @@ export function registerPersistence(
     );
 
     container.register({
-      organizationUnitOfWork: asValue(
-        new DirectUnitOfWork({ organizations, outbox }),
-      ),
-      memberUnitOfWork: asValue(
-        new DirectUnitOfWork({ members, outbox }),
-      ),
-      ministryUnitOfWork: asValue(
-        new DirectUnitOfWork({ ministries, outbox }),
-      ),
-      memberDetailsReader: asValue(
-        new InMemoryMemberDetailsReader(() => members.members),
-      ),
+      organizationUnitOfWork: asValue(new DirectUnitOfWork({ organizations, outbox })),
+      memberUnitOfWork: asValue(new DirectUnitOfWork({ members, outbox })),
+      ministryUnitOfWork: asValue(new DirectUnitOfWork({ ministries, outbox })),
+      memberDetailsReader: asValue(new InMemoryMemberDetailsReader(() => members.members)),
       organizationRegistrationFacts: asValue(
-        new InMemoryOrganizationRegistrationFactsReader(
-          () => organizations.organizations.map(
-            (organization) => organization.id,
-          ),
+        new InMemoryOrganizationRegistrationFactsReader(() =>
+          organizations.organizations.map((organization) => organization.id),
         ),
       ),
       ministryCreationFacts: asValue(
@@ -76,12 +68,12 @@ export function registerPersistence(
   }
 
   if (
-    options.organizationUnitOfWork === undefined
-    || options.memberUnitOfWork === undefined
-    || options.memberDetailsReader === undefined
-    || options.organizationRegistrationFacts === undefined
-    || options.ministryUnitOfWork === undefined
-    || options.ministryCreationFacts === undefined
+    options.organizationUnitOfWork === undefined ||
+    options.memberUnitOfWork === undefined ||
+    options.memberDetailsReader === undefined ||
+    options.organizationRegistrationFacts === undefined ||
+    options.ministryUnitOfWork === undefined ||
+    options.ministryCreationFacts === undefined
   ) {
     throw new ApplicationPersistenceConfigurationError();
   }
@@ -90,9 +82,7 @@ export function registerPersistence(
     organizationUnitOfWork: asValue(options.organizationUnitOfWork),
     memberUnitOfWork: asValue(options.memberUnitOfWork),
     memberDetailsReader: asValue(options.memberDetailsReader),
-    organizationRegistrationFacts: asValue(
-      options.organizationRegistrationFacts,
-    ),
+    organizationRegistrationFacts: asValue(options.organizationRegistrationFacts),
     ministryUnitOfWork: asValue(options.ministryUnitOfWork),
     ministryCreationFacts: asValue(options.ministryCreationFacts),
     eventRelayLifecycle: asValue(Object.freeze({})),

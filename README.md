@@ -154,9 +154,12 @@ Uma criação válida responde com `201 Created` e a representação direta do r
 
 ```bash
 cd backend
-npm test
-npm run build
+npm run check
 ```
+
+O comando `check` verifica a formatação, executa o lint, roda os testes e compila todos os
+workspaces. Durante o desenvolvimento, use `npm run format` para formatar o código e
+`npm run lint:fix` para aplicar as correções automáticas seguras do lint.
 
 ### Fluxo completo com PostgreSQL e Kafka
 

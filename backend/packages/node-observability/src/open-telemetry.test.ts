@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { ROOT_CONTEXT, SpanStatusCode, trace } from '@opentelemetry/api';
+import { ROOT_CONTEXT, SpanStatusCode, type trace } from '@opentelemetry/api';
 
 import {
   createPgInstrumentation,
@@ -62,7 +62,9 @@ describe('startOpenTelemetry', () => {
         assert.equal(received, instrumentations);
         return {
           start: () => calls.push('start'),
-          shutdown: async () => { calls.push('shutdown'); },
+          shutdown: async () => {
+            calls.push('shutdown');
+          },
         };
       },
     });
@@ -75,29 +77,35 @@ describe('startOpenTelemetry', () => {
 
   it('classifies lifecycle failures with stable codes', async () => {
     assert.throws(
-      () => startOpenTelemetry({
-        environment: {},
-        sdkFactory: () => ({
-          start: () => { throw new Error('startup details'); },
-          shutdown: async () => {},
+      () =>
+        startOpenTelemetry({
+          environment: {},
+          sdkFactory: () => ({
+            start: () => {
+              throw new Error('startup details');
+            },
+            shutdown: async () => {},
+          }),
         }),
-      }),
-      (error: unknown) => error instanceof OpenTelemetryError
-        && error.code === OpenTelemetryErrorCodes.StartFailed,
+      (error: unknown) =>
+        error instanceof OpenTelemetryError && error.code === OpenTelemetryErrorCodes.StartFailed,
     );
 
     const telemetry = startOpenTelemetry({
       environment: {},
       sdkFactory: () => ({
         start: () => {},
-        shutdown: async () => { throw new Error('shutdown details'); },
+        shutdown: async () => {
+          throw new Error('shutdown details');
+        },
       }),
     });
 
     await assert.rejects(
       telemetry.shutdown(),
-      (error: unknown) => error instanceof OpenTelemetryError
-        && error.code === OpenTelemetryErrorCodes.ShutdownFailed,
+      (error: unknown) =>
+        error instanceof OpenTelemetryError &&
+        error.code === OpenTelemetryErrorCodes.ShutdownFailed,
     );
   });
 });
@@ -109,20 +117,16 @@ describe('runInSpan', () => {
       startActiveSpan: async (...args: unknown[]) => {
         const operation = args.at(-1) as (span: object) => Promise<string>;
         return operation({
-          end: () => { ended = true; },
+          end: () => {
+            ended = true;
+          },
           recordException: () => {},
           setStatus: () => {},
         });
       },
     } as unknown as ReturnType<typeof trace.getTracer>;
 
-    const result = await runInSpan(
-      tracer,
-      'operation',
-      ROOT_CONTEXT,
-      {},
-      async () => 'completed',
-    );
+    const result = await runInSpan(tracer, 'operation', ROOT_CONTEXT, {}, async () => 'completed');
 
     assert.equal(result, 'completed');
     assert.equal(ended, true);
@@ -137,7 +141,9 @@ describe('runInSpan', () => {
       startActiveSpan: async (...args: unknown[]) => {
         const operation = args.at(-1) as (span: object) => Promise<never>;
         return operation({
-          end: () => { ended = true; },
+          end: () => {
+            ended = true;
+          },
           recordException: (error: unknown) => recorded.push(error),
           setStatus: (status: unknown) => statuses.push(status),
         });

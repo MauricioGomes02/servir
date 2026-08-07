@@ -1,3 +1,3 @@
 export type { MinistryWriteScope } from './ministry-write-scope';
-export * from './readers';
-export * from './repositories';
+export type * from './readers';
+export type * from './repositories';

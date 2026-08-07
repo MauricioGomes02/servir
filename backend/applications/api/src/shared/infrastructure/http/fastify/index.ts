@@ -1,22 +1,12 @@
-export {
-  createFastifyApplication,
-} from './create-fastify-application';
+export { createFastifyApplication } from './create-fastify-application';
 
-export {
-  registerFastifyRequestContext,
-} from './register-fastify-request-context';
+export { registerFastifyRequestContext } from './register-fastify-request-context';
 
-export {
-  registerFastifyErrorHandler,
-} from './register-fastify-error-handler';
+export { registerFastifyErrorHandler } from './register-fastify-error-handler';
 
-export {
-  FastifyRequestContextError,
-} from './fastify-request-context-error';
+export { FastifyRequestContextError } from './fastify-request-context-error';
 
-export {
-  FastifyRequestLogger,
-} from './fastify-request-logger';
+export { FastifyRequestLogger } from './fastify-request-logger';
 
 export {
   HttpExecutionContextUnavailableError,
@@ -27,15 +17,8 @@ export { requireHttpExecutionContext } from './require-http-execution-context';
 
 export { sendPresentedProblem } from './send-presented-problem';
 
-export type {
-  PresentedHttpProblem,
-  SendPresentedProblemInput,
-} from './send-presented-problem';
+export type { PresentedHttpProblem, SendPresentedProblemInput } from './send-presented-problem';
 
-export type {
-  MonotonicNow,
-} from './fastify-request-logger';
+export type { MonotonicNow } from './fastify-request-logger';
 
-export type {
-  CreateFastifyApplicationDependencies,
-} from './create-fastify-application';
+export type { CreateFastifyApplicationDependencies } from './create-fastify-application';

@@ -1,21 +1,15 @@
-import {
-  type NotificationError,
-} from './notification-error';
+import { type NotificationError } from './notification-error';
 
 function copyError<TCode extends string>(
   error: NotificationError<TCode>,
 ): NotificationError<TCode> {
   return Object.freeze({
     ...error,
-    params: error.params
-      ? Object.freeze({ ...error.params })
-      : undefined,
+    params: error.params ? Object.freeze({ ...error.params }) : undefined,
   });
 }
 
-export class Notification<
-  TCode extends string = string,
-> {
+export class Notification<TCode extends string = string> {
   private readonly items: NotificationError<TCode>[] = [];
 
   add(error: NotificationError<TCode>): this {
@@ -24,17 +18,13 @@ export class Notification<
     return this;
   }
 
-  addMany(
-    errors: readonly NotificationError<TCode>[],
-  ): this {
+  addMany(errors: readonly NotificationError<TCode>[]): this {
     this.items.push(...errors.map((error) => copyError(error)));
 
     return this;
   }
 
-  merge(
-    notification: Notification<TCode>,
-  ): this {
+  merge(notification: Notification<TCode>): this {
     this.items.push(...notification.getErrors());
 
     return this;
@@ -49,29 +39,19 @@ export class Notification<
   }
 
   hasErrorCode(code: TCode): boolean {
-    return this.items.some(
-      error => error.code === code,
-    );
+    return this.items.some((error) => error.code === code);
   }
 
   hasErrorForField(field: string): boolean {
-    return this.items.some(
-      error => error.field === field,
-    );
+    return this.items.some((error) => error.field === field);
   }
 
   getErrors(): readonly NotificationError<TCode>[] {
     return Object.freeze([...this.items]);
   }
 
-  getErrorsForField(
-    field: string,
-  ): readonly NotificationError<TCode>[] {
-    return Object.freeze(
-      this.items.filter(
-        error => error.field === field,
-      ),
-    );
+  getErrorsForField(field: string): readonly NotificationError<TCode>[] {
+    return Object.freeze(this.items.filter((error) => error.field === field));
   }
 
   get size(): number {

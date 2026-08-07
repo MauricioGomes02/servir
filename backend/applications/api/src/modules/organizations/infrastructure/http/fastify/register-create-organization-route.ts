@@ -19,11 +19,7 @@ export interface CreateOrganizationRouteDependencies {
 }
 
 function organizationName(body: unknown): unknown {
-  if (
-    typeof body !== 'object'
-    || body === null
-    || !('name' in body)
-  ) {
+  if (typeof body !== 'object' || body === null || !('name' in body)) {
     return undefined;
   }
 
@@ -37,18 +33,10 @@ export function registerCreateOrganizationRoute(
   app.post('/organizations', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
 
-    const result = await traceUseCase(
-      'CreateOrganization',
-      () => dependencies.handler.handle(
-        { name: organizationName(request.body) },
-        context,
-      ),
+    const result = await traceUseCase('CreateOrganization', () =>
+      dependencies.handler.handle({ name: organizationName(request.body) }, context),
     );
-    const view = dependencies.presenter.present(
-      result,
-      context,
-      request.locale,
-    );
+    const view = dependencies.presenter.present(result, context, request.locale);
 
     if (view.kind === 'failure') {
       return sendPresentedProblem(reply, {

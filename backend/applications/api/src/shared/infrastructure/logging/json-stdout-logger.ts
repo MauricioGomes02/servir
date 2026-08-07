@@ -1,7 +1,4 @@
-export {
-  createErrorLogAttributes,
-  JsonStdoutLogger,
-} from '@servir/node-observability';
+export { createErrorLogAttributes, JsonStdoutLogger } from '@servir/node-observability';
 export type {
   ActiveTraceContext,
   ActiveTraceContextReader,

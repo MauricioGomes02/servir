@@ -20,16 +20,12 @@ export class InMemoryMessageTranslator implements MessageTranslator {
   }
 
   translate(input: TranslateMessageInput): string {
-    const template = this.catalog[input.locale][input.code]
-      ?? MISSING_TRANSLATION[input.locale];
+    const template = this.catalog[input.locale][input.code] ?? MISSING_TRANSLATION[input.locale];
 
-    return template.replace(
-      /\{([^{}]+)\}/g,
-      (placeholder, parameter: string) => {
-        const value = input.parameters?.[parameter];
+    return template.replace(/\{([^{}]+)\}/g, (placeholder, parameter: string) => {
+      const value = input.parameters?.[parameter];
 
-        return value === undefined ? placeholder : String(value);
-      },
-    );
+      return value === undefined ? placeholder : String(value);
+    });
   }
 }

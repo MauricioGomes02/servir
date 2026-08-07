@@ -5,9 +5,7 @@ import { Notification } from '.';
 
 describe('Notification', () => {
   it('accumulates and queries errors by code and field', () => {
-    const notification = new Notification<
-      'organization.name.empty' | 'organization.slug.empty'
-    >();
+    const notification = new Notification<'organization.name.empty' | 'organization.slug.empty'>();
 
     notification
       .add({
@@ -22,10 +20,7 @@ describe('Notification', () => {
     assert.equal(notification.hasErrors(), true);
     assert.equal(notification.isValid(), false);
     assert.equal(notification.size, 2);
-    assert.equal(
-      notification.hasErrorCode('organization.name.empty'),
-      true,
-    );
+    assert.equal(notification.hasErrorCode('organization.name.empty'), true);
     assert.equal(notification.hasErrorForField('slug'), true);
     assert.equal(notification.getErrorsForField('name').length, 1);
   });
@@ -37,9 +32,7 @@ describe('Notification', () => {
       field: 'name',
       params,
     };
-    const notification = new Notification<
-      'organization.name.max_length'
-    >();
+    const notification = new Notification<'organization.name.max_length'>();
 
     notification.add(error);
     params.maxLength = 240;
@@ -52,10 +45,11 @@ describe('Notification', () => {
   });
 
   it('combines notifications without sharing mutable errors', () => {
-    const source = new Notification<'organization.name.empty'>()
-      .add({ code: 'organization.name.empty', field: 'name' });
-    const target = new Notification<'organization.name.empty'>()
-      .merge(source);
+    const source = new Notification<'organization.name.empty'>().add({
+      code: 'organization.name.empty',
+      field: 'name',
+    });
+    const target = new Notification<'organization.name.empty'>().merge(source);
 
     assert.deepEqual(target.getErrors(), source.getErrors());
     assert.notEqual(target.getErrors(), source.getErrors());

@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  parseCorrelationId,
-  type CorrelationId,
-} from '@/shared/application/context';
+import { parseCorrelationId, type CorrelationId } from '@/shared/application/context';
 import type { Logger } from '@/shared/application/logging';
 import {
   createEventEnvelope,
@@ -36,12 +33,8 @@ interface EnvelopeIds {
 
 function ids(): EnvelopeIds {
   const correlationId = parseCorrelationId('correlation-123');
-  const eventId = parseDomainEventId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
-  );
-  const messageId = parseMessageId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-  );
+  const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
+  const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
 
   assert.equal(correlationId.success, true);
   assert.equal(eventId.success, true);
@@ -79,10 +72,7 @@ function envelope(): EventEnvelope {
   });
 }
 
-async function relayFixture(
-  publisher: EventPublisher,
-  logger: Logger = new InMemoryLogger(),
-) {
+async function relayFixture(publisher: EventPublisher, logger: Logger = new InMemoryLogger()) {
   const outbox = new InMemoryEventOutbox();
   await outbox.add([envelope()]);
 
@@ -106,10 +96,7 @@ describe('InMemoryEventOutboxRelay', () => {
     await relay.flush();
 
     assert.equal(published.length, 1);
-    assert.equal(
-      published[0]?.messageId,
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-    );
+    assert.equal(published[0]?.messageId, '0198f334-6dc5-7c20-9af1-91d7e599c7b3');
     assert.equal(outbox.envelopes.length, 0);
   });
 
@@ -125,9 +112,10 @@ describe('InMemoryEventOutboxRelay', () => {
 
     await assert.rejects(
       relay.flush(),
-      (error) => error instanceof InMemoryEventOutboxRelayError
-        && error.code === InMemoryEventOutboxRelayErrorCodes.PublishFailed
-        && error.cause === failure,
+      (error) =>
+        error instanceof InMemoryEventOutboxRelayError &&
+        error.code === InMemoryEventOutboxRelayErrorCodes.PublishFailed &&
+        error.cause === failure,
     );
 
     assert.equal(outbox.envelopes.length, 1);

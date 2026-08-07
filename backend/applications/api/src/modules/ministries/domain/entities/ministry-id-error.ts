@@ -7,7 +7,6 @@ export const MinistryIdErrorCodes = {
   InvalidFormat: 'ministry.id.invalid_format',
 } as const;
 
-export type MinistryIdErrorCode =
-  (typeof MinistryIdErrorCodes)[keyof typeof MinistryIdErrorCodes];
+export type MinistryIdErrorCode = (typeof MinistryIdErrorCodes)[keyof typeof MinistryIdErrorCodes];
 
 export type MinistryIdError = NotificationError<MinistryIdErrorCode>;

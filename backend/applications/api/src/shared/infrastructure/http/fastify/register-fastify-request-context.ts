@@ -30,9 +30,7 @@ export function registerFastifyRequestContext(
   app.decorateRequest('locale', DefaultLocale);
 
   app.addHook('onRequest', async (request) => {
-    const parsedCorrelationId = parseCorrelationId(
-      request.headers['x-correlation-id'],
-    );
+    const parsedCorrelationId = parseCorrelationId(request.headers['x-correlation-id']);
     const correlationId = parsedCorrelationId.success
       ? parsedCorrelationId.value
       : correlationIdGenerator.generate();

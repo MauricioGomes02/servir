@@ -1,7 +1,4 @@
-import {
-  OrganizationId,
-  type OrganizationIdError,
-} from '@/modules/organizations/domain';
+import { OrganizationId, type OrganizationIdError } from '@/modules/organizations/domain';
 import type { Clock } from '@/shared/application/clock';
 import type { ExecutionContext } from '@/shared/application/context';
 import type { IdGenerator } from '@/shared/application/id-generator';
@@ -12,28 +9,19 @@ import {
   type LogAttributes,
   type LogLevel,
 } from '@/shared/application/logging';
-import {
-  createEventEnvelope,
-  type MessageId,
-} from '@/shared/application/messaging';
+import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
-import {
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 
 import {
   Member,
-  MemberRegistrationPolicy,
+  type MemberRegistrationPolicy,
   type MemberId,
   type MemberNameError,
   type MemberRegistrationPolicyError,
 } from '../../../domain';
-import type {
-  MemberWriteScope,
-  OrganizationRegistrationFactsReader,
-} from '../../ports';
+import type { MemberWriteScope, OrganizationRegistrationFactsReader } from '../../ports';
 import type { RegisterMemberCommand } from './register-member-command';
 
 export interface RegisterMemberOutput {
@@ -47,22 +35,16 @@ export interface RegisterMemberDependencies {
   readonly memberIdGenerator: IdGenerator<MemberId>;
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
-  readonly organizationRegistrationFacts:
-    OrganizationRegistrationFactsReader;
+  readonly organizationRegistrationFacts: OrganizationRegistrationFactsReader;
   readonly registrationPolicy: MemberRegistrationPolicy;
   readonly unitOfWork: UnitOfWork<MemberWriteScope>;
   readonly logger: Logger;
 }
 
-type RegisterMemberError =
-  | OrganizationIdError
-  | MemberNameError
-  | MemberRegistrationPolicyError;
+type RegisterMemberError = OrganizationIdError | MemberNameError | MemberRegistrationPolicyError;
 
 export class RegisterMemberHandler {
-  constructor(
-    private readonly dependencies: RegisterMemberDependencies,
-  ) {}
+  constructor(private readonly dependencies: RegisterMemberDependencies) {}
 
   async handle(
     command: RegisterMemberCommand,
@@ -72,16 +54,17 @@ export class RegisterMemberHandler {
     const organizationId = OrganizationId.create(command.organizationId);
 
     if (!organizationId.success) {
-      this.logRejection(context, organizationId.error.code,
-        organizationId.error.field);
+      this.logRejection(context, organizationId.error.code, organizationId.error.field);
       return organizationId;
     }
 
-    this.log(LogLevels.Debug, 'member.registration.organization.validated',
-      context, { 'organization.id': organizationId.value.value });
+    this.log(LogLevels.Debug, 'member.registration.organization.validated', context, {
+      'organization.id': organizationId.value.value,
+    });
 
-    const organization = await this.dependencies.organizationRegistrationFacts
-      .findById(organizationId.value);
+    const organization = await this.dependencies.organizationRegistrationFacts.findById(
+      organizationId.value,
+    );
     const permission = this.dependencies.registrationPolicy.evaluate({
       organization,
     });
@@ -93,8 +76,9 @@ export class RegisterMemberHandler {
       return permission;
     }
 
-    this.log(LogLevels.Debug, 'member.registration.eligibility.accepted',
-      context, { 'organization.id': organizationId.value.value });
+    this.log(LogLevels.Debug, 'member.registration.eligibility.accepted', context, {
+      'organization.id': organizationId.value.value,
+    });
 
     const member = Member.register({
       id: this.dependencies.memberIdGenerator.generate(),
@@ -117,11 +101,13 @@ export class RegisterMemberHandler {
       'member.id': member.value.id.value,
       'domain_event.count': pendingEvents.length,
     });
-    const envelopes = pendingEvents.map((event) => createEventEnvelope({
-      messageId: this.dependencies.messageIdGenerator.generate(),
-      correlationId: context.correlationId,
-      event,
-    }));
+    const envelopes = pendingEvents.map((event) =>
+      createEventEnvelope({
+        messageId: this.dependencies.messageIdGenerator.generate(),
+        correlationId: context.correlationId,
+        event,
+      }),
+    );
 
     await this.dependencies.unitOfWork.execute(async (scope) => {
       await scope.members.save(member.value);
@@ -141,11 +127,13 @@ export class RegisterMemberHandler {
       'member.id': member.value.id.value,
     });
 
-    return success(Object.freeze({
-      memberId: member.value.id,
-      organizationId: member.value.organizationId,
-      name: member.value.name.toString(),
-    }));
+    return success(
+      Object.freeze({
+        memberId: member.value.id,
+        organizationId: member.value.organizationId,
+        name: member.value.name.toString(),
+      }),
+    );
   }
 
   private logRejection(
@@ -167,11 +155,13 @@ export class RegisterMemberHandler {
     context: ExecutionContext,
     attributes: LogAttributes,
   ): void {
-    this.dependencies.logger.log(createLogRecord({
-      level,
-      eventName,
-      context,
-      attributes,
-    }));
+    this.dependencies.logger.log(
+      createLogRecord({
+        level,
+        eventName,
+        context,
+        attributes,
+      }),
+    );
   }
 }

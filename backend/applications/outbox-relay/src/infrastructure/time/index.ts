@@ -1,5 +1,1 @@
-export {
-  SystemClock,
-  SystemClockError,
-  SystemClockErrorCode,
-} from './system-clock';
+export { SystemClock, SystemClockError, SystemClockErrorCode } from './system-clock';

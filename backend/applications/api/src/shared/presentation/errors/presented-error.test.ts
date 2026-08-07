@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createExecutionContext,
-  parseCorrelationId,
-} from '@/shared/application/context';
+import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 import type { MessageTranslator } from '@/shared/presentation/localization';
 import { SupportedLocales } from '@/shared/presentation/localization';
 
@@ -20,9 +17,7 @@ describe('presentError', () => {
     }
 
     const translator: MessageTranslator = {
-      translate: ({ code, locale, parameters }) => (
-        `${locale}:${code}:${parameters?.maxLength}`
-      ),
+      translate: ({ code, locale, parameters }) => `${locale}:${code}:${parameters?.maxLength}`,
     };
     const presented = presentError(
       {

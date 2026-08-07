@@ -1,20 +1,10 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 import { AggregateRoot } from '@/shared/domain/aggregate-root';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import type { Instant } from '@/shared/domain/instant';
 
-import {
-  createOrganizationCreated,
-  type OrganizationEvent,
-} from '../events';
-import {
-  OrganizationName,
-  type OrganizationNameError,
-} from '../value-objects';
+import { createOrganizationCreated, type OrganizationEvent } from '../events';
+import { OrganizationName, type OrganizationNameError } from '../value-objects';
 import type { OrganizationId } from './organization-id';
 
 interface OrganizationProps {
@@ -33,16 +23,11 @@ export class Organization extends AggregateRoot<
   OrganizationProps,
   OrganizationEvent
 > {
-  private constructor(
-    id: OrganizationId,
-    props: OrganizationProps,
-  ) {
+  private constructor(id: OrganizationId, props: OrganizationProps) {
     super(id, props);
   }
 
-  static create(
-    input: CreateOrganizationProps,
-  ): Result<Organization, OrganizationNameError> {
+  static create(input: CreateOrganizationProps): Result<Organization, OrganizationNameError> {
     const name = OrganizationName.create(input.name);
 
     if (!name.success) {
@@ -53,12 +38,14 @@ export class Organization extends AggregateRoot<
       name: name.value,
     });
 
-    organization.recordDomainEvent(createOrganizationCreated({
-      eventId: input.eventId,
-      occurredAt: input.occurredAt,
-      organizationId: input.id,
-      name: name.value,
-    }));
+    organization.recordDomainEvent(
+      createOrganizationCreated({
+        eventId: input.eventId,
+        occurredAt: input.occurredAt,
+        organizationId: input.id,
+        name: name.value,
+      }),
+    );
 
     return success(organization);
   }

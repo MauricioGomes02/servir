@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createLogRecord,
-  LogLevels,
-} from '@/shared/application/logging';
+import { createLogRecord, LogLevels } from '@/shared/application/logging';
 
 import { JsonStdoutLogger } from './json-stdout-logger';
 
@@ -13,14 +10,16 @@ describe('JsonStdoutLogger', () => {
     const lines: string[] = [];
     const logger = new JsonStdoutLogger((line) => lines.push(line));
 
-    logger.log(createLogRecord({
-      level: LogLevels.Info,
-      eventName: 'service.started',
-      attributes: {
-        'server.host': '127.0.0.1',
-        'server.port': 3000,
-      },
-    }));
+    logger.log(
+      createLogRecord({
+        level: LogLevels.Info,
+        eventName: 'service.started',
+        attributes: {
+          'server.host': '127.0.0.1',
+          'server.port': 3000,
+        },
+      }),
+    );
 
     assert.equal(lines.length, 1);
     assert.equal(lines[0]?.endsWith('\n'), true);
@@ -38,13 +37,15 @@ describe('JsonStdoutLogger', () => {
     const lines: string[] = [];
     const logger = new JsonStdoutLogger((line) => lines.push(line));
 
-    logger.log(createLogRecord({
-      level: LogLevels.Error,
-      eventName: 'http.request.failed',
-      attributes: {
-        'exception.stacktrace': 'x'.repeat(20_000),
-      },
-    }));
+    logger.log(
+      createLogRecord({
+        level: LogLevels.Error,
+        eventName: 'http.request.failed',
+        attributes: {
+          'exception.stacktrace': 'x'.repeat(20_000),
+        },
+      }),
+    );
 
     const output = JSON.parse(lines[0] ?? '') as {
       attributes: Record<string, string>;
@@ -66,11 +67,13 @@ describe('JsonStdoutLogger', () => {
       }),
     );
 
-    logger.log(createLogRecord({
-      level: LogLevels.Info,
-      eventName: 'http.request.completed',
-      attributes: {},
-    }));
+    logger.log(
+      createLogRecord({
+        level: LogLevels.Info,
+        eventName: 'http.request.completed',
+        attributes: {},
+      }),
+    );
 
     const output = JSON.parse(lines[0] ?? '') as Record<string, unknown>;
 
@@ -83,11 +86,15 @@ describe('JsonStdoutLogger', () => {
       throw new Error('stdout unavailable');
     });
 
-    assert.doesNotThrow(() => logger.log(createLogRecord({
-      level: LogLevels.Error,
-      eventName: 'http.request.failed',
-      attributes: {},
-    })));
+    assert.doesNotThrow(() =>
+      logger.log(
+        createLogRecord({
+          level: LogLevels.Error,
+          eventName: 'http.request.failed',
+          attributes: {},
+        }),
+      ),
+    );
   });
 
   it('writes only records at or above the configured minimum level', () => {
@@ -99,11 +106,13 @@ describe('JsonStdoutLogger', () => {
     );
 
     for (const level of [LogLevels.Debug, LogLevels.Info, LogLevels.Warn]) {
-      logger.log(createLogRecord({
-        level,
-        eventName: `operation.${level}`,
-        attributes: {},
-      }));
+      logger.log(
+        createLogRecord({
+          level,
+          eventName: `operation.${level}`,
+          attributes: {},
+        }),
+      );
     }
 
     assert.equal(lines.length, 1);

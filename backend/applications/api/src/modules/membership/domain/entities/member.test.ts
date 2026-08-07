@@ -5,20 +5,13 @@ import { OrganizationId } from '@/modules/organizations/domain';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 
-import {
-  Member,
-  MemberId,
-} from '.';
+import { Member, MemberId } from '.';
 import { MemberNameErrorCodes } from '../value-objects';
 
 function validMetadata() {
   const id = MemberId.create('0198f334-6dc5-7c20-9af1-91d7e599d7b1');
-  const organizationId = OrganizationId.create(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-  );
-  const eventId = parseDomainEventId(
-    '0198f334-6dc5-7c20-9af1-91d7e599d7b2',
-  );
+  const organizationId = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+  const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599d7b2');
   const occurredAt = Instant.create('2026-08-03T15:00:00.000Z');
 
   assert.equal(id.success, true);
@@ -26,12 +19,7 @@ function validMetadata() {
   assert.equal(eventId.success, true);
   assert.equal(occurredAt.success, true);
 
-  if (
-    !id.success
-    || !organizationId.success
-    || !eventId.success
-    || !occurredAt.success
-  ) {
+  if (!id.success || !organizationId.success || !eventId.success || !occurredAt.success) {
     throw new Error('Invalid deterministic test fixture');
   }
 
@@ -63,28 +51,33 @@ describe('Member', () => {
     assert.equal(result.value.name.toString(), 'Maria da Silva');
     assert.equal(result.value.status, 'active');
     assert.equal(result.value.registeredAt, metadata.registeredAt);
-    assert.deepEqual(result.value.pendingDomainEvents, [{
-      eventId: metadata.eventId,
-      name: 'member.registered',
-      occurredAt: metadata.registeredAt,
-      payload: {
-        memberId: '0198f334-6dc5-7c20-9af1-91d7e599d7b1',
-        organizationId: '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-        name: 'Maria da Silva',
+    assert.deepEqual(result.value.pendingDomainEvents, [
+      {
+        eventId: metadata.eventId,
+        name: 'member.registered',
+        occurredAt: metadata.registeredAt,
+        payload: {
+          memberId: '0198f334-6dc5-7c20-9af1-91d7e599d7b1',
+          organizationId: '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
+          name: 'Maria da Silva',
+        },
       },
-    }]);
+    ]);
   });
 
   it('registers neither member nor fact when the name is invalid', () => {
-    assert.deepEqual(Member.register({
-      ...validMetadata(),
-      name: '   ',
-    }), {
-      success: false,
-      error: {
-        code: MemberNameErrorCodes.Empty,
-        field: 'name',
+    assert.deepEqual(
+      Member.register({
+        ...validMetadata(),
+        name: '   ',
+      }),
+      {
+        success: false,
+        error: {
+          code: MemberNameErrorCodes.Empty,
+          field: 'name',
+        },
       },
-    });
+    );
   });
 });

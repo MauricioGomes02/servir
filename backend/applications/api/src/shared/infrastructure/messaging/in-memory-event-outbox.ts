@@ -10,12 +10,8 @@ import { InMemoryEventOutboxAcknowledgementError } from './in-memory-event-outbo
 export class InMemoryEventOutbox implements EventOutbox {
   private readonly storedEnvelopes: EventEnvelope[] = [];
 
-  async add(
-    envelopes: ReadonlyArray<EventEnvelope>,
-  ): Promise<void> {
-    this.storedEnvelopes.push(
-      ...envelopes.map((envelope) => createEventEnvelope(envelope)),
-    );
+  async add(envelopes: ReadonlyArray<EventEnvelope>): Promise<void> {
+    this.storedEnvelopes.push(...envelopes.map((envelope) => createEventEnvelope(envelope)));
   }
 
   get envelopes(): ReadonlyArray<EventEnvelope> {
@@ -30,10 +26,7 @@ export class InMemoryEventOutbox implements EventOutbox {
     const expectedMessageId = this.nextEnvelope?.messageId;
 
     if (expectedMessageId !== messageId) {
-      throw new InMemoryEventOutboxAcknowledgementError(
-        expectedMessageId,
-        messageId,
-      );
+      throw new InMemoryEventOutboxAcknowledgementError(expectedMessageId, messageId);
     }
 
     this.storedEnvelopes.shift();

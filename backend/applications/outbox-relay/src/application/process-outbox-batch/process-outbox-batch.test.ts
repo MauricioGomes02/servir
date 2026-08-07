@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import type {
-  Clock,
-  RelayTelemetry,
-  RetryPolicy,
-} from '@/application/ports';
+import type { Clock, RelayTelemetry, RetryPolicy } from '@/application/ports';
 import {
   IntegrationEventPublicationError,
   OutboxLeaseError,
@@ -14,10 +10,7 @@ import {
   ProcessOutboxBatchConfigErrorCodes,
 } from '@/application/errors';
 import { createLeaseId } from '@/application/lease-id';
-import {
-  InMemoryIntegrationEventPublisher,
-  InMemoryOutboxMessageStore,
-} from '@/infrastructure';
+import { InMemoryIntegrationEventPublisher, InMemoryOutboxMessageStore } from '@/infrastructure';
 
 import { ProcessOutboxBatch } from './process-outbox-batch';
 
@@ -70,9 +63,7 @@ class SequenceClock implements Clock {
 
 function retryPolicy(retry: boolean): RetryPolicy {
   return {
-    decide: () => retry
-      ? { retry: true, availableAt: RETRY_AT }
-      : { retry: false },
+    decide: () => (retry ? { retry: true, availableAt: RETRY_AT } : { retry: false }),
   };
 }
 
@@ -90,12 +81,14 @@ function recordingRetryPolicy(): RetryPolicy & {
   };
 }
 
-function processBatch(input: Readonly<{
-  clock: Clock;
-  store: InMemoryOutboxMessageStore;
-  publisher: InMemoryIntegrationEventPublisher;
-  retryPolicy: RetryPolicy;
-}>) {
+function processBatch(
+  input: Readonly<{
+    clock: Clock;
+    store: InMemoryOutboxMessageStore;
+    publisher: InMemoryIntegrationEventPublisher;
+    retryPolicy: RetryPolicy;
+  }>,
+) {
   return new ProcessOutboxBatch({
     clock: input.clock,
     leaseIdGenerator: { generate: () => LEASE_ID },
@@ -142,7 +135,9 @@ describe('ProcessOutboxBatch', () => {
       batchSize: 10,
       leaseDurationMilliseconds: 60_000,
       telemetry,
-      onBatchCompleted: (result) => { observed = result.published; },
+      onBatchCompleted: (result) => {
+        observed = result.published;
+      },
     });
 
     await process.execute();
@@ -155,13 +150,15 @@ describe('ProcessOutboxBatch', () => {
       'batch.completed',
     ]);
     assert.equal(observed, 1);
-    assert.deepEqual(attributes, [{
-      'servir.outbox.claimed': 1,
-      'servir.outbox.published': 1,
-      'servir.outbox.rescheduled': 0,
-      'servir.outbox.failed': 0,
-      'servir.outbox.batch_size': 10,
-    }]);
+    assert.deepEqual(attributes, [
+      {
+        'servir.outbox.claimed': 1,
+        'servir.outbox.published': 1,
+        'servir.outbox.rescheduled': 0,
+        'servir.outbox.failed': 0,
+        'servir.outbox.batch_size': 10,
+      },
+    ]);
   });
 
   it('does not create semantic telemetry for an empty poll', async () => {
@@ -203,17 +200,19 @@ describe('ProcessOutboxBatch', () => {
 
     for (const batchSize of [0, -1, 1.5]) {
       assert.throws(
-        () => new ProcessOutboxBatch({
-          clock: new SequenceClock([CLAIMED_AT]),
-          leaseIdGenerator: { generate: () => LEASE_ID },
-          messageStore: store,
-          publisher,
-          retryPolicy: retryPolicy(true),
-          batchSize,
-          leaseDurationMilliseconds: 60_000,
-        }),
-        (error: unknown) => error instanceof ProcessOutboxBatchConfigError
-          && error.code === ProcessOutboxBatchConfigErrorCodes.InvalidBatchSize,
+        () =>
+          new ProcessOutboxBatch({
+            clock: new SequenceClock([CLAIMED_AT]),
+            leaseIdGenerator: { generate: () => LEASE_ID },
+            messageStore: store,
+            publisher,
+            retryPolicy: retryPolicy(true),
+            batchSize,
+            leaseDurationMilliseconds: 60_000,
+          }),
+        (error: unknown) =>
+          error instanceof ProcessOutboxBatchConfigError &&
+          error.code === ProcessOutboxBatchConfigErrorCodes.InvalidBatchSize,
       );
     }
   });
@@ -224,27 +223,25 @@ describe('ProcessOutboxBatch', () => {
 
     for (const leaseDurationMilliseconds of [0, -1, 1.5]) {
       assert.throws(
-        () => new ProcessOutboxBatch({
-          clock: new SequenceClock([CLAIMED_AT]),
-          leaseIdGenerator: { generate: () => LEASE_ID },
-          messageStore: store,
-          publisher,
-          retryPolicy: retryPolicy(true),
-          batchSize: 10,
-          leaseDurationMilliseconds,
-        }),
-        (error: unknown) => error instanceof ProcessOutboxBatchConfigError
-          && error.code
-            === ProcessOutboxBatchConfigErrorCodes.InvalidLeaseDuration,
+        () =>
+          new ProcessOutboxBatch({
+            clock: new SequenceClock([CLAIMED_AT]),
+            leaseIdGenerator: { generate: () => LEASE_ID },
+            messageStore: store,
+            publisher,
+            retryPolicy: retryPolicy(true),
+            batchSize: 10,
+            leaseDurationMilliseconds,
+          }),
+        (error: unknown) =>
+          error instanceof ProcessOutboxBatchConfigError &&
+          error.code === ProcessOutboxBatchConfigErrorCodes.InvalidLeaseDuration,
       );
     }
   });
 
   it('publishes claimed messages and reschedules a transient failure', async () => {
-    const store = new InMemoryOutboxMessageStore([
-      message('message-1'),
-      message('message-2'),
-    ]);
+    const store = new InMemoryOutboxMessageStore([message('message-1'), message('message-2')]);
     const publisher = new InMemoryIntegrationEventPublisher({
       'message-2': 'kafka.unavailable',
     });
@@ -271,8 +268,7 @@ describe('ProcessOutboxBatch', () => {
       publisher.messages.map((published) => published.messageId),
       ['message-1'],
     );
-    assert.equal(store.currentMessages[0]?.publishedAt,
-      '2026-07-29T15:00:01.000Z');
+    assert.equal(store.currentMessages[0]?.publishedAt, '2026-07-29T15:00:01.000Z');
     assert.equal(store.currentMessages[1]?.availableAt, RETRY_AT);
     assert.equal(store.currentMessages[1]?.lastErrorCode, 'kafka.unavailable');
   });
@@ -283,10 +279,7 @@ describe('ProcessOutboxBatch', () => {
       'message-1': 'kafka.message_rejected',
     });
     const worker = processBatch({
-      clock: new SequenceClock([
-        CLAIMED_AT,
-        '2026-07-29T15:00:01.000Z',
-      ]),
+      clock: new SequenceClock([CLAIMED_AT, '2026-07-29T15:00:01.000Z']),
       store,
       publisher,
       retryPolicy: retryPolicy(false),
@@ -300,8 +293,7 @@ describe('ProcessOutboxBatch', () => {
       rescheduled: 0,
       failed: 1,
     });
-    assert.equal(store.currentMessages[0]?.failedAt,
-      '2026-07-29T15:00:01.000Z');
+    assert.equal(store.currentMessages[0]?.failedAt, '2026-07-29T15:00:01.000Z');
   });
 
   it('passes explicit publication retryability to the retry policy', async () => {
@@ -309,17 +301,11 @@ describe('ProcessOutboxBatch', () => {
     const retry = recordingRetryPolicy();
     const publisher = {
       publish: async () => {
-        throw new IntegrationEventPublicationError(
-          'kafka.message_rejected',
-          { retryable: false },
-        );
+        throw new IntegrationEventPublicationError('kafka.message_rejected', { retryable: false });
       },
     };
     const worker = new ProcessOutboxBatch({
-      clock: new SequenceClock([
-        CLAIMED_AT,
-        '2026-07-29T15:00:01.000Z',
-      ]),
+      clock: new SequenceClock([CLAIMED_AT, '2026-07-29T15:00:01.000Z']),
       leaseIdGenerator: { generate: () => LEASE_ID },
       messageStore: store,
       publisher,
@@ -349,8 +335,8 @@ describe('ProcessOutboxBatch', () => {
 
     await assert.rejects(
       worker.execute(),
-      (error: unknown) => error instanceof OutboxLeaseError
-        && error.code === OutboxLeaseErrorCodes.Expired,
+      (error: unknown) =>
+        error instanceof OutboxLeaseError && error.code === OutboxLeaseErrorCodes.Expired,
     );
     assert.equal(publisher.messages.length, 1);
     assert.equal(store.currentMessages[0]?.publishedAt, undefined);

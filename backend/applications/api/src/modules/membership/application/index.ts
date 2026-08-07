@@ -1,4 +1,4 @@
-export * from './ports';
+export type * from './ports';
 export * from './commands';
-export * from './integration-events';
+export type * from './integration-events';
 export * from './queries';

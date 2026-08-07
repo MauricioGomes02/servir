@@ -3,16 +3,14 @@ export const SupportedLocales = {
   EnglishUnitedStates: 'en-US',
 } as const;
 
-export type SupportedLocale =
-  (typeof SupportedLocales)[keyof typeof SupportedLocales];
+export type SupportedLocale = (typeof SupportedLocales)[keyof typeof SupportedLocales];
 
 export const DefaultLocale = SupportedLocales.PortugueseBrazil;
 
-const LocaleAliases: Readonly<Record<string, SupportedLocale>> =
-  Object.freeze({
-    pt: SupportedLocales.PortugueseBrazil,
-    en: SupportedLocales.EnglishUnitedStates,
-  });
+const LocaleAliases: Readonly<Record<string, SupportedLocale>> = Object.freeze({
+  pt: SupportedLocales.PortugueseBrazil,
+  en: SupportedLocales.EnglishUnitedStates,
+});
 
 export function resolveLocale(candidate: unknown): SupportedLocale {
   if (typeof candidate !== 'string') {
@@ -28,9 +26,7 @@ export function resolveLocale(candidate: unknown): SupportedLocale {
   return supportedLocale ?? LocaleAliases[normalized] ?? DefaultLocale;
 }
 
-export function resolveLocaleCandidates(
-  candidates: ReadonlyArray<unknown>,
-): SupportedLocale {
+export function resolveLocaleCandidates(candidates: ReadonlyArray<unknown>): SupportedLocale {
   for (const candidate of candidates) {
     if (typeof candidate !== 'string') {
       continue;

@@ -2,17 +2,12 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { OrganizationId } from '@/modules/organizations/domain';
-import {
-  createExecutionContext,
-  parseCorrelationId,
-} from '@/shared/application/context';
+import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 import { failure, success } from '@/shared/core/result';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import { SupportedLocales } from '@/shared/presentation';
 
-import {
-  organizationMessageCatalog,
-} from '../localization';
+import { organizationMessageCatalog } from '../localization';
 import { CreateOrganizationPresenter } from '.';
 
 function context() {
@@ -27,16 +22,12 @@ function context() {
 }
 
 function presenter(): CreateOrganizationPresenter {
-  return new CreateOrganizationPresenter(
-    new InMemoryMessageTranslator(organizationMessageCatalog),
-  );
+  return new CreateOrganizationPresenter(new InMemoryMessageTranslator(organizationMessageCatalog));
 }
 
 describe('CreateOrganizationPresenter', () => {
   it('presents the identifier without exposing the domain object', () => {
-    const organizationId = OrganizationId.create(
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-    );
+    const organizationId = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
     assert.equal(organizationId.success, true);
 
     if (!organizationId.success) {
@@ -60,10 +51,7 @@ describe('CreateOrganizationPresenter', () => {
       },
     });
     assert.equal(Object.isFrozen(view), true);
-    assert.equal(
-      view.kind === 'success' && Object.isFrozen(view.resource),
-      true,
-    );
+    assert.equal(view.kind === 'success' && Object.isFrozen(view.resource), true);
   });
 
   it('presents the expected failure in Portuguese with correlation', () => {
@@ -119,9 +107,6 @@ describe('CreateOrganizationPresenter', () => {
     });
     assert.equal(Object.isFrozen(view), true);
     assert.equal(view.kind === 'failure' && Object.isFrozen(view.error), true);
-    assert.equal(
-      view.kind === 'failure' && Object.isFrozen(view.error.parameters),
-      true,
-    );
+    assert.equal(view.kind === 'failure' && Object.isFrozen(view.error.parameters), true);
   });
 });

@@ -2,8 +2,7 @@ import type { IdGenerator } from '@/shared/application/id-generator';
 
 import { IdSequenceExhaustedError } from './id-sequence-exhausted-error';
 
-export class SequenceIdGenerator<TId>
-implements IdGenerator<TId> {
+export class SequenceIdGenerator<TId> implements IdGenerator<TId> {
   private readonly ids: ReadonlyArray<TId>;
   private nextIndex = 0;
 

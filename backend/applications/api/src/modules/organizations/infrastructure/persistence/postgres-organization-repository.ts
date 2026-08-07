@@ -4,8 +4,7 @@ import type { OrganizationRepository } from '../../application';
 import type { Organization } from '../../domain';
 import { PostgresOrganizationRepositoryError } from './postgres-organization-repository-error';
 
-export class PostgresOrganizationRepository
-implements OrganizationRepository {
+export class PostgresOrganizationRepository implements OrganizationRepository {
   constructor(private readonly client: PoolClient) {}
 
   async save(organization: Organization): Promise<void> {

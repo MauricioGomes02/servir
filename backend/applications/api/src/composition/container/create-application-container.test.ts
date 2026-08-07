@@ -16,23 +16,22 @@ describe('createApplicationContainer', () => {
       container.resolve('registerMemberHandler'),
       container.resolve('registerMemberHandler'),
     );
-    assert.equal(
-      container.resolve('translator'),
-      container.resolve('translator'),
-    );
+    assert.equal(container.resolve('translator'), container.resolve('translator'));
   });
 
   it('rejects an incomplete persistence override with a stable error', () => {
     assert.throws(
-      () => createApplicationContainer({
-        organizationRegistrationFacts: {
-          async findById() {
-            return undefined;
+      () =>
+        createApplicationContainer({
+          organizationRegistrationFacts: {
+            async findById() {
+              return undefined;
+            },
           },
-        },
-      }),
-      (error: unknown) => error instanceof ApplicationPersistenceConfigurationError
-        && error.code === 'application.persistence.dependencies_incomplete',
+        }),
+      (error: unknown) =>
+        error instanceof ApplicationPersistenceConfigurationError &&
+        error.code === 'application.persistence.dependencies_incomplete',
     );
   });
 });

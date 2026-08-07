@@ -51,15 +51,11 @@ function application(generatedCorrelationId = 'correlation-generated') {
   const logger = new InMemoryLogger();
   const monotonicInstants = [100, 125];
   const app = createFastifyApplication({
-    correlationIdGenerator: new SequenceIdGenerator([
-      correlationId(generatedCorrelationId),
-    ]),
+    correlationIdGenerator: new SequenceIdGenerator([correlationId(generatedCorrelationId)]),
     logger,
     messageTranslator: new InMemoryMessageTranslator(catalog),
     monotonicNow: () => monotonicInstants.shift() ?? 125,
-    requestIdGenerator: new SequenceIdGenerator([
-      requestId(REQUEST_ID),
-    ]),
+    requestIdGenerator: new SequenceIdGenerator([requestId(REQUEST_ID)]),
   });
 
   return { app, logger };
@@ -163,10 +159,7 @@ describe('createFastifyApplication', () => {
 
     assert.equal(response.statusCode, 500);
     assert.equal(response.headers['x-correlation-id'], 'correlation-generated');
-    assert.match(
-      response.headers['content-type'] ?? '',
-      /^application\/problem\+json/,
-    );
+    assert.match(response.headers['content-type'] ?? '', /^application\/problem\+json/);
     assert.equal(response.headers['content-language'], 'en-US');
     assert.deepEqual(response.json(), {
       type: '/problems/internal-error',
@@ -237,9 +230,7 @@ describe('createFastifyApplication', () => {
   it('logs a stable persistence code without exposing its cause', async () => {
     const { app, logger } = application();
     app.get('/persistence-failure', async () => {
-      throw new PostgresEventOutboxError(
-        new Error('secret database detail'),
-      );
+      throw new PostgresEventOutboxError(new Error('secret database detail'));
     });
 
     const response = await app.inject({
@@ -250,14 +241,8 @@ describe('createFastifyApplication', () => {
 
     assert.equal(response.statusCode, 500);
     assert.equal(logger.records.length, 1);
-    assert.equal(
-      logger.records[0]?.attributes['error.code'],
-      PostgresEventOutboxErrorCode,
-    );
-    assert.equal(
-      JSON.stringify(logger.records).includes('secret database detail'),
-      false,
-    );
+    assert.equal(logger.records[0]?.attributes['error.code'], PostgresEventOutboxErrorCode);
+    assert.equal(JSON.stringify(logger.records).includes('secret database detail'), false);
   });
 
   it('presents malformed JSON as Problem Details', async () => {
@@ -276,10 +261,7 @@ describe('createFastifyApplication', () => {
     await app.close();
 
     assert.equal(response.statusCode, 400);
-    assert.match(
-      response.headers['content-type'] ?? '',
-      /^application\/problem\+json/,
-    );
+    assert.match(response.headers['content-type'] ?? '', /^application\/problem\+json/);
     assert.deepEqual(response.json(), {
       type: '/problems/invalid-request',
       title: 'The request could not be processed.',
@@ -289,9 +271,6 @@ describe('createFastifyApplication', () => {
     });
     assert.equal(logger.records.length, 1);
     assert.equal(logger.records[0]?.eventName, 'http.request.completed');
-    assert.equal(
-      logger.records[0]?.attributes['http.response.status_code'],
-      400,
-    );
+    assert.equal(logger.records[0]?.attributes['http.response.status_code'], 400);
   });
 });

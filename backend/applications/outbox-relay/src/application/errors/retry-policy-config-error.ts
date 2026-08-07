@@ -7,9 +7,7 @@ export const RetryPolicyConfigErrorCodes = Object.freeze({
 } as const);
 
 export type RetryPolicyConfigErrorCode =
-  typeof RetryPolicyConfigErrorCodes[
-    keyof typeof RetryPolicyConfigErrorCodes
-  ];
+  (typeof RetryPolicyConfigErrorCodes)[keyof typeof RetryPolicyConfigErrorCodes];
 
 export class RetryPolicyConfigError extends Error {
   constructor(readonly code: RetryPolicyConfigErrorCode) {

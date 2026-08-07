@@ -1,17 +1,8 @@
-import {
-  context,
-  propagation,
-  trace,
-} from '@opentelemetry/api';
+import { context, propagation, trace } from '@opentelemetry/api';
 import { recordSpanFailure } from '@servir/node-observability';
 
-import {
-  IntegrationEventPublicationError,
-} from '@/application';
-import type {
-  ClaimedOutboxMessage,
-  IntegrationEventPublisher,
-} from '@/application';
+import { IntegrationEventPublicationError } from '@/application';
+import type { ClaimedOutboxMessage, IntegrationEventPublisher } from '@/application';
 
 import { mapToStructuredCloudEvent } from './cloud-event';
 
@@ -43,98 +34,84 @@ export interface KafkaIntegrationEventPublisherOptions {
 }
 
 const tracer = trace.getTracer('@servir/outbox-relay');
-function assertConfiguration(
-  options: KafkaIntegrationEventPublisherOptions,
-): void {
-  if (
-    !Number.isInteger(options.timeoutMs)
-    || options.timeoutMs <= 0
-  ) {
-    throw new IntegrationEventPublicationError(
-      KafkaPublicationErrorCodes.InvalidConfiguration,
-      { retryable: false },
-    );
+function assertConfiguration(options: KafkaIntegrationEventPublisherOptions): void {
+  if (!Number.isInteger(options.timeoutMs) || options.timeoutMs <= 0) {
+    throw new IntegrationEventPublicationError(KafkaPublicationErrorCodes.InvalidConfiguration, {
+      retryable: false,
+    });
   }
 }
 
 function isExplicitlyNonRetryable(error: unknown): boolean {
-  return typeof error === 'object'
-    && error !== null
-    && 'retriable' in error
-    && error.retriable === false;
+  return (
+    typeof error === 'object' && error !== null && 'retriable' in error && error.retriable === false
+  );
 }
 
-export class KafkaIntegrationEventPublisher
-implements IntegrationEventPublisher {
-  constructor(
-    private readonly options: KafkaIntegrationEventPublisherOptions,
-  ) {
+export class KafkaIntegrationEventPublisher implements IntegrationEventPublisher {
+  constructor(private readonly options: KafkaIntegrationEventPublisherOptions) {
     assertConfiguration(options);
   }
 
   async publish(message: ClaimedOutboxMessage): Promise<void> {
-    await tracer.startActiveSpan(
-      'kafka.publish',
-      async (span) => {
-        span.setAttributes({
-          'servir.messaging.system': 'kafka',
-          'servir.messaging.topic': message.event.channel,
-        });
+    await tracer.startActiveSpan('kafka.publish', async (span) => {
+      span.setAttributes({
+        'servir.messaging.system': 'kafka',
+        'servir.messaging.topic': message.event.channel,
+      });
+
+      try {
+        let value: string;
 
         try {
-          let value: string;
+          value = JSON.stringify(mapToStructuredCloudEvent(message));
+        } catch {
+          throw new IntegrationEventPublicationError(
+            KafkaPublicationErrorCodes.SerializationFailed,
+            { retryable: false },
+          );
+        }
 
-          try {
-            value = JSON.stringify(mapToStructuredCloudEvent(message));
-          } catch (cause) {
-            throw new IntegrationEventPublicationError(
-              KafkaPublicationErrorCodes.SerializationFailed,
-              { retryable: false },
-            );
+        const headers: Record<string, string> = {
+          'content-type': 'application/cloudevents+json',
+        };
+        propagation.inject(context.active(), headers);
+        if (headers.traceparent === undefined && message.traceContext !== undefined) {
+          headers.traceparent = message.traceContext.traceparent;
+
+          if (message.traceContext.tracestate !== undefined) {
+            headers.tracestate = message.traceContext.tracestate;
           }
+        }
 
-          const headers: Record<string, string> = {
-            'content-type': 'application/cloudevents+json',
-          };
-          propagation.inject(context.active(), headers);
-          if (
-            headers.traceparent === undefined
-            && message.traceContext !== undefined
-          ) {
-            headers.traceparent = message.traceContext.traceparent;
-
-            if (message.traceContext.tracestate !== undefined) {
-              headers.tracestate = message.traceContext.tracestate;
-            }
-          }
-
-          await this.options.producer.send({
-            topic: message.event.channel,
-            acks: -1,
-            timeout: this.options.timeoutMs,
-            messages: [{
+        await this.options.producer.send({
+          topic: message.event.channel,
+          acks: -1,
+          timeout: this.options.timeoutMs,
+          messages: [
+            {
               key: message.event.partitionKey ?? null,
               value,
               headers,
-            }],
-          });
-        } catch (cause) {
-          recordSpanFailure(span, cause);
+            },
+          ],
+        });
+      } catch (cause) {
+        recordSpanFailure(span, cause);
 
-          if (cause instanceof IntegrationEventPublicationError) {
-            throw cause;
-          }
-
-          throw new IntegrationEventPublicationError(
-            isExplicitlyNonRetryable(cause)
-              ? KafkaPublicationErrorCodes.PublishRejected
-              : KafkaPublicationErrorCodes.PublishFailed,
-            { retryable: !isExplicitlyNonRetryable(cause) },
-          );
-        } finally {
-          span.end();
+        if (cause instanceof IntegrationEventPublicationError) {
+          throw cause;
         }
-      },
-    );
+
+        throw new IntegrationEventPublicationError(
+          isExplicitlyNonRetryable(cause)
+            ? KafkaPublicationErrorCodes.PublishRejected
+            : KafkaPublicationErrorCodes.PublishFailed,
+          { retryable: !isExplicitlyNonRetryable(cause) },
+        );
+      } finally {
+        span.end();
+      }
+    });
   }
 }

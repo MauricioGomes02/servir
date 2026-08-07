@@ -6,9 +6,7 @@ export interface ErrorLogAttributeOptions {
 }
 
 function errorCode(error: Error): string | undefined {
-  return 'code' in error && typeof error.code === 'string'
-    ? error.code
-    : undefined;
+  return 'code' in error && typeof error.code === 'string' ? error.code : undefined;
 }
 
 export function createErrorLogAttributes(

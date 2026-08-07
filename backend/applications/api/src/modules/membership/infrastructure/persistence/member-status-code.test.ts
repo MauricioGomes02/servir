@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  fromMemberStatusCode,
-  MemberStatusCodes,
-  toMemberStatusCode,
-} from './member-status-code';
+import { fromMemberStatusCode, MemberStatusCodes, toMemberStatusCode } from './member-status-code';
 import { UnsupportedMemberStatusCodeError } from './unsupported-member-status-code-error';
 
 describe('toMemberStatusCode', () => {
@@ -25,8 +21,9 @@ describe('fromMemberStatusCode', () => {
   it('rejects an unsupported persisted status with a stable code', () => {
     assert.throws(
       () => fromMemberStatusCode(99),
-      (error: unknown) => error instanceof UnsupportedMemberStatusCodeError
-        && error.code === 'member_status_code.unsupported',
+      (error: unknown) =>
+        error instanceof UnsupportedMemberStatusCodeError &&
+        error.code === 'member_status_code.unsupported',
     );
   });
 });

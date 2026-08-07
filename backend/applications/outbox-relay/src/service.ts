@@ -23,10 +23,7 @@ import { Pool } from 'pg';
 
 import { readRelayServiceConfig } from './service-config';
 
-function failureAttributes(
-  error: unknown,
-  fallbackCode: string,
-): LogAttributes {
+function failureAttributes(error: unknown, fallbackCode: string): LogAttributes {
   return createErrorLogAttributes(error, {
     fallbackCode,
     includeDetails: process.env.NODE_ENV === 'development',
@@ -41,20 +38,20 @@ function log(
   attributes: LogAttributes = {},
 ): void {
   try {
-    logger.log(createLogRecord({
-      occurredAt: clock.now(),
-      level,
-      eventName,
-      attributes,
-    }));
+    logger.log(
+      createLogRecord({
+        occurredAt: clock.now(),
+        level,
+        eventName,
+        attributes,
+      }),
+    );
   } catch {
     // Service lifecycle cannot depend on an observability destination.
   }
 }
 
-export async function startRelayService(
-  telemetry: TelemetryLifecycle,
-): Promise<void> {
+export async function startRelayService(telemetry: TelemetryLifecycle): Promise<void> {
   let logger = new JsonStdoutLogger();
   const clock = new SystemClock();
   let pool: Pool | undefined;
@@ -80,16 +77,12 @@ export async function startRelayService(
     });
     await producer.connect();
 
-    const retryPolicy = new ExponentialBackoffRetryPolicy(
-      clock,
-      new SystemRandomSource(),
-      {
-        maximumAttempts: config.maximumAttempts,
-        baseDelayMilliseconds: config.retryBaseDelayMilliseconds,
-        maximumDelayMilliseconds: config.retryMaximumDelayMilliseconds,
-        jitterRatio: config.retryJitterRatio,
-      },
-    );
+    const retryPolicy = new ExponentialBackoffRetryPolicy(clock, new SystemRandomSource(), {
+      maximumAttempts: config.maximumAttempts,
+      baseDelayMilliseconds: config.retryBaseDelayMilliseconds,
+      maximumDelayMilliseconds: config.retryMaximumDelayMilliseconds,
+      jitterRatio: config.retryJitterRatio,
+    });
     const batchProcessor = new ProcessOutboxBatch({
       clock,
       leaseIdGenerator: new UuidV7LeaseIdGenerator(),

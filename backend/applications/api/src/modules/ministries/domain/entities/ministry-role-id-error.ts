@@ -6,5 +6,6 @@ export const MinistryRoleIdErrorCodes = {
   TooLong: 'ministry_role.id.too_long',
   InvalidFormat: 'ministry_role.id.invalid_format',
 } as const;
-export type MinistryRoleIdErrorCode = (typeof MinistryRoleIdErrorCodes)[keyof typeof MinistryRoleIdErrorCodes];
+export type MinistryRoleIdErrorCode =
+  (typeof MinistryRoleIdErrorCodes)[keyof typeof MinistryRoleIdErrorCodes];
 export type MinistryRoleIdError = NotificationError<MinistryRoleIdErrorCode>;

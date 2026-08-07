@@ -1,7 +1,4 @@
-import type {
-  GetMemberDetailsError,
-  MemberDetails,
-} from '@/modules/membership/application';
+import type { GetMemberDetailsError, MemberDetails } from '@/modules/membership/application';
 import type { MemberIdError } from '@/modules/membership/domain';
 import type { OrganizationIdError } from '@/modules/organizations/domain';
 import type { ExecutionContext } from '@/shared/application/context';
@@ -13,22 +10,22 @@ import {
   type SupportedLocale,
 } from '@/shared/presentation';
 
-type GetMemberDetailsFailure = OrganizationIdError
-  | MemberIdError
-  | GetMemberDetailsError;
+type GetMemberDetailsFailure = OrganizationIdError | MemberIdError | GetMemberDetailsError;
 
-export type GetMemberDetailsView = Readonly<{
-  kind: 'success';
-  resource: Readonly<{
-    id: string;
-    organizationId: string;
-    name: string;
-    status: MemberDetails['status'];
-  }>;
-}> | Readonly<{
-  kind: 'failure';
-  error: PresentedError;
-}>;
+export type GetMemberDetailsView =
+  | Readonly<{
+      kind: 'success';
+      resource: Readonly<{
+        id: string;
+        organizationId: string;
+        name: string;
+        status: MemberDetails['status'];
+      }>;
+    }>
+  | Readonly<{
+      kind: 'failure';
+      error: PresentedError;
+    }>;
 
 export class GetMemberDetailsPresenter {
   constructor(private readonly translator: MessageTranslator) {}

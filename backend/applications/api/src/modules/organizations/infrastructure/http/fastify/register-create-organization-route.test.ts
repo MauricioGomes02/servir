@@ -7,18 +7,12 @@ import {
   CreateOrganizationPresenter,
   organizationMessageCatalog,
 } from '@/modules/organizations/presentation';
-import {
-  parseCorrelationId,
-  parseRequestId,
-} from '@/shared/application/context';
+import { parseCorrelationId, parseRequestId } from '@/shared/application/context';
 import { parseMessageId } from '@/shared/application/messaging';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
-import {
-  createFastifyApplication,
-  httpProblemMessageCatalog,
-} from '@/shared/infrastructure/http';
+import { createFastifyApplication, httpProblemMessageCatalog } from '@/shared/infrastructure/http';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
@@ -31,15 +25,9 @@ import { registerCreateOrganizationRoute } from './register-create-organization-
 function fixture() {
   const correlationId = parseCorrelationId('correlation-123');
   const requestId = parseRequestId('request-123');
-  const organizationId = OrganizationId.create(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-  );
-  const domainEventId = parseDomainEventId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
-  );
-  const messageId = parseMessageId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-  );
+  const organizationId = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+  const domainEventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
+  const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
   const instant = Instant.create('2026-07-28T12:00:00.000Z');
 
   assert.equal(correlationId.success, true);
@@ -50,12 +38,12 @@ function fixture() {
   assert.equal(instant.success, true);
 
   if (
-    !correlationId.success
-    || !requestId.success
-    || !organizationId.success
-    || !domainEventId.success
-    || !messageId.success
-    || !instant.success
+    !correlationId.success ||
+    !requestId.success ||
+    !organizationId.success ||
+    !domainEventId.success ||
+    !messageId.success ||
+    !instant.success
   ) {
     throw new Error('Invalid deterministic test fixture');
   }
@@ -75,28 +63,18 @@ function fixture() {
   });
   const handler = new CreateOrganizationHandler({
     clock: new FixedClock(instant.value),
-    organizationIdGenerator: new SequenceIdGenerator([
-      organizationId.value,
-    ]),
-    domainEventIdGenerator: new SequenceIdGenerator([
-      domainEventId.value,
-    ]),
-    messageIdGenerator: new SequenceIdGenerator([
-      messageId.value,
-    ]),
+    organizationIdGenerator: new SequenceIdGenerator([organizationId.value]),
+    domainEventIdGenerator: new SequenceIdGenerator([domainEventId.value]),
+    messageIdGenerator: new SequenceIdGenerator([messageId.value]),
     unitOfWork: new DirectUnitOfWork({ organizations, outbox }),
     logger,
   });
   const presenter = new CreateOrganizationPresenter(translator);
   const app = createFastifyApplication({
-    correlationIdGenerator: new SequenceIdGenerator([
-      correlationId.value,
-    ]),
+    correlationIdGenerator: new SequenceIdGenerator([correlationId.value]),
     logger,
     messageTranslator: translator,
-    requestIdGenerator: new SequenceIdGenerator([
-      requestId.value,
-    ]),
+    requestIdGenerator: new SequenceIdGenerator([requestId.value]),
   });
 
   registerCreateOrganizationRoute(app, {
@@ -126,10 +104,7 @@ describe('registerCreateOrganizationRoute', () => {
       id: '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
       name: 'Comunidade Servir',
     });
-    assert.equal(
-      response.headers.location,
-      '/organizations/0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-    );
+    assert.equal(response.headers.location, '/organizations/0198f334-6dc5-7c20-9af1-91d7e599c7b1');
     assert.equal(response.headers['x-correlation-id'], 'correlation-123');
     assert.equal(organizations.organizations.length, 1);
     assert.equal(outbox.envelopes.length, 1);
@@ -150,10 +125,7 @@ describe('registerCreateOrganizationRoute', () => {
     await app.close();
 
     assert.equal(response.statusCode, 422);
-    assert.match(
-      response.headers['content-type'] ?? '',
-      /^application\/problem\+json/,
-    );
+    assert.match(response.headers['content-type'] ?? '', /^application\/problem\+json/);
     assert.equal(response.headers['content-language'], 'en-US');
     assert.deepEqual(response.json(), {
       type: '/problems/validation-error',
@@ -161,11 +133,13 @@ describe('registerCreateOrganizationRoute', () => {
       status: 422,
       instance: 'urn:servir:request:request-123',
       correlationId: 'correlation-123',
-      errors: [{
-        code: 'organization.name.invalid_type',
-        detail: 'The organization name must be text.',
-        pointer: '#/name',
-      }],
+      errors: [
+        {
+          code: 'organization.name.invalid_type',
+          detail: 'The organization name must be text.',
+          pointer: '#/name',
+        },
+      ],
     });
     assert.equal(organizations.organizations.length, 0);
     assert.equal(outbox.envelopes.length, 0);

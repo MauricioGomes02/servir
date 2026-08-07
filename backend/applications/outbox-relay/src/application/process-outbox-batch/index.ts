@@ -1,6 +1,4 @@
-export {
-  ProcessOutboxBatch,
-} from './process-outbox-batch';
+export { ProcessOutboxBatch } from './process-outbox-batch';
 export type {
   ProcessOutboxBatchDependencies,
   ProcessOutboxBatchResult,

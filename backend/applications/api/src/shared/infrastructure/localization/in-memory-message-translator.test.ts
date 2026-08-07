@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  SupportedLocales,
-  type MessageCatalog,
-} from '@/shared/presentation/localization';
+import { SupportedLocales, type MessageCatalog } from '@/shared/presentation/localization';
 
 import { InMemoryMessageTranslator } from '.';
 

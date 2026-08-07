@@ -18,9 +18,8 @@ export const OpenTelemetryErrorCodes = {
   ShutdownFailed: 'telemetry.shutdown.failed',
 } as const;
 
-export type OpenTelemetryErrorCode = typeof OpenTelemetryErrorCodes[
-  keyof typeof OpenTelemetryErrorCodes
-];
+export type OpenTelemetryErrorCode =
+  (typeof OpenTelemetryErrorCodes)[keyof typeof OpenTelemetryErrorCodes];
 
 export class OpenTelemetryError extends Error {
   override readonly name = 'OpenTelemetryError';
@@ -57,13 +56,13 @@ export interface DistributedTraceContext {
 }
 
 function isDisabled(environment: NodeJS.ProcessEnv): boolean {
-  return environment.OTEL_SDK_DISABLED?.toLowerCase() === 'true'
-    || environment.OTEL_TRACES_EXPORTER?.toLowerCase() === 'none';
+  return (
+    environment.OTEL_SDK_DISABLED?.toLowerCase() === 'true' ||
+    environment.OTEL_TRACES_EXPORTER?.toLowerCase() === 'none'
+  );
 }
 
-function createSdk(
-  instrumentations: NodeSDKConfiguration['instrumentations'],
-): TelemetrySdk {
+function createSdk(instrumentations: NodeSDKConfiguration['instrumentations']): TelemetrySdk {
   return new NodeSDK({
     traceExporter: new OTLPTraceExporter(),
     textMapPropagator: new W3CTraceContextPropagator(),
@@ -75,9 +74,7 @@ export function createPgInstrumentation(): PgInstrumentation {
   return new PgInstrumentation({ enhancedDatabaseReporting: false });
 }
 
-export function startOpenTelemetry(
-  options: StartOpenTelemetryOptions = {},
-): TelemetryLifecycle {
+export function startOpenTelemetry(options: StartOpenTelemetryOptions = {}): TelemetryLifecycle {
   const environment = options.environment ?? process.env;
 
   if (isDisabled(environment)) {
@@ -99,10 +96,7 @@ export function startOpenTelemetry(
       try {
         await sdk.shutdown();
       } catch (cause) {
-        throw new OpenTelemetryError(
-          OpenTelemetryErrorCodes.ShutdownFailed,
-          { cause },
-        );
+        throw new OpenTelemetryError(OpenTelemetryErrorCodes.ShutdownFailed, { cause });
       }
     },
   };
@@ -122,9 +116,7 @@ export function captureActiveTraceContext(): DistributedTraceContext | undefined
   });
 }
 
-export function extractTraceContext(
-  carrier: DistributedTraceContext,
-): Context {
+export function extractTraceContext(carrier: DistributedTraceContext): Context {
   return propagation.extract(ROOT_CONTEXT, { ...carrier });
 }
 

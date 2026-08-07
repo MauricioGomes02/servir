@@ -1,3 +1,3 @@
 export * from './commands';
-export * from './integration-events';
-export * from './ports';
+export type * from './integration-events';
+export type * from './ports';

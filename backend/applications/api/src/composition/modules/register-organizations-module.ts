@@ -12,22 +12,22 @@ export function registerOrganizationsModule(
   options: CreateApplicationOptions,
 ): void {
   container.register({
-    organizationIdGenerator: asFunction(() => new UuidV7Generator(
-      OrganizationId.create,
-      options.uuidSource,
-    )).singleton(),
-    createOrganizationHandler: asFunction((dependencies: ApplicationCradle) => (
-      new CreateOrganizationHandler({
-        clock: dependencies.clock,
-        organizationIdGenerator: dependencies.organizationIdGenerator,
-        domainEventIdGenerator: dependencies.domainEventIdGenerator,
-        messageIdGenerator: dependencies.messageIdGenerator,
-        unitOfWork: dependencies.organizationUnitOfWork,
-        logger: dependencies.logger,
-      })
-    )).singleton(),
-    createOrganizationPresenter: asFunction((dependencies: ApplicationCradle) => (
-      new CreateOrganizationPresenter(dependencies.translator)
-    )).singleton(),
+    organizationIdGenerator: asFunction(
+      () => new UuidV7Generator(OrganizationId.create, options.uuidSource),
+    ).singleton(),
+    createOrganizationHandler: asFunction(
+      (dependencies: ApplicationCradle) =>
+        new CreateOrganizationHandler({
+          clock: dependencies.clock,
+          organizationIdGenerator: dependencies.organizationIdGenerator,
+          domainEventIdGenerator: dependencies.domainEventIdGenerator,
+          messageIdGenerator: dependencies.messageIdGenerator,
+          unitOfWork: dependencies.organizationUnitOfWork,
+          logger: dependencies.logger,
+        }),
+    ).singleton(),
+    createOrganizationPresenter: asFunction(
+      (dependencies: ApplicationCradle) => new CreateOrganizationPresenter(dependencies.translator),
+    ).singleton(),
   });
 }

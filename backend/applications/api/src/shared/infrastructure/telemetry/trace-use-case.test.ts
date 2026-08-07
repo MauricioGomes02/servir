@@ -5,10 +5,9 @@ import { traceUseCase } from './trace-use-case';
 
 describe('traceUseCase', () => {
   it('preserves the use case result when tracing is unavailable', async () => {
-    const result = await traceUseCase(
-      'CreateOrganization',
-      async () => ({ organizationId: 'organization-123' }),
-    );
+    const result = await traceUseCase('CreateOrganization', async () => ({
+      organizationId: 'organization-123',
+    }));
 
     assert.deepEqual(result, { organizationId: 'organization-123' });
   });

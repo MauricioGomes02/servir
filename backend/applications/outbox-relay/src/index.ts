@@ -1,23 +1,19 @@
 import { startOpenTelemetry } from '@/infrastructure';
-import {
-  createLogRecord,
-  LogLevels,
-} from '@servir/application-foundation';
-import {
-  createErrorLogAttributes,
-  JsonStdoutLogger,
-} from '@servir/node-observability';
+import { createLogRecord, LogLevels } from '@servir/application-foundation';
+import { createErrorLogAttributes, JsonStdoutLogger } from '@servir/node-observability';
 
 function reportStartupFailure(error: unknown): void {
-  new JsonStdoutLogger().log(createLogRecord({
-    occurredAt: new Date().toISOString(),
-    level: LogLevels.Error,
-    eventName: 'outbox.relay.start.failed',
-    attributes: createErrorLogAttributes(error, {
-      fallbackCode: 'outbox.relay.start_failed',
-      includeDetails: process.env.NODE_ENV === 'development',
+  new JsonStdoutLogger().log(
+    createLogRecord({
+      occurredAt: new Date().toISOString(),
+      level: LogLevels.Error,
+      eventName: 'outbox.relay.start.failed',
+      attributes: createErrorLogAttributes(error, {
+        fallbackCode: 'outbox.relay.start_failed',
+        includeDetails: process.env.NODE_ENV === 'development',
+      }),
     }),
-  }));
+  );
 }
 
 async function main(): Promise<void> {

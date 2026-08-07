@@ -1,8 +1,4 @@
-export {
-  createLogRecord,
-  LogLevels,
-  parseLogLevel,
-} from './logging.js';
+export { createLogRecord, LogLevels, parseLogLevel } from './logging.js';
 
 export type {
   Logger,

@@ -7,9 +7,7 @@ export const PostgresOutboxMessageStoreErrorCodes = Object.freeze({
 } as const);
 
 export type PostgresOutboxMessageStoreErrorCode =
-  typeof PostgresOutboxMessageStoreErrorCodes[
-    keyof typeof PostgresOutboxMessageStoreErrorCodes
-  ];
+  (typeof PostgresOutboxMessageStoreErrorCodes)[keyof typeof PostgresOutboxMessageStoreErrorCodes];
 
 export class PostgresOutboxMessageStoreError extends Error {
   constructor(

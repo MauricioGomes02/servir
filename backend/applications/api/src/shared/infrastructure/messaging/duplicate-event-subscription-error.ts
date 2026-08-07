@@ -5,9 +5,7 @@ export class DuplicateEventSubscriptionError extends Error {
     readonly eventName: string,
     readonly handlerName: string,
   ) {
-    super(
-      `Handler "${handlerName}" is already subscribed to event "${eventName}"`,
-    );
+    super(`Handler "${handlerName}" is already subscribed to event "${eventName}"`);
 
     this.name = 'DuplicateEventSubscriptionError';
   }

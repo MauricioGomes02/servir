@@ -1,5 +1,4 @@
-export const PostgresMemberRepositoryErrorCode =
-  'postgres_member_repository.save_failed' as const;
+export const PostgresMemberRepositoryErrorCode = 'postgres_member_repository.save_failed' as const;
 
 export class PostgresMemberRepositoryError extends Error {
   readonly code = PostgresMemberRepositoryErrorCode;

@@ -25,7 +25,9 @@ describe('Ministry', () => {
     assert.equal(result.value.organizationId, organizationId);
     assert.equal(result.value.name.toString(), 'Louvor');
     assert.deepEqual(result.value.pendingDomainEvents[0]?.payload, {
-      ministryId: id.toString(), organizationId: organizationId.toString(), name: 'Louvor',
+      ministryId: id.toString(),
+      organizationId: organizationId.toString(),
+      name: 'Louvor',
     });
   });
 
@@ -37,7 +39,10 @@ describe('Ministry', () => {
       eventId: value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e003')),
       occurredAt: value(Instant.create('2026-08-06T12:00:00.000Z')),
     });
-    assert.deepEqual(result, { success: false, error: { code: MinistryNameErrorCodes.Empty, field: 'name' } });
+    assert.deepEqual(result, {
+      success: false,
+      error: { code: MinistryNameErrorCodes.Empty, field: 'name' },
+    });
   });
 
   it('defines an active internal role and records the occurred fact', () => {
@@ -52,7 +57,12 @@ describe('Ministry', () => {
     if (!created.success) return;
     created.value.acknowledgeDomainEvents(created.value.pendingDomainEvents);
     const roleId = value(MinistryRoleId.create('0198f334-6dc5-7c20-9af1-91d7e599e004'));
-    const defined = created.value.defineRole({ id: roleId, name: ' Vocal ', eventId: metadata.eventId, occurredAt: metadata.occurredAt });
+    const defined = created.value.defineRole({
+      id: roleId,
+      name: ' Vocal ',
+      eventId: metadata.eventId,
+      occurredAt: metadata.occurredAt,
+    });
     assert.equal(defined.success, true);
     assert.equal(created.value.roles.length, 1);
     assert.equal(created.value.roles[0]?.name.toString(), 'Vocal');
@@ -64,18 +74,28 @@ describe('Ministry', () => {
     const created = Ministry.create({
       id: value(MinistryId.create('0198f334-6dc5-7c20-9af1-91d7e599e001')),
       organizationId: value(OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599e002')),
-      name: 'Louvor', eventId: value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e003')),
+      name: 'Louvor',
+      eventId: value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e003')),
       occurredAt: value(Instant.create('2026-08-06T12:00:00.000Z')),
     });
     assert.equal(created.success, true);
     if (!created.success) return;
     created.value.acknowledgeDomainEvents(created.value.pendingDomainEvents);
-    const first = { id: value(MinistryRoleId.create('0198f334-6dc5-7c20-9af1-91d7e599e004')), eventId: value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e005')), occurredAt: value(Instant.create('2026-08-06T12:01:00.000Z')) };
+    const first = {
+      id: value(MinistryRoleId.create('0198f334-6dc5-7c20-9af1-91d7e599e004')),
+      eventId: value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e005')),
+      occurredAt: value(Instant.create('2026-08-06T12:01:00.000Z')),
+    };
     created.value.defineRole({ ...first, name: 'Vocal' });
     created.value.acknowledgeDomainEvents(created.value.pendingDomainEvents);
-    const duplicate = created.value.defineRole({ ...first, id: value(MinistryRoleId.create('0198f334-6dc5-7c20-9af1-91d7e599e006')), name: 'vocal' });
+    const duplicate = created.value.defineRole({
+      ...first,
+      id: value(MinistryRoleId.create('0198f334-6dc5-7c20-9af1-91d7e599e006')),
+      name: 'vocal',
+    });
     assert.equal(duplicate.success, false);
-    if (!duplicate.success) assert.equal(duplicate.error.code, MinistryRoleDefinitionErrorCodes.ActiveNameAlreadyExists);
+    if (!duplicate.success)
+      assert.equal(duplicate.error.code, MinistryRoleDefinitionErrorCodes.ActiveNameAlreadyExists);
     assert.equal(created.value.roles.length, 1);
     assert.equal(created.value.pendingDomainEvents.length, 0);
   });

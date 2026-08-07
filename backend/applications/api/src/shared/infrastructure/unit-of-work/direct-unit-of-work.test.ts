@@ -54,9 +54,6 @@ describe('DirectUnitOfWork', () => {
       throw failure;
     });
 
-    await assert.rejects(
-      execution,
-      (error: unknown) => error === failure,
-    );
+    await assert.rejects(execution, (error: unknown) => error === failure);
   });
 });

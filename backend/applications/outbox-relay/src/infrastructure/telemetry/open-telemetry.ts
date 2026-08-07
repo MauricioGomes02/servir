@@ -7,14 +7,9 @@ import {
 
 export type { TelemetryLifecycle } from '@servir/node-observability';
 
-export type RelayOpenTelemetryOptions = Omit<
-  StartOpenTelemetryOptions,
-  'instrumentations'
->;
+export type RelayOpenTelemetryOptions = Omit<StartOpenTelemetryOptions, 'instrumentations'>;
 
-export function startOpenTelemetry(
-  options: RelayOpenTelemetryOptions = {},
-): TelemetryLifecycle {
+export function startOpenTelemetry(options: RelayOpenTelemetryOptions = {}): TelemetryLifecycle {
   return startNodeOpenTelemetry({
     ...options,
     instrumentations: [createPgInstrumentation()],

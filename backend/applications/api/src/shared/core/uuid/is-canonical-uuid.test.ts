@@ -5,10 +5,7 @@ import { isCanonicalUuid } from '.';
 
 describe('isCanonicalUuid', () => {
   it('accepts canonical UUIDs with recognized versions', () => {
-    assert.equal(
-      isCanonicalUuid('0198f334-6dc5-7c20-9af1-91d7e599c7b1'),
-      true,
-    );
+    assert.equal(isCanonicalUuid('0198f334-6dc5-7c20-9af1-91d7e599c7b1'), true);
   });
 
   it('rejects non-canonical and unsupported UUID representations', () => {

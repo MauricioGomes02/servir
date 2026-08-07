@@ -9,9 +9,22 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "check": "npm run format:check && npm run lint && npm test && npm run build",
     "dev:api": "npm run dev --workspace @servir/api",
     "start:api": "npm run start --workspace @servir/api",
     "dev:relay": "npm run dev --workspace @servir/outbox-relay",
     "start:relay": "npm run start --workspace @servir/outbox-relay"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.9.0",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.66.0"
   }
 }

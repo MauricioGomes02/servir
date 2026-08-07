@@ -1,8 +1,4 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 import { isCanonicalUuid } from '@/shared/core/uuid';
 
 import {

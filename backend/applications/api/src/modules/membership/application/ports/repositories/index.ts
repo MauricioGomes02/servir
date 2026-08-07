@@ -1,3 +1,1 @@
-export type {
-  MemberRepository,
-} from './member-repository';
+export type { MemberRepository } from './member-repository';

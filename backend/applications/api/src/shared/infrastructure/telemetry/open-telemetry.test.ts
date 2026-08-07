@@ -9,9 +9,9 @@ describe('API OpenTelemetry composition', () => {
     const telemetry = startOpenTelemetry({
       environment: {},
       sdkFactory: (instrumentations) => {
-        instrumentationNames = instrumentations.flat().map(
-          (instrumentation) => instrumentation.instrumentationName,
-        );
+        instrumentationNames = instrumentations
+          .flat()
+          .map((instrumentation) => instrumentation.instrumentationName);
         return { start() {}, async shutdown() {} };
       },
     });

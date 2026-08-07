@@ -1,3 +1,1 @@
-export {
-  mapOrganizationCreatedIntegrationEvent,
-} from './map-organization-created-integration-event';
+export { mapOrganizationCreatedIntegrationEvent } from './map-organization-created-integration-event';

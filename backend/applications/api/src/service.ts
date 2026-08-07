@@ -1,11 +1,5 @@
-import {
-  createLogRecord,
-  LogLevels,
-} from '@/shared/application/logging';
-import {
-  createErrorLogAttributes,
-  JsonStdoutLogger,
-} from '@/shared/infrastructure/logging';
+import { createLogRecord, LogLevels } from '@/shared/application/logging';
+import { createErrorLogAttributes, JsonStdoutLogger } from '@/shared/infrastructure/logging';
 import type { TelemetryLifecycle } from '@/shared/infrastructure/telemetry';
 
 import {
@@ -15,19 +9,17 @@ import {
 } from './composition';
 import { readServiceConfig } from './service-config';
 
-function reportFailure(
-  logger: JsonStdoutLogger,
-  eventName: string,
-  error: unknown,
-): void {
-  logger.log(createLogRecord({
-    level: LogLevels.Fatal,
-    eventName,
-    attributes: createErrorLogAttributes(error, {
-      fallbackCode: eventName,
-      includeDetails: process.env.NODE_ENV === 'development',
+function reportFailure(logger: JsonStdoutLogger, eventName: string, error: unknown): void {
+  logger.log(
+    createLogRecord({
+      level: LogLevels.Fatal,
+      eventName,
+      attributes: createErrorLogAttributes(error, {
+        fallbackCode: eventName,
+        includeDetails: process.env.NODE_ENV === 'development',
+      }),
     }),
-  }));
+  );
 }
 
 export function reportBootstrapFailure(error: unknown): void {
@@ -35,9 +27,7 @@ export function reportBootstrapFailure(error: unknown): void {
   process.exitCode = 1;
 }
 
-export async function startService(
-  telemetry: TelemetryLifecycle,
-): Promise<void> {
+export async function startService(telemetry: TelemetryLifecycle): Promise<void> {
   let logger = new JsonStdoutLogger();
 
   try {
@@ -46,17 +36,14 @@ export async function startService(
     let postgresPersistence: PostgresPersistence | undefined;
 
     if (config.persistence.mode === 'postgres') {
-      postgresPersistence = createPostgresPersistence(
-        config.persistence.connectionString,
-      );
+      postgresPersistence = createPostgresPersistence(config.persistence.connectionString);
     }
 
     const app = createApplication({
       logger,
       memberUnitOfWork: postgresPersistence?.memberUnitOfWork,
       memberDetailsReader: postgresPersistence?.memberDetailsReader,
-      organizationRegistrationFacts:
-        postgresPersistence?.organizationRegistrationFacts,
+      organizationRegistrationFacts: postgresPersistence?.organizationRegistrationFacts,
       organizationUnitOfWork: postgresPersistence?.unitOfWork,
       ministryUnitOfWork: postgresPersistence?.ministryUnitOfWork,
       ministryCreationFacts: postgresPersistence?.ministryCreationFacts,
@@ -69,17 +56,19 @@ export async function startService(
     }
 
     await app.listen({ host: config.host, port: config.port });
-    logger.log(createLogRecord({
-      level: LogLevels.Info,
-      eventName: 'service.started',
-      attributes: {
-        'server.host': config.host,
-        'server.port': config.port,
-        'persistence.mode': config.persistence.mode,
-        'telemetry.enabled': telemetry.enabled,
-        'log.level': config.logLevel,
-      },
-    }));
+    logger.log(
+      createLogRecord({
+        level: LogLevels.Info,
+        eventName: 'service.started',
+        attributes: {
+          'server.host': config.host,
+          'server.port': config.port,
+          'persistence.mode': config.persistence.mode,
+          'telemetry.enabled': telemetry.enabled,
+          'log.level': config.logLevel,
+        },
+      }),
+    );
 
     let stopping: Promise<void> | undefined;
     const stop = (): Promise<void> => {

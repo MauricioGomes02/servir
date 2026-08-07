@@ -31,9 +31,7 @@ function fallbackContext(requestId: string): ExecutionContext | undefined {
 
   return {
     correlationId: correlationId.value,
-    requestId: parsedRequestId.success
-      ? parsedRequestId.value
-      : undefined,
+    requestId: parsedRequestId.success ? parsedRequestId.value : undefined,
   };
 }
 
@@ -64,14 +62,10 @@ export class FastifyRequestLogger {
   }
 
   context(request: FastifyRequest): ExecutionContext | undefined {
-    return request.executionContext
-      ?? fallbackContext(request.id);
+    return request.executionContext ?? fallbackContext(request.id);
   }
 
-  markFailed(
-    request: FastifyRequest,
-    error: unknown,
-  ): void {
+  markFailed(request: FastifyRequest, error: unknown): void {
     this.failures.set(request, errorAttributes(error));
   }
 
@@ -96,21 +90,21 @@ export class FastifyRequestLogger {
     attributes: LogAttributes | undefined,
   ): void {
     const startedAt = this.startedAt.get(request);
-    const duration = startedAt === undefined
-      ? 0
-      : Math.max(0, this.monotonicNow() - startedAt);
+    const duration = startedAt === undefined ? 0 : Math.max(0, this.monotonicNow() - startedAt);
 
-    this.logger.log(createLogRecord({
-      level,
-      eventName,
-      context: this.context(request),
-      attributes: {
-        'http.request.method': request.method,
-        'http.route': request.routeOptions.url ?? 'unmatched',
-        'http.response.status_code': reply.statusCode,
-        'duration.ms': Number(duration.toFixed(3)),
-        ...attributes,
-      },
-    }));
+    this.logger.log(
+      createLogRecord({
+        level,
+        eventName,
+        context: this.context(request),
+        attributes: {
+          'http.request.method': request.method,
+          'http.route': request.routeOptions.url ?? 'unmatched',
+          'http.response.status_code': reply.statusCode,
+          'duration.ms': Number(duration.toFixed(3)),
+          ...attributes,
+        },
+      }),
+    );
   }
 }

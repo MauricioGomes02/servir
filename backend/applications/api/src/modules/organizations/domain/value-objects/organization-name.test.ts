@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  OrganizationName,
-  OrganizationNameErrorCodes,
-} from '.';
+import { OrganizationName, OrganizationNameErrorCodes } from '.';
 
 describe('OrganizationName', () => {
   it('normalizes and represents a valid name', () => {

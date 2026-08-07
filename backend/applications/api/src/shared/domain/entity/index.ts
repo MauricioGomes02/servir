@@ -1,7 +1,3 @@
-export {
-  Entity,
-} from './entity';
+export { Entity } from './entity';
 
-export {
-  EntityId,
-} from './entity-id';
+export { EntityId } from './entity-id';

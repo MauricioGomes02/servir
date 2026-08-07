@@ -1,5 +1,4 @@
-export const UnsupportedMemberStatusCodeErrorCode =
-  'member_status_code.unsupported' as const;
+export const UnsupportedMemberStatusCodeErrorCode = 'member_status_code.unsupported' as const;
 
 export class UnsupportedMemberStatusCodeError extends Error {
   readonly code = UnsupportedMemberStatusCodeErrorCode;

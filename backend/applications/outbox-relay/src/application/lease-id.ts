@@ -12,7 +12,7 @@ export class LeaseIdError extends Error {
   override readonly name = 'LeaseIdError';
 
   constructor(
-    readonly code: typeof LeaseIdErrorCodes[keyof typeof LeaseIdErrorCodes],
+    readonly code: (typeof LeaseIdErrorCodes)[keyof typeof LeaseIdErrorCodes],
     options?: ErrorOptions,
   ) {
     super(code, options);

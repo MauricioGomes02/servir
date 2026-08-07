@@ -1,11 +1,6 @@
-export {
-  InMemoryLogger,
-} from './in-memory-logger';
+export { InMemoryLogger } from './in-memory-logger';
 
-export {
-  createErrorLogAttributes,
-  JsonStdoutLogger,
-} from './json-stdout-logger';
+export { createErrorLogAttributes, JsonStdoutLogger } from './json-stdout-logger';
 
 export type {
   ActiveTraceContext,

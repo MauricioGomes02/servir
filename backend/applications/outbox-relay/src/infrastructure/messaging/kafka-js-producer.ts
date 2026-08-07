@@ -6,9 +6,7 @@ export interface KafkaJsProducerOptions {
   readonly retryCount?: number;
 }
 
-export function createKafkaJsProducer(
-  options: KafkaJsProducerOptions,
-): Producer {
+export function createKafkaJsProducer(options: KafkaJsProducerOptions): Producer {
   const kafkaConfig: KafkaConfig = {
     clientId: options.clientId,
     brokers: [...options.brokers],

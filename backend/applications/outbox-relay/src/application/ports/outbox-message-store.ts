@@ -7,9 +7,7 @@ export interface DistributedTraceContext {
   readonly tracestate?: string;
 }
 
-export interface ClaimedOutboxMessage<
-  TEvent extends IntegrationEvent = IntegrationEvent,
-> {
+export interface ClaimedOutboxMessage<TEvent extends IntegrationEvent = IntegrationEvent> {
   readonly messageId: string;
   readonly eventId: string;
   readonly correlationId: string;
@@ -30,22 +28,28 @@ export interface ClaimOutboxMessages {
 
 export interface OutboxMessageStore {
   claim(input: ClaimOutboxMessages): Promise<readonly ClaimedOutboxMessage[]>;
-  markPublished(input: Readonly<{
-    messageId: string;
-    leaseId: LeaseId;
-    publishedAt: string;
-  }>): Promise<void>;
-  reschedule(input: Readonly<{
-    messageId: string;
-    leaseId: LeaseId;
-    failedAt: string;
-    availableAt: string;
-    errorCode: string;
-  }>): Promise<void>;
-  markFailed(input: Readonly<{
-    messageId: string;
-    leaseId: LeaseId;
-    failedAt: string;
-    errorCode: string;
-  }>): Promise<void>;
+  markPublished(
+    input: Readonly<{
+      messageId: string;
+      leaseId: LeaseId;
+      publishedAt: string;
+    }>,
+  ): Promise<void>;
+  reschedule(
+    input: Readonly<{
+      messageId: string;
+      leaseId: LeaseId;
+      failedAt: string;
+      availableAt: string;
+      errorCode: string;
+    }>,
+  ): Promise<void>;
+  markFailed(
+    input: Readonly<{
+      messageId: string;
+      leaseId: LeaseId;
+      failedAt: string;
+      errorCode: string;
+    }>,
+  ): Promise<void>;
 }

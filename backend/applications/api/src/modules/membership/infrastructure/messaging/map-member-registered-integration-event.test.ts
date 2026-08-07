@@ -2,20 +2,15 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { OrganizationId } from '@/modules/organizations/domain';
-import {
-  createMemberRegistered,
-  MemberId,
-  MemberName,
-} from '@/modules/membership/domain';
+import { createMemberRegistered, MemberId, MemberName } from '@/modules/membership/domain';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 
 import { mapMemberRegisteredIntegrationEvent } from './map-member-registered-integration-event';
 
-function requireValue<TValue>(result: Readonly<
-  | { success: true; value: TValue }
-  | { success: false }
->): TValue {
+function requireValue<TValue>(
+  result: Readonly<{ success: true; value: TValue } | { success: false }>,
+): TValue {
   assert.equal(result.success, true);
 
   if (!result.success) {
@@ -28,18 +23,10 @@ function requireValue<TValue>(result: Readonly<
 describe('mapMemberRegisteredIntegrationEvent', () => {
   it('creates the versioned public contract with organization partitioning', () => {
     const event = createMemberRegistered({
-      eventId: requireValue(parseDomainEventId(
-        '0198f334-6dc5-7c20-9af1-91d7e599f001',
-      )),
-      occurredAt: requireValue(Instant.create(
-        '2026-08-04T15:00:00.000Z',
-      )),
-      memberId: requireValue(MemberId.create(
-        '0198f334-6dc5-7c20-9af1-91d7e599f002',
-      )),
-      organizationId: requireValue(OrganizationId.create(
-        '0198f334-6dc5-7c20-9af1-91d7e599f003',
-      )),
+      eventId: requireValue(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599f001')),
+      occurredAt: requireValue(Instant.create('2026-08-04T15:00:00.000Z')),
+      memberId: requireValue(MemberId.create('0198f334-6dc5-7c20-9af1-91d7e599f002')),
+      organizationId: requireValue(OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599f003')),
       name: requireValue(MemberName.create('Maria da Silva')),
     });
 

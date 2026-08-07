@@ -9,8 +9,6 @@ export interface MemberDetails {
   readonly status: MemberStatus;
 }
 
-export function createMemberDetails(
-  details: MemberDetails,
-): MemberDetails {
+export function createMemberDetails(details: MemberDetails): MemberDetails {
   return Object.freeze({ ...details });
 }

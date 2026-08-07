@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  Entity,
-  EntityId,
-} from '.';
+import { Entity, EntityId } from '.';
 
 class TestEntityId extends EntityId<'TestEntityId'> {
   static create(value: string): TestEntityId {
@@ -26,10 +23,7 @@ describe('Entity', () => {
   it('compares entities by identity despite state changes', () => {
     const id = TestEntityId.create('entity-123');
     const first = TestEntity.create(id, 'first');
-    const second = TestEntity.create(
-      TestEntityId.create('entity-123'),
-      'second',
-    );
+    const second = TestEntity.create(TestEntityId.create('entity-123'), 'second');
 
     first.rename('changed');
 
@@ -37,14 +31,8 @@ describe('Entity', () => {
   });
 
   it('distinguishes entities with different identities', () => {
-    const first = TestEntity.create(
-      TestEntityId.create('entity-123'),
-      'same',
-    );
-    const second = TestEntity.create(
-      TestEntityId.create('entity-456'),
-      'same',
-    );
+    const first = TestEntity.create(TestEntityId.create('entity-123'), 'same');
+    const second = TestEntity.create(TestEntityId.create('entity-456'), 'same');
 
     assert.equal(first.equals(second), false);
     assert.equal(first.equals(null), false);

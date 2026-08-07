@@ -21,9 +21,11 @@ export class EventDispatchError extends AggregateError {
 
     this.name = 'EventDispatchError';
     this.failures = Object.freeze(
-      failures.map((failure) => Object.freeze({
-        ...failure,
-      })),
+      failures.map((failure) =>
+        Object.freeze({
+          ...failure,
+        }),
+      ),
     );
   }
 }

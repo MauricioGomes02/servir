@@ -1,14 +1,8 @@
-export {
-  createDomainEvent,
-} from './domain-event';
+export { createDomainEvent } from './domain-event';
 
-export {
-  parseDomainEventId,
-} from './domain-event-metadata';
+export { parseDomainEventId } from './domain-event-metadata';
 
-export {
-  DomainEventMetadataErrorCodes,
-} from './domain-event-metadata-error';
+export { DomainEventMetadataErrorCodes } from './domain-event-metadata-error';
 
 export type {
   DomainEvent,
@@ -17,9 +11,7 @@ export type {
   DomainEventValue,
 } from './domain-event';
 
-export type {
-  DomainEventId,
-} from './domain-event-metadata';
+export type { DomainEventId } from './domain-event-metadata';
 
 export type {
   DomainEventMetadataError,

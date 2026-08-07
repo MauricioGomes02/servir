@@ -1,3 +1,1 @@
-export type {
-  OrganizationRepository,
-} from './organization-repository';
+export type { OrganizationRepository } from './organization-repository';

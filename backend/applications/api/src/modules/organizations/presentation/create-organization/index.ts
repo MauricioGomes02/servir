@@ -1,6 +1,4 @@
-export {
-  CreateOrganizationPresenter,
-} from './create-organization-presenter';
+export { CreateOrganizationPresenter } from './create-organization-presenter';
 
 export type {
   CreateOrganizationFailureView,

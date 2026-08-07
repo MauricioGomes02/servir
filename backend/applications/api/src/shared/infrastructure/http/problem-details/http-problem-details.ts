@@ -1,7 +1,4 @@
-import type {
-  CorrelationId,
-  RequestId,
-} from '@/shared/application/context';
+import type { CorrelationId, RequestId } from '@/shared/application/context';
 import type { PresentedError } from '@/shared/presentation';
 
 export const HttpProblemTypes = {
@@ -53,26 +50,18 @@ function fieldPointer(field: string | undefined): string | undefined {
     return undefined;
   }
 
-  const escapedField = field
-    .replaceAll('~', '~0')
-    .replaceAll('/', '~1');
+  const escapedField = field.replaceAll('~', '~0').replaceAll('/', '~1');
 
   return `#/${escapedField}`;
 }
 
-export function createHttpProblemDetails(
-  input: CreateHttpProblemDetailsInput,
-): HttpProblemDetails {
+export function createHttpProblemDetails(input: CreateHttpProblemDetailsInput): HttpProblemDetails {
   return Object.freeze({
     type: input.type,
     title: input.title,
     status: input.status,
-    ...(input.requestId === undefined
-      ? {}
-      : { instance: `urn:servir:request:${input.requestId}` }),
-    ...(input.correlationId === undefined
-      ? {}
-      : { correlationId: input.correlationId }),
+    ...(input.requestId === undefined ? {} : { instance: `urn:servir:request:${input.requestId}` }),
+    ...(input.correlationId === undefined ? {} : { correlationId: input.correlationId }),
   });
 }
 
@@ -87,15 +76,15 @@ export function createValidationProblemDetails(
       requestId: input.requestId,
       correlationId: input.correlationId,
     }),
-    errors: Object.freeze(input.errors.map((error) => Object.freeze({
-      code: error.code,
-      detail: error.message,
-      ...(error.field === undefined
-        ? {}
-        : { pointer: fieldPointer(error.field) }),
-      ...(error.parameters === undefined
-        ? {}
-        : { parameters: error.parameters }),
-    }))),
+    errors: Object.freeze(
+      input.errors.map((error) =>
+        Object.freeze({
+          code: error.code,
+          detail: error.message,
+          ...(error.field === undefined ? {} : { pointer: fieldPointer(error.field) }),
+          ...(error.parameters === undefined ? {} : { parameters: error.parameters }),
+        }),
+      ),
+    ),
   });
 }

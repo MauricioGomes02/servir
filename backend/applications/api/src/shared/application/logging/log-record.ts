@@ -1,8 +1,4 @@
-export {
-  createLogRecord,
-  LogLevels,
-  parseLogLevel,
-} from '@servir/application-foundation';
+export { createLogRecord, LogLevels, parseLogLevel } from '@servir/application-foundation';
 
 export type {
   LogAttributes,

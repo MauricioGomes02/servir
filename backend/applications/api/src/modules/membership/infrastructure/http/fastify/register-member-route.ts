@@ -22,24 +22,16 @@ export interface RegisterMemberRouteDependencies {
 }
 
 function organizationId(params: unknown): unknown {
-  return typeof params === 'object'
-    && params !== null
-    && 'organizationId' in params
+  return typeof params === 'object' && params !== null && 'organizationId' in params
     ? params.organizationId
     : undefined;
 }
 
 function memberName(body: unknown): unknown {
-  return typeof body === 'object'
-    && body !== null
-    && 'name' in body
-    ? body.name
-    : undefined;
+  return typeof body === 'object' && body !== null && 'name' in body ? body.name : undefined;
 }
 
-const organizationIdErrorCodes = new Set<string>(
-  Object.values(OrganizationIdErrorCodes),
-);
+const organizationIdErrorCodes = new Set<string>(Object.values(OrganizationIdErrorCodes));
 
 function problemMetadata(error: PresentedError): PresentedHttpProblem {
   if (organizationIdErrorCodes.has(error.code)) {
@@ -72,18 +64,16 @@ export function registerMemberRoute(
   app.post('/organizations/:organizationId/members', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
 
-    const result = await traceUseCase(
-      'RegisterMember',
-      () => dependencies.handler.handle({
-        organizationId: organizationId(request.params),
-        name: memberName(request.body),
-      }, context),
+    const result = await traceUseCase('RegisterMember', () =>
+      dependencies.handler.handle(
+        {
+          organizationId: organizationId(request.params),
+          name: memberName(request.body),
+        },
+        context,
+      ),
     );
-    const view = dependencies.presenter.present(
-      result,
-      context,
-      request.locale,
-    );
+    const view = dependencies.presenter.present(result, context, request.locale);
 
     if (view.kind === 'failure') {
       const problem = problemMetadata(view.error);

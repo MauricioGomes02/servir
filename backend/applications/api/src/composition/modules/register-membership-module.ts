@@ -1,7 +1,4 @@
-import {
-  GetMemberDetailsHandler,
-  RegisterMemberHandler,
-} from '@/modules/membership/application';
+import { GetMemberDetailsHandler, RegisterMemberHandler } from '@/modules/membership/application';
 import { MemberId, MemberRegistrationPolicy } from '@/modules/membership/domain';
 import {
   GetMemberDetailsPresenter,
@@ -18,34 +15,31 @@ export function registerMembershipModule(
   options: CreateApplicationOptions,
 ): void {
   container.register({
-    memberIdGenerator: asFunction(() => new UuidV7Generator(
-      MemberId.create,
-      options.uuidSource,
-    )).singleton(),
-    registerMemberHandler: asFunction((dependencies: ApplicationCradle) => (
-      new RegisterMemberHandler({
-        clock: dependencies.clock,
-        memberIdGenerator: dependencies.memberIdGenerator,
-        domainEventIdGenerator: dependencies.domainEventIdGenerator,
-        messageIdGenerator: dependencies.messageIdGenerator,
-        organizationRegistrationFacts:
-          dependencies.organizationRegistrationFacts,
-        registrationPolicy: new MemberRegistrationPolicy(),
-        unitOfWork: dependencies.memberUnitOfWork,
-        logger: dependencies.logger,
-      })
-    )).singleton(),
-    registerMemberPresenter: asFunction((dependencies: ApplicationCradle) => (
-      new RegisterMemberPresenter(dependencies.translator)
-    )).singleton(),
-    getMemberDetailsHandler: asFunction((dependencies: ApplicationCradle) => (
-      new GetMemberDetailsHandler(
-        dependencies.memberDetailsReader,
-        dependencies.logger,
-      )
-    )).singleton(),
-    getMemberDetailsPresenter: asFunction((dependencies: ApplicationCradle) => (
-      new GetMemberDetailsPresenter(dependencies.translator)
-    )).singleton(),
+    memberIdGenerator: asFunction(
+      () => new UuidV7Generator(MemberId.create, options.uuidSource),
+    ).singleton(),
+    registerMemberHandler: asFunction(
+      (dependencies: ApplicationCradle) =>
+        new RegisterMemberHandler({
+          clock: dependencies.clock,
+          memberIdGenerator: dependencies.memberIdGenerator,
+          domainEventIdGenerator: dependencies.domainEventIdGenerator,
+          messageIdGenerator: dependencies.messageIdGenerator,
+          organizationRegistrationFacts: dependencies.organizationRegistrationFacts,
+          registrationPolicy: new MemberRegistrationPolicy(),
+          unitOfWork: dependencies.memberUnitOfWork,
+          logger: dependencies.logger,
+        }),
+    ).singleton(),
+    registerMemberPresenter: asFunction(
+      (dependencies: ApplicationCradle) => new RegisterMemberPresenter(dependencies.translator),
+    ).singleton(),
+    getMemberDetailsHandler: asFunction(
+      (dependencies: ApplicationCradle) =>
+        new GetMemberDetailsHandler(dependencies.memberDetailsReader, dependencies.logger),
+    ).singleton(),
+    getMemberDetailsPresenter: asFunction(
+      (dependencies: ApplicationCradle) => new GetMemberDetailsPresenter(dependencies.translator),
+    ).singleton(),
   });
 }

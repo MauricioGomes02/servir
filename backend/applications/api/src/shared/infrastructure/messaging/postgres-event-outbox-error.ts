@@ -1,5 +1,4 @@
-export const PostgresEventOutboxErrorCode =
-  'postgres_event_outbox.add_failed' as const;
+export const PostgresEventOutboxErrorCode = 'postgres_event_outbox.add_failed' as const;
 
 export class PostgresEventOutboxError extends Error {
   readonly code = PostgresEventOutboxErrorCode;

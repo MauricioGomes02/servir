@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { FastifyRequestLogger } from './fastify-request-logger';
+import { type FastifyRequestLogger } from './fastify-request-logger';
 
 export function registerFastifyRequestLogging(
   app: FastifyInstance,

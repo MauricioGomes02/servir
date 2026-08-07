@@ -10,15 +10,9 @@ import {
 import { EntityId } from '@/shared/domain/entity';
 import { Instant } from '@/shared/domain/instant';
 
-import {
-  AggregateRoot,
-  DomainEventAcknowledgementError,
-} from '.';
+import { AggregateRoot, DomainEventAcknowledgementError } from '.';
 
-type NameChanged = DomainEvent<
-  'test.name_changed',
-  Readonly<{ name: string }>
->;
+type NameChanged = DomainEvent<'test.name_changed', Readonly<{ name: string }>>;
 
 class TestAggregateId extends EntityId<'TestAggregateId'> {
   static create(value: string): TestAggregateId {
@@ -26,34 +20,25 @@ class TestAggregateId extends EntityId<'TestAggregateId'> {
   }
 }
 
-class TestAggregate extends AggregateRoot<
-  TestAggregateId,
-  { name: string },
-  NameChanged
-> {
+class TestAggregate extends AggregateRoot<TestAggregateId, { name: string }, NameChanged> {
   static create(): TestAggregate {
-    return new TestAggregate(
-      TestAggregateId.create('aggregate-123'),
-      { name: 'initial' },
-    );
+    return new TestAggregate(TestAggregateId.create('aggregate-123'), { name: 'initial' });
   }
 
-  changeName(
-    name: string,
-    eventId: DomainEventId,
-    occurredAt: Instant,
-  ): boolean {
+  changeName(name: string, eventId: DomainEventId, occurredAt: Instant): boolean {
     if (name.trim().length === 0) {
       return false;
     }
 
     this.props.name = name;
-    this.recordDomainEvent(createDomainEvent({
-      eventId,
-      name: 'test.name_changed',
-      occurredAt,
-      payload: { name },
-    }));
+    this.recordDomainEvent(
+      createDomainEvent({
+        eventId,
+        name: 'test.name_changed',
+        occurredAt,
+        payload: { name },
+      }),
+    );
 
     return true;
   }
@@ -64,9 +49,7 @@ function eventMetadata(eventIdInput: string): Readonly<{
   occurredAt: Instant;
 }> {
   const eventId = parseDomainEventId(eventIdInput);
-  const occurredAt = Instant.create(
-    '2026-07-27T15:00:00.000Z',
-  );
+  const occurredAt = Instant.create('2026-07-27T15:00:00.000Z');
 
   assert.equal(eventId.success, true);
   assert.equal(occurredAt.success, true);
@@ -86,29 +69,18 @@ describe('AggregateRoot', () => {
     const aggregate = TestAggregate.create();
     const metadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
 
-    const changed = aggregate.changeName(
-      'changed',
-      metadata.eventId,
-      metadata.occurredAt,
-    );
+    const changed = aggregate.changeName('changed', metadata.eventId, metadata.occurredAt);
 
     assert.equal(changed, true);
     assert.equal(aggregate.pendingDomainEvents.length, 1);
-    assert.deepEqual(
-      aggregate.pendingDomainEvents[0]?.payload,
-      { name: 'changed' },
-    );
+    assert.deepEqual(aggregate.pendingDomainEvents[0]?.payload, { name: 'changed' });
   });
 
   it('does not record an event when the change fails', () => {
     const aggregate = TestAggregate.create();
     const metadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
 
-    const changed = aggregate.changeName(
-      '   ',
-      metadata.eventId,
-      metadata.occurredAt,
-    );
+    const changed = aggregate.changeName('   ', metadata.eventId, metadata.occurredAt);
 
     assert.equal(changed, false);
     assert.deepEqual(aggregate.pendingDomainEvents, []);
@@ -119,17 +91,9 @@ describe('AggregateRoot', () => {
     const firstMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
     const secondMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
 
-    aggregate.changeName(
-      'first',
-      firstMetadata.eventId,
-      firstMetadata.occurredAt,
-    );
+    aggregate.changeName('first', firstMetadata.eventId, firstMetadata.occurredAt);
     const snapshot = aggregate.pendingDomainEvents;
-    aggregate.changeName(
-      'second',
-      secondMetadata.eventId,
-      secondMetadata.occurredAt,
-    );
+    aggregate.changeName('second', secondMetadata.eventId, secondMetadata.occurredAt);
 
     assert.equal(Object.isFrozen(snapshot), true);
     assert.deepEqual(
@@ -148,22 +112,10 @@ describe('AggregateRoot', () => {
     const secondMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
     const thirdMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
 
-    aggregate.changeName(
-      'first',
-      firstMetadata.eventId,
-      firstMetadata.occurredAt,
-    );
-    aggregate.changeName(
-      'second',
-      secondMetadata.eventId,
-      secondMetadata.occurredAt,
-    );
+    aggregate.changeName('first', firstMetadata.eventId, firstMetadata.occurredAt);
+    aggregate.changeName('second', secondMetadata.eventId, secondMetadata.occurredAt);
     const persistedEvents = aggregate.pendingDomainEvents;
-    aggregate.changeName(
-      'third',
-      thirdMetadata.eventId,
-      thirdMetadata.occurredAt,
-    );
+    aggregate.changeName('third', thirdMetadata.eventId, thirdMetadata.occurredAt);
 
     aggregate.acknowledgeDomainEvents(persistedEvents);
 
@@ -178,17 +130,9 @@ describe('AggregateRoot', () => {
     const firstMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
     const secondMetadata = eventMetadata('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
 
-    aggregate.changeName(
-      'first',
-      firstMetadata.eventId,
-      firstMetadata.occurredAt,
-    );
+    aggregate.changeName('first', firstMetadata.eventId, firstMetadata.occurredAt);
     const firstEvent = aggregate.pendingDomainEvents[0];
-    aggregate.changeName(
-      'second',
-      secondMetadata.eventId,
-      secondMetadata.occurredAt,
-    );
+    aggregate.changeName('second', secondMetadata.eventId, secondMetadata.occurredAt);
     const secondEvent = aggregate.pendingDomainEvents[1];
 
     assert.ok(firstEvent);
@@ -197,19 +141,13 @@ describe('AggregateRoot', () => {
     assert.throws(
       () => aggregate.acknowledgeDomainEvents([secondEvent]),
       (error: unknown) => {
-        assert.equal(
-          error instanceof DomainEventAcknowledgementError,
-          true,
-        );
+        assert.equal(error instanceof DomainEventAcknowledgementError, true);
 
         if (!(error instanceof DomainEventAcknowledgementError)) {
           return false;
         }
 
-        assert.equal(
-          error.code,
-          'aggregate_root.domain_events.acknowledgement_mismatch',
-        );
+        assert.equal(error.code, 'aggregate_root.domain_events.acknowledgement_mismatch');
         assert.equal(error.pendingCount, 2);
         assert.equal(error.acknowledgementCount, 1);
 

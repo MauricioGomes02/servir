@@ -1,3 +1,1 @@
-export type {
-  MemberRegisteredIntegrationEventV1,
-} from './member-registered-integration-event';
+export type { MemberRegisteredIntegrationEventV1 } from './member-registered-integration-event';

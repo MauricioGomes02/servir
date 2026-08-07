@@ -4,10 +4,7 @@ export {
   HttpProblemTypes,
 } from './http-problem-details';
 
-export {
-  httpProblemMessageCatalog,
-  HttpProblemMessageCodes,
-} from './http-problem-message-catalog';
+export { httpProblemMessageCatalog, HttpProblemMessageCodes } from './http-problem-message-catalog';
 
 export type {
   HttpProblemDetails,

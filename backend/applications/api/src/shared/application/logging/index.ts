@@ -1,12 +1,6 @@
-export {
-  createLogRecord,
-  LogLevels,
-  parseLogLevel,
-} from './log-record';
+export { createLogRecord, LogLevels, parseLogLevel } from './log-record';
 
-export type {
-  Logger,
-} from './logger';
+export type { Logger } from './logger';
 
 export type {
   LogAttributes,

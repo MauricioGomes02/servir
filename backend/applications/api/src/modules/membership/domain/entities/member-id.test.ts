@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  MemberId,
-  MemberIdErrorCodes,
-} from '.';
+import { MemberId, MemberIdErrorCodes } from '.';
 
 describe('MemberId', () => {
   const UUID_V7 = '0198f334-6dc5-7c20-9af1-91d7e599d7b1';

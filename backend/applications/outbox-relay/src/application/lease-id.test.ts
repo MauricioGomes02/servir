@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createLeaseId,
-  LeaseIdError,
-  LeaseIdErrorCodes,
-} from './lease-id';
+import { createLeaseId, LeaseIdError, LeaseIdErrorCodes } from './lease-id';
 
 describe('LeaseId', () => {
   it('accepts a canonical UUIDv7 identity', () => {
@@ -18,8 +14,8 @@ describe('LeaseId', () => {
     for (const value of [undefined, '', 'lease-1', '0198F334-6DC5-7C20-9AF1-91D7E599C001']) {
       assert.throws(
         () => createLeaseId(value),
-        (error: unknown) => error instanceof LeaseIdError
-          && error.code === LeaseIdErrorCodes.Invalid,
+        (error: unknown) =>
+          error instanceof LeaseIdError && error.code === LeaseIdErrorCodes.Invalid,
       );
     }
   });
@@ -27,8 +23,7 @@ describe('LeaseId', () => {
   it('rejects a canonical UUID from another version', () => {
     assert.throws(
       () => createLeaseId('550e8400-e29b-41d4-a716-446655440000'),
-      (error: unknown) => error instanceof LeaseIdError
-        && error.code === LeaseIdErrorCodes.Invalid,
+      (error: unknown) => error instanceof LeaseIdError && error.code === LeaseIdErrorCodes.Invalid,
     );
   });
 });

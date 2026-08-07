@@ -1,9 +1,6 @@
 import type { CorrelationId } from '@/shared/application/context';
 
-import {
-  createLogRecord,
-  type LogContext,
-} from '.';
+import { createLogRecord, type LogContext } from '.';
 
 declare const correlationId: CorrelationId;
 

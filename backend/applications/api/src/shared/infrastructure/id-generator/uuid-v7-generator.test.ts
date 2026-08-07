@@ -4,20 +4,13 @@ import { describe, it } from 'node:test';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { failure } from '@/shared/core/result';
 
-import {
-  UuidV7Generator,
-  UuidV7GeneratorError,
-  UuidV7GeneratorErrorCodes,
-} from '.';
+import { UuidV7Generator, UuidV7GeneratorError, UuidV7GeneratorErrorCodes } from '.';
 
 const UUID_V7 = '0198f334-6dc5-7c20-9af1-91d7e599c7b1';
 
 describe('UuidV7Generator', () => {
   it('produces a typed identity through the configured factory', () => {
-    const generator = new UuidV7Generator(
-      OrganizationId.create,
-      () => UUID_V7,
-    );
+    const generator = new UuidV7Generator(OrganizationId.create, () => UUID_V7);
 
     const id = generator.generate();
 
@@ -26,12 +19,9 @@ describe('UuidV7Generator', () => {
 
   it('classifies and preserves a source failure', () => {
     const sourceFailure = new Error('entropy unavailable');
-    const generator = new UuidV7Generator(
-      OrganizationId.create,
-      () => {
-        throw sourceFailure;
-      },
-    );
+    const generator = new UuidV7Generator(OrganizationId.create, () => {
+      throw sourceFailure;
+    });
 
     assert.throws(
       () => generator.generate(),
@@ -94,10 +84,7 @@ describe('UuidV7Generator', () => {
           return false;
         }
 
-        assert.equal(
-          error.code,
-          UuidV7GeneratorErrorCodes.GeneratedIdRejected,
-        );
+        assert.equal(error.code, UuidV7GeneratorErrorCodes.GeneratedIdRejected);
         assert.deepEqual(error.cause, rejection);
 
         return true;

@@ -1,6 +1,11 @@
 import type { Result } from '@/shared/core/result';
 import type { OrganizationId } from '@/modules/organizations/domain';
-import type { Ministry, MinistryActiveNameConflictError, MinistryId, MinistryRoleDefinitionError } from '../../../domain';
+import type {
+  Ministry,
+  MinistryActiveNameConflictError,
+  MinistryId,
+  MinistryRoleDefinitionError,
+} from '../../../domain';
 
 export interface MinistryRepository {
   add(ministry: Ministry): Promise<Result<void, MinistryActiveNameConflictError>>;

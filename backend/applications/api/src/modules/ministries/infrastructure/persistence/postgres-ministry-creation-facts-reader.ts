@@ -9,7 +9,10 @@ export class PostgresMinistryCreationFactsReader implements MinistryCreationFact
 
   async find(organizationId: OrganizationId, name: MinistryName) {
     try {
-      const result = await this.pool.query<{ organization_exists: boolean; active_name_exists: boolean }>(
+      const result = await this.pool.query<{
+        organization_exists: boolean;
+        active_name_exists: boolean;
+      }>(
         `SELECT
            EXISTS (SELECT 1 FROM organizations WHERE id = $1) AS organization_exists,
            EXISTS (

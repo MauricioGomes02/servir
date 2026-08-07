@@ -12,13 +12,9 @@ import { Instant } from '@/shared/domain/instant';
 import { mapOrganizationCreatedIntegrationEvent } from './map-organization-created-integration-event';
 
 function organizationCreated() {
-  const eventId = parseDomainEventId(
-    '0198f334-6dc5-7c20-9af1-91d7e599e001',
-  );
+  const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e001');
   const occurredAt = Instant.create('2026-07-29T15:00:00.000Z');
-  const organizationId = OrganizationId.create(
-    '0198f334-6dc5-7c20-9af1-91d7e599e002',
-  );
+  const organizationId = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599e002');
   const name = OrganizationName.create('Community Servir');
 
   assert.equal(eventId.success, true);
@@ -26,12 +22,7 @@ function organizationCreated() {
   assert.equal(organizationId.success, true);
   assert.equal(name.success, true);
 
-  if (
-    !eventId.success
-    || !occurredAt.success
-    || !organizationId.success
-    || !name.success
-  ) {
+  if (!eventId.success || !occurredAt.success || !organizationId.success || !name.success) {
     throw new Error('Invalid deterministic integration event fixture');
   }
 

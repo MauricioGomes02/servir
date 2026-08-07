@@ -1,5 +1,4 @@
-export const IntegrationEventPublicationErrorCode =
-  'integration_event.publish_failed' as const;
+export const IntegrationEventPublicationErrorCode = 'integration_event.publish_failed' as const;
 
 export class IntegrationEventPublicationError extends Error {
   readonly code: string;

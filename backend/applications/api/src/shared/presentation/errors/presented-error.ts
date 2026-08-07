@@ -1,12 +1,6 @@
 import type { ExecutionContext } from '@/shared/application/context';
-import type {
-  NotificationError,
-  NotificationErrorParams,
-} from '@/shared/domain/notification';
-import type {
-  MessageTranslator,
-  SupportedLocale,
-} from '@/shared/presentation/localization';
+import type { NotificationError, NotificationErrorParams } from '@/shared/domain/notification';
+import type { MessageTranslator, SupportedLocale } from '@/shared/presentation/localization';
 
 export interface PresentedError {
   readonly code: string;
@@ -30,9 +24,7 @@ export function presentError(
       parameters: error.params,
     }),
     field: error.field,
-    parameters: error.params
-      ? Object.freeze({ ...error.params })
-      : undefined,
+    parameters: error.params ? Object.freeze({ ...error.params }) : undefined,
     correlationId: context.correlationId,
   });
 }

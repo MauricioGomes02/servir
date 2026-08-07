@@ -9,6 +9,4 @@ export const OrganizationNameErrorCodes = {
 export type OrganizationNameErrorCode =
   (typeof OrganizationNameErrorCodes)[keyof typeof OrganizationNameErrorCodes];
 
-export type OrganizationNameError = NotificationError<
-  OrganizationNameErrorCode
->;
+export type OrganizationNameError = NotificationError<OrganizationNameErrorCode>;

@@ -14,17 +14,17 @@ export class InMemoryMemberDetailsReader implements MemberDetailsReader {
     memberId: MemberId,
   ): Promise<MemberDetails | undefined> {
     const member = this.members().find(
-      (candidate) => candidate.id.equals(memberId)
-        && candidate.organizationId.equals(organizationId),
+      (candidate) =>
+        candidate.id.equals(memberId) && candidate.organizationId.equals(organizationId),
     );
 
     return member === undefined
       ? undefined
       : createMemberDetails({
-        id: member.id,
-        organizationId: member.organizationId,
-        name: member.name.toString(),
-        status: member.status,
-      });
+          id: member.id,
+          organizationId: member.organizationId,
+          name: member.name.toString(),
+          status: member.status,
+        });
   }
 }

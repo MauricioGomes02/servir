@@ -1,15 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createExecutionContext,
-  parseCorrelationId,
-} from '@/shared/application/context';
+import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 
-import {
-  HttpExecutionContextUnavailableError,
-  requireHttpExecutionContext,
-} from '.';
+import { HttpExecutionContextUnavailableError, requireHttpExecutionContext } from '.';
 
 describe('requireHttpExecutionContext', () => {
   it('preserves an execution context created at the HTTP boundary', () => {
@@ -31,8 +25,9 @@ describe('requireHttpExecutionContext', () => {
   it('classifies an unavailable execution context by stable code', () => {
     assert.throws(
       () => requireHttpExecutionContext(null),
-      (error: unknown) => error instanceof HttpExecutionContextUnavailableError
-        && error.code === 'http.execution_context_unavailable',
+      (error: unknown) =>
+        error instanceof HttpExecutionContextUnavailableError &&
+        error.code === 'http.execution_context_unavailable',
     );
   });
 });

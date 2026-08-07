@@ -1,24 +1,15 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  parseDomainEventId,
-} from '@/shared/domain/domain-event';
+import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 
-import {
-  Organization,
-  OrganizationId,
-} from '.';
+import { Organization, OrganizationId } from '.';
 import { OrganizationNameErrorCodes } from '../value-objects';
 
 function validMetadata() {
-  const id = OrganizationId.create(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
-  );
-  const eventId = parseDomainEventId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
-  );
+  const id = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+  const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
   const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 
   assert.equal(id.success, true);

@@ -4,5 +4,6 @@ export const MinistryRoleNameErrorCodes = {
   Empty: 'ministry_role.name.empty',
   TooLong: 'ministry_role.name.too_long',
 } as const;
-export type MinistryRoleNameErrorCode = (typeof MinistryRoleNameErrorCodes)[keyof typeof MinistryRoleNameErrorCodes];
+export type MinistryRoleNameErrorCode =
+  (typeof MinistryRoleNameErrorCodes)[keyof typeof MinistryRoleNameErrorCodes];
 export type MinistryRoleNameError = NotificationError<MinistryRoleNameErrorCode>;

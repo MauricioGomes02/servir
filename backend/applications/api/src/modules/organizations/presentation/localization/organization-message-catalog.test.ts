@@ -9,16 +9,11 @@ import { organizationMessageCatalog } from '.';
 
 describe('organizationMessageCatalog', () => {
   it('translates OrganizationName errors in supported locales', () => {
-    const translator = new InMemoryMessageTranslator(
-      organizationMessageCatalog,
-    );
+    const translator = new InMemoryMessageTranslator(organizationMessageCatalog);
 
     for (const locale of Object.values(SupportedLocales)) {
       for (const code of Object.values(OrganizationNameErrorCodes)) {
-        assert.equal(
-          Object.hasOwn(organizationMessageCatalog[locale], code),
-          true,
-        );
+        assert.equal(Object.hasOwn(organizationMessageCatalog[locale], code), true);
 
         const message = translator.translate({
           code,

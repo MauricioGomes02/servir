@@ -15,11 +15,7 @@ import {
 } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 
-import {
-  DuplicateEventSubscriptionError,
-  EventDispatchError,
-  InMemoryEventBus,
-} from '.';
+import { DuplicateEventSubscriptionError, EventDispatchError, InMemoryEventBus } from '.';
 
 type OrganizationCreated = DomainEvent<
   'organization.created',
@@ -27,15 +23,9 @@ type OrganizationCreated = DomainEvent<
 >;
 
 function envelope(): EventEnvelope<OrganizationCreated> {
-  const eventId = parseDomainEventId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
-  );
-  const occurredAt = Instant.create(
-    '2026-07-27T15:00:00.000Z',
-  );
-  const messageId = parseMessageId(
-    '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-  );
+  const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
+  const occurredAt = Instant.create('2026-07-27T15:00:00.000Z');
+  const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
   const correlationId = parseCorrelationId('correlation-123');
 
   assert.equal(eventId.success, true);
@@ -43,12 +33,7 @@ function envelope(): EventEnvelope<OrganizationCreated> {
   assert.equal(messageId.success, true);
   assert.equal(correlationId.success, true);
 
-  if (
-    !eventId.success
-    || !occurredAt.success
-    || !messageId.success
-    || !correlationId.success
-  ) {
+  if (!eventId.success || !occurredAt.success || !messageId.success || !correlationId.success) {
     throw new Error('Invalid deterministic test fixture');
   }
 
@@ -160,33 +145,27 @@ describe('InMemoryEventBus', () => {
       }),
     );
 
-    await assert.rejects(
-      bus.publish(envelope()),
-      (error: unknown) => {
-        assert.equal(error instanceof EventDispatchError, true);
+    await assert.rejects(bus.publish(envelope()), (error: unknown) => {
+      assert.equal(error instanceof EventDispatchError, true);
 
-        if (!(error instanceof EventDispatchError)) {
-          return false;
-        }
+      if (!(error instanceof EventDispatchError)) {
+        return false;
+      }
 
-        assert.equal(error.code, 'event.dispatch.failed');
-        assert.equal(error.eventName, 'organization.created');
-        assert.deepEqual(
-          error.failures.map((failure) => failure.handlerName),
-          [
-            'audit.organization_created',
-            'email.organization_created',
-          ],
-        );
-        assert.deepEqual(
-          error.failures.map((failure) => failure.cause),
-          [auditFailure, emailFailure],
-        );
-        assert.equal(Object.isFrozen(error.failures), true);
+      assert.equal(error.code, 'event.dispatch.failed');
+      assert.equal(error.eventName, 'organization.created');
+      assert.deepEqual(
+        error.failures.map((failure) => failure.handlerName),
+        ['audit.organization_created', 'email.organization_created'],
+      );
+      assert.deepEqual(
+        error.failures.map((failure) => failure.cause),
+        [auditFailure, emailFailure],
+      );
+      assert.equal(Object.isFrozen(error.failures), true);
 
-        return true;
-      },
-    );
+      return true;
+    });
 
     assert.deepEqual(handled, ['audit', 'log', 'email']);
   });
@@ -199,26 +178,14 @@ describe('InMemoryEventBus', () => {
 
   it('rejects a duplicate subscription for the same event and handler', () => {
     const bus = new InMemoryEventBus();
-    const auditHandler = handler(
-      'audit.organization_created',
-      async () => undefined,
-    );
+    const auditHandler = handler('audit.organization_created', async () => undefined);
 
-    bus.subscribe<OrganizationCreated>(
-      'organization.created',
-      auditHandler,
-    );
+    bus.subscribe<OrganizationCreated>('organization.created', auditHandler);
 
     assert.throws(
-      () => bus.subscribe<OrganizationCreated>(
-        'organization.created',
-        auditHandler,
-      ),
+      () => bus.subscribe<OrganizationCreated>('organization.created', auditHandler),
       (error: unknown) => {
-        assert.equal(
-          error instanceof DuplicateEventSubscriptionError,
-          true,
-        );
+        assert.equal(error instanceof DuplicateEventSubscriptionError, true);
 
         if (!(error instanceof DuplicateEventSubscriptionError)) {
           return false;

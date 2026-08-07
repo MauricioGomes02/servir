@@ -15,9 +15,7 @@ export interface StructuredCloudEvent {
   readonly data: JsonObject;
 }
 
-export function mapToStructuredCloudEvent(
-  message: ClaimedOutboxMessage,
-): StructuredCloudEvent {
+export function mapToStructuredCloudEvent(message: ClaimedOutboxMessage): StructuredCloudEvent {
   return Object.freeze({
     specversion: '1.0',
     id: message.messageId,

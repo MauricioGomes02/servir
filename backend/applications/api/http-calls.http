@@ -4,11 +4,11 @@ Content-Type: application/json
 Accept-Language: pt-BR
 
 {
-  "name": "Igreja Batista Filadélfia de Canoas"
+  "name": "Igreja Batista Filadélfia de Canoass"
 }
 
 ### Register a member in an organization
-POST http://localhost:3000/organizations/{{organizationId}}/members
+POST http://localhost:3000/organizations/019fd31b-be64-75fa-a885-f241294b1563/members
 Content-Type: application/json
 Accept-Language: pt-BR
 
@@ -17,5 +17,5 @@ Accept-Language: pt-BR
 }
 
 ### Get member details
-GET http://localhost:3000/organizations/{{organizationId}}/members/{{memberId}}
+GET http://localhost:3000/organizations/019fd31b-be64-75fa-a885-f241294b1563/members/019fd31c-29d1-732d-8e16-d9f2a4ec2f5d
 Accept-Language: pt-BR

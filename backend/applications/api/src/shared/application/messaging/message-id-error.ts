@@ -5,8 +5,7 @@ export const MessageIdErrorCodes = {
   InvalidFormat: 'message_id.invalid_format',
 } as const;
 
-export type MessageIdErrorCode =
-  (typeof MessageIdErrorCodes)[keyof typeof MessageIdErrorCodes];
+export type MessageIdErrorCode = (typeof MessageIdErrorCodes)[keyof typeof MessageIdErrorCodes];
 
 export interface MessageIdError {
   readonly code: MessageIdErrorCode;

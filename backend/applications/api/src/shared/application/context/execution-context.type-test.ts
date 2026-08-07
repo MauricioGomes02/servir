@@ -1,7 +1,4 @@
-import type {
-  CorrelationId,
-  RequestId,
-} from '.';
+import type { CorrelationId, RequestId } from '.';
 
 declare const correlationId: CorrelationId;
 

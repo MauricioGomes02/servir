@@ -1,7 +1,4 @@
-import {
-  parseCorrelationId,
-  parseRequestId,
-} from '@/shared/application/context';
+import { parseCorrelationId, parseRequestId } from '@/shared/application/context';
 import { parseMessageId } from '@/shared/application/messaging';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { SystemClock } from '@/shared/infrastructure/clock';
@@ -24,35 +21,34 @@ export function registerCoreDependencies(
   container.register({
     logger: asValue(options.logger ?? new JsonStdoutLogger()),
     clock: asFunction(() => new SystemClock()).singleton(),
-    translator: asFunction(() => new InMemoryMessageTranslator({
-      'pt-BR': {
-        ...httpProblemMessageCatalog['pt-BR'],
-        ...membershipMessageCatalog['pt-BR'],
-        ...ministryMessageCatalog['pt-BR'],
-        ...organizationMessageCatalog['pt-BR'],
-      },
-      'en-US': {
-        ...httpProblemMessageCatalog['en-US'],
-        ...membershipMessageCatalog['en-US'],
-        ...ministryMessageCatalog['en-US'],
-        ...organizationMessageCatalog['en-US'],
-      },
-    })).singleton(),
-    domainEventIdGenerator: asFunction(() => new UuidV7Generator(
-      parseDomainEventId,
-      options.uuidSource,
-    )).singleton(),
-    messageIdGenerator: asFunction(() => new UuidV7Generator(
-      parseMessageId,
-      options.uuidSource,
-    )).singleton(),
-    requestIdGenerator: asFunction(() => new UuidV7Generator(
-      parseRequestId,
-      options.uuidSource,
-    )).singleton(),
-    correlationIdGenerator: asFunction(() => new UuidV7Generator(
-      parseCorrelationId,
-      options.uuidSource,
-    )).singleton(),
+    translator: asFunction(
+      () =>
+        new InMemoryMessageTranslator({
+          'pt-BR': {
+            ...httpProblemMessageCatalog['pt-BR'],
+            ...membershipMessageCatalog['pt-BR'],
+            ...ministryMessageCatalog['pt-BR'],
+            ...organizationMessageCatalog['pt-BR'],
+          },
+          'en-US': {
+            ...httpProblemMessageCatalog['en-US'],
+            ...membershipMessageCatalog['en-US'],
+            ...ministryMessageCatalog['en-US'],
+            ...organizationMessageCatalog['en-US'],
+          },
+        }),
+    ).singleton(),
+    domainEventIdGenerator: asFunction(
+      () => new UuidV7Generator(parseDomainEventId, options.uuidSource),
+    ).singleton(),
+    messageIdGenerator: asFunction(
+      () => new UuidV7Generator(parseMessageId, options.uuidSource),
+    ).singleton(),
+    requestIdGenerator: asFunction(
+      () => new UuidV7Generator(parseRequestId, options.uuidSource),
+    ).singleton(),
+    correlationIdGenerator: asFunction(
+      () => new UuidV7Generator(parseCorrelationId, options.uuidSource),
+    ).singleton(),
   });
 }

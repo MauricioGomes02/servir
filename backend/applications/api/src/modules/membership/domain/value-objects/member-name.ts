@@ -1,14 +1,7 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 import { ValueObject } from '@/shared/domain/value-object';
 
-import {
-  MemberNameErrorCodes,
-  type MemberNameError,
-} from './member-name-error';
+import { MemberNameErrorCodes, type MemberNameError } from './member-name-error';
 
 const MAX_MEMBER_NAME_LENGTH = 120;
 
@@ -16,10 +9,7 @@ interface MemberNameProps {
   readonly value: string;
 }
 
-export class MemberName extends ValueObject<
-  MemberNameProps,
-  'MemberName'
-> {
+export class MemberName extends ValueObject<MemberNameProps, 'MemberName'> {
   private constructor(value: string) {
     super({ value });
     Object.freeze(this);

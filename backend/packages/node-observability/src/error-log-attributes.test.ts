@@ -9,21 +9,27 @@ describe('createErrorLogAttributes', () => {
       code: 'database.connection.failed',
     });
 
-    assert.deepEqual(createErrorLogAttributes(error, {
-      fallbackCode: 'service.failed',
-    }), {
-      'error.type': 'Error',
-      'error.code': 'database.connection.failed',
-    });
+    assert.deepEqual(
+      createErrorLogAttributes(error, {
+        fallbackCode: 'service.failed',
+      }),
+      {
+        'error.type': 'Error',
+        'error.code': 'database.connection.failed',
+      },
+    );
   });
 
   it('uses the application fallback for unknown failures', () => {
-    assert.deepEqual(createErrorLogAttributes('failure', {
-      fallbackCode: 'service.failed',
-    }), {
-      'error.type': 'string',
-      'error.code': 'service.failed',
-    });
+    assert.deepEqual(
+      createErrorLogAttributes('failure', {
+        fallbackCode: 'service.failed',
+      }),
+      {
+        'error.type': 'string',
+        'error.code': 'service.failed',
+      },
+    );
   });
 
   it('includes message and stack only when explicitly enabled', () => {

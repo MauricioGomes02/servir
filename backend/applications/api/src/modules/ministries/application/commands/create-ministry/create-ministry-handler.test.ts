@@ -10,8 +10,16 @@ import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
-import { MinistryCreationPolicy, MinistryCreationPolicyErrorCodes, MinistryId, MinistryName } from '../../../domain';
-import { InMemoryMinistryCreationFactsReader, InMemoryMinistryRepository } from '../../../infrastructure';
+import {
+  MinistryCreationPolicy,
+  MinistryCreationPolicyErrorCodes,
+  MinistryId,
+  MinistryName,
+} from '../../../domain';
+import {
+  InMemoryMinistryCreationFactsReader,
+  InMemoryMinistryRepository,
+} from '../../../infrastructure';
 import { CreateMinistryHandler } from '.';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {
@@ -29,10 +37,14 @@ function fixture(organizationExists = true) {
   const handler = new CreateMinistryHandler({
     clock: new FixedClock(value(Instant.create('2026-08-06T12:00:00.000Z'))),
     ministryIdGenerator: new SequenceIdGenerator([ministryId]),
-    domainEventIdGenerator: new SequenceIdGenerator([value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e012'))]),
-    messageIdGenerator: new SequenceIdGenerator([value(parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599e013'))]),
+    domainEventIdGenerator: new SequenceIdGenerator([
+      value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e012')),
+    ]),
+    messageIdGenerator: new SequenceIdGenerator([
+      value(parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599e013')),
+    ]),
     creationFacts: new InMemoryMinistryCreationFactsReader(
-      () => organizationExists ? [organizationId] : [],
+      () => (organizationExists ? [organizationId] : []),
       () => ministries.ministries,
     ),
     creationPolicy: new MinistryCreationPolicy(),
@@ -40,15 +52,25 @@ function fixture(organizationExists = true) {
     logger,
   });
   return {
-    handler, organizationId, ministryId, ministries, outbox, logger,
-    context: createExecutionContext({ correlationId: value(parseCorrelationId('correlation-123')) }),
+    handler,
+    organizationId,
+    ministryId,
+    ministries,
+    outbox,
+    logger,
+    context: createExecutionContext({
+      correlationId: value(parseCorrelationId('correlation-123')),
+    }),
   };
 }
 
 describe('CreateMinistryHandler', () => {
   it('persists the active ministry and envelope in the same scope', async () => {
     const f = fixture();
-    const result = await f.handler.handle({ organizationId: f.organizationId.toString(), name: 'Louvor' }, f.context);
+    const result = await f.handler.handle(
+      { organizationId: f.organizationId.toString(), name: 'Louvor' },
+      f.context,
+    );
     assert.equal(result.success, true);
     assert.equal(f.ministries.ministries.length, 1);
     assert.equal(f.outbox.envelopes.length, 1);
@@ -59,21 +81,32 @@ describe('CreateMinistryHandler', () => {
 
   it('rejects an unknown organization without persistence', async () => {
     const f = fixture(false);
-    const result = await f.handler.handle({ organizationId: f.organizationId.toString(), name: 'Louvor' }, f.context);
+    const result = await f.handler.handle(
+      { organizationId: f.organizationId.toString(), name: 'Louvor' },
+      f.context,
+    );
     assert.equal(result.success, false);
-    if (!result.success) assert.equal(result.error.code, MinistryCreationPolicyErrorCodes.OrganizationNotFound);
+    if (!result.success)
+      assert.equal(result.error.code, MinistryCreationPolicyErrorCodes.OrganizationNotFound);
     assert.equal(f.ministries.ministries.length, 0);
     assert.equal(f.outbox.envelopes.length, 0);
   });
 
   it('reports an existing active name ignoring case without a second envelope', async () => {
     const f = fixture();
-    await f.handler.handle({ organizationId: f.organizationId.toString(), name: 'Louvor' }, f.context);
-    const facts = new InMemoryMinistryCreationFactsReader(() => [f.organizationId], () => f.ministries.ministries);
+    await f.handler.handle(
+      { organizationId: f.organizationId.toString(), name: 'Louvor' },
+      f.context,
+    );
+    const facts = new InMemoryMinistryCreationFactsReader(
+      () => [f.organizationId],
+      () => f.ministries.ministries,
+    );
     const duplicateFacts = await facts.find(f.organizationId, value(MinistryName.create('louvor')));
     const decision = new MinistryCreationPolicy().evaluate(duplicateFacts);
     assert.equal(decision.success, false);
-    if (!decision.success) assert.equal(decision.error.code, MinistryCreationPolicyErrorCodes.ActiveNameAlreadyExists);
+    if (!decision.success)
+      assert.equal(decision.error.code, MinistryCreationPolicyErrorCodes.ActiveNameAlreadyExists);
     assert.equal(f.outbox.envelopes.length, 1);
   });
 });

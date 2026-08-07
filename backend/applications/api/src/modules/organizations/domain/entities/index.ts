@@ -1,20 +1,9 @@
-export {
-  Organization,
-} from './organization';
+export { Organization } from './organization';
 
-export {
-  OrganizationId,
-} from './organization-id';
+export { OrganizationId } from './organization-id';
 
-export {
-  OrganizationIdErrorCodes,
-} from './organization-id-error';
+export { OrganizationIdErrorCodes } from './organization-id-error';
 
-export type {
-  CreateOrganizationProps,
-} from './organization';
+export type { CreateOrganizationProps } from './organization';
 
-export type {
-  OrganizationIdError,
-  OrganizationIdErrorCode,
-} from './organization-id-error';
+export type { OrganizationIdError, OrganizationIdErrorCode } from './organization-id-error';

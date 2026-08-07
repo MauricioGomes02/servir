@@ -9,17 +9,15 @@ describe('relay OpenTelemetry composition', () => {
     const telemetry = startOpenTelemetry({
       environment: {},
       sdkFactory: (instrumentations) => {
-        instrumentationNames = instrumentations.flat().map(
-          (instrumentation) => instrumentation.instrumentationName,
-        );
+        instrumentationNames = instrumentations
+          .flat()
+          .map((instrumentation) => instrumentation.instrumentationName);
         return { start() {}, async shutdown() {} };
       },
     });
 
     await telemetry.shutdown();
 
-    assert.deepEqual(instrumentationNames, [
-      '@opentelemetry/instrumentation-pg',
-    ]);
+    assert.deepEqual(instrumentationNames, ['@opentelemetry/instrumentation-pg']);
   });
 });

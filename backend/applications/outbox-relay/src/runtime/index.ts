@@ -1,8 +1,4 @@
-export {
-  OutboxRelayWorker,
-  RelayWorkerErrorCode,
-  waitForDelay,
-} from './outbox-relay-worker';
+export { OutboxRelayWorker, RelayWorkerErrorCode, waitForDelay } from './outbox-relay-worker';
 export type {
   OutboxBatchProcessor,
   OutboxRelayWorkerDependencies,

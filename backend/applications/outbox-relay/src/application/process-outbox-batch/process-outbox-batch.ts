@@ -33,18 +33,13 @@ export interface ProcessOutboxBatchDependencies {
 }
 
 const noOpTelemetry: RelayTelemetry = {
-  traceBatch: async <T>(
-    operation: () => Promise<T>,
-    completed?: (result: T) => void,
-  ) => {
+  traceBatch: async <T>(operation: () => Promise<T>, completed?: (result: T) => void) => {
     const result = await operation();
     completed?.(result);
     return result;
   },
-  traceMessage: async <T>(
-    _message: ClaimedOutboxMessage,
-    operation: () => Promise<T>,
-  ) => operation(),
+  traceMessage: async <T>(_message: ClaimedOutboxMessage, operation: () => Promise<T>) =>
+    operation(),
   addEvent: () => undefined,
   setAttributes: () => undefined,
 };
@@ -52,23 +47,16 @@ const noOpTelemetry: RelayTelemetry = {
 export class ProcessOutboxBatch {
   private readonly telemetry: RelayTelemetry;
 
-  constructor(
-    private readonly dependencies: ProcessOutboxBatchDependencies,
-  ) {
+  constructor(private readonly dependencies: ProcessOutboxBatchDependencies) {
     this.telemetry = dependencies.telemetry ?? noOpTelemetry;
 
-    if (
-      !Number.isInteger(dependencies.batchSize)
-      || dependencies.batchSize <= 0
-    ) {
-      throw new ProcessOutboxBatchConfigError(
-        ProcessOutboxBatchConfigErrorCodes.InvalidBatchSize,
-      );
+    if (!Number.isInteger(dependencies.batchSize) || dependencies.batchSize <= 0) {
+      throw new ProcessOutboxBatchConfigError(ProcessOutboxBatchConfigErrorCodes.InvalidBatchSize);
     }
 
     if (
-      !Number.isInteger(dependencies.leaseDurationMilliseconds)
-      || dependencies.leaseDurationMilliseconds <= 0
+      !Number.isInteger(dependencies.leaseDurationMilliseconds) ||
+      dependencies.leaseDurationMilliseconds <= 0
     ) {
       throw new ProcessOutboxBatchConfigError(
         ProcessOutboxBatchConfigErrorCodes.InvalidLeaseDuration,

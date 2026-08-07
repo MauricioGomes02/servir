@@ -7,7 +7,6 @@ export const MemberIdErrorCodes = {
   InvalidFormat: 'member.id.invalid_format',
 } as const;
 
-export type MemberIdErrorCode =
-  (typeof MemberIdErrorCodes)[keyof typeof MemberIdErrorCodes];
+export type MemberIdErrorCode = (typeof MemberIdErrorCodes)[keyof typeof MemberIdErrorCodes];
 
 export type MemberIdError = NotificationError<MemberIdErrorCode>;

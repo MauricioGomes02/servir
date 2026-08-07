@@ -5,7 +5,9 @@ import { MinistryNameErrorCodes, type MinistryNameError } from './ministry-name-
 
 const MAX_MINISTRY_NAME_LENGTH = 120;
 
-interface MinistryNameProps { readonly value: string }
+interface MinistryNameProps {
+  readonly value: string;
+}
 
 export class MinistryName extends ValueObject<MinistryNameProps, 'MinistryName'> {
   private constructor(value: string) {
@@ -31,6 +33,10 @@ export class MinistryName extends ValueObject<MinistryNameProps, 'MinistryName'>
     return success(new MinistryName(value));
   }
 
-  toString(): string { return this.props.value; }
-  toJSON(): string { return this.props.value; }
+  toString(): string {
+    return this.props.value;
+  }
+  toJSON(): string {
+    return this.props.value;
+  }
 }

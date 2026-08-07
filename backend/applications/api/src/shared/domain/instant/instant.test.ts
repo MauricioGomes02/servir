@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  Instant,
-  InstantErrorCodes,
-} from '.';
+import { Instant, InstantErrorCodes } from '.';
 
 describe('Instant', () => {
   it('represents an absolute point in UTC without exposing Date', () => {

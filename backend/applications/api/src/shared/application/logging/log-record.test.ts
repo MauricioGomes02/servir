@@ -5,39 +5,25 @@ import { parseCorrelationId } from '@/shared/application/context';
 import { parseMessageId } from '@/shared/application/messaging';
 import { Instant } from '@/shared/domain/instant';
 
-import {
-  createLogRecord,
-  LogLevels,
-  type LogAttributeValue,
-} from '.';
+import { createLogRecord, LogLevels, type LogAttributeValue } from '.';
 
 function isLogAttributeObject(
   value: LogAttributeValue,
 ): value is { readonly [key: string]: LogAttributeValue } {
-  return value !== null
-    && typeof value === 'object'
-    && !Array.isArray(value);
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 describe('LogRecord', () => {
   it('preserves only the provided context and attributes', () => {
     const correlationId = parseCorrelationId('correlation-123');
-    const messageId = parseMessageId(
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-    );
-    const occurredAt = Instant.create(
-      '2026-07-27T15:00:00.000Z',
-    );
+    const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
+    const occurredAt = Instant.create('2026-07-27T15:00:00.000Z');
 
     assert.equal(correlationId.success, true);
     assert.equal(messageId.success, true);
     assert.equal(occurredAt.success, true);
 
-    if (
-      !correlationId.success
-      || !messageId.success
-      || !occurredAt.success
-    ) {
+    if (!correlationId.success || !messageId.success || !occurredAt.success) {
       return;
     }
 

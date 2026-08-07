@@ -1,7 +1,3 @@
-export type {
-  OrganizationRepository,
-} from './repositories';
+export type { OrganizationRepository } from './repositories';
 
-export type {
-  OrganizationWriteScope,
-} from './organization-write-scope';
+export type { OrganizationWriteScope } from './organization-write-scope';

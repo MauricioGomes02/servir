@@ -1,8 +1,5 @@
 import type { RegisterMemberOutput } from '@/modules/membership/application';
-import type {
-  MemberNameError,
-  MemberRegistrationPolicyError,
-} from '@/modules/membership/domain';
+import type { MemberNameError, MemberRegistrationPolicyError } from '@/modules/membership/domain';
 import type { OrganizationIdError } from '@/modules/organizations/domain';
 import type { ExecutionContext } from '@/shared/application/context';
 import type { Result } from '@/shared/core/result';
@@ -13,21 +10,21 @@ import {
   type SupportedLocale,
 } from '@/shared/presentation';
 
-type RegisterMemberError = OrganizationIdError
-  | MemberNameError
-  | MemberRegistrationPolicyError;
+type RegisterMemberError = OrganizationIdError | MemberNameError | MemberRegistrationPolicyError;
 
-export type RegisterMemberView = Readonly<{
-  kind: 'success';
-  resource: Readonly<{
-    id: string;
-    organizationId: string;
-    name: string;
-  }>;
-}> | Readonly<{
-  kind: 'failure';
-  error: PresentedError;
-}>;
+export type RegisterMemberView =
+  | Readonly<{
+      kind: 'success';
+      resource: Readonly<{
+        id: string;
+        organizationId: string;
+        name: string;
+      }>;
+    }>
+  | Readonly<{
+      kind: 'failure';
+      error: PresentedError;
+    }>;
 
 export class RegisterMemberPresenter {
   constructor(private readonly translator: MessageTranslator) {}

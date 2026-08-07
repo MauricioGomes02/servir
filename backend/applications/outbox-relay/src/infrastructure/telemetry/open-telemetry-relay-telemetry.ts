@@ -1,18 +1,6 @@
-import type {
-  ClaimedOutboxMessage,
-  RelayTelemetry,
-  RelayTraceAttribute,
-} from '@/application';
-import {
-  context,
-  ROOT_CONTEXT,
-  trace,
-  type Context,
-} from '@opentelemetry/api';
-import {
-  extractTraceContext,
-  runInSpan,
-} from '@servir/node-observability';
+import type { ClaimedOutboxMessage, RelayTelemetry, RelayTraceAttribute } from '@/application';
+import { context, ROOT_CONTEXT, trace, type Context } from '@opentelemetry/api';
+import { extractTraceContext, runInSpan } from '@servir/node-observability';
 
 const tracer = trace.getTracer('@servir/outbox-relay');
 function linkedContext(message: ClaimedOutboxMessage): Context | undefined {
@@ -24,10 +12,7 @@ function linkedContext(message: ClaimedOutboxMessage): Context | undefined {
 }
 
 export class OpenTelemetryRelayTelemetry implements RelayTelemetry {
-  traceBatch<T>(
-    operation: () => Promise<T>,
-    completed?: (result: T) => void,
-  ): Promise<T> {
+  traceBatch<T>(operation: () => Promise<T>, completed?: (result: T) => void): Promise<T> {
     return runInSpan(tracer, 'outbox.relay.batch', ROOT_CONTEXT, {}, async () => {
       const result = await operation();
 
@@ -41,14 +26,9 @@ export class OpenTelemetryRelayTelemetry implements RelayTelemetry {
     });
   }
 
-  traceMessage<T>(
-    message: ClaimedOutboxMessage,
-    operation: () => Promise<T>,
-  ): Promise<T> {
+  traceMessage<T>(message: ClaimedOutboxMessage, operation: () => Promise<T>): Promise<T> {
     const origin = linkedContext(message);
-    const originSpanContext = origin === undefined
-      ? undefined
-      : trace.getSpanContext(origin);
+    const originSpanContext = origin === undefined ? undefined : trace.getSpanContext(origin);
 
     return runInSpan(
       tracer,
@@ -61,24 +41,17 @@ export class OpenTelemetryRelayTelemetry implements RelayTelemetry {
           'servir.messaging.event_type': message.event.type,
           'servir.outbox.attempt': message.attemptCount,
         },
-        links: originSpanContext === undefined
-          ? []
-          : [{ context: originSpanContext }],
+        links: originSpanContext === undefined ? [] : [{ context: originSpanContext }],
       },
       operation,
     );
   }
 
-  addEvent(
-    name: string,
-    attributes?: Readonly<Record<string, RelayTraceAttribute>>,
-  ): void {
+  addEvent(name: string, attributes?: Readonly<Record<string, RelayTraceAttribute>>): void {
     trace.getActiveSpan()?.addEvent(name, attributes);
   }
 
-  setAttributes(
-    attributes: Readonly<Record<string, RelayTraceAttribute>>,
-  ): void {
+  setAttributes(attributes: Readonly<Record<string, RelayTraceAttribute>>): void {
     trace.getActiveSpan()?.setAttributes(attributes);
   }
 }

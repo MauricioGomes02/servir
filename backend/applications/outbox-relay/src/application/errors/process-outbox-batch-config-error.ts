@@ -4,9 +4,7 @@ export const ProcessOutboxBatchConfigErrorCodes = Object.freeze({
 } as const);
 
 export type ProcessOutboxBatchConfigErrorCode =
-  typeof ProcessOutboxBatchConfigErrorCodes[
-    keyof typeof ProcessOutboxBatchConfigErrorCodes
-  ];
+  (typeof ProcessOutboxBatchConfigErrorCodes)[keyof typeof ProcessOutboxBatchConfigErrorCodes];
 
 export class ProcessOutboxBatchConfigError extends Error {
   constructor(readonly code: ProcessOutboxBatchConfigErrorCode) {

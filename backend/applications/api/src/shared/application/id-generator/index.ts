@@ -1,3 +1,1 @@
-export type {
-  IdGenerator,
-} from './id-generator';
+export type { IdGenerator } from './id-generator';

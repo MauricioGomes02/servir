@@ -1,9 +1,7 @@
 export type JsonScalar = string | number | boolean | null;
 
 export type JsonValue =
-  | JsonScalar
-  | ReadonlyArray<JsonValue>
-  | { readonly [key: string]: JsonValue };
+  JsonScalar | ReadonlyArray<JsonValue> | { readonly [key: string]: JsonValue };
 
 export type JsonObject = Readonly<Record<string, JsonValue>>;
 

@@ -29,10 +29,7 @@ import {
 } from '@/modules/membership/infrastructure';
 import type { EventEnvelope } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
-import {
-  PostgresEventOutbox,
-  UnmappedDomainEventError,
-} from '@/shared/infrastructure/messaging';
+import { PostgresEventOutbox, UnmappedDomainEventError } from '@/shared/infrastructure/messaging';
 import { captureActiveTraceContext } from '@/shared/infrastructure/telemetry';
 import { PostgresUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { Pool } from 'pg';
@@ -42,15 +39,12 @@ export interface PostgresPersistence {
   readonly memberUnitOfWork: UnitOfWork<MemberWriteScope>;
   readonly ministryUnitOfWork: UnitOfWork<MinistryWriteScope>;
   readonly memberDetailsReader: MemberDetailsReader;
-  readonly organizationRegistrationFacts:
-    OrganizationRegistrationFactsReader;
+  readonly organizationRegistrationFacts: OrganizationRegistrationFactsReader;
   readonly ministryCreationFacts: MinistryCreationFactsReader;
   close(): Promise<void>;
 }
 
-export function createPostgresPersistence(
-  connectionString: string,
-): PostgresPersistence {
+export function createPostgresPersistence(connectionString: string): PostgresPersistence {
   const pool = new Pool({ connectionString });
 
   function mapIntegrationEvent(envelope: EventEnvelope) {
@@ -75,31 +69,18 @@ export function createPostgresPersistence(
   return {
     unitOfWork: new PostgresUnitOfWork(pool, (client) => ({
       organizations: new PostgresOrganizationRepository(client),
-      outbox: new PostgresEventOutbox(
-        client,
-        mapIntegrationEvent,
-        captureActiveTraceContext,
-      ),
+      outbox: new PostgresEventOutbox(client, mapIntegrationEvent, captureActiveTraceContext),
     })),
     memberUnitOfWork: new PostgresUnitOfWork(pool, (client) => ({
       members: new PostgresMemberRepository(client),
-      outbox: new PostgresEventOutbox(
-        client,
-        mapIntegrationEvent,
-        captureActiveTraceContext,
-      ),
+      outbox: new PostgresEventOutbox(client, mapIntegrationEvent, captureActiveTraceContext),
     })),
     ministryUnitOfWork: new PostgresUnitOfWork(pool, (client) => ({
       ministries: new PostgresMinistryRepository(client),
-      outbox: new PostgresEventOutbox(
-        client,
-        mapIntegrationEvent,
-        captureActiveTraceContext,
-      ),
+      outbox: new PostgresEventOutbox(client, mapIntegrationEvent, captureActiveTraceContext),
     })),
     memberDetailsReader: new PostgresMemberDetailsReader(pool),
-    organizationRegistrationFacts:
-      new PostgresOrganizationRegistrationFactsReader(pool),
+    organizationRegistrationFacts: new PostgresOrganizationRegistrationFactsReader(pool),
     ministryCreationFacts: new PostgresMinistryCreationFactsReader(pool),
     async close(): Promise<void> {
       await pool.end();

@@ -1,7 +1,3 @@
-export {
-  AggregateRoot,
-} from './aggregate-root';
+export { AggregateRoot } from './aggregate-root';
 
-export {
-  DomainEventAcknowledgementError,
-} from './domain-event-acknowledgement-error';
+export { DomainEventAcknowledgementError } from './domain-event-acknowledgement-error';

@@ -7,9 +7,7 @@ import { registerApplicationRoutes } from './register-application-routes';
 
 export type { CreateApplicationOptions } from './create-application-options';
 
-export function createApplication(
-  options: CreateApplicationOptions = {},
-): FastifyInstance {
+export function createApplication(options: CreateApplicationOptions = {}): FastifyInstance {
   const container = createApplicationContainer(options);
   const dependencies = container.cradle;
   const app = createFastifyApplication({

@@ -6,7 +6,6 @@ export const MemberNameErrorCodes = {
   TooLong: 'member.name.too_long',
 } as const;
 
-export type MemberNameErrorCode =
-  (typeof MemberNameErrorCodes)[keyof typeof MemberNameErrorCodes];
+export type MemberNameErrorCode = (typeof MemberNameErrorCodes)[keyof typeof MemberNameErrorCodes];
 
 export type MemberNameError = NotificationError<MemberNameErrorCode>;

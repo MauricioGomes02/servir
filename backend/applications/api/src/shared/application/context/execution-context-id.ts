@@ -1,8 +1,4 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 
 import {
   ExecutionContextIdErrorCodes,
@@ -56,14 +52,10 @@ function parseExecutionContextId<TId extends string>(
   return success(value as TId);
 }
 
-export function parseCorrelationId(
-  input: unknown,
-): Result<CorrelationId, ExecutionContextIdError> {
+export function parseCorrelationId(input: unknown): Result<CorrelationId, ExecutionContextIdError> {
   return parseExecutionContextId(input, 'correlationId');
 }
 
-export function parseRequestId(
-  input: unknown,
-): Result<RequestId, ExecutionContextIdError> {
+export function parseRequestId(input: unknown): Result<RequestId, ExecutionContextIdError> {
   return parseExecutionContextId(input, 'requestId');
 }

@@ -1,4 +1,7 @@
-export { MinistryCreationPolicy, MinistryCreationPolicyErrorCodes } from './ministry-creation-policy';
+export {
+  MinistryCreationPolicy,
+  MinistryCreationPolicyErrorCodes,
+} from './ministry-creation-policy';
 export type {
   MinistryActiveNameConflictError,
   MinistryCreationFacts,

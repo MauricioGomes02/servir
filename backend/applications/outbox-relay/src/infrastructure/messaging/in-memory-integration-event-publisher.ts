@@ -2,13 +2,10 @@ import type { ClaimedOutboxMessage, IntegrationEventPublisher } from '@/applicat
 
 import { IntegrationEventPublicationError } from '@/application';
 
-export class InMemoryIntegrationEventPublisher
-implements IntegrationEventPublisher {
+export class InMemoryIntegrationEventPublisher implements IntegrationEventPublisher {
   private readonly publishedMessages: ClaimedOutboxMessage[] = [];
 
-  constructor(
-    private readonly failures: Readonly<Record<string, string>> = {},
-  ) {}
+  constructor(private readonly failures: Readonly<Record<string, string>> = {}) {}
 
   get messages(): readonly ClaimedOutboxMessage[] {
     return Object.freeze([...this.publishedMessages]);

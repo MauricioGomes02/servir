@@ -1,15 +1,8 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 import { isCanonicalUuid } from '@/shared/core/uuid';
 import { EntityId } from '@/shared/domain/entity';
 
-import {
-  MemberIdErrorCodes,
-  type MemberIdError,
-} from './member-id-error';
+import { MemberIdErrorCodes, type MemberIdError } from './member-id-error';
 
 const MAX_MEMBER_ID_LENGTH = 128;
 

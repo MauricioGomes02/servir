@@ -1,18 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createExecutionContext,
-  parseCorrelationId,
-} from '@/shared/application/context';
-import {
-  createEventEnvelope,
-  parseMessageId,
-} from '@/shared/application/messaging';
-import {
-  createDomainEvent,
-  parseDomainEventId,
-} from '@/shared/domain/domain-event';
+import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
+import { createEventEnvelope, parseMessageId } from '@/shared/application/messaging';
+import { createDomainEvent, parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 
 import { InMemoryEventOutbox } from '.';
@@ -23,12 +14,8 @@ import {
 
 describe('InMemoryEventOutbox', () => {
   it('stores envelopes in order and exposes an immutable snapshot', async () => {
-    const messageId = parseMessageId(
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-    );
-    const eventId = parseDomainEventId(
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
-    );
+    const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
+    const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
     const correlationId = parseCorrelationId('correlation-123');
     const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 
@@ -37,12 +24,7 @@ describe('InMemoryEventOutbox', () => {
     assert.equal(correlationId.success, true);
     assert.equal(occurredAt.success, true);
 
-    if (
-      !messageId.success
-      || !eventId.success
-      || !correlationId.success
-      || !occurredAt.success
-    ) {
+    if (!messageId.success || !eventId.success || !correlationId.success || !occurredAt.success) {
       throw new Error('Invalid deterministic test fixture');
     }
 
@@ -75,15 +57,9 @@ describe('InMemoryEventOutbox', () => {
   });
 
   it('rejects acknowledgement outside outbox order', async () => {
-    const storedMessageId = parseMessageId(
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-    );
-    const receivedMessageId = parseMessageId(
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b4',
-    );
-    const eventId = parseDomainEventId(
-      '0198f334-6dc5-7c20-9af1-91d7e599c7b2',
-    );
+    const storedMessageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
+    const receivedMessageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b4');
+    const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
     const correlationId = parseCorrelationId('correlation-123');
     const occurredAt = Instant.create('2026-07-28T15:00:00.000Z');
 
@@ -94,11 +70,11 @@ describe('InMemoryEventOutbox', () => {
     assert.equal(occurredAt.success, true);
 
     if (
-      !storedMessageId.success
-      || !receivedMessageId.success
-      || !eventId.success
-      || !correlationId.success
-      || !occurredAt.success
+      !storedMessageId.success ||
+      !receivedMessageId.success ||
+      !eventId.success ||
+      !correlationId.success ||
+      !occurredAt.success
     ) {
       throw new Error('Invalid deterministic test fixture');
     }
@@ -118,8 +94,9 @@ describe('InMemoryEventOutbox', () => {
 
     assert.throws(
       () => outbox.acknowledge(receivedMessageId.value),
-      (error) => error instanceof InMemoryEventOutboxAcknowledgementError
-        && error.code === InMemoryEventOutboxAcknowledgementErrorCode,
+      (error) =>
+        error instanceof InMemoryEventOutboxAcknowledgementError &&
+        error.code === InMemoryEventOutboxAcknowledgementErrorCode,
     );
     assert.equal(outbox.nextEnvelope?.messageId, envelope.messageId);
   });

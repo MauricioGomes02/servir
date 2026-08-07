@@ -9,9 +9,8 @@ export const RelayServiceConfigErrorCodes = {
   InvalidLogLevel: 'relay.config.log_level.invalid',
 } as const;
 
-export type RelayServiceConfigErrorCode = typeof RelayServiceConfigErrorCodes[
-  keyof typeof RelayServiceConfigErrorCodes
-];
+export type RelayServiceConfigErrorCode =
+  (typeof RelayServiceConfigErrorCodes)[keyof typeof RelayServiceConfigErrorCodes];
 
 export class RelayServiceConfigError extends Error {
   override readonly name = 'RelayServiceConfigError';
@@ -37,10 +36,7 @@ export interface RelayServiceConfig {
   readonly logLevel: LogLevel;
 }
 
-function required(
-  value: string | undefined,
-  code: RelayServiceConfigErrorCode,
-): string {
+function required(value: string | undefined, code: RelayServiceConfigErrorCode): string {
   const normalized = value?.trim();
 
   if (normalized === undefined || normalized.length === 0) {
@@ -54,9 +50,7 @@ function positiveInteger(value: string | undefined, fallback: number): number {
   const parsed = value === undefined ? fallback : Number(value);
 
   if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new RelayServiceConfigError(
-      RelayServiceConfigErrorCodes.InvalidInteger,
-    );
+    throw new RelayServiceConfigError(RelayServiceConfigErrorCodes.InvalidInteger);
   }
 
   return parsed;
@@ -66,9 +60,7 @@ function nonNegativeInteger(value: string | undefined, fallback: number): number
   const parsed = value === undefined ? fallback : Number(value);
 
   if (!Number.isInteger(parsed) || parsed < 0) {
-    throw new RelayServiceConfigError(
-      RelayServiceConfigErrorCodes.InvalidInteger,
-    );
+    throw new RelayServiceConfigError(RelayServiceConfigErrorCodes.InvalidInteger);
   }
 
   return parsed;
@@ -84,9 +76,7 @@ function ratio(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
-export function readRelayServiceConfig(
-  environment: NodeJS.ProcessEnv,
-): RelayServiceConfig {
+export function readRelayServiceConfig(environment: NodeJS.ProcessEnv): RelayServiceConfig {
   const databaseUrl = required(
     environment.DATABASE_URL,
     RelayServiceConfigErrorCodes.MissingDatabaseUrl,
@@ -94,34 +84,25 @@ export function readRelayServiceConfig(
   const kafkaBrokers = required(
     environment.KAFKA_BROKERS,
     RelayServiceConfigErrorCodes.MissingKafkaBrokers,
-  ).split(',').map((broker) => broker.trim()).filter(Boolean);
+  )
+    .split(',')
+    .map((broker) => broker.trim())
+    .filter(Boolean);
 
   if (kafkaBrokers.length === 0) {
-    throw new RelayServiceConfigError(
-      RelayServiceConfigErrorCodes.MissingKafkaBrokers,
-    );
+    throw new RelayServiceConfigError(RelayServiceConfigErrorCodes.MissingKafkaBrokers);
   }
 
-  const leaseDurationMilliseconds = positiveInteger(
-    environment.OUTBOX_LEASE_DURATION_MS,
-    60_000,
-  );
-  const publishTimeoutMilliseconds = positiveInteger(
-    environment.KAFKA_PUBLISH_TIMEOUT_MS,
-    10_000,
-  );
+  const leaseDurationMilliseconds = positiveInteger(environment.OUTBOX_LEASE_DURATION_MS, 60_000);
+  const publishTimeoutMilliseconds = positiveInteger(environment.KAFKA_PUBLISH_TIMEOUT_MS, 10_000);
 
   if (publishTimeoutMilliseconds >= leaseDurationMilliseconds) {
-    throw new RelayServiceConfigError(
-      RelayServiceConfigErrorCodes.InvalidPublishTimeout,
-    );
+    throw new RelayServiceConfigError(RelayServiceConfigErrorCodes.InvalidPublishTimeout);
   }
 
   const logLevel = parseLogLevel(environment.LOG_LEVEL);
   if (logLevel === undefined) {
-    throw new RelayServiceConfigError(
-      RelayServiceConfigErrorCodes.InvalidLogLevel,
-    );
+    throw new RelayServiceConfigError(RelayServiceConfigErrorCodes.InvalidLogLevel);
   }
 
   return Object.freeze({
@@ -130,21 +111,12 @@ export function readRelayServiceConfig(
     kafkaClientId: environment.KAFKA_CLIENT_ID?.trim() || 'servir-outbox-relay',
     batchSize: positiveInteger(environment.OUTBOX_BATCH_SIZE, 100),
     leaseDurationMilliseconds,
-    pollIntervalMilliseconds: positiveInteger(
-      environment.OUTBOX_POLL_INTERVAL_MS,
-      1_000,
-    ),
+    pollIntervalMilliseconds: positiveInteger(environment.OUTBOX_POLL_INTERVAL_MS, 1_000),
     publishTimeoutMilliseconds,
     kafkaRetryCount: nonNegativeInteger(environment.KAFKA_RETRY_COUNT, 5),
     maximumAttempts: positiveInteger(environment.OUTBOX_MAX_ATTEMPTS, 10),
-    retryBaseDelayMilliseconds: positiveInteger(
-      environment.OUTBOX_RETRY_BASE_DELAY_MS,
-      1_000,
-    ),
-    retryMaximumDelayMilliseconds: positiveInteger(
-      environment.OUTBOX_RETRY_MAX_DELAY_MS,
-      300_000,
-    ),
+    retryBaseDelayMilliseconds: positiveInteger(environment.OUTBOX_RETRY_BASE_DELAY_MS, 1_000),
+    retryMaximumDelayMilliseconds: positiveInteger(environment.OUTBOX_RETRY_MAX_DELAY_MS, 300_000),
     retryJitterRatio: ratio(environment.OUTBOX_RETRY_JITTER_RATIO, 0.2),
     logLevel,
   });

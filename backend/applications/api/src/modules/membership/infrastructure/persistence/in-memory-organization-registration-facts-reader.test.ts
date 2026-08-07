@@ -19,9 +19,7 @@ describe('InMemoryOrganizationRegistrationFactsReader', () => {
   it('reads organizations added to a live source after construction', async () => {
     const organizations: OrganizationId[] = [];
     const expected = organizationId('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
-    const reader = new InMemoryOrganizationRegistrationFactsReader(
-      () => organizations,
-    );
+    const reader = new InMemoryOrganizationRegistrationFactsReader(() => organizations);
 
     assert.equal(await reader.findById(expected), undefined);
 

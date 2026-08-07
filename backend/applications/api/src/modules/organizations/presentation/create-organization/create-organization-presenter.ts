@@ -22,9 +22,7 @@ export interface CreateOrganizationFailureView {
   readonly error: PresentedError;
 }
 
-export type CreateOrganizationView =
-  | CreateOrganizationSuccessView
-  | CreateOrganizationFailureView;
+export type CreateOrganizationView = CreateOrganizationSuccessView | CreateOrganizationFailureView;
 
 export class CreateOrganizationPresenter {
   constructor(private readonly translator: MessageTranslator) {}
@@ -37,12 +35,7 @@ export class CreateOrganizationPresenter {
     if (!result.success) {
       return Object.freeze({
         kind: 'failure',
-        error: presentError(
-          result.error,
-          context,
-          locale,
-          this.translator,
-        ),
+        error: presentError(result.error, context, locale, this.translator),
       });
     }
 

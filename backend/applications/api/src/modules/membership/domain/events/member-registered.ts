@@ -26,9 +26,7 @@ interface CreateMemberRegisteredProps {
   readonly name: MemberName;
 }
 
-export function createMemberRegistered(
-  props: CreateMemberRegisteredProps,
-): MemberRegistered {
+export function createMemberRegistered(props: CreateMemberRegisteredProps): MemberRegistered {
   return createDomainEvent({
     eventId: props.eventId,
     name: 'member.registered',
@@ -41,9 +39,7 @@ export function createMemberRegistered(
   });
 }
 
-export function isMemberRegistered(
-  event: DomainEvent,
-): event is MemberRegistered {
+export function isMemberRegistered(event: DomainEvent): event is MemberRegistered {
   return event.name === 'member.registered';
 }
 

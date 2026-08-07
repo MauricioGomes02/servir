@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createLeaseId,
-  IntegrationEventPublicationError,
-} from '@/application';
+import { createLeaseId, IntegrationEventPublicationError } from '@/application';
 import type { ClaimedOutboxMessage } from '@/application';
 
 import {
@@ -77,10 +74,7 @@ describe('KafkaIntegrationEventPublisher', () => {
 
     assert.equal(record.topic, 'servir.organizations.events');
     assert.equal(record.acks, -1);
-    assert.equal(
-      kafkaMessage?.key,
-      '0198f334-6dc5-7c20-9af1-91d7e599c004',
-    );
+    assert.equal(kafkaMessage?.key, '0198f334-6dc5-7c20-9af1-91d7e599c004');
     assert.deepEqual(kafkaMessage?.headers, {
       'content-type': 'application/cloudevents+json',
       traceparent: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
@@ -143,9 +137,10 @@ describe('KafkaIntegrationEventPublisher', () => {
 
     await assert.rejects(
       publisher(producer).publish(message()),
-      (error: unknown) => error instanceof IntegrationEventPublicationError
-        && error.code === KafkaPublicationErrorCodes.PublishRejected
-        && error.retryable === false,
+      (error: unknown) =>
+        error instanceof IntegrationEventPublicationError &&
+        error.code === KafkaPublicationErrorCodes.PublishRejected &&
+        error.retryable === false,
     );
   });
 
@@ -158,9 +153,10 @@ describe('KafkaIntegrationEventPublisher', () => {
 
     await assert.rejects(
       publisher(producer).publish(message()),
-      (error: unknown) => error instanceof IntegrationEventPublicationError
-        && error.code === KafkaPublicationErrorCodes.PublishFailed
-        && error.retryable === true,
+      (error: unknown) =>
+        error instanceof IntegrationEventPublicationError &&
+        error.code === KafkaPublicationErrorCodes.PublishFailed &&
+        error.retryable === true,
     );
   });
 
@@ -169,12 +165,14 @@ describe('KafkaIntegrationEventPublisher', () => {
 
     for (const timeoutMs of [0, -1, 1.5]) {
       assert.throws(
-        () => new KafkaIntegrationEventPublisher({
-          producer,
-          timeoutMs,
-        }),
-        (error: unknown) => error instanceof IntegrationEventPublicationError
-          && error.code === KafkaPublicationErrorCodes.InvalidConfiguration,
+        () =>
+          new KafkaIntegrationEventPublisher({
+            producer,
+            timeoutMs,
+          }),
+        (error: unknown) =>
+          error instanceof IntegrationEventPublicationError &&
+          error.code === KafkaPublicationErrorCodes.InvalidConfiguration,
       );
     }
   });

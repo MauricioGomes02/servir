@@ -1,14 +1,7 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 import { isCanonicalUuid } from '@/shared/core/uuid';
 
-import {
-  MessageIdErrorCodes,
-  type MessageIdError,
-} from './message-id-error';
+import { MessageIdErrorCodes, type MessageIdError } from './message-id-error';
 
 const MAX_MESSAGE_ID_LENGTH = 128;
 
@@ -18,9 +11,7 @@ export type MessageId = string & {
   readonly [messageIdBrand]: 'MessageId';
 };
 
-export function parseMessageId(
-  input: unknown,
-): Result<MessageId, MessageIdError> {
+export function parseMessageId(input: unknown): Result<MessageId, MessageIdError> {
   if (typeof input !== 'string') {
     return failure({
       code: MessageIdErrorCodes.InvalidType,

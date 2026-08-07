@@ -1,7 +1,9 @@
 import type { MinistryCreatedIntegrationEventV1 } from '../../application';
 import type { MinistryCreated } from '../../domain';
 
-export function mapMinistryCreatedIntegrationEvent(event: MinistryCreated): MinistryCreatedIntegrationEventV1 {
+export function mapMinistryCreatedIntegrationEvent(
+  event: MinistryCreated,
+): MinistryCreatedIntegrationEventV1 {
   return Object.freeze({
     channel: 'servir.ministries.events',
     source: 'urn:servir:ministries',

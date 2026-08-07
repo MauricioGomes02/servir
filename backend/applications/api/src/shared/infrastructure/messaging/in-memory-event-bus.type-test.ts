@@ -1,6 +1,4 @@
-import type {
-  EventHandler,
-} from '@/shared/application/messaging';
+import type { EventHandler } from '@/shared/application/messaging';
 import type { DomainEvent } from '@/shared/domain/domain-event';
 
 import { InMemoryEventBus } from '.';

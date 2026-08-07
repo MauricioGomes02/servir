@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  failure,
-  success,
-} from '.';
+import { failure, success } from '.';
 
 describe('Result', () => {
   it('represents success as an immutable exclusive branch', () => {

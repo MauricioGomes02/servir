@@ -10,7 +10,8 @@ export const LogLevels = {
 export type LogLevel = (typeof LogLevels)[keyof typeof LogLevels];
 
 export type LogAttributeScalar = string | number | boolean | null;
-export type LogAttributeValue = LogAttributeScalar
+export type LogAttributeValue =
+  | LogAttributeScalar
   | ReadonlyArray<LogAttributeValue>
   | { readonly [key: string]: LogAttributeValue };
 export type LogAttributes = Readonly<Record<string, LogAttributeValue>>;
@@ -49,19 +50,25 @@ export function parseLogLevel(
   const normalized = input.trim().toLowerCase();
 
   return (Object.values(LogLevels) as string[]).includes(normalized)
-    ? normalized as LogLevel
+    ? (normalized as LogLevel)
     : undefined;
 }
 
 function freezeAttributeValue<TValue extends LogAttributeValue>(value: TValue): TValue {
   if (Array.isArray(value)) {
-    return Object.freeze(value.map((item) => freezeAttributeValue(item))) as TValue;
+    const items: ReadonlyArray<LogAttributeValue> = value;
+    return Object.freeze(items.map((item) => freezeAttributeValue(item))) as TValue;
   }
 
   if (value !== null && typeof value === 'object') {
-    return Object.freeze(Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, freezeAttributeValue(item)]),
-    )) as TValue;
+    return Object.freeze(
+      Object.fromEntries(
+        Object.entries(value as Readonly<Record<string, LogAttributeValue>>).map(([key, item]) => [
+          key,
+          freezeAttributeValue(item),
+        ]),
+      ),
+    ) as TValue;
   }
 
   return value;
@@ -70,9 +77,7 @@ function freezeAttributeValue<TValue extends LogAttributeValue>(value: TValue): 
 export function createLogRecord(record: LogRecord): LogRecord {
   return Object.freeze({
     ...record,
-    context: record.context === undefined
-      ? undefined
-      : Object.freeze({ ...record.context }),
+    context: record.context === undefined ? undefined : Object.freeze({ ...record.context }),
     attributes: freezeAttributeValue(record.attributes),
   });
 }

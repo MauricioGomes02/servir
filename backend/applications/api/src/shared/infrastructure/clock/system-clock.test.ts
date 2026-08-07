@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  SystemClock,
-  SystemClockError,
-} from '.';
+import { SystemClock, SystemClockError } from '.';
 
 describe('SystemClock', () => {
   it('converts system time into a UTC Instant', () => {
@@ -13,14 +10,8 @@ describe('SystemClock', () => {
 
     const instant = clock.now();
 
-    assert.equal(
-      instant.toISOString(),
-      '2026-07-28T12:00:00.000Z',
-    );
-    assert.equal(
-      instant.toEpochMilliseconds(),
-      epochMilliseconds,
-    );
+    assert.equal(instant.toISOString(), '2026-07-28T12:00:00.000Z');
+    assert.equal(instant.toEpochMilliseconds(), epochMilliseconds);
   });
 
   it('classifies and preserves the cause of a technical failure', () => {

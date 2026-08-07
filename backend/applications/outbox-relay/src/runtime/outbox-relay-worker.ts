@@ -12,10 +12,7 @@ export interface OutboxBatchProcessor {
   execute(): Promise<ProcessOutboxBatchResult>;
 }
 
-export type RelayDelay = (
-  milliseconds: number,
-  signal: AbortSignal,
-) => Promise<void>;
+export type RelayDelay = (milliseconds: number, signal: AbortSignal) => Promise<void>;
 
 export interface OutboxRelayWorkerDependencies {
   readonly batchProcessor: OutboxBatchProcessor;
@@ -28,10 +25,7 @@ export interface OutboxRelayWorkerDependencies {
 
 export const RelayWorkerErrorCode = 'outbox.relay.cycle_failed' as const;
 
-export function waitForDelay(
-  milliseconds: number,
-  signal: AbortSignal,
-): Promise<void> {
+export function waitForDelay(milliseconds: number, signal: AbortSignal): Promise<void> {
   if (signal.aborted) {
     return Promise.resolve();
   }
@@ -52,10 +46,10 @@ export function waitForDelay(
 
 function errorCode(error: unknown): string {
   if (
-    typeof error === 'object'
-    && error !== null
-    && 'code' in error
-    && typeof error.code === 'string'
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'string'
   ) {
     return error.code;
   }
@@ -90,18 +84,16 @@ export class OutboxRelayWorker {
     }
   }
 
-  private log(
-    level: LogLevel,
-    eventName: string,
-    attributes: LogAttributes = {},
-  ): void {
+  private log(level: LogLevel, eventName: string, attributes: LogAttributes = {}): void {
     try {
-      this.dependencies.logger.log(createLogRecord({
-        occurredAt: this.dependencies.clock.now(),
-        level,
-        eventName,
-        attributes,
-      }));
+      this.dependencies.logger.log(
+        createLogRecord({
+          occurredAt: this.dependencies.clock.now(),
+          level,
+          eventName,
+          attributes,
+        }),
+      );
     } catch {
       // Observability cannot change durable delivery behavior.
     }

@@ -1,21 +1,11 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 import { AggregateRoot } from '@/shared/domain/aggregate-root';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import type { Instant } from '@/shared/domain/instant';
 import type { OrganizationId } from '@/modules/organizations/domain';
 
-import {
-  createMemberRegistered,
-  type MemberEvent,
-} from '../events';
-import {
-  MemberName,
-  type MemberNameError,
-} from '../value-objects';
+import { createMemberRegistered, type MemberEvent } from '../events';
+import { MemberName, type MemberNameError } from '../value-objects';
 import type { MemberId } from './member-id';
 
 export type MemberStatus = 'active' | 'inactive';
@@ -35,18 +25,12 @@ export interface RegisterMemberProps {
   readonly registeredAt: Instant;
 }
 
-export class Member extends AggregateRoot<
-  MemberId,
-  MemberProps,
-  MemberEvent
-> {
+export class Member extends AggregateRoot<MemberId, MemberProps, MemberEvent> {
   private constructor(id: MemberId, props: MemberProps) {
     super(id, props);
   }
 
-  static register(
-    input: RegisterMemberProps,
-  ): Result<Member, MemberNameError> {
+  static register(input: RegisterMemberProps): Result<Member, MemberNameError> {
     const name = MemberName.create(input.name);
 
     if (!name.success) {
@@ -60,13 +44,15 @@ export class Member extends AggregateRoot<
       registeredAt: input.registeredAt,
     });
 
-    member.recordDomainEvent(createMemberRegistered({
-      eventId: input.eventId,
-      occurredAt: input.registeredAt,
-      memberId: input.id,
-      organizationId: input.organizationId,
-      name: name.value,
-    }));
+    member.recordDomainEvent(
+      createMemberRegistered({
+        eventId: input.eventId,
+        occurredAt: input.registeredAt,
+        memberId: input.id,
+        organizationId: input.organizationId,
+        name: name.value,
+      }),
+    );
 
     return success(member);
   }

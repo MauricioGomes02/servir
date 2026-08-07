@@ -1,14 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createLeaseId,
-  OutboxLeaseError,
-  OutboxLeaseErrorCodes,
-} from '@/application';
-import {
-  InMemoryOutboxMessageStore,
-} from '.';
+import { createLeaseId, OutboxLeaseError, OutboxLeaseErrorCodes } from '@/application';
+import { InMemoryOutboxMessageStore } from '.';
 
 const MESSAGE = {
   messageId: 'message-1',
@@ -49,8 +43,8 @@ describe('InMemoryOutboxMessageStore', () => {
         leaseId: LEASE_IDS[0],
         publishedAt: '2026-07-29T15:01:00.000Z',
       }),
-      (error: unknown) => error instanceof OutboxLeaseError
-        && error.code === OutboxLeaseErrorCodes.Expired,
+      (error: unknown) =>
+        error instanceof OutboxLeaseError && error.code === OutboxLeaseErrorCodes.Expired,
     );
   });
 
@@ -103,8 +97,8 @@ describe('InMemoryOutboxMessageStore', () => {
         leaseId: LEASE_IDS[0],
         publishedAt: '2026-07-29T15:01:01.000Z',
       }),
-      (error: unknown) => error instanceof OutboxLeaseError
-        && error.code === OutboxLeaseErrorCodes.NotOwned,
+      (error: unknown) =>
+        error instanceof OutboxLeaseError && error.code === OutboxLeaseErrorCodes.NotOwned,
     );
     assert.equal(store.currentMessages[0]?.publishedAt, undefined);
   });

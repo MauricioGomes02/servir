@@ -1,6 +1,4 @@
-export {
-  InMemoryMemberRepository,
-} from './in-memory-member-repository';
+export { InMemoryMemberRepository } from './in-memory-member-repository';
 
 export { InMemoryMemberDetailsReader } from './in-memory-member-details-reader';
 
@@ -9,19 +7,11 @@ export {
   InvalidPersistedMemberDetailsErrorCode,
 } from './invalid-persisted-member-details-error';
 
-export {
-  InMemoryOrganizationRegistrationFactsReader,
-} from './in-memory-organization-registration-facts-reader';
+export { InMemoryOrganizationRegistrationFactsReader } from './in-memory-organization-registration-facts-reader';
 
-export {
-  MemberStatusCodes,
-  fromMemberStatusCode,
-  toMemberStatusCode,
-} from './member-status-code';
+export { MemberStatusCodes, fromMemberStatusCode, toMemberStatusCode } from './member-status-code';
 
-export {
-  PostgresMemberDetailsReader,
-} from './postgres-member-details-reader';
+export { PostgresMemberDetailsReader } from './postgres-member-details-reader';
 
 export {
   PostgresMemberDetailsReaderError,
@@ -33,18 +23,14 @@ export {
   UnsupportedMemberStatusCodeErrorCode,
 } from './unsupported-member-status-code-error';
 
-export {
-  PostgresMemberRepository,
-} from './postgres-member-repository';
+export { PostgresMemberRepository } from './postgres-member-repository';
 
 export {
   PostgresMemberRepositoryError,
   PostgresMemberRepositoryErrorCode,
 } from './postgres-member-repository-error';
 
-export {
-  PostgresOrganizationRegistrationFactsReader,
-} from './postgres-organization-registration-facts-reader';
+export { PostgresOrganizationRegistrationFactsReader } from './postgres-organization-registration-facts-reader';
 
 export {
   PostgresOrganizationRegistrationFactsReaderError,

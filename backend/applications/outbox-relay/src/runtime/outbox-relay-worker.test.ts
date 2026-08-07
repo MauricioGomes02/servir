@@ -36,7 +36,9 @@ describe('OutboxRelayWorker', () => {
           return { claimed: 2, published: 2, rescheduled: 0, failed: 0 };
         },
       },
-      delay: async (milliseconds) => { delays.push(milliseconds); },
+      delay: async (milliseconds) => {
+        delays.push(milliseconds);
+      },
     });
 
     await worker.run(controller.signal);
@@ -98,13 +100,15 @@ describe('OutboxRelayWorker', () => {
     await worker.run(controller.signal);
 
     assert.equal(executions, 2);
-    assert.deepEqual(records, [{
-      occurredAt: '2026-07-31T15:00:00.000Z',
-      level: 'error',
-      eventName: 'outbox.relay.cycle.failed',
-      context: undefined,
-      attributes: { 'error.code': 'outbox.claim_failed' },
-    }]);
+    assert.deepEqual(records, [
+      {
+        occurredAt: '2026-07-31T15:00:00.000Z',
+        level: 'error',
+        eventName: 'outbox.relay.cycle.failed',
+        context: undefined,
+        attributes: { 'error.code': 'outbox.claim_failed' },
+      },
+    ]);
     assert.equal(JSON.stringify(records).includes('sensitive details'), false);
   });
 });

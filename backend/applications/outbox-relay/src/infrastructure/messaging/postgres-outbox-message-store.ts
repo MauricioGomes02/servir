@@ -1,15 +1,7 @@
-import type {
-  IntegrationEvent,
-  JsonObject,
-  JsonValue,
-} from '@servir/integration-messaging';
+import type { IntegrationEvent, JsonObject, JsonValue } from '@servir/integration-messaging';
 import type { Pool, QueryResultRow } from 'pg';
 
-import {
-  createLeaseId,
-  OutboxLeaseError,
-  OutboxLeaseErrorCodes,
-} from '@/application';
+import { createLeaseId, OutboxLeaseError, OutboxLeaseErrorCodes } from '@/application';
 import type {
   ClaimedOutboxMessage,
   ClaimOutboxMessages,
@@ -51,10 +43,10 @@ interface TransitionResultRow extends QueryResultRow {
 
 function isJsonValue(value: unknown): value is JsonValue {
   if (
-    value === null
-    || typeof value === 'string'
-    || typeof value === 'boolean'
-    || (typeof value === 'number' && Number.isFinite(value))
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    (typeof value === 'number' && Number.isFinite(value))
   ) {
     return true;
   }
@@ -67,7 +59,7 @@ function isJsonValue(value: unknown): value is JsonValue {
     return false;
   }
 
-  return Object.values(value).every(isJsonValue);
+  return Object.values(value as Record<string, unknown>).every(isJsonValue);
 }
 
 function isJsonObject(value: unknown): value is JsonObject {
@@ -75,10 +67,9 @@ function isJsonObject(value: unknown): value is JsonObject {
     return false;
   }
 
-  const prototype = Object.getPrototypeOf(value);
+  const prototype: unknown = Object.getPrototypeOf(value);
 
-  return (prototype === Object.prototype || prototype === null)
-    && isJsonValue(value);
+  return (prototype === Object.prototype || prototype === null) && isJsonValue(value);
 }
 
 function isOptionalString(value: unknown): value is string | null {
@@ -98,10 +89,10 @@ function readPersistedMetadata(metadata: JsonObject): Readonly<{
 
   const traceparent = trace.traceparent;
   const tracestate = trace.tracestate;
-  const traceContext = typeof traceparent === 'string'
-    && (tracestate === undefined || typeof tracestate === 'string')
-    ? Object.freeze({ traceparent, tracestate })
-    : undefined;
+  const traceContext =
+    typeof traceparent === 'string' && (tracestate === undefined || typeof tracestate === 'string')
+      ? Object.freeze({ traceparent, tracestate })
+      : undefined;
 
   return Object.freeze({
     event: freezeJsonValue(event) as JsonObject,
@@ -114,13 +105,11 @@ function isValidClaimedRow(row: ClaimedOutboxRow): boolean {
     typeof row.message_id === 'string',
     typeof row.event_id === 'string',
     typeof row.event_name === 'string' && row.event_name.length > 0,
-    typeof row.publication_channel === 'string'
-      && row.publication_channel.length > 0,
+    typeof row.publication_channel === 'string' && row.publication_channel.length > 0,
     typeof row.event_source === 'string' && row.event_source.length > 0,
     typeof row.event_type === 'string' && row.event_type.length > 0,
     Number.isInteger(row.event_version) && row.event_version > 0,
-    row.occurred_at instanceof Date
-      && !Number.isNaN(row.occurred_at.getTime()),
+    row.occurred_at instanceof Date && !Number.isNaN(row.occurred_at.getTime()),
     isOptionalString(row.aggregate_id),
     isOptionalString(row.partition_key),
     typeof row.correlation_id === 'string' && row.correlation_id.length > 0,
@@ -129,8 +118,7 @@ function isValidClaimedRow(row: ClaimedOutboxRow): boolean {
     isJsonObject(row.metadata),
     Number.isInteger(row.attempt_count) && row.attempt_count > 0,
     typeof row.lease_id === 'string',
-    row.lease_expires_at instanceof Date
-      && !Number.isNaN(row.lease_expires_at.getTime()),
+    row.lease_expires_at instanceof Date && !Number.isNaN(row.lease_expires_at.getTime()),
   ].every(Boolean);
 }
 
@@ -140,11 +128,9 @@ function freezeJsonValue(value: JsonValue): JsonValue {
   }
 
   if (value !== null && typeof value === 'object') {
-    return Object.freeze(Object.fromEntries(
-      Object.entries(value).map(
-        ([key, item]) => [key, freezeJsonValue(item)],
-      ),
-    ));
+    return Object.freeze(
+      Object.fromEntries(Object.entries(value).map(([key, item]) => [key, freezeJsonValue(item)])),
+    );
   }
 
   return value;
@@ -152,9 +138,7 @@ function freezeJsonValue(value: JsonValue): JsonValue {
 
 function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
   if (!isValidClaimedRow(row)) {
-    throw new PostgresOutboxMessageStoreError(
-      PostgresOutboxMessageStoreErrorCodes.InvalidRow,
-    );
+    throw new PostgresOutboxMessageStoreError(PostgresOutboxMessageStoreErrorCodes.InvalidRow);
   }
 
   let leaseId: LeaseId;
@@ -162,9 +146,7 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
   try {
     leaseId = createLeaseId(row.lease_id);
   } catch {
-    throw new PostgresOutboxMessageStoreError(
-      PostgresOutboxMessageStoreErrorCodes.InvalidRow,
-    );
+    throw new PostgresOutboxMessageStoreError(PostgresOutboxMessageStoreErrorCodes.InvalidRow);
   }
 
   const persistedMetadata = readPersistedMetadata(row.metadata as JsonObject);
@@ -197,9 +179,7 @@ function mapClaimedRow(row: ClaimedOutboxRow): ClaimedOutboxMessage {
 export class PostgresOutboxMessageStore implements OutboxMessageStore {
   constructor(private readonly pool: Pool) {}
 
-  async claim(
-    input: ClaimOutboxMessages,
-  ): Promise<readonly ClaimedOutboxMessage[]> {
+  async claim(input: ClaimOutboxMessages): Promise<readonly ClaimedOutboxMessage[]> {
     try {
       const result = await this.pool.query<ClaimedOutboxRow>(
         `WITH candidates AS MATERIALIZED (
@@ -241,11 +221,13 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
     }
   }
 
-  async markPublished(input: Readonly<{
-    messageId: string;
-    leaseId: LeaseId;
-    publishedAt: string;
-  }>): Promise<void> {
+  async markPublished(
+    input: Readonly<{
+      messageId: string;
+      leaseId: LeaseId;
+      publishedAt: string;
+    }>,
+  ): Promise<void> {
     await this.transition(
       `UPDATE outbox_messages
        SET published_at = $3::timestamptz,
@@ -263,13 +245,15 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
     );
   }
 
-  async reschedule(input: Readonly<{
-    messageId: string;
-    leaseId: LeaseId;
-    failedAt: string;
-    availableAt: string;
-    errorCode: string;
-  }>): Promise<void> {
+  async reschedule(
+    input: Readonly<{
+      messageId: string;
+      leaseId: LeaseId;
+      failedAt: string;
+      availableAt: string;
+      errorCode: string;
+    }>,
+  ): Promise<void> {
     await this.transition(
       `UPDATE outbox_messages
        SET available_at = $4::timestamptz,
@@ -282,13 +266,7 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
          AND published_at IS NULL
          AND failed_at IS NULL
        RETURNING message_id`,
-      [
-        input.messageId,
-        input.leaseId,
-        input.failedAt,
-        input.availableAt,
-        input.errorCode,
-      ],
+      [input.messageId, input.leaseId, input.failedAt, input.availableAt, input.errorCode],
       {
         messageId: input.messageId,
         leaseId: input.leaseId,
@@ -298,12 +276,14 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
     );
   }
 
-  async markFailed(input: Readonly<{
-    messageId: string;
-    leaseId: LeaseId;
-    failedAt: string;
-    errorCode: string;
-  }>): Promise<void> {
+  async markFailed(
+    input: Readonly<{
+      messageId: string;
+      leaseId: LeaseId;
+      failedAt: string;
+      errorCode: string;
+    }>,
+  ): Promise<void> {
     await this.transition(
       `UPDATE outbox_messages
        SET failed_at = $3::timestamptz,
@@ -360,11 +340,10 @@ export class PostgresOutboxMessageStore implements OutboxMessageStore {
       }
 
       if (
-        transitionAt !== undefined
-        && state?.current_lease_id === ownership.leaseId
-        && state.current_lease_expires_at instanceof Date
-        && state.current_lease_expires_at.getTime()
-          <= new Date(transitionAt).getTime()
+        transitionAt !== undefined &&
+        state?.current_lease_id === ownership.leaseId &&
+        state.current_lease_expires_at instanceof Date &&
+        state.current_lease_expires_at.getTime() <= new Date(transitionAt).getTime()
       ) {
         throw new OutboxLeaseError(OutboxLeaseErrorCodes.Expired);
       }

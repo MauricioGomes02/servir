@@ -3,8 +3,7 @@ export const InstantErrorCodes = {
   InvalidFormat: 'instant.invalid_format',
 } as const;
 
-export type InstantErrorCode =
-  (typeof InstantErrorCodes)[keyof typeof InstantErrorCodes];
+export type InstantErrorCode = (typeof InstantErrorCodes)[keyof typeof InstantErrorCodes];
 
 export interface InstantError {
   readonly code: InstantErrorCode;

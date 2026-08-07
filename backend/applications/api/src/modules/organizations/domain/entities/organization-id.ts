@@ -1,15 +1,8 @@
-import {
-  failure,
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { failure, success, type Result } from '@/shared/core/result';
 import { isCanonicalUuid } from '@/shared/core/uuid';
 import { EntityId } from '@/shared/domain/entity';
 
-import {
-  OrganizationIdErrorCodes,
-  type OrganizationIdError,
-} from './organization-id-error';
+import { OrganizationIdErrorCodes, type OrganizationIdError } from './organization-id-error';
 
 const MAX_ORGANIZATION_ID_LENGTH = 128;
 
@@ -19,9 +12,7 @@ export class OrganizationId extends EntityId<'OrganizationId'> {
     Object.freeze(this);
   }
 
-  static create(
-    input: unknown,
-  ): Result<OrganizationId, OrganizationIdError> {
+  static create(input: unknown): Result<OrganizationId, OrganizationIdError> {
     if (typeof input !== 'string') {
       return failure({
         code: OrganizationIdErrorCodes.InvalidType,

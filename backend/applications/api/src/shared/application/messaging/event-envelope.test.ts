@@ -2,17 +2,10 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { parseCorrelationId } from '@/shared/application/context';
-import {
-  createDomainEvent,
-  parseDomainEventId,
-} from '@/shared/domain/domain-event';
+import { createDomainEvent, parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 
-import {
-  createEventEnvelope,
-  MessageIdErrorCodes,
-  parseMessageId,
-} from '.';
+import { createEventEnvelope, MessageIdErrorCodes, parseMessageId } from '.';
 
 const EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b2';
 const MESSAGE_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b3';
@@ -20,9 +13,7 @@ const CAUSATION_ID = '0198f334-6dc5-7c20-9af1-91d7e599c7b4';
 
 function fixtures() {
   const eventId = parseDomainEventId(EVENT_ID);
-  const occurredAt = Instant.create(
-    '2026-07-27T15:00:00.000Z',
-  );
+  const occurredAt = Instant.create('2026-07-27T15:00:00.000Z');
   const messageId = parseMessageId(MESSAGE_ID);
   const correlationId = parseCorrelationId('correlation-123');
 
@@ -31,12 +22,7 @@ function fixtures() {
   assert.equal(messageId.success, true);
   assert.equal(correlationId.success, true);
 
-  if (
-    !eventId.success
-    || !occurredAt.success
-    || !messageId.success
-    || !correlationId.success
-  ) {
+  if (!eventId.success || !occurredAt.success || !messageId.success || !correlationId.success) {
     throw new Error('Invalid deterministic test fixture');
   }
 

@@ -1,3 +1,1 @@
-export {
-  InMemoryMessageTranslator,
-} from './in-memory-message-translator';
+export { InMemoryMessageTranslator } from './in-memory-message-translator';

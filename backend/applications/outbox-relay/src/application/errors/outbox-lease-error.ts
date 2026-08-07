@@ -4,7 +4,7 @@ export const OutboxLeaseErrorCodes = Object.freeze({
 } as const);
 
 export type OutboxLeaseErrorCode =
-  typeof OutboxLeaseErrorCodes[keyof typeof OutboxLeaseErrorCodes];
+  (typeof OutboxLeaseErrorCodes)[keyof typeof OutboxLeaseErrorCodes];
 
 export class OutboxLeaseError extends Error {
   constructor(readonly code: OutboxLeaseErrorCode) {

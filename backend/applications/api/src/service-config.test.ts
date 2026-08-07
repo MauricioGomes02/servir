@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  ServiceConfigError,
-  ServiceConfigErrorCodes,
-} from './service-config-error';
+import { ServiceConfigError, ServiceConfigErrorCodes } from './service-config-error';
 import { readServiceConfig } from './service-config';
 
 describe('readServiceConfig', () => {
@@ -20,36 +17,44 @@ describe('readServiceConfig', () => {
   });
 
   it('normalizes explicit host and port configuration', () => {
-    assert.deepEqual(readServiceConfig({
-      HOST: ' 127.0.0.1 ',
-      PORT: ' 8080 ',
-    }), {
-      host: '127.0.0.1',
-      port: 8080,
-      persistence: {
-        mode: 'memory',
+    assert.deepEqual(
+      readServiceConfig({
+        HOST: ' 127.0.0.1 ',
+        PORT: ' 8080 ',
+      }),
+      {
+        host: '127.0.0.1',
+        port: 8080,
+        persistence: {
+          mode: 'memory',
+        },
+        logLevel: 'info',
       },
-      logLevel: 'info',
-    });
+    );
   });
 
   it('requires a PostgreSQL URL only in postgres mode', () => {
-    assert.deepEqual(readServiceConfig({
-      PERSISTENCE_MODE: ' postgres ',
-      DATABASE_URL: ' postgresql://runtime:secret@localhost:5432/servir ',
-    }).persistence, {
-      mode: 'postgres',
-      connectionString: 'postgresql://runtime:secret@localhost:5432/servir',
-    });
+    assert.deepEqual(
+      readServiceConfig({
+        PERSISTENCE_MODE: ' postgres ',
+        DATABASE_URL: ' postgresql://runtime:secret@localhost:5432/servir ',
+      }).persistence,
+      {
+        mode: 'postgres',
+        connectionString: 'postgresql://runtime:secret@localhost:5432/servir',
+      },
+    );
 
     for (const databaseUrl of [undefined, '', 'http://localhost/servir']) {
       assert.throws(
-        () => readServiceConfig({
-          PERSISTENCE_MODE: 'postgres',
-          DATABASE_URL: databaseUrl,
-        }),
-        (error) => error instanceof ServiceConfigError
-          && error.code === ServiceConfigErrorCodes.InvalidDatabaseUrl,
+        () =>
+          readServiceConfig({
+            PERSISTENCE_MODE: 'postgres',
+            DATABASE_URL: databaseUrl,
+          }),
+        (error) =>
+          error instanceof ServiceConfigError &&
+          error.code === ServiceConfigErrorCodes.InvalidDatabaseUrl,
       );
     }
   });
@@ -57,8 +62,9 @@ describe('readServiceConfig', () => {
   it('rejects an unsupported persistence mode with a stable code', () => {
     assert.throws(
       () => readServiceConfig({ PERSISTENCE_MODE: 'mysql' }),
-      (error) => error instanceof ServiceConfigError
-        && error.code === ServiceConfigErrorCodes.InvalidPersistenceMode,
+      (error) =>
+        error instanceof ServiceConfigError &&
+        error.code === ServiceConfigErrorCodes.InvalidPersistenceMode,
     );
   });
 
@@ -70,8 +76,8 @@ describe('readServiceConfig', () => {
   it('rejects an empty explicit host with a stable code', () => {
     assert.throws(
       () => readServiceConfig({ HOST: '   ' }),
-      (error) => error instanceof ServiceConfigError
-        && error.code === ServiceConfigErrorCodes.InvalidHost,
+      (error) =>
+        error instanceof ServiceConfigError && error.code === ServiceConfigErrorCodes.InvalidHost,
     );
   });
 
@@ -79,8 +85,8 @@ describe('readServiceConfig', () => {
     for (const port of ['0', '65536', '1.5', 'not-a-number']) {
       assert.throws(
         () => readServiceConfig({ PORT: port }),
-        (error) => error instanceof ServiceConfigError
-          && error.code === ServiceConfigErrorCodes.InvalidPort,
+        (error) =>
+          error instanceof ServiceConfigError && error.code === ServiceConfigErrorCodes.InvalidPort,
       );
     }
   });
@@ -89,8 +95,9 @@ describe('readServiceConfig', () => {
     assert.equal(readServiceConfig({ LOG_LEVEL: ' DEBUG ' }).logLevel, 'debug');
     assert.throws(
       () => readServiceConfig({ LOG_LEVEL: 'verbose' }),
-      (error) => error instanceof ServiceConfigError
-        && error.code === ServiceConfigErrorCodes.InvalidLogLevel,
+      (error) =>
+        error instanceof ServiceConfigError &&
+        error.code === ServiceConfigErrorCodes.InvalidLogLevel,
     );
   });
 });

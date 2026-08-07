@@ -8,22 +8,12 @@ import {
   type LogAttributes,
   type LogLevel,
 } from '@/shared/application/logging';
-import {
-  createEventEnvelope,
-  type MessageId,
-} from '@/shared/application/messaging';
+import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
-import {
-  success,
-  type Result,
-} from '@/shared/core/result';
+import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 
-import {
-  Organization,
-  type OrganizationId,
-  type OrganizationNameError,
-} from '../../../domain';
+import { Organization, type OrganizationId, type OrganizationNameError } from '../../../domain';
 import type { OrganizationWriteScope } from '../../ports';
 import type { CreateOrganizationCommand } from './create-organization-command';
 
@@ -42,9 +32,7 @@ export interface CreateOrganizationDependencies {
 }
 
 export class CreateOrganizationHandler {
-  constructor(
-    private readonly dependencies: CreateOrganizationDependencies,
-  ) {}
+  constructor(private readonly dependencies: CreateOrganizationDependencies) {}
 
   async handle(
     command: CreateOrganizationCommand,
@@ -72,11 +60,13 @@ export class CreateOrganizationHandler {
       'organization.id': organization.value.id.value,
       'domain_event.count': pendingEvents.length,
     });
-    const envelopes = pendingEvents.map((event) => createEventEnvelope({
-      messageId: this.dependencies.messageIdGenerator.generate(),
-      correlationId: context.correlationId,
-      event,
-    }));
+    const envelopes = pendingEvents.map((event) =>
+      createEventEnvelope({
+        messageId: this.dependencies.messageIdGenerator.generate(),
+        correlationId: context.correlationId,
+        event,
+      }),
+    );
 
     await this.dependencies.unitOfWork.execute(async (scope) => {
       await scope.organizations.save(organization.value);
@@ -94,10 +84,12 @@ export class CreateOrganizationHandler {
       'organization.id': organization.value.id.value,
     });
 
-    return success(Object.freeze({
-      organizationId: organization.value.id,
-      name: organization.value.name.toString(),
-    }));
+    return success(
+      Object.freeze({
+        organizationId: organization.value.id,
+        name: organization.value.name.toString(),
+      }),
+    );
   }
 
   private log(
@@ -106,11 +98,13 @@ export class CreateOrganizationHandler {
     context: ExecutionContext,
     attributes: LogAttributes,
   ): void {
-    this.dependencies.logger.log(createLogRecord({
-      level,
-      eventName,
-      context,
-      attributes,
-    }));
+    this.dependencies.logger.log(
+      createLogRecord({
+        level,
+        eventName,
+        context,
+        attributes,
+      }),
+    );
   }
 }

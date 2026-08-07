@@ -1,28 +1,20 @@
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
-import type {
-  Pool,
-  PoolClient,
-} from 'pg';
+import type { Pool, PoolClient } from 'pg';
 
 import {
   PostgresUnitOfWorkError,
   PostgresUnitOfWorkErrorCodes,
 } from './postgres-unit-of-work-error';
 
-export type PostgresScopeFactory<TScope extends object> = (
-  client: PoolClient,
-) => TScope;
+export type PostgresScopeFactory<TScope extends object> = (client: PoolClient) => TScope;
 
-export class PostgresUnitOfWork<TScope extends object>
-implements UnitOfWork<TScope> {
+export class PostgresUnitOfWork<TScope extends object> implements UnitOfWork<TScope> {
   constructor(
     private readonly pool: Pool,
     private readonly createScope: PostgresScopeFactory<TScope>,
   ) {}
 
-  async execute<TResult>(
-    work: (scope: TScope) => Promise<TResult>,
-  ): Promise<TResult> {
+  async execute<TResult>(work: (scope: TScope) => Promise<TResult>): Promise<TResult> {
     let client: PoolClient;
 
     try {
@@ -38,10 +30,7 @@ implements UnitOfWork<TScope> {
       try {
         await client.query('BEGIN');
       } catch (cause) {
-        throw new PostgresUnitOfWorkError(
-          PostgresUnitOfWorkErrorCodes.BeginFailed,
-          cause,
-        );
+        throw new PostgresUnitOfWorkError(PostgresUnitOfWorkErrorCodes.BeginFailed, cause);
       }
 
       let result: TResult;
@@ -73,10 +62,7 @@ implements UnitOfWork<TScope> {
           );
         }
 
-        throw new PostgresUnitOfWorkError(
-          PostgresUnitOfWorkErrorCodes.CommitFailed,
-          cause,
-        );
+        throw new PostgresUnitOfWorkError(PostgresUnitOfWorkErrorCodes.CommitFailed, cause);
       }
 
       return result;

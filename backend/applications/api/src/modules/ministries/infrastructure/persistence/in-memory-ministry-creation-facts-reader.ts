@@ -11,11 +11,12 @@ export class InMemoryMinistryCreationFactsReader implements MinistryCreationFact
   async find(organizationId: OrganizationId, name: MinistryName) {
     return Object.freeze({
       organizationExists: this.organizationIds().some((id) => id.equals(organizationId)),
-      activeNameExists: this.ministries().some((ministry) =>
-        ministry.organizationId.equals(organizationId)
-        && ministry.status === 'active'
-        && ministry.name.toString().toLowerCase()
-          === name.toString().toLowerCase()),
+      activeNameExists: this.ministries().some(
+        (ministry) =>
+          ministry.organizationId.equals(organizationId) &&
+          ministry.status === 'active' &&
+          ministry.name.toString().toLowerCase() === name.toString().toLowerCase(),
+      ),
     });
   }
 }

@@ -25,9 +25,7 @@ export interface GetMemberDetailsRouteDependencies {
 }
 
 function pathValue(params: unknown, name: string): unknown {
-  return typeof params === 'object'
-    && params !== null
-    && name in params
+  return typeof params === 'object' && params !== null && name in params
     ? params[name as keyof typeof params]
     : undefined;
 }
@@ -62,34 +60,29 @@ export function registerGetMemberDetailsRoute(
   app: FastifyInstance,
   dependencies: GetMemberDetailsRouteDependencies,
 ): void {
-  app.get(
-    '/organizations/:organizationId/members/:memberId',
-    async (request, reply) => {
-      const context = requireHttpExecutionContext(request.executionContext);
-      const result = await traceUseCase(
-        'GetMemberDetails',
-        () => dependencies.handler.handle({
+  app.get('/organizations/:organizationId/members/:memberId', async (request, reply) => {
+    const context = requireHttpExecutionContext(request.executionContext);
+    const result = await traceUseCase('GetMemberDetails', () =>
+      dependencies.handler.handle(
+        {
           organizationId: pathValue(request.params, 'organizationId'),
           memberId: pathValue(request.params, 'memberId'),
-        }, context),
-      );
-      const view = dependencies.presenter.present(
-        result,
+        },
         context,
-        request.locale,
-      );
+      ),
+    );
+    const view = dependencies.presenter.present(result, context, request.locale);
 
-      if (view.kind === 'failure') {
-        return sendPresentedProblem(reply, {
-          context,
-          error: view.error,
-          locale: request.locale,
-          problem: problemMetadata(view.error),
-          translator: dependencies.messageTranslator,
-        });
-      }
+    if (view.kind === 'failure') {
+      return sendPresentedProblem(reply, {
+        context,
+        error: view.error,
+        locale: request.locale,
+        problem: problemMetadata(view.error),
+        translator: dependencies.messageTranslator,
+      });
+    }
 
-      return reply.status(200).send(view.resource);
-    },
-  );
+    return reply.status(200).send(view.resource);
+  });
 }

@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  createDomainEvent,
-  DomainEventMetadataErrorCodes,
-  parseDomainEventId,
-} from '.';
+import { createDomainEvent, DomainEventMetadataErrorCodes, parseDomainEventId } from '.';
 import { Instant } from '@/shared/domain/instant';
 
 describe('DomainEvent', () => {
@@ -13,9 +9,7 @@ describe('DomainEvent', () => {
 
   it('creates a deeply immutable fact with explicit metadata', () => {
     const eventId = parseDomainEventId(EVENT_ID);
-    const occurredAt = Instant.create(
-      '2026-07-27T12:00:00.000Z',
-    );
+    const occurredAt = Instant.create('2026-07-27T12:00:00.000Z');
 
     assert.equal(eventId.success, true);
     assert.equal(occurredAt.success, true);
@@ -48,9 +42,7 @@ describe('DomainEvent', () => {
 
   it('preserves the original payload while creating an immutable copy', () => {
     const eventId = parseDomainEventId(EVENT_ID);
-    const occurredAt = Instant.create(
-      '2026-07-27T12:00:00.000Z',
-    );
+    const occurredAt = Instant.create('2026-07-27T12:00:00.000Z');
 
     assert.equal(eventId.success, true);
     assert.equal(occurredAt.success, true);

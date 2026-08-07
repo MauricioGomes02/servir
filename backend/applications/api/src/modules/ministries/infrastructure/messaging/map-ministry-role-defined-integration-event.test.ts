@@ -3,9 +3,18 @@ import { describe, it } from 'node:test';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
-import { createMinistryRoleDefined, MinistryId, MinistryRoleId, MinistryRoleName } from '../../domain';
+import {
+  createMinistryRoleDefined,
+  MinistryId,
+  MinistryRoleId,
+  MinistryRoleName,
+} from '../../domain';
 import { mapMinistryRoleDefinedIntegrationEvent } from './map-ministry-role-defined-integration-event';
-function value<T>(result: { success: true; value: T } | { success: false }): T { assert.equal(result.success, true); if (!result.success) throw new Error('fixture'); return result.value; }
+function value<T>(result: { success: true; value: T } | { success: false }): T {
+  assert.equal(result.success, true);
+  if (!result.success) throw new Error('fixture');
+  return result.value;
+}
 describe('mapMinistryRoleDefinedIntegrationEvent', () => {
   it('creates the versioned public contract partitioned by organization', () => {
     const event = createMinistryRoleDefined({

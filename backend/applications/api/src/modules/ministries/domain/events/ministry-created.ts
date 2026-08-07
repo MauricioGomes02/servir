@@ -1,15 +1,22 @@
-import { createDomainEvent, type DomainEvent, type DomainEventId } from '@/shared/domain/domain-event';
+import {
+  createDomainEvent,
+  type DomainEvent,
+  type DomainEventId,
+} from '@/shared/domain/domain-event';
 import type { Instant } from '@/shared/domain/instant';
 import type { OrganizationId } from '@/modules/organizations/domain';
 
 import type { MinistryId } from '../entities';
 import type { MinistryName } from '../value-objects';
 
-export type MinistryCreated = DomainEvent<'ministry.created', Readonly<{
-  ministryId: string;
-  organizationId: string;
-  name: string;
-}>>;
+export type MinistryCreated = DomainEvent<
+  'ministry.created',
+  Readonly<{
+    ministryId: string;
+    organizationId: string;
+    name: string;
+  }>
+>;
 
 interface CreateMinistryCreatedProps {
   readonly eventId: DomainEventId;

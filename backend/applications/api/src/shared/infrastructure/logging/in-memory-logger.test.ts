@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  LogLevels,
-  type LogRecord,
-} from '@/shared/application/logging';
+import { LogLevels, type LogRecord } from '@/shared/application/logging';
 
 import { InMemoryLogger } from '.';
 
@@ -37,10 +34,7 @@ describe('InMemoryLogger', () => {
     );
     assert.deepEqual(
       logger.records.map((record) => record.eventName),
-      [
-        'organization.created',
-        'organization.creation_delayed',
-      ],
+      ['organization.created', 'organization.creation_delayed'],
     );
   });
 
