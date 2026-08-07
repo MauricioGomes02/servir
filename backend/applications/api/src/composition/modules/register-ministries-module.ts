@@ -1,7 +1,10 @@
 import {
   CreateMinistryHandler,
+  CreateMinistryMessage,
   DefineMinistryRoleHandler,
+  DefineMinistryRoleMessage,
   RequestMinistryMembershipHandler,
+  RequestMinistryMembershipMessage,
 } from '@/modules/ministries/application';
 import {
   MinistryCreationPolicy,
@@ -11,76 +14,81 @@ import {
   MinistryRoleId,
 } from '@/modules/ministries/domain';
 import {
+  registerCreateMinistryRoute,
+  registerDefineMinistryRoleRoute,
+  registerRequestMinistryMembershipRoute,
+} from '@/modules/ministries/infrastructure';
+import {
   CreateMinistryPresenter,
   DefineMinistryRolePresenter,
   RequestMinistryMembershipPresenter,
 } from '@/modules/ministries/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
-import { asFunction } from 'awilix';
+import type { ApplicationModule } from './application-module';
 
-import type { ApplicationContainer, ApplicationCradle } from '../container';
-import type { CreateApplicationOptions } from '../create-application-options';
-
-export function registerMinistriesModule(
-  container: ApplicationContainer,
-  options: CreateApplicationOptions,
-): void {
-  container.register({
-    ministryIdGenerator: asFunction(
-      () => new UuidV7Generator(MinistryId.create, options.uuidSource),
-    ).singleton(),
-    ministryRoleIdGenerator: asFunction(
-      () => new UuidV7Generator(MinistryRoleId.create, options.uuidSource),
-    ).singleton(),
-    ministryMembershipIdGenerator: asFunction(
-      () => new UuidV7Generator(MinistryMembershipId.create, options.uuidSource),
-    ).singleton(),
-    createMinistryHandler: asFunction(
-      (dependencies: ApplicationCradle) =>
-        new CreateMinistryHandler({
-          clock: dependencies.clock,
-          ministryIdGenerator: dependencies.ministryIdGenerator,
-          domainEventIdGenerator: dependencies.domainEventIdGenerator,
-          messageIdGenerator: dependencies.messageIdGenerator,
-          creationFacts: dependencies.ministryCreationFacts,
-          creationPolicy: new MinistryCreationPolicy(),
-          unitOfWork: dependencies.ministryUnitOfWork,
-          logger: dependencies.logger,
-        }),
-    ).singleton(),
-    createMinistryPresenter: asFunction(
-      (dependencies: ApplicationCradle) => new CreateMinistryPresenter(dependencies.translator),
-    ).singleton(),
-    defineMinistryRoleHandler: asFunction(
-      (dependencies: ApplicationCradle) =>
-        new DefineMinistryRoleHandler({
-          clock: dependencies.clock,
-          ministryRoleIdGenerator: dependencies.ministryRoleIdGenerator,
-          domainEventIdGenerator: dependencies.domainEventIdGenerator,
-          messageIdGenerator: dependencies.messageIdGenerator,
-          unitOfWork: dependencies.ministryUnitOfWork,
-          logger: dependencies.logger,
-        }),
-    ).singleton(),
-    defineMinistryRolePresenter: asFunction(
-      (dependencies: ApplicationCradle) => new DefineMinistryRolePresenter(dependencies.translator),
-    ).singleton(),
-    requestMinistryMembershipHandler: asFunction(
-      (dependencies: ApplicationCradle) =>
-        new RequestMinistryMembershipHandler({
-          clock: dependencies.clock,
-          ministryMembershipIdGenerator: dependencies.ministryMembershipIdGenerator,
-          domainEventIdGenerator: dependencies.domainEventIdGenerator,
-          messageIdGenerator: dependencies.messageIdGenerator,
-          facts: dependencies.ministryMembershipRequestFacts,
-          policy: new MinistryMembershipRequestPolicy(),
-          unitOfWork: dependencies.ministryMembershipUnitOfWork,
-          logger: dependencies.logger,
-        }),
-    ).singleton(),
-    requestMinistryMembershipPresenter: asFunction(
-      (dependencies: ApplicationCradle) =>
-        new RequestMinistryMembershipPresenter(dependencies.translator),
-    ).singleton(),
-  });
-}
+export const ministriesModule: ApplicationModule = {
+  register(container, options) {
+    const dependencies = container.cradle;
+    const createMinistry = new CreateMinistryHandler({
+      clock: dependencies.clock,
+      ministryIdGenerator: new UuidV7Generator(MinistryId.create, options.uuidSource),
+      domainEventIdGenerator: dependencies.domainEventIdGenerator,
+      messageIdGenerator: dependencies.messageIdGenerator,
+      creationFacts: dependencies.ministryCreationFacts,
+      creationPolicy: new MinistryCreationPolicy(),
+      unitOfWork: dependencies.ministryUnitOfWork,
+      logger: dependencies.logger,
+    });
+    const defineMinistryRole = new DefineMinistryRoleHandler({
+      clock: dependencies.clock,
+      ministryRoleIdGenerator: new UuidV7Generator(MinistryRoleId.create, options.uuidSource),
+      domainEventIdGenerator: dependencies.domainEventIdGenerator,
+      messageIdGenerator: dependencies.messageIdGenerator,
+      unitOfWork: dependencies.ministryUnitOfWork,
+      logger: dependencies.logger,
+    });
+    const requestMembership = new RequestMinistryMembershipHandler({
+      clock: dependencies.clock,
+      ministryMembershipIdGenerator: new UuidV7Generator(
+        MinistryMembershipId.create,
+        options.uuidSource,
+      ),
+      domainEventIdGenerator: dependencies.domainEventIdGenerator,
+      messageIdGenerator: dependencies.messageIdGenerator,
+      facts: dependencies.ministryMembershipRequestFacts,
+      policy: new MinistryMembershipRequestPolicy(),
+      unitOfWork: dependencies.ministryMembershipUnitOfWork,
+      logger: dependencies.logger,
+    });
+    dependencies.mediator.register(
+      CreateMinistryMessage,
+      createMinistry.handle.bind(createMinistry),
+    );
+    dependencies.mediator.register(
+      DefineMinistryRoleMessage,
+      defineMinistryRole.handle.bind(defineMinistryRole),
+    );
+    dependencies.mediator.register(
+      RequestMinistryMembershipMessage,
+      requestMembership.handle.bind(requestMembership),
+    );
+  },
+  registerRoutes(app, container) {
+    const dependencies = container.cradle;
+    registerCreateMinistryRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new CreateMinistryPresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+    registerDefineMinistryRoleRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new DefineMinistryRolePresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+    registerRequestMinistryMembershipRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new RequestMinistryMembershipPresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+  },
+};

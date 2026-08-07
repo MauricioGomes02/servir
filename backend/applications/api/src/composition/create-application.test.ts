@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 
 import { createApplication } from './create-application';
+import { createTestPersistence } from './test-support';
 
 const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
@@ -49,6 +50,7 @@ describe('createApplication', () => {
       100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725, 800, 825,
     ];
     const app = createApplication({
+      persistence: createTestPersistence(),
       logger,
       monotonicNow: () => monotonicInstants.shift() ?? 142,
       uuidSource: () => {
@@ -251,6 +253,7 @@ describe('createApplication', () => {
     const ids = [...UUIDS.slice(0, 6)];
     const instants = [0, 1, 2, 3, 4, 5];
     const app = createApplication({
+      persistence: createTestPersistence(),
       logger: new InMemoryLogger(),
       monotonicNow: () => instants.shift() ?? 3,
       uuidSource: () => {

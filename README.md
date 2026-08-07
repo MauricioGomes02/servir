@@ -126,12 +126,12 @@ servir/
 ### Pré-requisitos
 
 - Node.js compatível com ES2022 e npm workspaces.
-- Docker, Terraform e Docker Compose somente para o fluxo completo.
+- Docker, Terraform e Docker Compose para executar a API local com PostgreSQL e o fluxo completo.
 - No Windows, a infraestrutura foi preparada para execução pelo WSL com acesso ao Docker Engine.
 
-### API em memória
+### API local
 
-Essa opção não exige PostgreSQL nem Kafka:
+A API usa PostgreSQL como persistência de runtime. Depois de provisionar o banco e aplicar as migrations Liquibase conforme o guia de infraestrutura:
 
 ```bash
 cd backend
@@ -180,8 +180,9 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Contexto de execução com correlação e request; locale é resolvido na apresentação e o trace é propagado pelos adapters.
 - Logging estruturado, instrumentação HTTP/PostgreSQL e tracing de casos de uso.
 - Representação REST de sucesso e Problem Details localizado para falhas.
-- Container de dependências estrito com registros compartilhados, de persistência e por bounded context.
-- `CreateOrganization` completo em memória e PostgreSQL.
+- Container restrito à composition root, Service Collection, Mediator tipado e manifestos instaláveis por bounded context.
+- Runtime PostgreSQL-only com uma única composição de persistência; adapters em memória são doubles de teste.
+- `CreateOrganization` completo com PostgreSQL e outbox atômica.
 - Outbox transacional com Integration Event versionado.
 - Relay PostgreSQL independente, lease, retry exponencial com jitter e falha terminal.
 - Publicação Kafka em CloudEvents com entrega at-least-once.

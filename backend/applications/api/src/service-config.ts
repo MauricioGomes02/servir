@@ -4,12 +4,10 @@ import { parseLogLevel, type LogLevel } from '@/shared/application/logging';
 const DEFAULT_HOST = '0.0.0.0';
 const DEFAULT_PORT = 3000;
 
-export type PersistenceConfig =
-  | Readonly<{ mode: 'memory' }>
-  | Readonly<{
-      mode: 'postgres';
-      connectionString: string;
-    }>;
+export type PersistenceConfig = Readonly<{
+  mode: 'postgres';
+  connectionString: string;
+}>;
 
 export interface ServiceConfig {
   readonly host: string;
@@ -19,12 +17,7 @@ export interface ServiceConfig {
 }
 
 function readPersistenceConfig(environment: NodeJS.ProcessEnv): PersistenceConfig {
-  const mode = environment.PERSISTENCE_MODE?.trim() ?? 'memory';
-
-  if (mode === 'memory') {
-    return Object.freeze({ mode });
-  }
-
+  const mode = environment.PERSISTENCE_MODE?.trim() ?? 'postgres';
   if (mode !== 'postgres') {
     throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidPersistenceMode);
   }

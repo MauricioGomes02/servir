@@ -1,4 +1,5 @@
-import type { CreateOrganizationHandler } from '@/modules/organizations/application';
+import { CreateOrganizationMessage } from '@/modules/organizations/application';
+import type { Mediator } from '@/shared/application/mediator';
 import type { CreateOrganizationPresenter } from '@/modules/organizations/presentation';
 import {
   HttpProblemMessageCodes,
@@ -9,11 +10,10 @@ import {
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
 import type { MessageTranslator } from '@/shared/presentation';
-import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import type { FastifyInstance } from 'fastify';
 
 export interface CreateOrganizationRouteDependencies {
-  readonly handler: CreateOrganizationHandler;
+  readonly mediator: Mediator;
   readonly messageTranslator: MessageTranslator;
   readonly presenter: CreateOrganizationPresenter;
 }
@@ -33,8 +33,10 @@ export function registerCreateOrganizationRoute(
   app.post('/organizations', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
 
-    const result = await traceUseCase('CreateOrganization', () =>
-      dependencies.handler.handle({ name: organizationName(request.body) }, context),
+    const result = await dependencies.mediator.send(
+      CreateOrganizationMessage,
+      { name: organizationName(request.body) },
+      context,
     );
     const view = dependencies.presenter.present(result, context, request.locale);
 

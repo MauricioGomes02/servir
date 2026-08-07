@@ -9,4 +9,3 @@ export type { CreateApplicationOptions } from './create-application';
 export { createApplicationContainer } from './container';
 
 export type { ApplicationContainer, ApplicationCradle } from './container';
-export { ApplicationPersistenceConfigurationError } from './application-persistence-configuration-error';

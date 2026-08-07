@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { CreateOrganizationHandler } from '@/modules/organizations/application';
+import {
+  CreateOrganizationHandler,
+  CreateOrganizationMessage,
+} from '@/modules/organizations/application';
 import { OrganizationId } from '@/modules/organizations/domain';
 import {
   CreateOrganizationPresenter,
@@ -9,6 +12,7 @@ import {
 } from '@/modules/organizations/presentation';
 import { parseCorrelationId, parseRequestId } from '@/shared/application/context';
 import { parseMessageId } from '@/shared/application/messaging';
+import { Mediator } from '@/shared/application/mediator';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
@@ -70,6 +74,8 @@ function fixture() {
     logger,
   });
   const presenter = new CreateOrganizationPresenter(translator);
+  const mediator = new Mediator();
+  mediator.register(CreateOrganizationMessage, handler.handle.bind(handler));
   const app = createFastifyApplication({
     correlationIdGenerator: new SequenceIdGenerator([correlationId.value]),
     logger,
@@ -78,7 +84,7 @@ function fixture() {
   });
 
   registerCreateOrganizationRoute(app, {
-    handler,
+    mediator,
     messageTranslator: translator,
     presenter,
   });

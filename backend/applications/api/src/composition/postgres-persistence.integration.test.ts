@@ -83,7 +83,7 @@ describe('PostgreSQL organization persistence', () => {
         organizationIdGenerator: new SequenceIdGenerator([organizationId]),
         domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([eventId]),
         messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
-        unitOfWork: persistence.unitOfWork,
+        unitOfWork: persistence.organizationUnitOfWork,
         logger: new InMemoryLogger(),
       });
 
@@ -130,7 +130,7 @@ describe('PostgreSQL organization persistence', () => {
         organizationIdGenerator: new SequenceIdGenerator([rolledBackOrganizationId]),
         domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([rolledBackEventId]),
         messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
-        unitOfWork: persistence.unitOfWork,
+        unitOfWork: persistence.organizationUnitOfWork,
         logger: new InMemoryLogger(),
       });
 

@@ -42,6 +42,8 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Instant | Value Object que representa um ponto absoluto na linha do tempo, normalizado em UTC. | Produzido por Clock; usado por Events. | `2026-07-27T15:00:00.000Z`. | Horário civil sem offset. |
 | CorrelationId | Identificador que correlaciona operações relacionadas. | Campo de Context/Message. | Mesmo ID em passos de um fluxo. | ID da entidade de negócio. |
 | Handler | Componente que trata um tipo de mensagem. | Recebe Command, Query ou Event. | `CancelOrderHandler`. | Service com dezenas de métodos. |
+| Mediator | Dispatcher tipado entre uma mensagem e seu único Handler. | Aplica pipelines transversais sem esconder Context ou Unit of Work. | `mediator.send(CreateMinistryMessage, input, context)`. | Service Locator ou bus dinâmico sem tipos. |
+| Application Module | Manifesto instalável de um bounded context na composition root. | Registra handlers e endpoints do próprio módulo. | `ministriesModule`. | Lista central alterada para cada novo handler e rota. |
 | Publisher | Port que envia mensagens sem conhecer consumidores. | Usa Event Bus ou broker por adapter. | Publicador de eventos pendentes. | Agregado chamando webhook. |
 | Subscriber | Consumidor registrado para um tipo de mensagem. | Invoca um Handler. | Auditoria de `OrderCreated`. | Produtor conhecendo lista de consumidores. |
 | Outbox Relay | Adapter que entrega mensagens persistidas na outbox a um Publisher após a fronteira transacional. | Confirma entrega conforme a semântica do storage; pode acionar Event Bus ou broker. | Relay publica `OrganizationCreated` após o commit. | Caso de uso enviando e-mail depois de salvar e retornando falha por isso. |

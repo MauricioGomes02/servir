@@ -3,9 +3,7 @@ import { createContainer, InjectionMode } from 'awilix';
 import type { CreateApplicationOptions } from '../create-application-options';
 import type { ApplicationContainer, ApplicationCradle } from './application-container';
 import { registerCoreDependencies } from '../modules/register-core-dependencies';
-import { registerMembershipModule } from '../modules/register-membership-module';
-import { registerMinistriesModule } from '../modules/register-ministries-module';
-import { registerOrganizationsModule } from '../modules/register-organizations-module';
+import { applicationModules } from '../modules';
 import { registerPersistence } from '../persistence/register-persistence';
 
 export function createApplicationContainer(
@@ -17,10 +15,8 @@ export function createApplicationContainer(
   });
 
   registerCoreDependencies(container, options);
-  registerPersistence(container, options);
-  registerOrganizationsModule(container, options);
-  registerMembershipModule(container, options);
-  registerMinistriesModule(container, options);
+  registerPersistence(container, options.persistence);
+  for (const module of applicationModules) module.register(container, options);
 
   return container;
 }

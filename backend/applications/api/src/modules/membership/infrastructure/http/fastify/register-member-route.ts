@@ -1,4 +1,5 @@
-import type { RegisterMemberHandler } from '@/modules/membership/application';
+import { RegisterMemberMessage } from '@/modules/membership/application';
+import type { Mediator } from '@/shared/application/mediator';
 import { MemberRegistrationPolicyErrorCodes } from '@/modules/membership/domain';
 import type { RegisterMemberPresenter } from '@/modules/membership/presentation';
 import { OrganizationIdErrorCodes } from '@/modules/organizations/domain';
@@ -11,12 +12,11 @@ import {
   sendPresentedProblem,
   type PresentedHttpProblem,
 } from '@/shared/infrastructure/http/fastify';
-import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
 export interface RegisterMemberRouteDependencies {
-  readonly handler: RegisterMemberHandler;
+  readonly mediator: Mediator;
   readonly messageTranslator: MessageTranslator;
   readonly presenter: RegisterMemberPresenter;
 }
@@ -64,14 +64,13 @@ export function registerMemberRoute(
   app.post('/organizations/:organizationId/members', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
 
-    const result = await traceUseCase('RegisterMember', () =>
-      dependencies.handler.handle(
-        {
-          organizationId: organizationId(request.params),
-          name: memberName(request.body),
-        },
-        context,
-      ),
+    const result = await dependencies.mediator.send(
+      RegisterMemberMessage,
+      {
+        organizationId: organizationId(request.params),
+        name: memberName(request.body),
+      },
+      context,
     );
     const view = dependencies.presenter.present(result, context, request.locale);
 

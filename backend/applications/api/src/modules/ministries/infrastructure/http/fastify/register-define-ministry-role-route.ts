@@ -1,4 +1,5 @@
-import { DefineMinistryRoleErrorCodes, type DefineMinistryRoleHandler } from '../../../application';
+import { DefineMinistryRoleErrorCodes, DefineMinistryRoleMessage } from '../../../application';
+import type { Mediator } from '@/shared/application/mediator';
 import { MinistryIdErrorCodes, MinistryRoleDefinitionErrorCodes } from '../../../domain';
 import type { DefineMinistryRolePresenter } from '../../../presentation';
 import { OrganizationIdErrorCodes } from '@/modules/organizations/domain';
@@ -11,7 +12,6 @@ import {
   HttpProblemMessageCodes,
   HttpProblemTypes,
 } from '@/shared/infrastructure/http/problem-details';
-import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
@@ -52,7 +52,7 @@ function metadata(error: PresentedError): PresentedHttpProblem {
 export function registerDefineMinistryRoleRoute(
   app: FastifyInstance,
   dependencies: {
-    handler: DefineMinistryRoleHandler;
+    mediator: Mediator;
     presenter: DefineMinistryRolePresenter;
     messageTranslator: MessageTranslator;
   },
@@ -61,15 +61,14 @@ export function registerDefineMinistryRoleRoute(
     '/organizations/:organizationId/ministries/:ministryId/roles',
     async (request, reply) => {
       const context = requireHttpExecutionContext(request.executionContext);
-      const result = await traceUseCase('DefineMinistryRole', () =>
-        dependencies.handler.handle(
-          {
-            organizationId: property(request.params, 'organizationId'),
-            ministryId: property(request.params, 'ministryId'),
-            name: property(request.body, 'name'),
-          },
-          context,
-        ),
+      const result = await dependencies.mediator.send(
+        DefineMinistryRoleMessage,
+        {
+          organizationId: property(request.params, 'organizationId'),
+          ministryId: property(request.params, 'ministryId'),
+          name: property(request.body, 'name'),
+        },
+        context,
       );
       const view = dependencies.presenter.present(result, context, request.locale);
       if (view.kind === 'failure')

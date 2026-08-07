@@ -1,4 +1,5 @@
-import type { CreateMinistryHandler } from '../../../application';
+import { CreateMinistryMessage } from '../../../application';
+import type { Mediator } from '@/shared/application/mediator';
 import { MinistryCreationPolicyErrorCodes } from '../../../domain';
 import type { CreateMinistryPresenter } from '../../../presentation';
 import { OrganizationIdErrorCodes } from '@/modules/organizations/domain';
@@ -11,12 +12,11 @@ import {
   HttpProblemMessageCodes,
   HttpProblemTypes,
 } from '@/shared/infrastructure/http/problem-details';
-import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
 export interface CreateMinistryRouteDependencies {
-  readonly handler: CreateMinistryHandler;
+  readonly mediator: Mediator;
   readonly presenter: CreateMinistryPresenter;
   readonly messageTranslator: MessageTranslator;
 }
@@ -63,14 +63,13 @@ export function registerCreateMinistryRoute(
 ): void {
   app.post('/organizations/:organizationId/ministries', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
-    const result = await traceUseCase('CreateMinistry', () =>
-      dependencies.handler.handle(
-        {
-          organizationId: property(request.params, 'organizationId'),
-          name: property(request.body, 'name'),
-        },
-        context,
-      ),
+    const result = await dependencies.mediator.send(
+      CreateMinistryMessage,
+      {
+        organizationId: property(request.params, 'organizationId'),
+        name: property(request.body, 'name'),
+      },
+      context,
     );
     const view = dependencies.presenter.present(result, context, request.locale);
     if (view.kind === 'failure') {

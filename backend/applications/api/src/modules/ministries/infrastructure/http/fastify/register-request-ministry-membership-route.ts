@@ -7,15 +7,15 @@ import {
   HttpProblemMessageCodes,
   HttpProblemTypes,
 } from '@/shared/infrastructure/http/problem-details';
-import { traceUseCase } from '@/shared/infrastructure/telemetry';
+import type { Mediator } from '@/shared/application/mediator';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
-import type { RequestMinistryMembershipHandler } from '../../../application';
+import { RequestMinistryMembershipMessage } from '../../../application';
 import { MinistryMembershipRequestPolicyErrorCodes } from '../../../domain';
 import type { RequestMinistryMembershipPresenter } from '../../../presentation';
 
 export interface RequestMinistryMembershipRouteDependencies {
-  readonly handler: RequestMinistryMembershipHandler;
+  readonly mediator: Mediator;
   readonly presenter: RequestMinistryMembershipPresenter;
   readonly messageTranslator: MessageTranslator;
 }
@@ -58,15 +58,14 @@ export function registerRequestMinistryMembershipRoute(
     '/organizations/:organizationId/ministries/:ministryId/memberships',
     async (request, reply) => {
       const context = requireHttpExecutionContext(request.executionContext);
-      const result = await traceUseCase('RequestMinistryMembership', () =>
-        dependencies.handler.handle(
-          {
-            organizationId: parameter(request.params, 'organizationId'),
-            ministryId: parameter(request.params, 'ministryId'),
-            memberId: memberId(request.body),
-          },
-          context,
-        ),
+      const result = await dependencies.mediator.send(
+        RequestMinistryMembershipMessage,
+        {
+          organizationId: parameter(request.params, 'organizationId'),
+          ministryId: parameter(request.params, 'ministryId'),
+          memberId: memberId(request.body),
+        },
+        context,
       );
       const view = dependencies.presenter.present(result, context, request.locale);
       if (view.kind === 'failure')

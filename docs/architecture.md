@@ -38,7 +38,11 @@ Capacidades transversais usadas por mais de uma aplicação residem em pacotes n
 
 Mecânicas pequenas e equivalentes, como parsing de severidade e extração segura de atributos técnicos, também podem ser compartilhadas. Lifecycle, sinais, ordem de shutdown, códigos fallback e configuração específica permanecem nas applications porque expressam garantias operacionais distintas.
 
-A API usa um container Awilix tipado somente na composition root. Registros são separados entre dependências compartilhadas, persistência e bounded contexts; o bootstrap resolve objetos e os injeta explicitamente. Rotas, casos de uso, presenters e domínio não consultam o container. O `ExecutionContext` permanece um dado da execução, criado na borda e passado ao handler, não uma dependência global ou request-scoped escondida.
+A API usa um container Awilix tipado somente na composition root. Uma `ServiceCollection` oferece registros explícitos com lifetimes singleton, transient e scoped, sem expor o container ao núcleo. Cada bounded context fornece um manifesto instalável que registra seus handlers e suas rotas; adicionar um caso de uso não exige alterar listas centrais de handlers ou endpoints.
+
+Commands e Queries são enviados por um Mediator tipado. O manifesto associa cada token de mensagem a exatamente um handler e o Mediator aplica o pipeline transversal de tracing antes da execução. Rotas conhecem o token e o Mediator, não a classe concreta do handler. O `ExecutionContext` continua explícito: nasce na borda HTTP e acompanha a mensagem, sem ambient context, Service Locator ou estado request-scoped escondido.
+
+O runtime recebe uma única `ApplicationPersistence`, que agrupa as portas exigidas pela aplicação e seu lifecycle. A implementação de produção é exclusivamente PostgreSQL; doubles em memória pertencem ao test harness. A atomicidade entre Aggregate e outbox continua expressa pela `UnitOfWork` do handler, não pelo container nem pelo Mediator. A decisão completa está no [ADR 042](decisions/042-typed-mediator-and-installable-modules.md).
 
 ## Commands e Queries
 

@@ -1,7 +1,8 @@
 import {
   GetMemberDetailsErrorCodes,
-  type GetMemberDetailsHandler,
+  GetMemberDetailsMessage,
 } from '@/modules/membership/application';
+import type { Mediator } from '@/shared/application/mediator';
 import { MemberIdErrorCodes } from '@/modules/membership/domain';
 import type { GetMemberDetailsPresenter } from '@/modules/membership/presentation';
 import { OrganizationIdErrorCodes } from '@/modules/organizations/domain';
@@ -14,12 +15,11 @@ import {
   HttpProblemMessageCodes,
   HttpProblemTypes,
 } from '@/shared/infrastructure/http/problem-details';
-import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
 export interface GetMemberDetailsRouteDependencies {
-  readonly handler: GetMemberDetailsHandler;
+  readonly mediator: Mediator;
   readonly messageTranslator: MessageTranslator;
   readonly presenter: GetMemberDetailsPresenter;
 }
@@ -62,14 +62,13 @@ export function registerGetMemberDetailsRoute(
 ): void {
   app.get('/organizations/:organizationId/members/:memberId', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
-    const result = await traceUseCase('GetMemberDetails', () =>
-      dependencies.handler.handle(
-        {
-          organizationId: pathValue(request.params, 'organizationId'),
-          memberId: pathValue(request.params, 'memberId'),
-        },
-        context,
-      ),
+    const result = await dependencies.mediator.send(
+      GetMemberDetailsMessage,
+      {
+        organizationId: pathValue(request.params, 'organizationId'),
+        memberId: pathValue(request.params, 'memberId'),
+      },
+      context,
     );
     const view = dependencies.presenter.present(result, context, request.locale);
 

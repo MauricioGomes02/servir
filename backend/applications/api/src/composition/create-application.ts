@@ -3,11 +3,11 @@ import type { FastifyInstance } from 'fastify';
 
 import { createApplicationContainer } from './container';
 import type { CreateApplicationOptions } from './create-application-options';
-import { registerApplicationRoutes } from './register-application-routes';
+import { applicationModules } from './modules';
 
 export type { CreateApplicationOptions } from './create-application-options';
 
-export function createApplication(options: CreateApplicationOptions = {}): FastifyInstance {
+export function createApplication(options: CreateApplicationOptions): FastifyInstance {
   const container = createApplicationContainer(options);
   const dependencies = container.cradle;
   const app = createFastifyApplication({
@@ -28,7 +28,11 @@ export function createApplication(options: CreateApplicationOptions = {}): Fasti
     });
   }
 
-  registerApplicationRoutes(app, container);
+  app.addHook('onClose', async () => {
+    await options.persistence.close();
+  });
+
+  for (const module of applicationModules) module.registerRoutes(app, container);
 
   return app;
 }

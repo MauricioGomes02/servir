@@ -33,29 +33,14 @@ export async function startService(telemetry: TelemetryLifecycle): Promise<void>
   try {
     const config = readServiceConfig(process.env);
     logger = new JsonStdoutLogger(undefined, undefined, config.logLevel);
-    let postgresPersistence: PostgresPersistence | undefined;
-
-    if (config.persistence.mode === 'postgres') {
-      postgresPersistence = createPostgresPersistence(config.persistence.connectionString);
-    }
+    const postgresPersistence: PostgresPersistence = createPostgresPersistence(
+      config.persistence.connectionString,
+    );
 
     const app = createApplication({
       logger,
-      memberUnitOfWork: postgresPersistence?.memberUnitOfWork,
-      memberDetailsReader: postgresPersistence?.memberDetailsReader,
-      organizationRegistrationFacts: postgresPersistence?.organizationRegistrationFacts,
-      organizationUnitOfWork: postgresPersistence?.unitOfWork,
-      ministryUnitOfWork: postgresPersistence?.ministryUnitOfWork,
-      ministryCreationFacts: postgresPersistence?.ministryCreationFacts,
-      ministryMembershipUnitOfWork: postgresPersistence?.ministryMembershipUnitOfWork,
-      ministryMembershipRequestFacts: postgresPersistence?.ministryMembershipRequestFacts,
+      persistence: postgresPersistence,
     });
-
-    if (postgresPersistence !== undefined) {
-      app.addHook('onClose', async () => {
-        await postgresPersistence?.close();
-      });
-    }
 
     await app.listen({ host: config.host, port: config.port });
     logger.log(

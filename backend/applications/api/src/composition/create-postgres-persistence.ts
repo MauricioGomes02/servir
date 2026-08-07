@@ -42,9 +42,10 @@ import { PostgresEventOutbox, UnmappedDomainEventError } from '@/shared/infrastr
 import { captureActiveTraceContext } from '@/shared/infrastructure/telemetry';
 import { PostgresUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { Pool } from 'pg';
+import type { ApplicationPersistence } from './persistence';
 
-export interface PostgresPersistence {
-  readonly unitOfWork: UnitOfWork<OrganizationWriteScope>;
+export interface PostgresPersistence extends ApplicationPersistence {
+  readonly organizationUnitOfWork: UnitOfWork<OrganizationWriteScope>;
   readonly memberUnitOfWork: UnitOfWork<MemberWriteScope>;
   readonly ministryUnitOfWork: UnitOfWork<MinistryWriteScope>;
   readonly ministryMembershipUnitOfWork: UnitOfWork<MinistryMembershipWriteScope>;
@@ -81,7 +82,7 @@ export function createPostgresPersistence(connectionString: string): PostgresPer
   }
 
   return {
-    unitOfWork: new PostgresUnitOfWork(pool, (client) => ({
+    organizationUnitOfWork: new PostgresUnitOfWork(pool, (client) => ({
       organizations: new PostgresOrganizationRepository(client),
       outbox: new PostgresEventOutbox(client, mapIntegrationEvent, captureActiveTraceContext),
     })),
