@@ -16,6 +16,11 @@ import { assertMemberDetailsReaderContract } from '@/modules/membership/infrastr
 import { Pool } from 'pg';
 
 import { createPostgresPersistence } from './create-postgres-persistence';
+import {
+  memberDetailsReader,
+  memberUnitOfWork,
+  organizationRegistrationFacts,
+} from './modules/membership-persistence-module';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const integrationIt = databaseUrl === undefined ? it.skip : it;
@@ -75,9 +80,9 @@ describe('PostgreSQL member persistence', () => {
           messageIdGenerator: new SequenceIdGenerator<MessageId>([
             requireValue(parseMessageId(messageIdText)),
           ]),
-          organizationRegistrationFacts: persistence.organizationRegistrationFacts,
+          organizationRegistrationFacts: persistence.services.get(organizationRegistrationFacts),
           registrationPolicy: new MemberRegistrationPolicy(),
-          unitOfWork: persistence.memberUnitOfWork,
+          unitOfWork: persistence.services.get(memberUnitOfWork),
           logger: new InMemoryLogger(),
         });
       }
@@ -116,7 +121,7 @@ describe('PostgreSQL member persistence', () => {
       });
 
       await assertMemberDetailsReaderContract({
-        reader: persistence.memberDetailsReader,
+        reader: persistence.services.get(memberDetailsReader),
         expected: createMemberDetails({
           id: requireValue(MemberId.create(memberIdText)),
           organizationId,

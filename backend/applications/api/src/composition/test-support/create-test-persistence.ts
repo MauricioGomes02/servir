@@ -1,16 +1,4 @@
 import {
-  InMemoryMemberDetailsReader,
-  InMemoryMemberRepository,
-  InMemoryOrganizationRegistrationFactsReader,
-} from '@/modules/membership/infrastructure';
-import {
-  InMemoryMinistryCreationFactsReader,
-  InMemoryMinistryMembershipRepository,
-  InMemoryMinistryMembershipRequestFactsReader,
-  InMemoryMinistryRepository,
-} from '@/modules/ministries/infrastructure';
-import { InMemoryOrganizationRepository } from '@/modules/organizations/infrastructure';
-import {
   InMemoryEventBus,
   InMemoryEventOutbox,
   InMemoryEventOutboxRelay,
@@ -18,6 +6,29 @@ import {
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import type { ApplicationPersistence } from '../persistence';
+import {
+  memberDetailsReader,
+  memberUnitOfWork,
+  organizationRegistrationFacts,
+} from '../modules/membership-persistence-module';
+import {
+  ministryCreationFacts,
+  ministryMembershipRequestFacts,
+  ministryMembershipUnitOfWork,
+  ministryUnitOfWork,
+} from '../modules/ministries-persistence-module';
+import { organizationUnitOfWork } from '../modules/organizations-persistence-module';
+import { ServiceRegistry } from '../services';
+import {
+  InMemoryMemberDetailsReader,
+  InMemoryMemberRepository,
+  InMemoryMinistryCreationFactsReader,
+  InMemoryMinistryMembershipRepository,
+  InMemoryMinistryMembershipRequestFactsReader,
+  InMemoryMinistryRepository,
+  InMemoryOrganizationRegistrationFactsReader,
+  InMemoryOrganizationRepository,
+} from './persistence-doubles';
 
 export function createTestPersistence(): ApplicationPersistence {
   const organizations = new InMemoryOrganizationRepository();
@@ -30,25 +41,36 @@ export function createTestPersistence(): ApplicationPersistence {
     new InMemoryEventBus(),
     new InMemoryLogger(),
   );
-
-  return {
-    organizationUnitOfWork: new DirectUnitOfWork({ organizations, outbox }),
-    memberUnitOfWork: new DirectUnitOfWork({ members, outbox }),
-    memberDetailsReader: new InMemoryMemberDetailsReader(() => members.members),
-    organizationRegistrationFacts: new InMemoryOrganizationRegistrationFactsReader(() =>
+  const services = new ServiceRegistry();
+  services.add(organizationUnitOfWork, new DirectUnitOfWork({ organizations, outbox }));
+  services.add(memberUnitOfWork, new DirectUnitOfWork({ members, outbox }));
+  services.add(memberDetailsReader, new InMemoryMemberDetailsReader(() => members.members));
+  services.add(
+    organizationRegistrationFacts,
+    new InMemoryOrganizationRegistrationFactsReader(() =>
       organizations.organizations.map(({ id }) => id),
     ),
-    ministryUnitOfWork: new DirectUnitOfWork({ ministries, outbox }),
-    ministryCreationFacts: new InMemoryMinistryCreationFactsReader(
+  );
+  services.add(ministryUnitOfWork, new DirectUnitOfWork({ ministries, outbox }));
+  services.add(
+    ministryCreationFacts,
+    new InMemoryMinistryCreationFactsReader(
       () => organizations.organizations.map(({ id }) => id),
       () => ministries.ministries,
     ),
-    ministryMembershipUnitOfWork: new DirectUnitOfWork({ ministryMemberships, outbox }),
-    ministryMembershipRequestFacts: new InMemoryMinistryMembershipRequestFactsReader(
+  );
+  services.add(ministryMembershipUnitOfWork, new DirectUnitOfWork({ ministryMemberships, outbox }));
+  services.add(
+    ministryMembershipRequestFacts,
+    new InMemoryMinistryMembershipRequestFactsReader(
       () => members.members,
       () => ministries.ministries,
       () => ministryMemberships.memberships,
     ),
+  );
+
+  return {
+    services,
     eventRelay,
     async close() {},
   };

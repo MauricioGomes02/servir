@@ -1,13 +1,7 @@
-export { InMemoryMemberRepository } from './in-memory-member-repository';
-
-export { InMemoryMemberDetailsReader } from './in-memory-member-details-reader';
-
 export {
   InvalidPersistedMemberDetailsError,
   InvalidPersistedMemberDetailsErrorCode,
 } from './invalid-persisted-member-details-error';
-
-export { InMemoryOrganizationRegistrationFactsReader } from './in-memory-organization-registration-facts-reader';
 
 export { MemberStatusCodes, fromMemberStatusCode, toMemberStatusCode } from './member-status-code';
 

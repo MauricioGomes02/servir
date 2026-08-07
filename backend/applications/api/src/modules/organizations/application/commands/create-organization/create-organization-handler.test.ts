@@ -17,7 +17,7 @@ import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 
 import { OrganizationId, OrganizationNameErrorCodes } from '../../../domain';
-import { InMemoryOrganizationRepository } from '../../../infrastructure';
+import { InMemoryOrganizationRepository } from '@/composition/test-support';
 import type { OrganizationWriteScope } from '../../ports';
 import { CreateOrganizationHandler } from '.';
 

@@ -13,6 +13,10 @@ export type MessageHandler<TInput, TOutput> = (
   context: ExecutionContext,
 ) => Promise<TOutput>;
 
+export interface MessageHandlerObject<TInput, TOutput> {
+  handle(input: TInput, context: ExecutionContext): Promise<TOutput>;
+}
+
 export type MessageExecution = <TOutput>(
   traceName: string,
   execute: () => Promise<TOutput>,
@@ -54,6 +58,13 @@ export class Mediator {
   ): void {
     if (this.handlers.has(token.name)) throw new DuplicateMessageHandlerError(token.name);
     this.handlers.set(token.name, handler as MessageHandler<unknown, unknown>);
+  }
+
+  registerHandler<TInput, TOutput>(
+    token: MessageToken<TInput, TOutput>,
+    handler: MessageHandlerObject<TInput, TOutput>,
+  ): void {
+    this.register(token, handler.handle.bind(handler));
   }
 
   async send<TInput, TOutput>(

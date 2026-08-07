@@ -17,6 +17,7 @@ import {
 import { Pool } from 'pg';
 
 import { createPostgresPersistence } from './create-postgres-persistence';
+import { organizationUnitOfWork } from './modules/organizations-persistence-module';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const integrationIt = databaseUrl === undefined ? it.skip : it;
@@ -83,7 +84,7 @@ describe('PostgreSQL organization persistence', () => {
         organizationIdGenerator: new SequenceIdGenerator([organizationId]),
         domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([eventId]),
         messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
-        unitOfWork: persistence.organizationUnitOfWork,
+        unitOfWork: persistence.services.get(organizationUnitOfWork),
         logger: new InMemoryLogger(),
       });
 
@@ -130,7 +131,7 @@ describe('PostgreSQL organization persistence', () => {
         organizationIdGenerator: new SequenceIdGenerator([rolledBackOrganizationId]),
         domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([rolledBackEventId]),
         messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
-        unitOfWork: persistence.organizationUnitOfWork,
+        unitOfWork: persistence.services.get(organizationUnitOfWork),
         logger: new InMemoryLogger(),
       });
 

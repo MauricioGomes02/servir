@@ -19,7 +19,7 @@ import {
 import {
   InMemoryMinistryCreationFactsReader,
   InMemoryMinistryRepository,
-} from '../../../infrastructure';
+} from '@/composition/test-support';
 import { CreateMinistryHandler } from '.';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {

@@ -16,7 +16,7 @@ import {
   MinistryRoleDefinitionErrorCodes,
   MinistryRoleId,
 } from '../../../domain';
-import { InMemoryMinistryRepository } from '../../../infrastructure';
+import { InMemoryMinistryRepository } from '@/composition/test-support';
 import { DefineMinistryRoleErrorCodes, DefineMinistryRoleHandler } from '.';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {

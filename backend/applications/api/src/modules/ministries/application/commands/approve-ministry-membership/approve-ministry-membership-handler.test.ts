@@ -12,7 +12,7 @@ import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { MinistryId, MinistryMembership, MinistryMembershipId } from '../../../domain';
-import { InMemoryMinistryMembershipRepository } from '../../../infrastructure';
+import { InMemoryMinistryMembershipRepository } from '@/composition/test-support';
 import { ApproveMinistryMembershipHandler } from '.';
 function value<T>(result: { success: true; value: T } | { success: false }): T {
   assert.equal(result.success, true);

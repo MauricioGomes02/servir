@@ -15,6 +15,11 @@ import {
 } from '@/modules/membership/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
+import {
+  memberDetailsReader,
+  memberUnitOfWork,
+  organizationRegistrationFacts,
+} from './membership-persistence-module';
 
 export const membershipModule: ApplicationModule = {
   register(container, options) {
@@ -24,23 +29,19 @@ export const membershipModule: ApplicationModule = {
       memberIdGenerator: new UuidV7Generator(MemberId.create, options.uuidSource),
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
-      organizationRegistrationFacts: dependencies.organizationRegistrationFacts,
+      organizationRegistrationFacts: options.persistence.services.get(
+        organizationRegistrationFacts,
+      ),
       registrationPolicy: new MemberRegistrationPolicy(),
-      unitOfWork: dependencies.memberUnitOfWork,
+      unitOfWork: options.persistence.services.get(memberUnitOfWork),
       logger: dependencies.logger,
     });
     const getMemberDetails = new GetMemberDetailsHandler(
-      dependencies.memberDetailsReader,
+      options.persistence.services.get(memberDetailsReader),
       dependencies.logger,
     );
-    dependencies.mediator.register(
-      RegisterMemberMessage,
-      registerMember.handle.bind(registerMember),
-    );
-    dependencies.mediator.register(
-      GetMemberDetailsMessage,
-      getMemberDetails.handle.bind(getMemberDetails),
-    );
+    dependencies.mediator.registerHandler(RegisterMemberMessage, registerMember);
+    dependencies.mediator.registerHandler(GetMemberDetailsMessage, getMemberDetails);
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;

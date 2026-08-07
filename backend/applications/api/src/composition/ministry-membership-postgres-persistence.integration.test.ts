@@ -12,6 +12,10 @@ import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
 import { Pool } from 'pg';
 import { createPostgresPersistence } from './create-postgres-persistence';
+import {
+  ministryMembershipRequestFacts,
+  ministryMembershipUnitOfWork,
+} from './modules/ministries-persistence-module';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const integrationIt = databaseUrl === undefined ? it.skip : it;
@@ -79,9 +83,9 @@ describe('PostgreSQL ministry membership persistence', () => {
       const common = {
         clock: new FixedClock(value(Instant.create('2026-08-07T12:00:00.000Z'))),
         messageIdGenerator: new SequenceIdGenerator([value(parseMessageId(ids.message))]),
-        facts: persistence.ministryMembershipRequestFacts,
+        facts: persistence.services.get(ministryMembershipRequestFacts),
         policy: new MinistryMembershipRequestPolicy(),
-        unitOfWork: persistence.ministryMembershipUnitOfWork,
+        unitOfWork: persistence.services.get(ministryMembershipUnitOfWork),
         logger: new InMemoryLogger(),
       };
       const context = createExecutionContext({

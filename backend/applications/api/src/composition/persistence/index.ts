@@ -1,2 +1,3 @@
 export type { ApplicationPersistence } from './application-persistence';
-export { registerPersistence } from './register-persistence';
+export * from './integration-event-mapper-registry';
+export * from './postgres-persistence-builder';

@@ -42,7 +42,9 @@ A API usa um container Awilix tipado somente na composition root. Uma `ServiceCo
 
 Commands e Queries são enviados por um Mediator tipado. O manifesto associa cada token de mensagem a exatamente um handler e o Mediator aplica o pipeline transversal de tracing antes da execução. Rotas conhecem o token e o Mediator, não a classe concreta do handler. O `ExecutionContext` continua explícito: nasce na borda HTTP e acompanha a mensagem, sem ambient context, Service Locator ou estado request-scoped escondido.
 
-O runtime recebe uma única `ApplicationPersistence`, que agrupa as portas exigidas pela aplicação e seu lifecycle. A implementação de produção é exclusivamente PostgreSQL; doubles em memória pertencem ao test harness. A atomicidade entre Aggregate e outbox continua expressa pela `UnitOfWork` do handler, não pelo container nem pelo Mediator. A decisão completa está no [ADR 042](decisions/042-typed-mediator-and-installable-modules.md).
+O runtime recebe uma única `ApplicationPersistence`, composta por um registry de tokens tipados e seu lifecycle. Cada bounded context registra as próprias portas, write scopes PostgreSQL e traduções de Integration Events. A composition root resolve tokens somente durante a montagem; o registry não atravessa para handlers, rotas ou domínio. A implementação de produção é exclusivamente PostgreSQL; doubles de repositories e readers pertencem ao test support.
+
+Um builder acrescenta automaticamente a outbox PostgreSQL a cada write scope, enquanto a `UnitOfWork` e o uso da outbox continuam explícitos no handler. Mappers externos são registrados por `DomainEvent.name` e resolvidos em O(1), sem cadeia central de condições. As decisões completas estão nos [ADRs 042](decisions/042-typed-mediator-and-installable-modules.md) e [044](decisions/044-module-owned-persistence-registration.md).
 
 ## Commands e Queries
 

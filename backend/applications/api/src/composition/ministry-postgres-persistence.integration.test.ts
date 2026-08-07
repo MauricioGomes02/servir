@@ -13,6 +13,7 @@ import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
 import { Pool } from 'pg';
 import { createPostgresPersistence } from './create-postgres-persistence';
+import { ministryCreationFacts, ministryUnitOfWork } from './modules/ministries-persistence-module';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const integrationIt = databaseUrl === undefined ? it.skip : it;
@@ -63,9 +64,9 @@ describe('PostgreSQL ministry persistence', () => {
       });
       const common = {
         clock: new FixedClock(value(Instant.create('2026-08-06T15:00:00.000Z'))),
-        creationFacts: persistence.ministryCreationFacts,
+        creationFacts: persistence.services.get(ministryCreationFacts),
         creationPolicy: new MinistryCreationPolicy(),
-        unitOfWork: persistence.ministryUnitOfWork,
+        unitOfWork: persistence.services.get(ministryUnitOfWork),
         logger: new InMemoryLogger(),
       };
       const committed = new CreateMinistryHandler({

@@ -29,6 +29,12 @@ import {
 } from '@/modules/ministries/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
+import {
+  ministryCreationFacts,
+  ministryMembershipRequestFacts,
+  ministryMembershipUnitOfWork,
+  ministryUnitOfWork,
+} from './ministries-persistence-module';
 
 export const ministriesModule: ApplicationModule = {
   register(container, options) {
@@ -38,9 +44,9 @@ export const ministriesModule: ApplicationModule = {
       ministryIdGenerator: new UuidV7Generator(MinistryId.create, options.uuidSource),
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
-      creationFacts: dependencies.ministryCreationFacts,
+      creationFacts: options.persistence.services.get(ministryCreationFacts),
       creationPolicy: new MinistryCreationPolicy(),
-      unitOfWork: dependencies.ministryUnitOfWork,
+      unitOfWork: options.persistence.services.get(ministryUnitOfWork),
       logger: dependencies.logger,
     });
     const defineMinistryRole = new DefineMinistryRoleHandler({
@@ -48,7 +54,7 @@ export const ministriesModule: ApplicationModule = {
       ministryRoleIdGenerator: new UuidV7Generator(MinistryRoleId.create, options.uuidSource),
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
-      unitOfWork: dependencies.ministryUnitOfWork,
+      unitOfWork: options.persistence.services.get(ministryUnitOfWork),
       logger: dependencies.logger,
     });
     const requestMembership = new RequestMinistryMembershipHandler({
@@ -59,34 +65,22 @@ export const ministriesModule: ApplicationModule = {
       ),
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
-      facts: dependencies.ministryMembershipRequestFacts,
+      facts: options.persistence.services.get(ministryMembershipRequestFacts),
       policy: new MinistryMembershipRequestPolicy(),
-      unitOfWork: dependencies.ministryMembershipUnitOfWork,
+      unitOfWork: options.persistence.services.get(ministryMembershipUnitOfWork),
       logger: dependencies.logger,
     });
     const approveMembership = new ApproveMinistryMembershipHandler({
       clock: dependencies.clock,
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
-      unitOfWork: dependencies.ministryMembershipUnitOfWork,
+      unitOfWork: options.persistence.services.get(ministryMembershipUnitOfWork),
       logger: dependencies.logger,
     });
-    dependencies.mediator.register(
-      CreateMinistryMessage,
-      createMinistry.handle.bind(createMinistry),
-    );
-    dependencies.mediator.register(
-      DefineMinistryRoleMessage,
-      defineMinistryRole.handle.bind(defineMinistryRole),
-    );
-    dependencies.mediator.register(
-      RequestMinistryMembershipMessage,
-      requestMembership.handle.bind(requestMembership),
-    );
-    dependencies.mediator.register(
-      ApproveMinistryMembershipMessage,
-      approveMembership.handle.bind(approveMembership),
-    );
+    dependencies.mediator.registerHandler(CreateMinistryMessage, createMinistry);
+    dependencies.mediator.registerHandler(DefineMinistryRoleMessage, defineMinistryRole);
+    dependencies.mediator.registerHandler(RequestMinistryMembershipMessage, requestMembership);
+    dependencies.mediator.registerHandler(ApproveMinistryMembershipMessage, approveMembership);
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;

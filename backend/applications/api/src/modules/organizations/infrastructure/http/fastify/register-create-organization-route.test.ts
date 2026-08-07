@@ -23,7 +23,7 @@ import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 
-import { InMemoryOrganizationRepository } from '../../persistence';
+import { InMemoryOrganizationRepository } from '@/composition/test-support';
 import { registerCreateOrganizationRoute } from './register-create-organization-route';
 
 function fixture() {

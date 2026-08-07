@@ -26,7 +26,7 @@ import {
 import {
   InMemoryMemberRepository,
   InMemoryOrganizationRegistrationFactsReader,
-} from '../../../infrastructure';
+} from '@/composition/test-support';
 import type { MemberWriteScope } from '../../ports';
 import { RegisterMemberHandler } from '.';
 

@@ -17,7 +17,7 @@ import {
   MinistryMembershipRequestPolicy,
   MinistryMembershipRequestPolicyErrorCodes,
 } from '../../../domain';
-import { InMemoryMinistryMembershipRepository } from '../../../infrastructure';
+import { InMemoryMinistryMembershipRepository } from '@/composition/test-support';
 import { RequestMinistryMembershipHandler } from '.';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {

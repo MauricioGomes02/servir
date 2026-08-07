@@ -25,6 +25,10 @@ export function registerCoreDependencies(
   services.addValue('logger', options.logger ?? new JsonStdoutLogger());
   services.addSingleton('mediator', () => new Mediator(traceUseCase));
   services.addSingleton('clock', () => new SystemClock());
+  services.addValue(
+    'eventRelayLifecycle',
+    Object.freeze({ relay: options.persistence.eventRelay }),
+  );
   container.register({
     translator: asFunction(
       () =>
