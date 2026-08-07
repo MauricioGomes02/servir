@@ -6,6 +6,7 @@ import { registerCreateOrganizationRoute } from '@/modules/organizations/infrast
 import {
   registerCreateMinistryRoute,
   registerDefineMinistryRoleRoute,
+  registerRequestMinistryMembershipRoute,
 } from '@/modules/ministries/infrastructure';
 import type { FastifyInstance } from 'fastify';
 
@@ -41,5 +42,10 @@ export function registerApplicationRoutes(
     handler: dependencies.defineMinistryRoleHandler,
     messageTranslator: dependencies.translator,
     presenter: dependencies.defineMinistryRolePresenter,
+  });
+  registerRequestMinistryMembershipRoute(app, {
+    handler: dependencies.requestMinistryMembershipHandler,
+    messageTranslator: dependencies.translator,
+    presenter: dependencies.requestMinistryMembershipPresenter,
   });
 }

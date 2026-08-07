@@ -1,8 +1,19 @@
-import { CreateMinistryHandler, DefineMinistryRoleHandler } from '@/modules/ministries/application';
-import { MinistryCreationPolicy, MinistryId, MinistryRoleId } from '@/modules/ministries/domain';
+import {
+  CreateMinistryHandler,
+  DefineMinistryRoleHandler,
+  RequestMinistryMembershipHandler,
+} from '@/modules/ministries/application';
+import {
+  MinistryCreationPolicy,
+  MinistryId,
+  MinistryMembershipId,
+  MinistryMembershipRequestPolicy,
+  MinistryRoleId,
+} from '@/modules/ministries/domain';
 import {
   CreateMinistryPresenter,
   DefineMinistryRolePresenter,
+  RequestMinistryMembershipPresenter,
 } from '@/modules/ministries/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import { asFunction } from 'awilix';
@@ -20,6 +31,9 @@ export function registerMinistriesModule(
     ).singleton(),
     ministryRoleIdGenerator: asFunction(
       () => new UuidV7Generator(MinistryRoleId.create, options.uuidSource),
+    ).singleton(),
+    ministryMembershipIdGenerator: asFunction(
+      () => new UuidV7Generator(MinistryMembershipId.create, options.uuidSource),
     ).singleton(),
     createMinistryHandler: asFunction(
       (dependencies: ApplicationCradle) =>
@@ -50,6 +64,23 @@ export function registerMinistriesModule(
     ).singleton(),
     defineMinistryRolePresenter: asFunction(
       (dependencies: ApplicationCradle) => new DefineMinistryRolePresenter(dependencies.translator),
+    ).singleton(),
+    requestMinistryMembershipHandler: asFunction(
+      (dependencies: ApplicationCradle) =>
+        new RequestMinistryMembershipHandler({
+          clock: dependencies.clock,
+          ministryMembershipIdGenerator: dependencies.ministryMembershipIdGenerator,
+          domainEventIdGenerator: dependencies.domainEventIdGenerator,
+          messageIdGenerator: dependencies.messageIdGenerator,
+          facts: dependencies.ministryMembershipRequestFacts,
+          policy: new MinistryMembershipRequestPolicy(),
+          unitOfWork: dependencies.ministryMembershipUnitOfWork,
+          logger: dependencies.logger,
+        }),
+    ).singleton(),
+    requestMinistryMembershipPresenter: asFunction(
+      (dependencies: ApplicationCradle) =>
+        new RequestMinistryMembershipPresenter(dependencies.translator),
     ).singleton(),
   });
 }

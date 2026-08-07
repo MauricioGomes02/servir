@@ -1,2 +1,3 @@
 export { mapMinistryCreatedIntegrationEvent } from './map-ministry-created-integration-event';
 export { mapMinistryRoleDefinedIntegrationEvent } from './map-ministry-role-defined-integration-event';
+export { mapMinistryMembershipRequestedIntegrationEvent } from './map-ministry-membership-requested-integration-event';

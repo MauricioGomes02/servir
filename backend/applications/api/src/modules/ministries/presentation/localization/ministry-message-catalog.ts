@@ -16,6 +16,12 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'O ministério informado não foi encontrado nesta organização.',
     'ministry_role.definition.active_name_already_exists':
       'Já existe uma função ministerial ativa com este nome.',
+    'ministry_membership.request.member_not_found':
+      'O membro informado não foi encontrado nesta organização.',
+    'ministry_membership.request.ministry_not_found':
+      'O ministério informado não foi encontrado nesta organização.',
+    'ministry_membership.request.current_membership_already_exists':
+      'Já existe um vínculo ministerial vigente para este membro.',
   }),
   'en-US': Object.freeze({
     'ministry.name.invalid_type': 'The ministry name must be text.',
@@ -32,5 +38,11 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'The specified ministry was not found in this organization.',
     'ministry_role.definition.active_name_already_exists':
       'An active ministry role with this name already exists.',
+    'ministry_membership.request.member_not_found':
+      'The specified member was not found in this organization.',
+    'ministry_membership.request.ministry_not_found':
+      'The specified ministry was not found in this organization.',
+    'ministry_membership.request.current_membership_already_exists':
+      'A current ministry membership already exists for this member.',
   }),
 });

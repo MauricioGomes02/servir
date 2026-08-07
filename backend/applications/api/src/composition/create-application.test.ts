@@ -34,6 +34,11 @@ const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7ca',
   '0198f334-6dc5-7c20-9af1-91d7e599c7cb',
   '0198f334-6dc5-7c20-9af1-91d7e599c7cc',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7cd',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7ce',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7cf',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7d0',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7d1',
 ];
 
 describe('createApplication', () => {
@@ -41,7 +46,7 @@ describe('createApplication', () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
     const monotonicInstants = [
-      100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725,
+      100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725, 800, 825,
     ];
     const app = createApplication({
       logger,
@@ -147,6 +152,20 @@ describe('createApplication', () => {
       'ministry_role.definition.active_name_already_exists',
     );
 
+    const membershipResponse = await app.inject({
+      method: 'POST',
+      url: `/organizations/${UUIDS[2]}/ministries/${UUIDS[12]}/memberships`,
+      payload: { memberId: UUIDS[7] },
+    });
+    assert.equal(membershipResponse.statusCode, 201);
+    assert.deepEqual(membershipResponse.json(), {
+      id: UUIDS[28],
+      organizationId: UUIDS[2],
+      ministryId: UUIDS[12],
+      memberId: UUIDS[7],
+      status: 'requested',
+    });
+
     const detailsResponse = await app.inject({
       method: 'GET',
       url: `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
@@ -173,7 +192,7 @@ describe('createApplication', () => {
     const requestRecords = logger.records.filter(
       (record) => record.eventName === 'http.request.completed',
     );
-    assert.equal(requestRecords.length, 7);
+    assert.equal(requestRecords.length, 8);
     assert.deepEqual(requestRecords[0]?.context, {
       correlationId: UUIDS[1],
       requestId: UUIDS[0],
@@ -215,6 +234,12 @@ describe('createApplication', () => {
       'duration.ms': 10,
     });
     assert.deepEqual(requestRecords[6]?.attributes, {
+      'http.request.method': 'POST',
+      'http.route': '/organizations/:organizationId/ministries/:ministryId/memberships',
+      'http.response.status_code': 201,
+      'duration.ms': 25,
+    });
+    assert.deepEqual(requestRecords[7]?.attributes, {
       'http.request.method': 'GET',
       'http.route': '/organizations/:organizationId/members/:memberId',
       'http.response.status_code': 200,

@@ -42,5 +42,6 @@
 | [038](038-safe-shared-operational-primitives.md) | Primitivas operacionais compartilhadas e seguras | Aceita |
 | [039](039-create-ministry-vertical-slice.md) | Primeiro corte vertical de Ministry | Aceita |
 | [040](040-define-ministry-role-vertical-slice.md) | Definição de funções ministeriais | Aceita |
+| [041](041-request-ministry-membership-vertical-slice.md) | Solicitação de participação ministerial | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

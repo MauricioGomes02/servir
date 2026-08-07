@@ -20,12 +20,16 @@ import type {
   CreateMinistryHandler,
   DefineMinistryRoleHandler,
   MinistryCreationFactsReader,
+  MinistryMembershipRequestFactsReader,
+  MinistryMembershipWriteScope,
   MinistryWriteScope,
+  RequestMinistryMembershipHandler,
 } from '@/modules/ministries/application';
-import type { MinistryId, MinistryRoleId } from '@/modules/ministries/domain';
+import type { MinistryId, MinistryMembershipId, MinistryRoleId } from '@/modules/ministries/domain';
 import type {
   CreateMinistryPresenter,
   DefineMinistryRolePresenter,
+  RequestMinistryMembershipPresenter,
 } from '@/modules/ministries/presentation';
 import type { Clock } from '@/shared/application/clock';
 import type { CorrelationId, RequestId } from '@/shared/application/context';
@@ -52,11 +56,14 @@ export interface ApplicationCradle {
   readonly organizationRegistrationFacts: OrganizationRegistrationFactsReader;
   readonly ministryUnitOfWork: UnitOfWork<MinistryWriteScope>;
   readonly ministryCreationFacts: MinistryCreationFactsReader;
+  readonly ministryMembershipUnitOfWork: UnitOfWork<MinistryMembershipWriteScope>;
+  readonly ministryMembershipRequestFacts: MinistryMembershipRequestFactsReader;
   readonly eventRelayLifecycle: EventRelayLifecycle;
   readonly organizationIdGenerator: IdGenerator<OrganizationId>;
   readonly memberIdGenerator: IdGenerator<MemberId>;
   readonly ministryIdGenerator: IdGenerator<MinistryId>;
   readonly ministryRoleIdGenerator: IdGenerator<MinistryRoleId>;
+  readonly ministryMembershipIdGenerator: IdGenerator<MinistryMembershipId>;
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
   readonly requestIdGenerator: IdGenerator<RequestId>;
@@ -71,6 +78,8 @@ export interface ApplicationCradle {
   readonly createMinistryPresenter: CreateMinistryPresenter;
   readonly defineMinistryRoleHandler: DefineMinistryRoleHandler;
   readonly defineMinistryRolePresenter: DefineMinistryRolePresenter;
+  readonly requestMinistryMembershipHandler: RequestMinistryMembershipHandler;
+  readonly requestMinistryMembershipPresenter: RequestMinistryMembershipPresenter;
 }
 
 export type ApplicationContainer = AwilixContainer<ApplicationCradle>;

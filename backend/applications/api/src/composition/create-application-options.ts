@@ -6,6 +6,8 @@ import type {
 import type { OrganizationWriteScope } from '@/modules/organizations/application';
 import type {
   MinistryCreationFactsReader,
+  MinistryMembershipRequestFactsReader,
+  MinistryMembershipWriteScope,
   MinistryWriteScope,
 } from '@/modules/ministries/application';
 import type { Logger } from '@/shared/application/logging';
@@ -21,5 +23,7 @@ export interface CreateApplicationOptions {
   readonly organizationUnitOfWork?: UnitOfWork<OrganizationWriteScope>;
   readonly ministryUnitOfWork?: UnitOfWork<MinistryWriteScope>;
   readonly ministryCreationFacts?: MinistryCreationFactsReader;
+  readonly ministryMembershipUnitOfWork?: UnitOfWork<MinistryMembershipWriteScope>;
+  readonly ministryMembershipRequestFacts?: MinistryMembershipRequestFactsReader;
   readonly uuidSource?: UuidV7Source;
 }

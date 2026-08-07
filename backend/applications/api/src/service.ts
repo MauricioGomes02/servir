@@ -47,6 +47,8 @@ export async function startService(telemetry: TelemetryLifecycle): Promise<void>
       organizationUnitOfWork: postgresPersistence?.unitOfWork,
       ministryUnitOfWork: postgresPersistence?.ministryUnitOfWork,
       ministryCreationFacts: postgresPersistence?.ministryCreationFacts,
+      ministryMembershipUnitOfWork: postgresPersistence?.ministryMembershipUnitOfWork,
+      ministryMembershipRequestFacts: postgresPersistence?.ministryMembershipRequestFacts,
     });
 
     if (postgresPersistence !== undefined) {
