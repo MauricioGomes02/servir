@@ -21,6 +21,21 @@ export class InMemoryMinistryMembershipRepository implements MinistryMembershipR
     return success();
   }
 
+  async findById(
+    organizationId: Parameters<MinistryMembershipRepository['findById']>[0],
+    ministryId: Parameters<MinistryMembershipRepository['findById']>[1],
+    membershipId: Parameters<MinistryMembershipRepository['findById']>[2],
+  ) {
+    return this.stored.find(
+      (candidate) =>
+        candidate.id.equals(membershipId) &&
+        candidate.organizationId.equals(organizationId) &&
+        candidate.ministryId.equals(ministryId),
+    );
+  }
+
+  async save(_membership: MinistryMembership): Promise<void> {}
+
   get memberships(): readonly MinistryMembership[] {
     return Object.freeze([...this.stored]);
   }

@@ -8,12 +8,14 @@ import type {
 import {
   isMinistryCreated,
   isMinistryMembershipRequested,
+  isMinistryMembershipApproved,
   isMinistryRoleDefined,
 } from '@/modules/ministries/domain';
 import {
   mapMinistryCreatedIntegrationEvent,
   mapMinistryRoleDefinedIntegrationEvent,
   mapMinistryMembershipRequestedIntegrationEvent,
+  mapMinistryMembershipApprovedIntegrationEvent,
   PostgresMinistryMembershipRepository,
   PostgresMinistryMembershipRequestFactsReader,
   PostgresMinistryCreationFactsReader,
@@ -76,6 +78,9 @@ export function createPostgresPersistence(connectionString: string): PostgresPer
     }
     if (isMinistryMembershipRequested(envelope.event)) {
       return mapMinistryMembershipRequestedIntegrationEvent(envelope.event);
+    }
+    if (isMinistryMembershipApproved(envelope.event)) {
+      return mapMinistryMembershipApprovedIntegrationEvent(envelope.event);
     }
 
     throw new UnmappedDomainEventError(envelope.event.name);

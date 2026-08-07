@@ -8,6 +8,7 @@ export { MinistryRoleDefinitionErrorCodes } from './ministry-role-definition-err
 export { MinistryMembership } from './ministry-membership';
 export { MinistryMembershipId } from './ministry-membership-id';
 export { MinistryMembershipIdErrorCodes } from './ministry-membership-id-error';
+export { MinistryMembershipApprovalErrorCodes } from './ministry-membership-approval-error';
 export type { CreateMinistryProps, MinistryStatus } from './ministry';
 export type { MinistryIdError, MinistryIdErrorCode } from './ministry-id-error';
 export type { MinistryRoleStatus } from './ministry-role';
@@ -18,3 +19,4 @@ export type {
   RequestMinistryMembershipProps,
 } from './ministry-membership';
 export type { MinistryMembershipIdError } from './ministry-membership-id-error';
+export type { MinistryMembershipApprovalError } from './ministry-membership-approval-error';

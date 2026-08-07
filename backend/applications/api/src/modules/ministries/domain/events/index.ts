@@ -10,3 +10,8 @@ export type {
   MinistryMembershipEvent,
   MinistryMembershipRequested,
 } from './ministry-membership-requested';
+export {
+  createMinistryMembershipApproved,
+  isMinistryMembershipApproved,
+} from './ministry-membership-approved';
+export type { MinistryMembershipApproved } from './ministry-membership-approved';

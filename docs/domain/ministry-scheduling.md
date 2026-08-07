@@ -64,7 +64,7 @@ Mantém identidade, estado e responsabilidades vigentes do time. Times não form
 
 ### MinistryMembership
 
-É um Aggregate Root separado que representa o vínculo histórico entre `Member` e `Ministry`. `RequestMinistryMembership` cria o vínculo em `requested`; a entrada efetiva exige aprovação posterior para `active`. Apenas um vínculo `requested` ou `active` pode existir para o mesmo Member e Ministry. Rejeição, suspensão, reativação e encerramento permanecem explícitos e planejados. Qualificações indicam funções que o membro está apto a exercer; saber tocar ou cantar é regra de negócio, não apenas permissão técnica.
+É um Aggregate Root separado que representa o vínculo histórico entre `Member` e `Ministry`. `RequestMinistryMembership` cria o vínculo em `requested`; `ApproveMinistryMembership` realiza a entrada efetiva ao transicionar para `active` e preservar o instante da aprovação. Apenas um vínculo `requested` ou `active` pode existir para o mesmo Member e Ministry. Rejeição, suspensão, reativação e encerramento permanecem explícitos e planejados. Qualificações indicam funções que o membro está apto a exercer; saber tocar ou cantar é regra de negócio, não apenas permissão técnica.
 
 ### TeamMembership
 
@@ -215,12 +215,13 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 2. Implementar `Ministry` e `CreateMinistry`, sem antecipar funções. **Concluído.**
 3. Implementar `MinistryRole` por `DefineMinistryRole`. **Concluído.**
 4. Implementar solicitação de `MinistryMembership`. **Concluído.**
-5. Implementar aprovação de `MinistryMembership` e qualificações.
-6. Implementar `MinistryTeam`, participação e liderança.
-7. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
-8. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
-9. Implementar disponibilidade e sua coleta por período.
-10. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
-10. Implementar publicação versionada, substituições e reações de auditoria/notificação.
+5. Implementar aprovação de `MinistryMembership`. **Concluído.**
+6. Implementar qualificações ministeriais.
+7. Implementar `MinistryTeam`, participação e liderança.
+8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
+9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
+10. Implementar disponibilidade e sua coleta por período.
+11. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
+12. Implementar publicação versionada, substituições e reações de auditoria/notificação.
 
 Cada incremento inclui Aggregate, testes, Repository específico, Unit of Work/outbox quando houver fatos externos, apresentação e documentação. Banco, API e eventos entram apenas com o caso de uso do incremento.

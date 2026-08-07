@@ -1,4 +1,6 @@
 import {
+  ApproveMinistryMembershipHandler,
+  ApproveMinistryMembershipMessage,
   CreateMinistryHandler,
   CreateMinistryMessage,
   DefineMinistryRoleHandler,
@@ -14,11 +16,13 @@ import {
   MinistryRoleId,
 } from '@/modules/ministries/domain';
 import {
+  registerApproveMinistryMembershipRoute,
   registerCreateMinistryRoute,
   registerDefineMinistryRoleRoute,
   registerRequestMinistryMembershipRoute,
 } from '@/modules/ministries/infrastructure';
 import {
+  ApproveMinistryMembershipPresenter,
   CreateMinistryPresenter,
   DefineMinistryRolePresenter,
   RequestMinistryMembershipPresenter,
@@ -60,6 +64,13 @@ export const ministriesModule: ApplicationModule = {
       unitOfWork: dependencies.ministryMembershipUnitOfWork,
       logger: dependencies.logger,
     });
+    const approveMembership = new ApproveMinistryMembershipHandler({
+      clock: dependencies.clock,
+      domainEventIdGenerator: dependencies.domainEventIdGenerator,
+      messageIdGenerator: dependencies.messageIdGenerator,
+      unitOfWork: dependencies.ministryMembershipUnitOfWork,
+      logger: dependencies.logger,
+    });
     dependencies.mediator.register(
       CreateMinistryMessage,
       createMinistry.handle.bind(createMinistry),
@@ -71,6 +82,10 @@ export const ministriesModule: ApplicationModule = {
     dependencies.mediator.register(
       RequestMinistryMembershipMessage,
       requestMembership.handle.bind(requestMembership),
+    );
+    dependencies.mediator.register(
+      ApproveMinistryMembershipMessage,
+      approveMembership.handle.bind(approveMembership),
     );
   },
   registerRoutes(app, container) {
@@ -88,6 +103,11 @@ export const ministriesModule: ApplicationModule = {
     registerRequestMinistryMembershipRoute(app, {
       mediator: dependencies.mediator,
       presenter: new RequestMinistryMembershipPresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+    registerApproveMinistryMembershipRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new ApproveMinistryMembershipPresenter(dependencies.translator),
       messageTranslator: dependencies.translator,
     });
   },

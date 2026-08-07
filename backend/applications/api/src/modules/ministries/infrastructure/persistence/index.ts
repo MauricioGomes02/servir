@@ -6,3 +6,4 @@ export { InMemoryMinistryMembershipRepository } from './in-memory-ministry-membe
 export { InMemoryMinistryMembershipRequestFactsReader } from './in-memory-ministry-membership-request-facts-reader';
 export { PostgresMinistryMembershipRepository } from './postgres-ministry-membership-repository';
 export { PostgresMinistryMembershipRequestFactsReader } from './postgres-ministry-membership-request-facts-reader';
+export * from './ministry-membership-status-code';

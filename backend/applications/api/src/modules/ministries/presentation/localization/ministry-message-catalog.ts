@@ -22,6 +22,10 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'O ministério informado não foi encontrado nesta organização.',
     'ministry_membership.request.current_membership_already_exists':
       'Já existe um vínculo ministerial vigente para este membro.',
+    'ministry_membership.approval.membership_not_found':
+      'O vínculo ministerial informado não foi encontrado.',
+    'ministry_membership.approval.not_requested':
+      'Somente um vínculo solicitado pode ser aprovado.',
   }),
   'en-US': Object.freeze({
     'ministry.name.invalid_type': 'The ministry name must be text.',
@@ -44,5 +48,9 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'The specified ministry was not found in this organization.',
     'ministry_membership.request.current_membership_already_exists':
       'A current ministry membership already exists for this member.',
+    'ministry_membership.approval.membership_not_found':
+      'The specified ministry membership was not found.',
+    'ministry_membership.approval.not_requested':
+      'Only a requested ministry membership can be approved.',
   }),
 });

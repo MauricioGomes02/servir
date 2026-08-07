@@ -190,12 +190,12 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Membership com `RegisterMember`, `GetMemberDetails`, Readers específicos, persistência PostgreSQL, entradas HTTP localizadas e Integration Event v1.
 - Ministries com `CreateMinistry`, unicidade de nome ativo por organização, persistência/outbox atômicas, entrada HTTP localizada e Integration Event v1.
 - Funções ministeriais com `DefineMinistryRole`, identidade estável, unicidade entre funções ativas e Integration Event v1.
-- Participação ministerial com `RequestMinistryMembership`, vínculo solicitado único, persistência/outbox atômicas e Integration Event v1.
+- Participação ministerial com solicitação e aprovação explícitas, vínculo vigente único, persistência/outbox atômicas e Integration Events v1.
 
 ### Em evolução
 
 - Listagem paginada de Membership orientada pela primeira tela consumidora.
-- Aprovação e qualificação ministerial, seguidas de times.
+- Qualificação ministerial, seguida de times.
 - Atividades, recorrência e ocorrências com modelagem temporal explícita.
 - Disponibilidade e escalas versionadas por time.
 - Auditoria durável, notificações e consumidores idempotentes.
