@@ -16,6 +16,8 @@ import {
   ministryMembershipRequestFacts,
   ministryMembershipUnitOfWork,
   ministryUnitOfWork,
+  ministryTeamCreationFacts,
+  ministryTeamUnitOfWork,
 } from '../modules/ministries-persistence-module';
 import { organizationUnitOfWork } from '../modules/organizations-persistence-module';
 import { ServiceRegistry } from '../services';
@@ -27,6 +29,8 @@ import {
   InMemoryMinistryMembershipRequestFactsReader,
   InMemoryMinistryRoleQualificationFactsReader,
   InMemoryMinistryRepository,
+  InMemoryMinistryTeamCreationFactsReader,
+  InMemoryMinistryTeamRepository,
   InMemoryOrganizationRegistrationFactsReader,
   InMemoryOrganizationRepository,
 } from './persistence-doubles';
@@ -36,6 +40,7 @@ export function createTestPersistence(): ApplicationPersistence {
   const members = new InMemoryMemberRepository();
   const ministries = new InMemoryMinistryRepository();
   const ministryMemberships = new InMemoryMinistryMembershipRepository();
+  const ministryTeams = new InMemoryMinistryTeamRepository();
   const outbox = new InMemoryEventOutbox();
   const eventRelay = new InMemoryEventOutboxRelay(
     outbox,
@@ -76,6 +81,14 @@ export function createTestPersistence(): ApplicationPersistence {
       () => members.members,
       () => ministries.ministries,
       () => ministryMemberships.memberships,
+    ),
+  );
+  services.add(ministryTeamUnitOfWork, new DirectUnitOfWork({ ministryTeams, outbox }));
+  services.add(
+    ministryTeamCreationFacts,
+    new InMemoryMinistryTeamCreationFactsReader(
+      () => ministries.ministries,
+      () => ministryTeams.teams,
     ),
   );
 

@@ -14,15 +14,20 @@ import type {
   MinistryMembershipRequestFactsReader,
   MinistryRoleQualificationFactsReader,
   MinistryRepository,
+  MinistryTeamCreationFactsReader,
+  MinistryTeamRepository,
 } from '@/modules/ministries/application';
 import {
   Ministry,
   MinistryCreationPolicy,
   MinistryMembershipRequestPolicyErrorCodes,
   MinistryRoleDefinitionErrorCodes,
+  MinistryTeamCreationPolicyErrorCodes,
   type MinistryId,
   type MinistryMembership,
   type MinistryName,
+  type MinistryTeam,
+  type MinistryTeamName,
 } from '@/modules/ministries/domain';
 import { failure, success } from '@/shared/core/result';
 
@@ -227,5 +232,50 @@ export class InMemoryMinistryRoleQualificationFactsReader implements MinistryRol
         ministry.id.equals(ministryId) &&
         ministry.roles.some((role) => role.id.equals(ministryRoleId) && role.status === 'active'),
     );
+  }
+}
+export class InMemoryMinistryTeamRepository implements MinistryTeamRepository {
+  private readonly stored: MinistryTeam[] = [];
+  async add(team: MinistryTeam) {
+    const conflict = this.stored.some(
+      (candidate) =>
+        candidate.organizationId.equals(team.organizationId) &&
+        candidate.ministryId.equals(team.ministryId) &&
+        candidate.status === 'active' &&
+        candidate.name.toString().toLowerCase() === team.name.toString().toLowerCase(),
+    );
+    if (conflict)
+      return failure({
+        code: MinistryTeamCreationPolicyErrorCodes.ActiveNameAlreadyExists,
+        field: 'name' as const,
+      });
+    this.stored.push(team);
+    return success();
+  }
+  get teams(): readonly MinistryTeam[] {
+    return Object.freeze([...this.stored]);
+  }
+}
+export class InMemoryMinistryTeamCreationFactsReader implements MinistryTeamCreationFactsReader {
+  constructor(
+    private readonly ministries: () => readonly Ministry[],
+    private readonly teams: () => readonly MinistryTeam[],
+  ) {}
+  async find(organizationId: OrganizationId, ministryId: MinistryId, name: MinistryTeamName) {
+    return Object.freeze({
+      ministryIsActive: this.ministries().some(
+        (ministry) =>
+          ministry.organizationId.equals(organizationId) &&
+          ministry.id.equals(ministryId) &&
+          ministry.status === 'active',
+      ),
+      activeNameExists: this.teams().some(
+        (team) =>
+          team.organizationId.equals(organizationId) &&
+          team.ministryId.equals(ministryId) &&
+          team.status === 'active' &&
+          team.name.toString().toLowerCase() === name.toString().toLowerCase(),
+      ),
+    });
   }
 }

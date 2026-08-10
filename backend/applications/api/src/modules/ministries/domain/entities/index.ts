@@ -29,3 +29,7 @@ export { MinistryRoleQualificationErrorCodes } from './ministry-role-qualificati
 export type { MinistryRoleQualificationStatus } from './ministry-role-qualification';
 export type { MinistryRoleQualificationIdError } from './ministry-role-qualification-id';
 export type { MinistryRoleQualificationError } from './ministry-role-qualification-error';
+export { MinistryTeam } from './ministry-team';
+export { MinistryTeamId, MinistryTeamIdErrorCodes } from './ministry-team-id';
+export type { MinistryTeamStatus } from './ministry-team';
+export type { MinistryTeamIdError } from './ministry-team-id';

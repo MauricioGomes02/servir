@@ -20,3 +20,5 @@ export {
   isMemberQualifiedForMinistryRole,
 } from './member-qualified-for-ministry-role';
 export type { MemberQualifiedForMinistryRole } from './member-qualified-for-ministry-role';
+export { createMinistryTeamCreated, isMinistryTeamCreated } from './ministry-team-created';
+export type { MinistryTeamCreated } from './ministry-team-created';

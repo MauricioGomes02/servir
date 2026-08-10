@@ -17,3 +17,4 @@ export type {
   MinistryCreationPolicyErrorCode,
 } from './ministry-creation-policy';
 export * from './ministry-role-qualification-policy';
+export * from './ministry-team-creation-policy';

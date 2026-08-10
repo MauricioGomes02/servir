@@ -34,6 +34,13 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'A função ministerial informada não existe ou não está ativa.',
     'ministry_role_qualification.active_qualification_already_exists':
       'Já existe uma qualificação ativa para esta função.',
+    'ministry_team.name.invalid_type': 'O nome do time deve ser um texto.',
+    'ministry_team.name.empty': 'Informe o nome do time.',
+    'ministry_team.name.too_long': 'O nome do time deve ter no máximo {maxLength} caracteres.',
+    'ministry_team.creation.ministry_not_found':
+      'O ministério informado não foi encontrado ou não está ativo.',
+    'ministry_team.creation.active_name_already_exists':
+      'Já existe um time ativo com este nome no ministério.',
   }),
   'en-US': Object.freeze({
     'ministry.name.invalid_type': 'The ministry name must be text.',
@@ -68,5 +75,12 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'The specified ministry role does not exist or is not active.',
     'ministry_role_qualification.active_qualification_already_exists':
       'An active qualification for this role already exists.',
+    'ministry_team.name.invalid_type': 'The team name must be text.',
+    'ministry_team.name.empty': 'Enter the team name.',
+    'ministry_team.name.too_long': 'The team name must have at most {maxLength} characters.',
+    'ministry_team.creation.ministry_not_found':
+      'The specified ministry was not found or is inactive.',
+    'ministry_team.creation.active_name_already_exists':
+      'An active team with this name already exists in the ministry.',
   }),
 });

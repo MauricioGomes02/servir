@@ -4,3 +4,4 @@ export { registerDefineMinistryRoleRoute } from './register-define-ministry-role
 export { registerRequestMinistryMembershipRoute } from './register-request-ministry-membership-route';
 export * from './register-approve-ministry-membership-route';
 export * from './register-qualify-member-for-ministry-role-route';
+export * from './register-create-ministry-team-route';

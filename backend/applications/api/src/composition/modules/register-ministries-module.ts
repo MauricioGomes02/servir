@@ -9,6 +9,8 @@ import {
   RequestMinistryMembershipMessage,
   QualifyMemberForMinistryRoleHandler,
   QualifyMemberForMinistryRoleMessage,
+  CreateMinistryTeamHandler,
+  CreateMinistryTeamMessage,
 } from '@/modules/ministries/application';
 import {
   MinistryCreationPolicy,
@@ -18,6 +20,8 @@ import {
   MinistryRoleId,
   MinistryRoleQualificationId,
   MinistryRoleQualificationPolicy,
+  MinistryTeamCreationPolicy,
+  MinistryTeamId,
 } from '@/modules/ministries/domain';
 import {
   registerApproveMinistryMembershipRoute,
@@ -25,6 +29,7 @@ import {
   registerDefineMinistryRoleRoute,
   registerRequestMinistryMembershipRoute,
   registerQualifyMemberForMinistryRoleRoute,
+  registerCreateMinistryTeamRoute,
 } from '@/modules/ministries/infrastructure';
 import {
   ApproveMinistryMembershipPresenter,
@@ -32,6 +37,7 @@ import {
   DefineMinistryRolePresenter,
   RequestMinistryMembershipPresenter,
   QualifyMemberForMinistryRolePresenter,
+  CreateMinistryTeamPresenter,
 } from '@/modules/ministries/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
@@ -40,6 +46,8 @@ import {
   ministryMembershipRequestFacts,
   ministryMembershipUnitOfWork,
   ministryUnitOfWork,
+  ministryTeamCreationFacts,
+  ministryTeamUnitOfWork,
 } from './ministries-persistence-module';
 
 export const ministriesModule: ApplicationModule = {
@@ -95,6 +103,15 @@ export const ministriesModule: ApplicationModule = {
       unitOfWork: options.persistence.services.get(ministryMembershipUnitOfWork),
       logger: dependencies.logger,
     });
+    const createMinistryTeam = new CreateMinistryTeamHandler({
+      clock: dependencies.clock,
+      ministryTeamIdGenerator: new UuidV7Generator(MinistryTeamId.create, options.uuidSource),
+      domainEventIdGenerator: dependencies.domainEventIdGenerator,
+      messageIdGenerator: dependencies.messageIdGenerator,
+      facts: options.persistence.services.get(ministryTeamCreationFacts),
+      policy: new MinistryTeamCreationPolicy(),
+      unitOfWork: options.persistence.services.get(ministryTeamUnitOfWork),
+    });
     dependencies.mediator.registerHandler(CreateMinistryMessage, createMinistry);
     dependencies.mediator.registerHandler(DefineMinistryRoleMessage, defineMinistryRole);
     dependencies.mediator.registerHandler(RequestMinistryMembershipMessage, requestMembership);
@@ -103,6 +120,7 @@ export const ministriesModule: ApplicationModule = {
       QualifyMemberForMinistryRoleMessage,
       qualifyMemberForRole,
     );
+    dependencies.mediator.registerHandler(CreateMinistryTeamMessage, createMinistryTeam);
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;
@@ -129,6 +147,11 @@ export const ministriesModule: ApplicationModule = {
     registerQualifyMemberForMinistryRoleRoute(app, {
       mediator: dependencies.mediator,
       presenter: new QualifyMemberForMinistryRolePresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+    registerCreateMinistryTeamRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new CreateMinistryTeamPresenter(dependencies.translator),
       messageTranslator: dependencies.translator,
     });
   },

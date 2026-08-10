@@ -48,5 +48,6 @@
 | [044](044-module-owned-persistence-registration.md) | Registro de persistência pertencente aos módulos | Aceita |
 | [045](045-qualify-member-for-ministry-role-vertical-slice.md) | Qualificação de membro para função ministerial | Aceita |
 | [046](046-organization-tenant-boundaries.md) | Organization como fronteira de tenant | Aceita |
+| [047](047-create-ministry-team-vertical-slice.md) | Primeiro corte vertical de MinistryTeam | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

@@ -60,7 +60,7 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 ### MinistryTeam
 
-Mantém identidade, estado e responsabilidades vigentes do time. Times não formam inicialmente uma árvore recursiva. Liderança e responsabilidade por escala preservam vigência; autorização técnica pertence a Identity & Access.
+É um Aggregate Root separado criado por `CreateMinistryTeam`, com identidade, Organization, Ministry, nome e estado ativo. O nome ativo é único dentro do Ministry. Times não formam inicialmente uma árvore recursiva. Participação, liderança e responsabilidade por escala entram em cortes posteriores; autorização técnica pertence a Identity & Access.
 
 ### MinistryMembership
 
@@ -217,7 +217,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 4. Implementar solicitação de `MinistryMembership`. **Concluído.**
 5. Implementar aprovação de `MinistryMembership`. **Concluído.**
 6. Implementar qualificações ministeriais. **Concluído.**
-7. Implementar `MinistryTeam`, participação e liderança.
+7. Implementar `MinistryTeam`. **Concluído.** Implementar participação e liderança em cortes seguintes.
 8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
 9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
 10. Implementar disponibilidade e sua coleta por período.

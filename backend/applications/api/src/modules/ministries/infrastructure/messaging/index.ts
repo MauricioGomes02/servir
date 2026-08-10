@@ -3,3 +3,4 @@ export { mapMinistryRoleDefinedIntegrationEvent } from './map-ministry-role-defi
 export { mapMinistryMembershipRequestedIntegrationEvent } from './map-ministry-membership-requested-integration-event';
 export * from './map-ministry-membership-approved-integration-event';
 export * from './map-member-qualified-for-ministry-role-integration-event';
+export * from './map-ministry-team-created-integration-event';
