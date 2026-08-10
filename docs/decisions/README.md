@@ -46,5 +46,6 @@
 | [042](042-typed-mediator-and-installable-modules.md) | Mediator tipado e módulos instaláveis | Aceita |
 | [043](043-approve-ministry-membership-vertical-slice.md) | Aprovação de participação ministerial | Aceita |
 | [044](044-module-owned-persistence-registration.md) | Registro de persistência pertencente aos módulos | Aceita |
+| [045](045-qualify-member-for-ministry-role-vertical-slice.md) | Qualificação de membro para função ministerial | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

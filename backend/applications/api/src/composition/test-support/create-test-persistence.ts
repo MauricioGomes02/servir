@@ -25,6 +25,7 @@ import {
   InMemoryMinistryCreationFactsReader,
   InMemoryMinistryMembershipRepository,
   InMemoryMinistryMembershipRequestFactsReader,
+  InMemoryMinistryRoleQualificationFactsReader,
   InMemoryMinistryRepository,
   InMemoryOrganizationRegistrationFactsReader,
   InMemoryOrganizationRepository,
@@ -59,7 +60,16 @@ export function createTestPersistence(): ApplicationPersistence {
       () => ministries.ministries,
     ),
   );
-  services.add(ministryMembershipUnitOfWork, new DirectUnitOfWork({ ministryMemberships, outbox }));
+  services.add(
+    ministryMembershipUnitOfWork,
+    new DirectUnitOfWork({
+      ministryMemberships,
+      ministryRoleQualificationFacts: new InMemoryMinistryRoleQualificationFactsReader(
+        () => ministries.ministries,
+      ),
+      outbox,
+    }),
+  );
   services.add(
     ministryMembershipRequestFacts,
     new InMemoryMinistryMembershipRequestFactsReader(

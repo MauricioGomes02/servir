@@ -9,6 +9,9 @@ import {
   MinistryMembership,
   MinistryMembershipApprovalErrorCodes,
   MinistryMembershipId,
+  MinistryRoleId,
+  MinistryRoleQualificationErrorCodes,
+  MinistryRoleQualificationId,
 } from '.';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {
@@ -74,5 +77,37 @@ describe('MinistryMembership', () => {
     );
     assert.equal(membership.status, 'active');
     assert.equal(membership.pendingDomainEvents.length, 0);
+  });
+  it('qualifies an active membership once for a ministry role', () => {
+    const instant = value(Instant.create('2026-08-07T14:00:00.000Z'));
+    const membership = MinistryMembership.reconstitute({
+      id: value(MinistryMembershipId.create('0198f334-6dc5-7c20-9af1-91d7e599e231')),
+      organizationId: value(OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599e232')),
+      ministryId: value(MinistryId.create('0198f334-6dc5-7c20-9af1-91d7e599e233')),
+      memberId: value(MemberId.create('0198f334-6dc5-7c20-9af1-91d7e599e234')),
+      status: 'active',
+      requestedAt: instant,
+      approvedAt: instant,
+    });
+    const ministryRoleId = value(MinistryRoleId.create('0198f334-6dc5-7c20-9af1-91d7e599e235'));
+    const first = membership.qualifyForRole({
+      id: value(MinistryRoleQualificationId.create('0198f334-6dc5-7c20-9af1-91d7e599e236')),
+      ministryRoleId,
+      eventId: value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e237')),
+      occurredAt: instant,
+    });
+    const repeated = membership.qualifyForRole({
+      id: value(MinistryRoleQualificationId.create('0198f334-6dc5-7c20-9af1-91d7e599e238')),
+      ministryRoleId,
+      eventId: value(parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599e239')),
+      occurredAt: instant,
+    });
+    assert.equal(first.success, true);
+    assert.equal(
+      repeated.success ? undefined : repeated.error.code,
+      MinistryRoleQualificationErrorCodes.ActiveQualificationAlreadyExists,
+    );
+    assert.equal(membership.roleQualifications.length, 1);
+    assert.equal(membership.pendingDomainEvents[0]?.name, 'member.qualified_for_ministry_role');
   });
 });

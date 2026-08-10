@@ -43,7 +43,11 @@ it('persists approval and outbox in the same scope', async () => {
     messageIdGenerator: new SequenceIdGenerator([
       value(parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599e247')),
     ]),
-    unitOfWork: new DirectUnitOfWork({ ministryMemberships: memberships, outbox }),
+    unitOfWork: new DirectUnitOfWork({
+      ministryMemberships: memberships,
+      ministryRoleQualificationFacts: { isRoleActive: async () => false },
+      outbox,
+    }),
     logger: new InMemoryLogger(),
   });
   const result = await handler.handle(

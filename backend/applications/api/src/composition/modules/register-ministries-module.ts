@@ -7,6 +7,8 @@ import {
   DefineMinistryRoleMessage,
   RequestMinistryMembershipHandler,
   RequestMinistryMembershipMessage,
+  QualifyMemberForMinistryRoleHandler,
+  QualifyMemberForMinistryRoleMessage,
 } from '@/modules/ministries/application';
 import {
   MinistryCreationPolicy,
@@ -14,18 +16,22 @@ import {
   MinistryMembershipId,
   MinistryMembershipRequestPolicy,
   MinistryRoleId,
+  MinistryRoleQualificationId,
+  MinistryRoleQualificationPolicy,
 } from '@/modules/ministries/domain';
 import {
   registerApproveMinistryMembershipRoute,
   registerCreateMinistryRoute,
   registerDefineMinistryRoleRoute,
   registerRequestMinistryMembershipRoute,
+  registerQualifyMemberForMinistryRoleRoute,
 } from '@/modules/ministries/infrastructure';
 import {
   ApproveMinistryMembershipPresenter,
   CreateMinistryPresenter,
   DefineMinistryRolePresenter,
   RequestMinistryMembershipPresenter,
+  QualifyMemberForMinistryRolePresenter,
 } from '@/modules/ministries/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
@@ -77,10 +83,26 @@ export const ministriesModule: ApplicationModule = {
       unitOfWork: options.persistence.services.get(ministryMembershipUnitOfWork),
       logger: dependencies.logger,
     });
+    const qualifyMemberForRole = new QualifyMemberForMinistryRoleHandler({
+      clock: dependencies.clock,
+      qualificationIdGenerator: new UuidV7Generator(
+        MinistryRoleQualificationId.create,
+        options.uuidSource,
+      ),
+      domainEventIdGenerator: dependencies.domainEventIdGenerator,
+      messageIdGenerator: dependencies.messageIdGenerator,
+      policy: new MinistryRoleQualificationPolicy(),
+      unitOfWork: options.persistence.services.get(ministryMembershipUnitOfWork),
+      logger: dependencies.logger,
+    });
     dependencies.mediator.registerHandler(CreateMinistryMessage, createMinistry);
     dependencies.mediator.registerHandler(DefineMinistryRoleMessage, defineMinistryRole);
     dependencies.mediator.registerHandler(RequestMinistryMembershipMessage, requestMembership);
     dependencies.mediator.registerHandler(ApproveMinistryMembershipMessage, approveMembership);
+    dependencies.mediator.registerHandler(
+      QualifyMemberForMinistryRoleMessage,
+      qualifyMemberForRole,
+    );
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;
@@ -102,6 +124,11 @@ export const ministriesModule: ApplicationModule = {
     registerApproveMinistryMembershipRoute(app, {
       mediator: dependencies.mediator,
       presenter: new ApproveMinistryMembershipPresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+    registerQualifyMemberForMinistryRoleRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new QualifyMemberForMinistryRolePresenter(dependencies.translator),
       messageTranslator: dependencies.translator,
     });
   },

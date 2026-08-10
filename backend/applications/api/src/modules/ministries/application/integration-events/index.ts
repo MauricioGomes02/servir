@@ -2,3 +2,4 @@ export type { MinistryCreatedIntegrationEventV1 } from './ministry-created-integ
 export type { MinistryRoleDefinedIntegrationEventV1 } from './ministry-role-defined-integration-event';
 export type { MinistryMembershipRequestedIntegrationEventV1 } from './ministry-membership-requested-integration-event';
 export type * from './ministry-membership-approved-integration-event';
+export type * from './member-qualified-for-ministry-role-integration-event';

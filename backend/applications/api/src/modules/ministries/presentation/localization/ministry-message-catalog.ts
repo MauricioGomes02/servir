@@ -26,6 +26,14 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'O vínculo ministerial informado não foi encontrado.',
     'ministry_membership.approval.not_requested':
       'Somente um vínculo solicitado pode ser aprovado.',
+    'ministry_role_qualification.membership_not_found':
+      'O vínculo ministerial informado não foi encontrado.',
+    'ministry_role_qualification.membership_not_active':
+      'Somente um vínculo ativo pode receber qualificações.',
+    'ministry_role_qualification.role_not_active':
+      'A função ministerial informada não existe ou não está ativa.',
+    'ministry_role_qualification.active_qualification_already_exists':
+      'Já existe uma qualificação ativa para esta função.',
   }),
   'en-US': Object.freeze({
     'ministry.name.invalid_type': 'The ministry name must be text.',
@@ -52,5 +60,13 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'The specified ministry membership was not found.',
     'ministry_membership.approval.not_requested':
       'Only a requested ministry membership can be approved.',
+    'ministry_role_qualification.membership_not_found':
+      'The specified ministry membership was not found.',
+    'ministry_role_qualification.membership_not_active':
+      'Only an active membership can receive qualifications.',
+    'ministry_role_qualification.role_not_active':
+      'The specified ministry role does not exist or is not active.',
+    'ministry_role_qualification.active_qualification_already_exists':
+      'An active qualification for this role already exists.',
   }),
 });

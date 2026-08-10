@@ -64,7 +64,7 @@ Mantém identidade, estado e responsabilidades vigentes do time. Times não form
 
 ### MinistryMembership
 
-É um Aggregate Root separado que representa o vínculo histórico entre `Member` e `Ministry`. `RequestMinistryMembership` cria o vínculo em `requested`; `ApproveMinistryMembership` realiza a entrada efetiva ao transicionar para `active` e preservar o instante da aprovação. Apenas um vínculo `requested` ou `active` pode existir para o mesmo Member e Ministry. Rejeição, suspensão, reativação e encerramento permanecem explícitos e planejados. Qualificações indicam funções que o membro está apto a exercer; saber tocar ou cantar é regra de negócio, não apenas permissão técnica.
+É um Aggregate Root separado que representa o vínculo histórico entre `Member` e `Ministry`. `RequestMinistryMembership` cria o vínculo em `requested`; `ApproveMinistryMembership` realiza a entrada efetiva ao transicionar para `active` e preservar o instante da aprovação. Apenas um vínculo `requested` ou `active` pode existir para o mesmo Member e Ministry. `QualifyMemberForMinistryRole` adiciona uma `MinistryRoleQualification` identificada ao vínculo ativo; só uma qualificação ativa pode existir por função, e a função deve estar ativa no mesmo ministério. Rejeição, suspensão, reativação, encerramento e revogação permanecem planejados.
 
 ### TeamMembership
 
@@ -216,7 +216,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 3. Implementar `MinistryRole` por `DefineMinistryRole`. **Concluído.**
 4. Implementar solicitação de `MinistryMembership`. **Concluído.**
 5. Implementar aprovação de `MinistryMembership`. **Concluído.**
-6. Implementar qualificações ministeriais.
+6. Implementar qualificações ministeriais. **Concluído.**
 7. Implementar `MinistryTeam`, participação e liderança.
 8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
 9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.

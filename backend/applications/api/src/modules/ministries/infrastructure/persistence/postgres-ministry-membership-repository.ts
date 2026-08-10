@@ -5,7 +5,13 @@ import type { PoolClient, QueryResultRow } from 'pg';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { MemberId } from '@/modules/membership/domain';
 import { Instant } from '@/shared/domain/instant';
-import { MinistryId, MinistryMembershipId } from '../../domain';
+import {
+  MinistryId,
+  MinistryMembershipId,
+  MinistryRoleId,
+  MinistryRoleQualification,
+  MinistryRoleQualificationId,
+} from '../../domain';
 import {
   fromMinistryMembershipStatusCode,
   toMinistryMembershipStatusCode,
@@ -20,6 +26,12 @@ interface MinistryMembershipRow extends QueryResultRow {
   readonly status: unknown;
   readonly requested_at: unknown;
   readonly approved_at: unknown;
+}
+interface QualificationRow extends QueryResultRow {
+  readonly id: unknown;
+  readonly ministry_role_id: unknown;
+  readonly status: unknown;
+  readonly qualified_at: unknown;
 }
 
 function persistedInstant(value: unknown) {
@@ -67,6 +79,10 @@ export class PostgresMinistryMembershipRepository implements MinistryMembershipR
       );
       if (result.rowCount === 0) return undefined;
       const row = result.rows[0];
+      const qualificationsResult = await this.client.query<QualificationRow>(
+        'SELECT id, ministry_role_id, status, qualified_at FROM ministry_role_qualifications WHERE ministry_membership_id = $1',
+        [membershipId.value],
+      );
       const id = MinistryMembershipId.create(row.id);
       const organization = OrganizationId.create(row.organization_id);
       const ministry = MinistryId.create(row.ministry_id);
@@ -82,6 +98,19 @@ export class PostgresMinistryMembershipRepository implements MinistryMembershipR
         (approvedAt !== undefined && !approvedAt.success)
       )
         throw new Error('invalid_persisted_ministry_membership');
+      const qualifications = qualificationsResult.rows.map((qualificationRow) => {
+        const qualificationId = MinistryRoleQualificationId.create(qualificationRow.id);
+        const roleId = MinistryRoleId.create(qualificationRow.ministry_role_id);
+        const qualifiedAt = persistedInstant(qualificationRow.qualified_at);
+        if (!qualificationId.success || !roleId.success || !qualifiedAt.success)
+          throw new Error('invalid_persisted_ministry_role_qualification');
+        return MinistryRoleQualification.reconstitute(
+          qualificationId.value,
+          roleId.value,
+          qualificationRow.status === 1 ? 'active' : 'revoked',
+          qualifiedAt.value,
+        );
+      });
       return MinistryMembership.reconstitute({
         id: id.value,
         organizationId: organization.value,
@@ -90,6 +119,7 @@ export class PostgresMinistryMembershipRepository implements MinistryMembershipR
         status: fromMinistryMembershipStatusCode(row.status),
         requestedAt: requestedAt.value,
         approvedAt: approvedAt?.value,
+        roleQualifications: qualifications,
       });
     } catch (cause) {
       throw new PostgresMinistryMembershipRepositoryError(cause);
@@ -106,6 +136,18 @@ export class PostgresMinistryMembershipRepository implements MinistryMembershipR
           membership.id.value,
         ],
       );
+      for (const qualification of membership.roleQualifications)
+        await this.client.query(
+          'INSERT INTO ministry_role_qualifications (id, organization_id, ministry_id, ministry_membership_id, ministry_role_id, status, qualified_at) VALUES ($1, $2, $3, $4, $5, 1, $6) ON CONFLICT (id) DO NOTHING',
+          [
+            qualification.id.value,
+            membership.organizationId.value,
+            membership.ministryId.value,
+            membership.id.value,
+            qualification.ministryRoleId.value,
+            qualification.qualifiedAt.toISOString(),
+          ],
+        );
     } catch (cause) {
       throw new PostgresMinistryMembershipRepositoryError(cause);
     }

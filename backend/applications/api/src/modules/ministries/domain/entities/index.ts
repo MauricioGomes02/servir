@@ -20,3 +20,12 @@ export type {
 } from './ministry-membership';
 export type { MinistryMembershipIdError } from './ministry-membership-id-error';
 export type { MinistryMembershipApprovalError } from './ministry-membership-approval-error';
+export { MinistryRoleQualification } from './ministry-role-qualification';
+export {
+  MinistryRoleQualificationId,
+  MinistryRoleQualificationIdErrorCodes,
+} from './ministry-role-qualification-id';
+export { MinistryRoleQualificationErrorCodes } from './ministry-role-qualification-error';
+export type { MinistryRoleQualificationStatus } from './ministry-role-qualification';
+export type { MinistryRoleQualificationIdError } from './ministry-role-qualification-id';
+export type { MinistryRoleQualificationError } from './ministry-role-qualification-error';

@@ -19,7 +19,9 @@ export type MinistryMembershipRequested = DomainEvent<
   }>
 >;
 import type { MinistryMembershipApproved } from './ministry-membership-approved';
-export type MinistryMembershipEvent = MinistryMembershipRequested | MinistryMembershipApproved;
+import type { MemberQualifiedForMinistryRole } from './member-qualified-for-ministry-role';
+export type MinistryMembershipEvent =
+  MinistryMembershipRequested | MinistryMembershipApproved | MemberQualifiedForMinistryRole;
 
 export function createMinistryMembershipRequested(input: {
   eventId: DomainEventId;

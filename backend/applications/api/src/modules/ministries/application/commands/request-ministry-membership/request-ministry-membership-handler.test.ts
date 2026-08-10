@@ -50,7 +50,11 @@ function fixture(
       },
     },
     policy: new MinistryMembershipRequestPolicy(),
-    unitOfWork: new DirectUnitOfWork({ ministryMemberships: memberships, outbox }),
+    unitOfWork: new DirectUnitOfWork({
+      ministryMemberships: memberships,
+      ministryRoleQualificationFacts: { isRoleActive: async () => false },
+      outbox,
+    }),
     logger: new InMemoryLogger(),
   });
   return {

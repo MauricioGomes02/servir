@@ -7,6 +7,7 @@ import type { Instant } from '@/shared/domain/instant';
 import {
   createMinistryMembershipApproved,
   createMinistryMembershipRequested,
+  createMemberQualifiedForMinistryRole,
   type MinistryMembershipEvent,
 } from '../events';
 import {
@@ -15,6 +16,13 @@ import {
 } from './ministry-membership-approval-error';
 import type { MinistryId } from './ministry-id';
 import type { MinistryMembershipId } from './ministry-membership-id';
+import { MinistryRoleQualification } from './ministry-role-qualification';
+import {
+  MinistryRoleQualificationErrorCodes,
+  type MinistryRoleQualificationError,
+} from './ministry-role-qualification-error';
+import type { MinistryRoleQualificationId } from './ministry-role-qualification-id';
+import type { MinistryRoleId } from './ministry-role-id';
 
 export type MinistryMembershipStatus = 'requested' | 'active' | 'rejected' | 'suspended' | 'ended';
 
@@ -25,6 +33,7 @@ interface MinistryMembershipProps {
   status: MinistryMembershipStatus;
   readonly requestedAt: Instant;
   approvedAt?: Instant;
+  readonly roleQualifications: MinistryRoleQualification[];
 }
 
 export interface RequestMinistryMembershipProps {
@@ -52,6 +61,7 @@ export class MinistryMembership extends AggregateRoot<
       memberId: input.memberId,
       status: 'requested',
       requestedAt: input.requestedAt,
+      roleQualifications: [],
     });
     membership.recordDomainEvent(
       createMinistryMembershipRequested({
@@ -74,6 +84,7 @@ export class MinistryMembership extends AggregateRoot<
     readonly status: MinistryMembershipStatus;
     readonly requestedAt: Instant;
     readonly approvedAt?: Instant;
+    readonly roleQualifications?: readonly MinistryRoleQualification[];
   }): MinistryMembership {
     return new MinistryMembership(input.id, {
       organizationId: input.organizationId,
@@ -82,7 +93,46 @@ export class MinistryMembership extends AggregateRoot<
       status: input.status,
       requestedAt: input.requestedAt,
       approvedAt: input.approvedAt,
+      roleQualifications: [...(input.roleQualifications ?? [])],
     });
+  }
+
+  qualifyForRole(input: {
+    readonly id: MinistryRoleQualificationId;
+    readonly ministryRoleId: MinistryRoleId;
+    readonly eventId: DomainEventId;
+    readonly occurredAt: Instant;
+  }): Result<MinistryRoleQualification, MinistryRoleQualificationError> {
+    if (this.status !== 'active')
+      return failure({
+        code: MinistryRoleQualificationErrorCodes.MembershipNotActive,
+        field: 'ministryMembershipId',
+      });
+    if (
+      this.props.roleQualifications.some(
+        (item) => item.ministryRoleId.equals(input.ministryRoleId) && item.status === 'active',
+      )
+    )
+      return failure({
+        code: MinistryRoleQualificationErrorCodes.ActiveQualificationAlreadyExists,
+        field: 'ministryRoleId',
+      });
+    const qualification = MinistryRoleQualification.create(
+      input.id,
+      input.ministryRoleId,
+      input.occurredAt,
+    );
+    this.props.roleQualifications.push(qualification);
+    this.recordDomainEvent(
+      createMemberQualifiedForMinistryRole({
+        ...input,
+        ministryRoleQualificationId: input.id,
+        ministryMembershipId: this.id,
+        organizationId: this.organizationId,
+        ministryId: this.ministryId,
+      }),
+    );
+    return success(qualification);
   }
 
   approve(input: {
@@ -126,5 +176,8 @@ export class MinistryMembership extends AggregateRoot<
   }
   get approvedAt(): Instant | undefined {
     return this.props.approvedAt;
+  }
+  get roleQualifications(): readonly MinistryRoleQualification[] {
+    return Object.freeze([...this.props.roleQualifications]);
   }
 }

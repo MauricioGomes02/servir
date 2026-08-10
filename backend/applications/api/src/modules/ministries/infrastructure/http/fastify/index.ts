@@ -3,3 +3,4 @@ export type { CreateMinistryRouteDependencies } from './register-create-ministry
 export { registerDefineMinistryRoleRoute } from './register-define-ministry-role-route';
 export { registerRequestMinistryMembershipRoute } from './register-request-ministry-membership-route';
 export * from './register-approve-ministry-membership-route';
+export * from './register-qualify-member-for-ministry-role-route';

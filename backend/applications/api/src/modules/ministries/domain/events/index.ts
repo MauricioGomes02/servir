@@ -15,3 +15,8 @@ export {
   isMinistryMembershipApproved,
 } from './ministry-membership-approved';
 export type { MinistryMembershipApproved } from './ministry-membership-approved';
+export {
+  createMemberQualifiedForMinistryRole,
+  isMemberQualifiedForMinistryRole,
+} from './member-qualified-for-ministry-role';
+export type { MemberQualifiedForMinistryRole } from './member-qualified-for-ministry-role';

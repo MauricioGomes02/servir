@@ -12,6 +12,7 @@ import type {
   MinistryCreationFactsReader,
   MinistryMembershipRepository,
   MinistryMembershipRequestFactsReader,
+  MinistryRoleQualificationFactsReader,
   MinistryRepository,
 } from '@/modules/ministries/application';
 import {
@@ -211,5 +212,20 @@ export class InMemoryMinistryMembershipRequestFactsReader implements MinistryMem
           (membership.status === 'requested' || membership.status === 'active'),
       ),
     });
+  }
+}
+export class InMemoryMinistryRoleQualificationFactsReader implements MinistryRoleQualificationFactsReader {
+  constructor(private readonly ministries: () => readonly Ministry[]) {}
+  async isRoleActive(
+    organizationId: OrganizationId,
+    ministryId: MinistryId,
+    ministryRoleId: Parameters<MinistryRoleQualificationFactsReader['isRoleActive']>[2],
+  ) {
+    return this.ministries().some(
+      (ministry) =>
+        ministry.organizationId.equals(organizationId) &&
+        ministry.id.equals(ministryId) &&
+        ministry.roles.some((role) => role.id.equals(ministryRoleId) && role.status === 'active'),
+    );
   }
 }

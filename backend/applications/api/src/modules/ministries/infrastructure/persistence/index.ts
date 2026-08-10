@@ -2,4 +2,5 @@ export { PostgresMinistryCreationFactsReader } from './postgres-ministry-creatio
 export { PostgresMinistryRepository } from './postgres-ministry-repository';
 export { PostgresMinistryMembershipRepository } from './postgres-ministry-membership-repository';
 export { PostgresMinistryMembershipRequestFactsReader } from './postgres-ministry-membership-request-facts-reader';
+export { PostgresMinistryRoleQualificationFactsReader } from './postgres-ministry-role-qualification-facts-reader';
 export * from './ministry-membership-status-code';

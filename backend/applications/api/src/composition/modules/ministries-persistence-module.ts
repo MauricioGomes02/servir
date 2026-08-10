@@ -9,15 +9,18 @@ import type {
   MinistryMembershipApproved,
   MinistryMembershipRequested,
   MinistryRoleDefined,
+  MemberQualifiedForMinistryRole,
 } from '@/modules/ministries/domain';
 import {
   mapMinistryCreatedIntegrationEvent,
   mapMinistryMembershipApprovedIntegrationEvent,
   mapMinistryMembershipRequestedIntegrationEvent,
   mapMinistryRoleDefinedIntegrationEvent,
+  mapMemberQualifiedForMinistryRoleIntegrationEvent,
   PostgresMinistryCreationFactsReader,
   PostgresMinistryMembershipRepository,
   PostgresMinistryMembershipRequestFactsReader,
+  PostgresMinistryRoleQualificationFactsReader,
   PostgresMinistryRepository,
 } from '@/modules/ministries/infrastructure';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
@@ -52,11 +55,16 @@ export function registerMinistriesPersistence(builder: PostgresPersistenceBuilde
     'ministry_membership.approved',
     mapMinistryMembershipApprovedIntegrationEvent,
   );
+  builder.integrationEvents.register<MemberQualifiedForMinistryRole>(
+    'member.qualified_for_ministry_role',
+    mapMemberQualifiedForMinistryRoleIntegrationEvent,
+  );
   builder.addWriteScope(ministryUnitOfWork, (client) => ({
     ministries: new PostgresMinistryRepository(client),
   }));
   builder.addWriteScope(ministryMembershipUnitOfWork, (client) => ({
     ministryMemberships: new PostgresMinistryMembershipRepository(client),
+    ministryRoleQualificationFacts: new PostgresMinistryRoleQualificationFactsReader(client),
   }));
   builder.addValue(ministryCreationFacts, (pool) => new PostgresMinistryCreationFactsReader(pool));
   builder.addValue(
