@@ -33,3 +33,7 @@ export { MinistryTeam } from './ministry-team';
 export { MinistryTeamId, MinistryTeamIdErrorCodes } from './ministry-team-id';
 export type { MinistryTeamStatus } from './ministry-team';
 export type { MinistryTeamIdError } from './ministry-team-id';
+export { TeamMembership } from './team-membership';
+export { TeamMembershipId, TeamMembershipIdErrorCodes } from './team-membership-id';
+export type { TeamMembershipStatus } from './team-membership';
+export type { TeamMembershipIdError } from './team-membership-id';

@@ -49,5 +49,6 @@
 | [045](045-qualify-member-for-ministry-role-vertical-slice.md) | Qualificação de membro para função ministerial | Aceita |
 | [046](046-organization-tenant-boundaries.md) | Organization como fronteira de tenant | Aceita |
 | [047](047-create-ministry-team-vertical-slice.md) | Primeiro corte vertical de MinistryTeam | Aceita |
+| [048](048-assign-member-to-team-vertical-slice.md) | Participação de membro em time ministerial | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

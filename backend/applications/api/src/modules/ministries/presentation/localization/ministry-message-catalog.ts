@@ -41,6 +41,12 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'O ministério informado não foi encontrado ou não está ativo.',
     'ministry_team.creation.active_name_already_exists':
       'Já existe um time ativo com este nome no ministério.',
+    'team_membership.assignment.team_not_found':
+      'O time informado não foi encontrado ou não está ativo.',
+    'team_membership.assignment.ministry_membership_not_active':
+      'O vínculo ministerial informado não está ativo.',
+    'team_membership.assignment.active_membership_already_exists':
+      'O membro já participa ativamente deste time.',
   }),
   'en-US': Object.freeze({
     'ministry.name.invalid_type': 'The ministry name must be text.',
@@ -82,5 +88,10 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'The specified ministry was not found or is inactive.',
     'ministry_team.creation.active_name_already_exists':
       'An active team with this name already exists in the ministry.',
+    'team_membership.assignment.team_not_found': 'The specified team was not found or is inactive.',
+    'team_membership.assignment.ministry_membership_not_active':
+      'The specified ministry membership is not active.',
+    'team_membership.assignment.active_membership_already_exists':
+      'The member already participates actively in this team.',
   }),
 });

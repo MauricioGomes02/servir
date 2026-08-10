@@ -193,6 +193,7 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Participação ministerial com solicitação e aprovação explícitas, vínculo vigente único, persistência/outbox atômicas e Integration Events v1.
 - Qualificação ministerial e isolamento estrutural dos dados tenant-owned por Organization.
 - Times ministeriais com criação tenant-safe, persistência/outbox atômicas e Integration Event v1.
+- Participação histórica de membros em times ministeriais.
 
 ### Em evolução
 

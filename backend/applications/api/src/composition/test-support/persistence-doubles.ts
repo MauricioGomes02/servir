@@ -16,6 +16,8 @@ import type {
   MinistryRepository,
   MinistryTeamCreationFactsReader,
   MinistryTeamRepository,
+  TeamMembershipAssignmentFactsReader,
+  TeamMembershipRepository,
 } from '@/modules/ministries/application';
 import {
   Ministry,
@@ -23,11 +25,13 @@ import {
   MinistryMembershipRequestPolicyErrorCodes,
   MinistryRoleDefinitionErrorCodes,
   MinistryTeamCreationPolicyErrorCodes,
+  TeamMembershipAssignmentPolicyErrorCodes,
   type MinistryId,
   type MinistryMembership,
   type MinistryName,
   type MinistryTeam,
   type MinistryTeamName,
+  type TeamMembership,
 } from '@/modules/ministries/domain';
 import { failure, success } from '@/shared/core/result';
 
@@ -275,6 +279,67 @@ export class InMemoryMinistryTeamCreationFactsReader implements MinistryTeamCrea
           team.ministryId.equals(ministryId) &&
           team.status === 'active' &&
           team.name.toString().toLowerCase() === name.toString().toLowerCase(),
+      ),
+    });
+  }
+}
+export class InMemoryTeamMembershipRepository implements TeamMembershipRepository {
+  private readonly stored: TeamMembership[] = [];
+  async add(membership: TeamMembership) {
+    const conflict = this.stored.some(
+      (candidate) =>
+        candidate.organizationId.equals(membership.organizationId) &&
+        candidate.ministryId.equals(membership.ministryId) &&
+        candidate.ministryTeamId.equals(membership.ministryTeamId) &&
+        candidate.ministryMembershipId.equals(membership.ministryMembershipId) &&
+        candidate.status === 'active',
+    );
+    if (conflict)
+      return failure({
+        code: TeamMembershipAssignmentPolicyErrorCodes.ActiveMembershipAlreadyExists,
+        field: 'ministryMembershipId' as const,
+      });
+    this.stored.push(membership);
+    return success();
+  }
+  get memberships(): readonly TeamMembership[] {
+    return Object.freeze([...this.stored]);
+  }
+}
+export class InMemoryTeamMembershipAssignmentFactsReader implements TeamMembershipAssignmentFactsReader {
+  constructor(
+    private readonly teams: () => readonly MinistryTeam[],
+    private readonly ministryMemberships: () => readonly MinistryMembership[],
+    private readonly teamMemberships: () => readonly TeamMembership[],
+  ) {}
+  async find(
+    organizationId: OrganizationId,
+    ministryId: MinistryId,
+    teamId: Parameters<TeamMembershipAssignmentFactsReader['find']>[2],
+    membershipId: Parameters<TeamMembershipAssignmentFactsReader['find']>[3],
+  ) {
+    return Object.freeze({
+      teamIsActive: this.teams().some(
+        (team) =>
+          team.organizationId.equals(organizationId) &&
+          team.ministryId.equals(ministryId) &&
+          team.id.equals(teamId) &&
+          team.status === 'active',
+      ),
+      ministryMembershipIsActive: this.ministryMemberships().some(
+        (membership) =>
+          membership.organizationId.equals(organizationId) &&
+          membership.ministryId.equals(ministryId) &&
+          membership.id.equals(membershipId) &&
+          membership.status === 'active',
+      ),
+      activeTeamMembershipExists: this.teamMemberships().some(
+        (membership) =>
+          membership.organizationId.equals(organizationId) &&
+          membership.ministryId.equals(ministryId) &&
+          membership.ministryTeamId.equals(teamId) &&
+          membership.ministryMembershipId.equals(membershipId) &&
+          membership.status === 'active',
       ),
     });
   }

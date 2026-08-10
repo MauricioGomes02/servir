@@ -68,7 +68,7 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 ### TeamMembership
 
-Associa um vínculo ministerial ativo a um time. Participação de apoio numa ocorrência pode ser permitida sem vínculo permanente com o time, mas exige vínculo e qualificação ativos no ministério.
+É um Aggregate Root histórico criado por `AssignMemberToTeam`. Associa um vínculo ministerial ativo a um time ativo do mesmo Ministry; apenas uma participação ativa existe por par, mas um membro pode participar de vários times. Participação de apoio numa ocorrência permanece futura e pode dispensar vínculo permanente com o time, mas exige vínculo e qualificação ativos no ministério.
 
 ### Activity
 
@@ -217,7 +217,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 4. Implementar solicitação de `MinistryMembership`. **Concluído.**
 5. Implementar aprovação de `MinistryMembership`. **Concluído.**
 6. Implementar qualificações ministeriais. **Concluído.**
-7. Implementar `MinistryTeam`. **Concluído.** Implementar participação e liderança em cortes seguintes.
+7. Implementar `MinistryTeam` e `TeamMembership`. **Concluído.** Implementar liderança em corte seguinte.
 8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
 9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
 10. Implementar disponibilidade e sua coleta por período.

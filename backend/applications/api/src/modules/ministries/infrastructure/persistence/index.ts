@@ -5,4 +5,6 @@ export { PostgresMinistryMembershipRequestFactsReader } from './postgres-ministr
 export { PostgresMinistryRoleQualificationFactsReader } from './postgres-ministry-role-qualification-facts-reader';
 export { PostgresMinistryTeamCreationFactsReader } from './postgres-ministry-team-creation-facts-reader';
 export { PostgresMinistryTeamRepository } from './postgres-ministry-team-repository';
+export { PostgresTeamMembershipAssignmentFactsReader } from './postgres-team-membership-assignment-facts-reader';
+export { PostgresTeamMembershipRepository } from './postgres-team-membership-repository';
 export * from './ministry-membership-status-code';
