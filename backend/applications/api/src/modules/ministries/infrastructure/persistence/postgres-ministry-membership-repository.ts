@@ -46,7 +46,7 @@ export class PostgresMinistryMembershipRepository implements MinistryMembershipR
       const result = await this.client.query<MinistryMembershipRow>(
         `INSERT INTO ministry_memberships (id, organization_id, ministry_id, member_id, status, requested_at)
        VALUES ($1, $2, $3, $4, 1, $5)
-       ON CONFLICT (ministry_id, member_id) WHERE status IN (1, 2)
+       ON CONFLICT (organization_id, ministry_id, member_id) WHERE status IN (1, 2)
        DO NOTHING RETURNING id`,
         [
           membership.id.toString(),
@@ -80,8 +80,8 @@ export class PostgresMinistryMembershipRepository implements MinistryMembershipR
       if (result.rowCount === 0) return undefined;
       const row = result.rows[0];
       const qualificationsResult = await this.client.query<QualificationRow>(
-        'SELECT id, ministry_role_id, status, qualified_at FROM ministry_role_qualifications WHERE ministry_membership_id = $1',
-        [membershipId.value],
+        'SELECT id, ministry_role_id, status, qualified_at FROM ministry_role_qualifications WHERE organization_id = $1 AND ministry_id = $2 AND ministry_membership_id = $3',
+        [organizationId.value, ministryId.value, membershipId.value],
       );
       const id = MinistryMembershipId.create(row.id);
       const organization = OrganizationId.create(row.organization_id);
@@ -129,10 +129,12 @@ export class PostgresMinistryMembershipRepository implements MinistryMembershipR
   async save(membership: MinistryMembership): Promise<void> {
     try {
       await this.client.query(
-        'UPDATE ministry_memberships SET status = $1, approved_at = $2 WHERE id = $3',
+        'UPDATE ministry_memberships SET status = $1, approved_at = $2 WHERE organization_id = $3 AND ministry_id = $4 AND id = $5',
         [
           toMinistryMembershipStatusCode(membership.status),
           membership.approvedAt?.toISOString() ?? null,
+          membership.organizationId.value,
+          membership.ministryId.value,
           membership.id.value,
         ],
       );

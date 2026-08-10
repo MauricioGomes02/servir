@@ -46,6 +46,10 @@ O runtime recebe uma única `ApplicationPersistence`, composta por um registry d
 
 Um builder acrescenta automaticamente a outbox PostgreSQL a cada write scope, enquanto a `UnitOfWork` e o uso da outbox continuam explícitos no handler. Mappers externos são registrados por `DomainEvent.name` e resolvidos em O(1), sem cadeia central de condições. As decisões completas estão nos [ADRs 042](decisions/042-typed-mediator-and-installable-modules.md) e [044](decisions/044-module-owned-persistence-registration.md).
 
+## Isolamento multi-tenant
+
+`Organization` é a fronteira de tenant dos dados de uma igreja local. O schema PostgreSQL é compartilhado, mas toda tabela tenant-owned carrega `organization_id`; relacionamentos entre essas tabelas usam constraints compostas para impedir referências entre Organizations. Repositories e Readers escopam leituras e escritas pelo tenant explicitamente, sem ambient context. IDs globalmente únicos ajudam a identidade, mas não substituem essa proteção. Tabelas operacionais globais podem permanecer sem tenant quando seus contratos não possuem um único proprietário. A decisão completa está no [ADR 046](decisions/046-organization-tenant-boundaries.md).
+
 ## Commands e Queries
 
 A Application aplica separação pragmática de responsabilidades. Commands alteram estado por meio de Aggregates, Repository ports e, quando necessário, Unit of Work. Queries não reconstituem Aggregates sem necessidade: cada consulta define um Read Model e um Reader port orientados ao consumidor.

@@ -26,3 +26,6 @@ databaseChangeLog:
   - include:
       file: changes/009-create-ministry-role-qualifications.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/010-enforce-organization-tenant-boundaries.sql
+      relativeToChangelogFile: true

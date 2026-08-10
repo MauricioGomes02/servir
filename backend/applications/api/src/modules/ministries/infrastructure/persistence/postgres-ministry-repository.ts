@@ -58,7 +58,8 @@ export class PostgresMinistryRepository implements MinistryRepository {
         `SELECT m.id, m.organization_id, m.name, m.status,
                 r.id AS role_id, r.name AS role_name, r.status AS role_status
          FROM ministries m
-         LEFT JOIN ministry_roles r ON r.ministry_id = m.id
+         LEFT JOIN ministry_roles r
+           ON r.organization_id = m.organization_id AND r.ministry_id = m.id
          WHERE m.id = $1 AND m.organization_id = $2
          ORDER BY r.id`,
         [ministryId.toString(), organizationId.toString()],
@@ -99,18 +100,19 @@ export class PostgresMinistryRepository implements MinistryRepository {
   async save(ministry: Ministry) {
     try {
       const persisted = await this.client.query<{ id: string }>(
-        'SELECT id FROM ministry_roles WHERE ministry_id = $1',
-        [ministry.id.toString()],
+        'SELECT id FROM ministry_roles WHERE organization_id = $1 AND ministry_id = $2',
+        [ministry.organizationId.toString(), ministry.id.toString()],
       );
       const ids = new Set(persisted.rows.map((row) => row.id));
       for (const role of ministry.roles.filter((candidate) => !ids.has(candidate.id.toString()))) {
         const result = await this.client.query(
-          `INSERT INTO ministry_roles (id, ministry_id, name, status)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (ministry_id, lower(name)) WHERE status = 1
+          `INSERT INTO ministry_roles (id, organization_id, ministry_id, name, status)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (organization_id, ministry_id, lower(name)) WHERE status = 1
            DO NOTHING RETURNING id`,
           [
             role.id.toString(),
+            ministry.organizationId.toString(),
             ministry.id.toString(),
             role.name.toString(),
             toMinistryRoleStatusCode(role.status),
