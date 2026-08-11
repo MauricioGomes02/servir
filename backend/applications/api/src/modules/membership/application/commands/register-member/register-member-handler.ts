@@ -11,11 +11,13 @@ import {
 } from '@/shared/application/logging';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 
 import {
   Member,
+  MemberName,
   type MemberRegistrationPolicy,
   type MemberId,
   type MemberNameError,
@@ -41,7 +43,8 @@ export interface RegisterMemberDependencies {
   readonly logger: Logger;
 }
 
-type RegisterMemberError = OrganizationIdError | MemberNameError | MemberRegistrationPolicyError;
+type RegisterMemberError =
+  OrganizationIdError | MemberNameError | MemberRegistrationPolicyError | ValidationErrors;
 
 export class RegisterMemberHandler {
   constructor(private readonly dependencies: RegisterMemberDependencies) {}
@@ -51,53 +54,52 @@ export class RegisterMemberHandler {
     context: ExecutionContext,
   ): Promise<Result<RegisterMemberOutput, RegisterMemberError>> {
     this.log(LogLevels.Debug, 'member.registration.started', context, {});
-    const organizationId = OrganizationId.create(command.organizationId);
-
-    if (!organizationId.success) {
-      this.logRejection(context, organizationId.error.code, organizationId.error.field);
-      return organizationId;
-    }
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MemberName.create(command.name),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, name] = validated.value;
 
     this.log(LogLevels.Debug, 'member.registration.organization.validated', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
     });
 
-    const organization = await this.dependencies.organizationRegistrationFacts.findById(
-      organizationId.value,
-    );
+    const organization =
+      await this.dependencies.organizationRegistrationFacts.findById(organizationId);
     const permission = this.dependencies.registrationPolicy.evaluate({
       organization,
     });
 
     if (!permission.success) {
       this.logRejection(context, permission.error.code, permission.error.field, {
-        'organization.id': organizationId.value.value,
+        'organization.id': organizationId.value,
       });
       return permission;
     }
 
     this.log(LogLevels.Debug, 'member.registration.eligibility.accepted', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
     });
 
     const member = Member.register({
       id: this.dependencies.memberIdGenerator.generate(),
-      organizationId: organizationId.value,
-      name: command.name,
+      organizationId,
+      name: name.toString(),
       eventId: this.dependencies.domainEventIdGenerator.generate(),
       registeredAt: this.dependencies.clock.now(),
     });
 
     if (!member.success) {
       this.logRejection(context, member.error.code, member.error.field, {
-        'organization.id': organizationId.value.value,
+        'organization.id': organizationId.value,
       });
       return member;
     }
 
     const pendingEvents = member.value.pendingDomainEvents;
     this.log(LogLevels.Debug, 'member.registration.validated', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
       'member.id': member.value.id.value,
       'domain_event.count': pendingEvents.length,
     });
@@ -115,7 +117,7 @@ export class RegisterMemberHandler {
     });
 
     this.log(LogLevels.Info, 'member.registration.persisted', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
       'member.id': member.value.id.value,
       'domain_event.count': pendingEvents.length,
     });
@@ -123,7 +125,7 @@ export class RegisterMemberHandler {
     member.value.acknowledgeDomainEvents(pendingEvents);
 
     this.log(LogLevels.Info, 'member.registration.completed', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
       'member.id': member.value.id.value,
     });
 

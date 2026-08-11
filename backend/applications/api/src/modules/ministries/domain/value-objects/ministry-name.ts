@@ -1,5 +1,6 @@
 import { failure, success, type Result } from '@/shared/core/result';
 import { ValueObject } from '@/shared/domain/value-object';
+import { normalizeName } from '@/shared/domain/name';
 
 import { MinistryNameErrorCodes, type MinistryNameError } from './ministry-name-error';
 
@@ -19,7 +20,7 @@ export class MinistryName extends ValueObject<MinistryNameProps, 'MinistryName'>
     if (typeof input !== 'string') {
       return failure({ code: MinistryNameErrorCodes.InvalidType, field: 'name' });
     }
-    const value = input.trim();
+    const value = normalizeName(input);
     if (value.length === 0) {
       return failure({ code: MinistryNameErrorCodes.Empty, field: 'name' });
     }

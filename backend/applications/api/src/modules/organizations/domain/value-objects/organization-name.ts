@@ -1,5 +1,6 @@
 import { failure, success, type Result } from '@/shared/core/result';
 import { ValueObject } from '@/shared/domain/value-object';
+import { normalizeName } from '@/shared/domain/name';
 
 import { OrganizationNameErrorCodes, type OrganizationNameError } from './organization-name-error';
 
@@ -23,7 +24,7 @@ export class OrganizationName extends ValueObject<OrganizationNameProps, 'Organi
       });
     }
 
-    const value = input.trim();
+    const value = normalizeName(input);
 
     if (value.length === 0) {
       return failure({

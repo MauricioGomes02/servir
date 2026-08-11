@@ -1,6 +1,7 @@
 import { MemberId, type MemberIdError } from '@/modules/membership/domain';
 import { OrganizationId, type OrganizationIdError } from '@/modules/organizations/domain';
 import { failure, type Result, success } from '@/shared/core/result';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import type { ExecutionContext } from '@/shared/application/context';
 import {
   createLogRecord,
@@ -14,7 +15,8 @@ import type { GetMemberDetailsQuery } from './get-member-details-query';
 import type { MemberDetails } from './member-details';
 import type { MemberDetailsReader } from './member-details-reader';
 
-type GetMemberDetailsFailure = OrganizationIdError | MemberIdError | GetMemberDetailsError;
+type GetMemberDetailsFailure =
+  OrganizationIdError | MemberIdError | GetMemberDetailsError | ValidationErrors;
 
 export class GetMemberDetailsHandler {
   constructor(
@@ -27,29 +29,20 @@ export class GetMemberDetailsHandler {
     context: ExecutionContext,
   ): Promise<Result<MemberDetails, GetMemberDetailsFailure>> {
     this.log('member.details.retrieval.started', context, {}, LogLevels.Debug);
-    const organizationId = OrganizationId.create(query.organizationId);
-
-    if (!organizationId.success) {
-      this.logRejection(context, organizationId.error.code, organizationId.error.field);
-      return organizationId;
-    }
-
-    const memberId = MemberId.create(query.memberId);
-
-    if (!memberId.success) {
-      this.logRejection(context, memberId.error.code, memberId.error.field, {
-        'organization.id': organizationId.value.value,
-      });
-      return memberId;
-    }
+    const validated = combineValidationResults(
+      OrganizationId.create(query.organizationId),
+      MemberId.create(query.memberId),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, memberId] = validated.value;
 
     const criteria = {
-      'organization.id': organizationId.value.value,
-      'member.id': memberId.value.value,
+      'organization.id': organizationId.value,
+      'member.id': memberId.value,
     };
     this.log('member.details.retrieval.criteria_validated', context, criteria, LogLevels.Debug);
 
-    const details = await this.reader.findById(organizationId.value, memberId.value);
+    const details = await this.reader.findById(organizationId, memberId);
 
     if (details === undefined) {
       this.log('member.details.retrieval.not_found', context, criteria, LogLevels.Info);

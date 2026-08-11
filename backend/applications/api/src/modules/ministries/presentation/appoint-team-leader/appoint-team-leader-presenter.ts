@@ -1,7 +1,7 @@
 import type { ExecutionContext } from '@/shared/application/context';
 import type { Result } from '@/shared/core/result';
 import {
-  presentError,
+  presentErrorGroup,
   type MessageTranslator,
   type PresentedError,
   type SupportedLocale,
@@ -21,7 +21,7 @@ export type AppointTeamLeaderView =
         appointedAt: string;
       }>;
     }>
-  | Readonly<{ kind: 'failure'; error: PresentedError }>;
+  | Readonly<{ kind: 'failure'; error: PresentedError; errors: readonly PresentedError[] }>;
 
 export class AppointTeamLeaderPresenter {
   constructor(private readonly translator: MessageTranslator) {}
@@ -34,7 +34,7 @@ export class AppointTeamLeaderPresenter {
     if (!result.success)
       return Object.freeze({
         kind: 'failure',
-        error: presentError(result.error, context, locale, this.translator),
+        ...presentErrorGroup(result.error, context, locale, this.translator),
       });
     return Object.freeze({
       kind: 'success',

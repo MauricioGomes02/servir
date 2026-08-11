@@ -1,5 +1,6 @@
 import { failure, success, type Result } from '@/shared/core/result';
 import { ValueObject } from '@/shared/domain/value-object';
+import { normalizeName } from '@/shared/domain/name';
 
 import { MemberNameErrorCodes, type MemberNameError } from './member-name-error';
 
@@ -23,7 +24,7 @@ export class MemberName extends ValueObject<MemberNameProps, 'MemberName'> {
       });
     }
 
-    const value = input.trim();
+    const value = normalizeName(input);
 
     if (value.length === 0) {
       return failure({

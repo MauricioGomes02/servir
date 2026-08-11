@@ -8,8 +8,6 @@ export const MinistryMembershipIdErrorCodes = {
 export type MinistryMembershipIdErrorCode =
   (typeof MinistryMembershipIdErrorCodes)[keyof typeof MinistryMembershipIdErrorCodes];
 
-export interface MinistryMembershipIdError {
-  readonly code: MinistryMembershipIdErrorCode;
-  readonly field: 'ministryMembershipId';
-  readonly parameters?: Readonly<Record<string, string | number>>;
-}
+import type { NotificationError } from '@/shared/domain/notification';
+
+export type MinistryMembershipIdError = NotificationError<MinistryMembershipIdErrorCode>;

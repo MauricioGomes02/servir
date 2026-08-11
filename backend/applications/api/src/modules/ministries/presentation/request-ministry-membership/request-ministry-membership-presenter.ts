@@ -1,9 +1,10 @@
 import type { MemberIdError } from '@/modules/membership/domain';
 import type { OrganizationIdError } from '@/modules/organizations/domain';
 import type { ExecutionContext } from '@/shared/application/context';
+import type { ValidationErrors } from '@/shared/application/validation';
 import type { Result } from '@/shared/core/result';
 import {
-  presentError,
+  presentErrorGroup,
   type MessageTranslator,
   type PresentedError,
   type SupportedLocale,
@@ -12,7 +13,11 @@ import type { RequestMinistryMembershipOutput } from '../../application';
 import type { MinistryIdError, MinistryMembershipRequestPolicyError } from '../../domain';
 
 type RequestMinistryMembershipError =
-  OrganizationIdError | MinistryIdError | MemberIdError | MinistryMembershipRequestPolicyError;
+  | OrganizationIdError
+  | MinistryIdError
+  | MemberIdError
+  | MinistryMembershipRequestPolicyError
+  | ValidationErrors;
 export type RequestMinistryMembershipView =
   | Readonly<{
       kind: 'success';
@@ -24,7 +29,7 @@ export type RequestMinistryMembershipView =
         status: 'requested';
       }>;
     }>
-  | Readonly<{ kind: 'failure'; error: PresentedError }>;
+  | Readonly<{ kind: 'failure'; error: PresentedError; errors: readonly PresentedError[] }>;
 
 export class RequestMinistryMembershipPresenter {
   constructor(private readonly translator: MessageTranslator) {}
@@ -36,7 +41,7 @@ export class RequestMinistryMembershipPresenter {
     if (!result.success)
       return Object.freeze({
         kind: 'failure',
-        error: presentError(result.error, context, locale, this.translator),
+        ...presentErrorGroup(result.error, context, locale, this.translator),
       });
     return Object.freeze({
       kind: 'success',

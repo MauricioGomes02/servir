@@ -46,6 +46,7 @@ Adicionar combinadores (`map`, `flatMap`, `mapError`) somente após usos reais d
 
 - Usar união discriminada e valores imutáveis.
 - Modelar erros estáveis por código e parâmetros.
+- Combinar Results independentes com Notification; manter fail-fast quando uma avaliação depende do sucesso anterior.
 
 ## Anti-patterns
 

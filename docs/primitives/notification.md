@@ -48,6 +48,8 @@ Evoluir para uma API persistentemente imutável somente se consumidores reais pr
 - Manter códigos estáveis e mensagens fora do domínio.
 - Acumular somente validações independentes.
 - Copiar e congelar erros na entrada e devolver snapshots congelados.
+- Acumular entradas estruturais independentes antes de I/O e transportar um snapshot imutável na falha do Result.
+- Manter o primeiro erro como diagnóstico primário somente para compatibilidade; consumidores devem preservar a coleção completa.
 
 ## Anti-patterns
 

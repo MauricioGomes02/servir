@@ -5,6 +5,7 @@ import type { IdGenerator } from '@/shared/application/id-generator';
 import { createLogRecord, LogLevels, type Logger } from '@/shared/application/logging';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { failure, success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import {
@@ -32,7 +33,8 @@ type ApproveMinistryMembershipError =
   | MinistryIdError
   | MinistryMembershipIdError
   | MinistryMembershipApprovalError
-  | ApproveMinistryMembershipNotFoundError;
+  | ApproveMinistryMembershipNotFoundError
+  | ValidationErrors;
 
 export class ApproveMinistryMembershipHandler {
   constructor(
@@ -49,17 +51,18 @@ export class ApproveMinistryMembershipHandler {
     command: ApproveMinistryMembershipCommand,
     context: ExecutionContext,
   ): Promise<Result<ApproveMinistryMembershipOutput, ApproveMinistryMembershipError>> {
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return organizationId;
-    const ministryId = MinistryId.create(command.ministryId);
-    if (!ministryId.success) return ministryId;
-    const membershipId = MinistryMembershipId.create(command.ministryMembershipId);
-    if (!membershipId.success) return membershipId;
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryId.create(command.ministryId),
+      MinistryMembershipId.create(command.ministryMembershipId),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, ministryId, membershipId] = validated.value;
     const transaction = await this.dependencies.unitOfWork.execute(async (scope) => {
       const membership = await scope.ministryMemberships.findById(
-        organizationId.value,
-        ministryId.value,
-        membershipId.value,
+        organizationId,
+        ministryId,
+        membershipId,
       );
       if (membership === undefined)
         return {
@@ -105,9 +108,9 @@ export class ApproveMinistryMembershipHandler {
         eventName: 'ministry_membership.approval.completed',
         context,
         attributes: {
-          'organization.id': organizationId.value.value,
-          'ministry.id': ministryId.value.value,
-          'ministry_membership.id': membershipId.value.value,
+          'organization.id': organizationId.value,
+          'ministry.id': ministryId.value,
+          'ministry_membership.id': membershipId.value,
         },
       }),
     );

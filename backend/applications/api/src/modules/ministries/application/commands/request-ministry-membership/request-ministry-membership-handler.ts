@@ -6,6 +6,7 @@ import type { IdGenerator } from '@/shared/application/id-generator';
 import { createLogRecord, LogLevels, type Logger } from '@/shared/application/logging';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import {
@@ -30,7 +31,11 @@ export interface RequestMinistryMembershipOutput {
   readonly status: 'requested';
 }
 type RequestMinistryMembershipError =
-  OrganizationIdError | MinistryIdError | MemberIdError | MinistryMembershipRequestPolicyError;
+  | OrganizationIdError
+  | MinistryIdError
+  | MemberIdError
+  | MinistryMembershipRequestPolicyError
+  | ValidationErrors;
 
 export interface RequestMinistryMembershipDependencies {
   readonly clock: Clock;
@@ -50,26 +55,23 @@ export class RequestMinistryMembershipHandler {
     command: RequestMinistryMembershipCommand,
     context: ExecutionContext,
   ): Promise<Result<RequestMinistryMembershipOutput, RequestMinistryMembershipError>> {
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return organizationId;
-    const ministryId = MinistryId.create(command.ministryId);
-    if (!ministryId.success) return ministryId;
-    const memberId = MemberId.create(command.memberId);
-    if (!memberId.success) return memberId;
-
-    const facts = await this.dependencies.facts.findFor(
-      organizationId.value,
-      ministryId.value,
-      memberId.value,
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryId.create(command.ministryId),
+      MemberId.create(command.memberId),
     );
+    if (!validated.success) return validated;
+    const [organizationId, ministryId, memberId] = validated.value;
+
+    const facts = await this.dependencies.facts.findFor(organizationId, ministryId, memberId);
     const permission = this.dependencies.policy.evaluate(facts);
     if (!permission.success) return permission;
 
     const membership = MinistryMembership.request({
       id: this.dependencies.ministryMembershipIdGenerator.generate(),
-      organizationId: organizationId.value,
-      ministryId: ministryId.value,
-      memberId: memberId.value,
+      organizationId,
+      ministryId,
+      memberId,
       eventId: this.dependencies.domainEventIdGenerator.generate(),
       requestedAt: this.dependencies.clock.now(),
     });

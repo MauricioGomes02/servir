@@ -76,6 +76,7 @@ export function registerCreateMinistryRoute(
       return sendPresentedProblem(reply, {
         context,
         error: view.error,
+        errors: view.errors,
         locale: request.locale,
         problem: problemMetadata(view.error),
         translator: dependencies.messageTranslator,

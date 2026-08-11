@@ -5,10 +5,12 @@ import type { IdGenerator } from '@/shared/application/id-generator';
 import { createLogRecord, LogLevels, type Logger } from '@/shared/application/logging';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { failure, success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import {
   MinistryId,
+  MinistryRoleName,
   type MinistryIdError,
   type MinistryRoleDefinitionError,
   type MinistryRoleId,
@@ -33,7 +35,8 @@ type DefineMinistryRoleError =
   | MinistryIdError
   | MinistryRoleNameError
   | MinistryRoleDefinitionError
-  | DefineMinistryRoleNotFoundError;
+  | DefineMinistryRoleNotFoundError
+  | ValidationErrors;
 export class DefineMinistryRoleHandler {
   constructor(
     private readonly dependencies: {
@@ -51,13 +54,16 @@ export class DefineMinistryRoleHandler {
     context: ExecutionContext,
   ): Promise<Result<DefineMinistryRoleOutput, DefineMinistryRoleError>> {
     this.log('ministry_role.definition.started', context, {});
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return this.reject(context, organizationId.error);
-    const ministryId = MinistryId.create(command.ministryId);
-    if (!ministryId.success) return this.reject(context, ministryId.error);
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryId.create(command.ministryId),
+      MinistryRoleName.create(command.name),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, ministryId, name] = validated.value;
 
     const transaction = await this.dependencies.unitOfWork.execute(async (scope) => {
-      const ministry = await scope.ministries.findById(organizationId.value, ministryId.value);
+      const ministry = await scope.ministries.findById(organizationId, ministryId);
       if (ministry === undefined) {
         return {
           result: this.reject(context, {
@@ -68,7 +74,7 @@ export class DefineMinistryRoleHandler {
       }
       const defined = ministry.defineRole({
         id: this.dependencies.ministryRoleIdGenerator.generate(),
-        name: command.name,
+        name: name.toString(),
         eventId: this.dependencies.domainEventIdGenerator.generate(),
         occurredAt: this.dependencies.clock.now(),
       });
@@ -102,8 +108,8 @@ export class DefineMinistryRoleHandler {
     if (!transaction.result.success) return transaction.result;
     transaction.ministry?.acknowledgeDomainEvents(transaction.events ?? []);
     this.log('ministry_role.definition.completed', context, {
-      'organization.id': organizationId.value.value,
-      'ministry.id': ministryId.value.value,
+      'organization.id': organizationId.value,
+      'ministry.id': ministryId.value,
       'ministry_role.id': transaction.result.value.ministryRoleId.value,
     });
     return transaction.result;

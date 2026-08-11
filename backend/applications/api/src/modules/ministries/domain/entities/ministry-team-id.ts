@@ -1,16 +1,22 @@
-import { failure, success, type Result } from '@/shared/core/result';
-import { isCanonicalUuid } from '@/shared/core/uuid';
-import { EntityId } from '@/shared/domain/entity';
+import { success, type Result } from '@/shared/core/result';
+import { EntityId, validateEntityId } from '@/shared/domain/entity';
 import type { NotificationError } from '@/shared/domain/notification';
-export const MinistryTeamIdErrorCodes = { Invalid: 'ministry_team.id.invalid' } as const;
-export type MinistryTeamIdError = NotificationError<typeof MinistryTeamIdErrorCodes.Invalid>;
+export const MinistryTeamIdErrorCodes = {
+  InvalidType: 'ministry_team.id.invalid_type',
+  Empty: 'ministry_team.id.empty',
+  TooLong: 'ministry_team.id.too_long',
+  InvalidFormat: 'ministry_team.id.invalid_format',
+} as const;
+export type MinistryTeamIdError = NotificationError<
+  (typeof MinistryTeamIdErrorCodes)[keyof typeof MinistryTeamIdErrorCodes]
+>;
 export class MinistryTeamId extends EntityId<'MinistryTeamId'> {
   private constructor(value: string) {
     super(value);
   }
   static create(value: unknown): Result<MinistryTeamId, MinistryTeamIdError> {
-    if (typeof value !== 'string' || !isCanonicalUuid(value.trim()))
-      return failure({ code: MinistryTeamIdErrorCodes.Invalid, field: 'ministryTeamId' });
-    return success(new MinistryTeamId(value.trim()));
+    const validated = validateEntityId(value, 'ministryTeamId', MinistryTeamIdErrorCodes);
+    if (!validated.success) return validated;
+    return success(new MinistryTeamId(validated.value));
   }
 }

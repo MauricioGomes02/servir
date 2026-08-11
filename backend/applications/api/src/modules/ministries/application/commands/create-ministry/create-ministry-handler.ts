@@ -11,6 +11,7 @@ import {
 } from '@/shared/application/logging';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { failure, success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 
@@ -48,7 +49,8 @@ type CreateMinistryError =
   | OrganizationIdError
   | MinistryNameError
   | MinistryCreationPolicyError
-  | MinistryActiveNameConflictError;
+  | MinistryActiveNameConflictError
+  | ValidationErrors;
 
 export class CreateMinistryHandler {
   constructor(private readonly dependencies: CreateMinistryDependencies) {}
@@ -58,39 +60,39 @@ export class CreateMinistryHandler {
     context: ExecutionContext,
   ): Promise<Result<CreateMinistryOutput, CreateMinistryError>> {
     this.log(LogLevels.Debug, 'ministry.creation.started', context, {});
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return this.reject(context, organizationId.error);
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryName.create(command.name),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, name] = validated.value;
 
-    const name = MinistryName.create(command.name);
-    if (!name.success)
-      return this.reject(context, name.error, { 'organization.id': organizationId.value.value });
-
-    const facts = await this.dependencies.creationFacts.find(organizationId.value, name.value);
+    const facts = await this.dependencies.creationFacts.find(organizationId, name);
     const permission = this.dependencies.creationPolicy.evaluate(facts);
     if (!permission.success)
       return this.reject(context, permission.error, {
-        'organization.id': organizationId.value.value,
+        'organization.id': organizationId.value,
       });
 
     this.log(LogLevels.Debug, 'ministry.creation.eligibility.accepted', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
     });
 
     const ministry = Ministry.create({
       id: this.dependencies.ministryIdGenerator.generate(),
-      organizationId: organizationId.value,
-      name: name.value.toString(),
+      organizationId,
+      name: name.toString(),
       eventId: this.dependencies.domainEventIdGenerator.generate(),
       occurredAt: this.dependencies.clock.now(),
     });
     if (!ministry.success)
       return this.reject(context, ministry.error, {
-        'organization.id': organizationId.value.value,
+        'organization.id': organizationId.value,
       });
 
     const pendingEvents = ministry.value.pendingDomainEvents;
     this.log(LogLevels.Debug, 'ministry.creation.validated', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
       'ministry.id': ministry.value.id.value,
       'domain_event.count': pendingEvents.length,
     });
@@ -110,17 +112,17 @@ export class CreateMinistryHandler {
     });
     if (!persisted.success)
       return this.reject(context, persisted.error, {
-        'organization.id': organizationId.value.value,
+        'organization.id': organizationId.value,
       });
 
     this.log(LogLevels.Info, 'ministry.creation.persisted', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
       'ministry.id': ministry.value.id.value,
       'domain_event.count': pendingEvents.length,
     });
     ministry.value.acknowledgeDomainEvents(pendingEvents);
     this.log(LogLevels.Info, 'ministry.creation.completed', context, {
-      'organization.id': organizationId.value.value,
+      'organization.id': organizationId.value,
       'ministry.id': ministry.value.id.value,
     });
     return success(

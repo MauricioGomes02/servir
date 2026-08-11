@@ -4,6 +4,7 @@ import type { ExecutionContext } from '@/shared/application/context';
 import type { IdGenerator } from '@/shared/application/id-generator';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import {
@@ -36,7 +37,8 @@ export type AssignMemberToTeamError =
   | MinistryTeamIdError
   | MinistryMembershipIdError
   | TeamMembershipIdError
-  | TeamMembershipAssignmentPolicyError;
+  | TeamMembershipAssignmentPolicyError
+  | ValidationErrors;
 export class AssignMemberToTeamHandler {
   constructor(
     private readonly dependencies: {
@@ -53,30 +55,25 @@ export class AssignMemberToTeamHandler {
     command: AssignMemberToTeamCommand,
     context: ExecutionContext,
   ): Promise<Result<AssignMemberToTeamOutput, AssignMemberToTeamError>> {
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return organizationId;
-    const ministryId = MinistryId.create(command.ministryId);
-    if (!ministryId.success) return ministryId;
-    const teamId = MinistryTeamId.create(command.ministryTeamId);
-    if (!teamId.success) return teamId;
-    const ministryMembershipId = MinistryMembershipId.create(command.ministryMembershipId);
-    if (!ministryMembershipId.success) return ministryMembershipId;
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryId.create(command.ministryId),
+      MinistryTeamId.create(command.ministryTeamId),
+      MinistryMembershipId.create(command.ministryMembershipId),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, ministryId, teamId, ministryMembershipId] = validated.value;
     const permission = this.dependencies.policy.evaluate(
-      await this.dependencies.facts.find(
-        organizationId.value,
-        ministryId.value,
-        teamId.value,
-        ministryMembershipId.value,
-      ),
+      await this.dependencies.facts.find(organizationId, ministryId, teamId, ministryMembershipId),
     );
     if (!permission.success) return permission;
     const assignedAt = this.dependencies.clock.now();
     const membership = TeamMembership.assign({
       id: this.dependencies.teamMembershipIdGenerator.generate(),
-      organizationId: organizationId.value,
-      ministryId: ministryId.value,
-      ministryTeamId: teamId.value,
-      ministryMembershipId: ministryMembershipId.value,
+      organizationId,
+      ministryId,
+      ministryTeamId: teamId,
+      ministryMembershipId,
       eventId: this.dependencies.domainEventIdGenerator.generate(),
       assignedAt,
     });

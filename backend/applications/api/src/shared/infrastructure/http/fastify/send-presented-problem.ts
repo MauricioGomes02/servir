@@ -12,6 +12,7 @@ export interface PresentedHttpProblem {
 export interface SendPresentedProblemInput {
   readonly context: ExecutionContext;
   readonly error: PresentedError;
+  readonly errors?: readonly PresentedError[];
   readonly locale: SupportedLocale;
   readonly problem: PresentedHttpProblem;
   readonly translator: MessageTranslator;
@@ -35,7 +36,7 @@ export function sendPresentedProblem(
         status: input.problem.status,
         correlationId: input.context.correlationId,
         requestId: input.context.requestId,
-        errors: [input.error],
+        errors: input.errors ?? [input.error],
       }),
     );
 }

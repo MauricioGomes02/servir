@@ -4,6 +4,7 @@ import type { ExecutionContext } from '@/shared/application/context';
 import type { IdGenerator } from '@/shared/application/id-generator';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import {
@@ -37,7 +38,8 @@ export type AppointTeamLeaderError =
   | MinistryTeamIdError
   | TeamMembershipIdError
   | TeamLeadershipIdError
-  | TeamLeaderAppointmentPolicyError;
+  | TeamLeaderAppointmentPolicyError
+  | ValidationErrors;
 
 export class AppointTeamLeaderHandler {
   constructor(
@@ -56,30 +58,25 @@ export class AppointTeamLeaderHandler {
     command: AppointTeamLeaderCommand,
     context: ExecutionContext,
   ): Promise<Result<AppointTeamLeaderOutput, AppointTeamLeaderError>> {
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return organizationId;
-    const ministryId = MinistryId.create(command.ministryId);
-    if (!ministryId.success) return ministryId;
-    const teamId = MinistryTeamId.create(command.ministryTeamId);
-    if (!teamId.success) return teamId;
-    const membershipId = TeamMembershipId.create(command.teamMembershipId);
-    if (!membershipId.success) return membershipId;
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryId.create(command.ministryId),
+      MinistryTeamId.create(command.ministryTeamId),
+      TeamMembershipId.create(command.teamMembershipId),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, ministryId, teamId, membershipId] = validated.value;
     const permission = this.dependencies.policy.evaluate(
-      await this.dependencies.facts.find(
-        organizationId.value,
-        ministryId.value,
-        teamId.value,
-        membershipId.value,
-      ),
+      await this.dependencies.facts.find(organizationId, ministryId, teamId, membershipId),
     );
     if (!permission.success) return permission;
     const appointedAt = this.dependencies.clock.now();
     const leadership = TeamLeadership.appoint({
       id: this.dependencies.teamLeadershipIdGenerator.generate(),
-      organizationId: organizationId.value,
-      ministryId: ministryId.value,
-      ministryTeamId: teamId.value,
-      teamMembershipId: membershipId.value,
+      organizationId,
+      ministryId,
+      ministryTeamId: teamId,
+      teamMembershipId: membershipId,
       eventId: this.dependencies.domainEventIdGenerator.generate(),
       appointedAt,
     });

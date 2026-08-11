@@ -1,10 +1,16 @@
-import { failure, success, type Result } from '@/shared/core/result';
-import { isCanonicalUuid } from '@/shared/core/uuid';
-import { EntityId } from '@/shared/domain/entity';
+import { success, type Result } from '@/shared/core/result';
+import { EntityId, validateEntityId } from '@/shared/domain/entity';
 import type { NotificationError } from '@/shared/domain/notification';
 
-export const TeamLeadershipIdErrorCodes = { Invalid: 'team_leadership.id.invalid' } as const;
-export type TeamLeadershipIdError = NotificationError<typeof TeamLeadershipIdErrorCodes.Invalid>;
+export const TeamLeadershipIdErrorCodes = {
+  InvalidType: 'team_leadership.id.invalid_type',
+  Empty: 'team_leadership.id.empty',
+  TooLong: 'team_leadership.id.too_long',
+  InvalidFormat: 'team_leadership.id.invalid_format',
+} as const;
+export type TeamLeadershipIdError = NotificationError<
+  (typeof TeamLeadershipIdErrorCodes)[keyof typeof TeamLeadershipIdErrorCodes]
+>;
 
 export class TeamLeadershipId extends EntityId<'TeamLeadershipId'> {
   private constructor(value: string) {
@@ -12,8 +18,8 @@ export class TeamLeadershipId extends EntityId<'TeamLeadershipId'> {
   }
 
   static create(value: unknown): Result<TeamLeadershipId, TeamLeadershipIdError> {
-    if (typeof value !== 'string' || !isCanonicalUuid(value.trim()))
-      return failure({ code: TeamLeadershipIdErrorCodes.Invalid, field: 'teamLeadershipId' });
-    return success(new TeamLeadershipId(value.trim()));
+    const validated = validateEntityId(value, 'teamLeadershipId', TeamLeadershipIdErrorCodes);
+    if (!validated.success) return validated;
+    return success(new TeamLeadershipId(validated.value));
   }
 }

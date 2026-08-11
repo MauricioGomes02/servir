@@ -51,5 +51,6 @@
 | [047](047-create-ministry-team-vertical-slice.md) | Primeiro corte vertical de MinistryTeam | Aceita |
 | [048](048-assign-member-to-team-vertical-slice.md) | Participação de membro em time ministerial | Aceita |
 | [049](049-appoint-team-leader-vertical-slice.md) | Nomeação de líder de time ministerial | Aceita |
+| [050](050-accumulated-input-validation-and-normalization.md) | Validação acumulada de entrada e normalização segura | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

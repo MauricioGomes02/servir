@@ -2,15 +2,17 @@ import type { RegisterMemberOutput } from '@/modules/membership/application';
 import type { MemberNameError, MemberRegistrationPolicyError } from '@/modules/membership/domain';
 import type { OrganizationIdError } from '@/modules/organizations/domain';
 import type { ExecutionContext } from '@/shared/application/context';
+import type { ValidationErrors } from '@/shared/application/validation';
 import type { Result } from '@/shared/core/result';
 import {
-  presentError,
+  presentErrorGroup,
   type MessageTranslator,
   type PresentedError,
   type SupportedLocale,
 } from '@/shared/presentation';
 
-type RegisterMemberError = OrganizationIdError | MemberNameError | MemberRegistrationPolicyError;
+type RegisterMemberError =
+  OrganizationIdError | MemberNameError | MemberRegistrationPolicyError | ValidationErrors;
 
 export type RegisterMemberView =
   | Readonly<{
@@ -24,6 +26,7 @@ export type RegisterMemberView =
   | Readonly<{
       kind: 'failure';
       error: PresentedError;
+      errors: readonly PresentedError[];
     }>;
 
 export class RegisterMemberPresenter {
@@ -37,7 +40,7 @@ export class RegisterMemberPresenter {
     if (!result.success) {
       return Object.freeze({
         kind: 'failure',
-        error: presentError(result.error, context, locale, this.translator),
+        ...presentErrorGroup(result.error, context, locale, this.translator),
       });
     }
 

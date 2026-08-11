@@ -18,6 +18,7 @@ Usar quando várias validações podem ser avaliadas com segurança na mesma ten
 3. Manter localização e transporte fora do domínio.
 4. Não misturar erros técnicos, warnings ou logs.
 5. Expor itens somente leitura.
+6. Em handlers, acumular todas as entradas estruturais independentes antes de qualquer I/O; manter decisões dependentes fail-fast.
 
 ## Exemplo correto
 

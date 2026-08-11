@@ -2,21 +2,23 @@ import type { CreateMinistryOutput } from '../../application';
 import type { MinistryCreationPolicyError, MinistryNameError } from '../../domain';
 import type { OrganizationIdError } from '@/modules/organizations/domain';
 import type { ExecutionContext } from '@/shared/application/context';
+import type { ValidationErrors } from '@/shared/application/validation';
 import type { Result } from '@/shared/core/result';
 import {
-  presentError,
+  presentErrorGroup,
   type MessageTranslator,
   type PresentedError,
   type SupportedLocale,
 } from '@/shared/presentation';
 
-type CreateMinistryError = OrganizationIdError | MinistryNameError | MinistryCreationPolicyError;
+type CreateMinistryError =
+  OrganizationIdError | MinistryNameError | MinistryCreationPolicyError | ValidationErrors;
 export type CreateMinistryView =
   | Readonly<{
       kind: 'success';
       resource: Readonly<{ id: string; organizationId: string; name: string; status: 'active' }>;
     }>
-  | Readonly<{ kind: 'failure'; error: PresentedError }>;
+  | Readonly<{ kind: 'failure'; error: PresentedError; errors: readonly PresentedError[] }>;
 
 export class CreateMinistryPresenter {
   constructor(private readonly translator: MessageTranslator) {}
@@ -29,7 +31,7 @@ export class CreateMinistryPresenter {
     if (!result.success) {
       return Object.freeze({
         kind: 'failure',
-        error: presentError(result.error, context, locale, this.translator),
+        ...presentErrorGroup(result.error, context, locale, this.translator),
       });
     }
     return Object.freeze({

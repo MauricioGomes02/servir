@@ -2,15 +2,17 @@ import type { GetMemberDetailsError, MemberDetails } from '@/modules/membership/
 import type { MemberIdError } from '@/modules/membership/domain';
 import type { OrganizationIdError } from '@/modules/organizations/domain';
 import type { ExecutionContext } from '@/shared/application/context';
+import type { ValidationErrors } from '@/shared/application/validation';
 import type { Result } from '@/shared/core/result';
 import {
-  presentError,
+  presentErrorGroup,
   type MessageTranslator,
   type PresentedError,
   type SupportedLocale,
 } from '@/shared/presentation';
 
-type GetMemberDetailsFailure = OrganizationIdError | MemberIdError | GetMemberDetailsError;
+type GetMemberDetailsFailure =
+  OrganizationIdError | MemberIdError | GetMemberDetailsError | ValidationErrors;
 
 export type GetMemberDetailsView =
   | Readonly<{
@@ -25,6 +27,7 @@ export type GetMemberDetailsView =
   | Readonly<{
       kind: 'failure';
       error: PresentedError;
+      errors: readonly PresentedError[];
     }>;
 
 export class GetMemberDetailsPresenter {
@@ -38,7 +41,7 @@ export class GetMemberDetailsPresenter {
     if (!result.success) {
       return Object.freeze({
         kind: 'failure',
-        error: presentError(result.error, context, locale, this.translator),
+        ...presentErrorGroup(result.error, context, locale, this.translator),
       });
     }
 

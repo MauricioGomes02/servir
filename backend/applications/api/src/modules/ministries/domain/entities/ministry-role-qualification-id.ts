@@ -1,13 +1,15 @@
-import { failure, success, type Result } from '@/shared/core/result';
-import { isCanonicalUuid } from '@/shared/core/uuid';
-import { EntityId } from '@/shared/domain/entity';
+import { success, type Result } from '@/shared/core/result';
+import { EntityId, validateEntityId } from '@/shared/domain/entity';
 import type { NotificationError } from '@/shared/domain/notification';
 
 export const MinistryRoleQualificationIdErrorCodes = {
-  Invalid: 'ministry_role_qualification.id.invalid',
+  InvalidType: 'ministry_role_qualification.id.invalid_type',
+  Empty: 'ministry_role_qualification.id.empty',
+  TooLong: 'ministry_role_qualification.id.too_long',
+  InvalidFormat: 'ministry_role_qualification.id.invalid_format',
 } as const;
 export type MinistryRoleQualificationIdError = NotificationError<
-  typeof MinistryRoleQualificationIdErrorCodes.Invalid
+  (typeof MinistryRoleQualificationIdErrorCodes)[keyof typeof MinistryRoleQualificationIdErrorCodes]
 >;
 
 export class MinistryRoleQualificationId extends EntityId<'MinistryRoleQualificationId'> {
@@ -17,11 +19,12 @@ export class MinistryRoleQualificationId extends EntityId<'MinistryRoleQualifica
   static create(
     value: unknown,
   ): Result<MinistryRoleQualificationId, MinistryRoleQualificationIdError> {
-    if (typeof value !== 'string' || !isCanonicalUuid(value.trim()))
-      return failure({
-        code: MinistryRoleQualificationIdErrorCodes.Invalid,
-        field: 'ministryRoleQualificationId',
-      });
-    return success(new MinistryRoleQualificationId(value.trim()));
+    const validated = validateEntityId(
+      value,
+      'ministryRoleQualificationId',
+      MinistryRoleQualificationIdErrorCodes,
+    );
+    if (!validated.success) return validated;
+    return success(new MinistryRoleQualificationId(validated.value));
   }
 }

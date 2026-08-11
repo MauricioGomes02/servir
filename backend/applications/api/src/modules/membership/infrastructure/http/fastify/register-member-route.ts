@@ -80,6 +80,7 @@ export function registerMemberRoute(
       return sendPresentedProblem(reply, {
         context,
         error: view.error,
+        errors: view.errors,
         locale: request.locale,
         problem,
         translator: dependencies.messageTranslator,

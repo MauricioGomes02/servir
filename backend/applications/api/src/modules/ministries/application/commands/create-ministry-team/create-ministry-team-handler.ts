@@ -4,6 +4,7 @@ import type { ExecutionContext } from '@/shared/application/context';
 import type { IdGenerator } from '@/shared/application/id-generator';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import {
@@ -26,7 +27,11 @@ export interface CreateMinistryTeamOutput {
   readonly status: 'active';
 }
 export type CreateMinistryTeamError =
-  OrganizationIdError | MinistryIdError | MinistryTeamNameError | MinistryTeamCreationPolicyError;
+  | OrganizationIdError
+  | MinistryIdError
+  | MinistryTeamNameError
+  | MinistryTeamCreationPolicyError
+  | ValidationErrors;
 export class CreateMinistryTeamHandler {
   constructor(
     private readonly dependencies: {
@@ -43,21 +48,22 @@ export class CreateMinistryTeamHandler {
     command: CreateMinistryTeamCommand,
     context: ExecutionContext,
   ): Promise<Result<CreateMinistryTeamOutput, CreateMinistryTeamError>> {
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return organizationId;
-    const ministryId = MinistryId.create(command.ministryId);
-    if (!ministryId.success) return ministryId;
-    const name = MinistryTeamName.create(command.name);
-    if (!name.success) return name;
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryId.create(command.ministryId),
+      MinistryTeamName.create(command.name),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, ministryId, name] = validated.value;
     const permission = this.dependencies.policy.evaluate(
-      await this.dependencies.facts.find(organizationId.value, ministryId.value, name.value),
+      await this.dependencies.facts.find(organizationId, ministryId, name),
     );
     if (!permission.success) return permission;
     const team = MinistryTeam.create({
       id: this.dependencies.ministryTeamIdGenerator.generate(),
-      organizationId: organizationId.value,
-      ministryId: ministryId.value,
-      name: name.value.toString(),
+      organizationId,
+      ministryId,
+      name: name.toString(),
       eventId: this.dependencies.domainEventIdGenerator.generate(),
       occurredAt: this.dependencies.clock.now(),
     });

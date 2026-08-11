@@ -97,6 +97,26 @@ describe('GetMemberDetailsHandler', () => {
     assert.equal(reads, 0);
   });
 
+  it('reports every invalid identifier before reading', async () => {
+    let reads = 0;
+    const result = await handler({
+      async findById() {
+        reads += 1;
+        return undefined;
+      },
+    }).handler.handle({ organizationId: '', memberId: 'invalid' }, context);
+
+    assert.equal(result.success, false);
+    if (result.success) return;
+    assert.equal('errors' in result.error, true);
+    if (!('errors' in result.error)) return;
+    assert.deepEqual(
+      result.error.errors.map(({ code }) => code),
+      [OrganizationIdErrorCodes.Empty, MemberIdErrorCodes.InvalidFormat],
+    );
+    assert.equal(reads, 0);
+  });
+
   it('returns a stable absence when the member does not belong to the organization', async () => {
     const reader: MemberDetailsReader = {
       async findById() {

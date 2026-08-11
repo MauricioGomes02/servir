@@ -6,9 +6,10 @@ import type {
 } from '../../domain';
 import type { OrganizationIdError } from '@/modules/organizations/domain';
 import type { ExecutionContext } from '@/shared/application/context';
+import type { ValidationErrors } from '@/shared/application/validation';
 import type { Result } from '@/shared/core/result';
 import {
-  presentError,
+  presentErrorGroup,
   type MessageTranslator,
   type PresentedError,
   type SupportedLocale,
@@ -18,7 +19,8 @@ type Error =
   | MinistryIdError
   | MinistryRoleNameError
   | MinistryRoleDefinitionError
-  | DefineMinistryRoleNotFoundError;
+  | DefineMinistryRoleNotFoundError
+  | ValidationErrors;
 export type DefineMinistryRoleView =
   | Readonly<{
       kind: 'success';
@@ -30,7 +32,7 @@ export type DefineMinistryRoleView =
         status: 'active';
       }>;
     }>
-  | Readonly<{ kind: 'failure'; error: PresentedError }>;
+  | Readonly<{ kind: 'failure'; error: PresentedError; errors: readonly PresentedError[] }>;
 export class DefineMinistryRolePresenter {
   constructor(private readonly translator: MessageTranslator) {}
   present(
@@ -41,7 +43,7 @@ export class DefineMinistryRolePresenter {
     if (!result.success)
       return Object.freeze({
         kind: 'failure',
-        error: presentError(result.error, context, locale, this.translator),
+        ...presentErrorGroup(result.error, context, locale, this.translator),
       });
     return Object.freeze({
       kind: 'success',

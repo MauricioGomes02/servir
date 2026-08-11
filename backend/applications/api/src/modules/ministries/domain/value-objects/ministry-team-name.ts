@@ -1,5 +1,6 @@
 import { failure, success, type Result } from '@/shared/core/result';
 import { ValueObject } from '@/shared/domain/value-object';
+import { normalizeName } from '@/shared/domain/name';
 import type { NotificationError } from '@/shared/domain/notification';
 export const MinistryTeamNameErrorCodes = {
   InvalidType: 'ministry_team.name.invalid_type',
@@ -16,13 +17,13 @@ export class MinistryTeamName extends ValueObject<{ readonly value: string }, 'M
   static create(value: unknown): Result<MinistryTeamName, MinistryTeamNameError> {
     if (typeof value !== 'string')
       return failure({ code: MinistryTeamNameErrorCodes.InvalidType, field: 'name' });
-    const normalized = value.trim().replace(/\s+/g, ' ');
+    const normalized = normalizeName(value);
     if (!normalized) return failure({ code: MinistryTeamNameErrorCodes.Empty, field: 'name' });
     if (normalized.length > 120)
       return failure({
         code: MinistryTeamNameErrorCodes.TooLong,
         field: 'name',
-        params: { maxLength: 120 },
+        params: { maxLength: 120, actualLength: normalized.length },
       });
     return success(new MinistryTeamName(normalized));
   }

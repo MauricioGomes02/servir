@@ -4,6 +4,7 @@ import type { ExecutionContext } from '@/shared/application/context';
 import type { IdGenerator } from '@/shared/application/id-generator';
 import { createEventEnvelope, type MessageId } from '@/shared/application/messaging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import { combineValidationResults, type ValidationErrors } from '@/shared/application/validation';
 import { failure, success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
 import type { Logger } from '@/shared/application/logging';
@@ -41,7 +42,8 @@ export type QualifyMemberForMinistryRoleError =
   | MinistryRoleIdError
   | MinistryRoleQualificationIdError
   | MinistryRoleQualificationError
-  | QualifyMemberForMinistryRoleNotFoundError;
+  | QualifyMemberForMinistryRoleNotFoundError
+  | ValidationErrors;
 export class QualifyMemberForMinistryRoleHandler {
   constructor(
     private readonly dependencies: {
@@ -58,19 +60,19 @@ export class QualifyMemberForMinistryRoleHandler {
     command: QualifyMemberForMinistryRoleCommand,
     context: ExecutionContext,
   ): Promise<Result<QualifyMemberForMinistryRoleOutput, QualifyMemberForMinistryRoleError>> {
-    const organizationId = OrganizationId.create(command.organizationId);
-    if (!organizationId.success) return organizationId;
-    const ministryId = MinistryId.create(command.ministryId);
-    if (!ministryId.success) return ministryId;
-    const membershipId = MinistryMembershipId.create(command.ministryMembershipId);
-    if (!membershipId.success) return membershipId;
-    const roleId = MinistryRoleId.create(command.ministryRoleId);
-    if (!roleId.success) return roleId;
+    const validated = combineValidationResults(
+      OrganizationId.create(command.organizationId),
+      MinistryId.create(command.ministryId),
+      MinistryMembershipId.create(command.ministryMembershipId),
+      MinistryRoleId.create(command.ministryRoleId),
+    );
+    if (!validated.success) return validated;
+    const [organizationId, ministryId, membershipId, roleId] = validated.value;
     const transaction = await this.dependencies.unitOfWork.execute(async (scope) => {
       const membership = await scope.ministryMemberships.findById(
-        organizationId.value,
-        ministryId.value,
-        membershipId.value,
+        organizationId,
+        ministryId,
+        membershipId,
       );
       if (!membership)
         return {
@@ -82,18 +84,18 @@ export class QualifyMemberForMinistryRoleHandler {
       const checked = this.dependencies.policy.evaluate({
         membershipIsActive: membership.status === 'active',
         roleIsActive: await scope.ministryRoleQualificationFacts.isRoleActive(
-          organizationId.value,
-          ministryId.value,
-          roleId.value,
+          organizationId,
+          ministryId,
+          roleId,
         ),
         activeQualificationExists: membership.roleQualifications.some(
-          (item) => item.ministryRoleId.equals(roleId.value) && item.status === 'active',
+          (item) => item.ministryRoleId.equals(roleId) && item.status === 'active',
         ),
       });
       if (!checked.success) return { result: checked };
       const qualified = membership.qualifyForRole({
         id: this.dependencies.qualificationIdGenerator.generate(),
-        ministryRoleId: roleId.value,
+        ministryRoleId: roleId,
         eventId: this.dependencies.domainEventIdGenerator.generate(),
         occurredAt: this.dependencies.clock.now(),
       });

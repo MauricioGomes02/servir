@@ -1,7 +1,8 @@
 import type { ExecutionContext } from '@/shared/application/context';
+import type { ValidationErrors } from '@/shared/application/validation';
 import type { Result } from '@/shared/core/result';
 import {
-  presentError,
+  presentErrorGroup,
   type MessageTranslator,
   type PresentedError,
   type SupportedLocale,
@@ -21,7 +22,8 @@ type ApprovalError =
   | MinistryIdError
   | MinistryMembershipIdError
   | MinistryMembershipApprovalError
-  | ApproveMinistryMembershipNotFoundError;
+  | ApproveMinistryMembershipNotFoundError
+  | ValidationErrors;
 export type ApproveMinistryMembershipView =
   | Readonly<{
       kind: 'success';
@@ -32,7 +34,7 @@ export type ApproveMinistryMembershipView =
         status: 'active';
       }>;
     }>
-  | Readonly<{ kind: 'failure'; error: PresentedError }>;
+  | Readonly<{ kind: 'failure'; error: PresentedError; errors: readonly PresentedError[] }>;
 export class ApproveMinistryMembershipPresenter {
   constructor(private readonly translator: MessageTranslator) {}
   present(
@@ -43,7 +45,7 @@ export class ApproveMinistryMembershipPresenter {
     if (!result.success)
       return Object.freeze({
         kind: 'failure',
-        error: presentError(result.error, context, locale, this.translator),
+        ...presentErrorGroup(result.error, context, locale, this.translator),
       });
     return Object.freeze({
       kind: 'success',

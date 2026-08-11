@@ -51,6 +51,7 @@ export function registerAppointTeamLeaderRoute(
         return sendPresentedProblem(reply, {
           context,
           error: view.error,
+          errors: view.errors,
           locale: request.locale,
           problem: {
             status: missing ? 404 : conflict ? 409 : 422,

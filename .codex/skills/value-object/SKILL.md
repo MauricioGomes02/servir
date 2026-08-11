@@ -18,6 +18,7 @@ Usar quando o significado e as regras importam mais que identidade/ciclo de vida
 3. Preservar imutabilidade profunda ou fazer cópias defensivas.
 4. Comparar por conteúdo entre tipos semanticamente compatíveis.
 5. Encapsular brand/casts dentro da abstração.
+6. Para nomes humanos, seguir `docs/input-validation-and-normalization.md`: NFC e whitespace previsível, preservando caixa e acentos.
 
 ## Exemplo correto
 

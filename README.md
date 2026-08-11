@@ -25,6 +25,7 @@ Mais do que reunir tecnologias, o repositório registra as decisões, os limites
 - **Observabilidade desacoplada:** logs JSON narram marcos do negócio, enquanto traces semânticos explicam request, caso de uso, lote, mensagem e dependências técnicas sem contaminar o domínio.
 - **Infraestrutura governada:** Terraform administra recursos persistentes; Liquibase administra migrations fora do lifecycle das aplicações.
 - **Falhas seguras:** erros esperados possuem códigos estáveis, localização e representação HTTP por Problem Details.
+- **Validação completa:** entradas estruturais independentes são acumuladas antes de I/O e normalizadas por regras documentadas.
 - **Composição modular:** Awilix monta dependências e lifetimes somente na composition root, sem Service Locator no núcleo ou nas rotas.
 - **Testes como especificação:** caminhos, condições, fluxo de dados, partições e limites orientam casos comportamentais determinísticos.
 
@@ -217,6 +218,7 @@ O [roadmap completo](docs/roadmap.md) preserva critérios de saída e evita apre
 - [Primitivas arquiteturais](docs/primitives/README.md)
 - [Architecture Decision Records](docs/decisions/README.md)
 - [Estratégia de testes](docs/testing-strategy.md)
+- [Validação de entrada e normalização](docs/input-validation-and-normalization.md)
 - [Relay durável de outbox](docs/outbox-relay.md)
 - [Infraestrutura e migrations](infrastructure/README.md)
 - [Roadmap](docs/roadmap.md)

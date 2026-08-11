@@ -28,3 +28,25 @@ export function presentError(
     correlationId: context.correlationId,
   });
 }
+
+export function presentErrors(
+  error: NotificationError & { readonly errors?: readonly NotificationError[] },
+  context: ExecutionContext,
+  locale: SupportedLocale,
+  translator: MessageTranslator,
+): readonly PresentedError[] {
+  const source = error.errors ?? [error];
+  return Object.freeze(source.map((error) => presentError(error, context, locale, translator)));
+}
+
+export function presentErrorGroup(
+  errors: NotificationError & { readonly errors?: readonly NotificationError[] },
+  context: ExecutionContext,
+  locale: SupportedLocale,
+  translator: MessageTranslator,
+): Readonly<{ error: PresentedError; errors: readonly PresentedError[] }> {
+  const presented = presentErrors(errors, context, locale, translator);
+  const primary = presented[0];
+  if (primary === undefined) throw new Error('presented_error.empty_collection');
+  return Object.freeze({ error: primary, errors: presented });
+}
