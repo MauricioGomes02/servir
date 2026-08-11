@@ -44,3 +44,6 @@ databaseChangeLog:
   - include:
       file: changes/015-create-activity-occurrences.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/016-create-availability-requests.sql
+      relativeToChangelogFile: true

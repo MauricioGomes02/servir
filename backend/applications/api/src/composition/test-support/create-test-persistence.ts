@@ -31,6 +31,11 @@ import {
   activityUnitOfWork,
 } from '../modules/activities-persistence-module';
 import type { Activity, ActivityOccurrence } from '@/modules/activities/domain';
+import type { AvailabilityRequest } from '@/modules/availability/domain';
+import {
+  availabilityRequestOpeningFacts,
+  availabilityRequestUnitOfWork,
+} from '../modules/availability-persistence-module';
 import { ServiceRegistry } from '../services';
 import {
   InMemoryMemberDetailsReader,
@@ -60,6 +65,7 @@ export function createTestPersistence(): ApplicationPersistence {
   const teamLeaderships = new InMemoryTeamLeadershipRepository();
   const activities: Activity[] = [];
   const activityOccurrences: ActivityOccurrence[] = [];
+  const availabilityRequests: AvailabilityRequest[] = [];
   const outbox = new InMemoryEventOutbox();
   const eventRelay = new InMemoryEventOutboxRelay(
     outbox,
@@ -192,6 +198,30 @@ export function createTestPersistence(): ApplicationPersistence {
             item.activityId.equals(activityId) &&
             item.scheduledAt.equals(scheduledAt) &&
             item.status === 'scheduled',
+        ),
+      });
+    },
+  });
+  services.add(
+    availabilityRequestUnitOfWork,
+    new DirectUnitOfWork({
+      availabilityRequests: {
+        async add(request: AvailabilityRequest) {
+          availabilityRequests.push(request);
+          return { success: true as const, value: undefined };
+        },
+      },
+      outbox,
+    }),
+  );
+  services.add(availabilityRequestOpeningFacts, {
+    async find(organizationId, ministryTeamId) {
+      return Object.freeze({
+        teamActive: ministryTeams.teams.some(
+          (item) =>
+            item.organizationId.equals(organizationId) &&
+            item.id.equals(ministryTeamId) &&
+            item.status === 'active',
         ),
       });
     },

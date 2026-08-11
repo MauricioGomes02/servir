@@ -55,5 +55,6 @@
 | [051](051-civil-temporal-values.md) | Valores temporais civis canônicos | Aceita |
 | [052](052-create-activity-vertical-slice.md) | Primeiro corte vertical de Activity | Aceita |
 | [053](053-schedule-manual-activity-occurrence.md) | Agendamento manual de ocorrência de atividade | Aceita |
+| [054](054-open-availability-request-vertical-slice.md) | Abertura de coleta de disponibilidade | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

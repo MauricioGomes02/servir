@@ -2,7 +2,7 @@
 
 ## Estado
 
-Descoberta em andamento. Os cortes verticais iniciais de `Member`, `Ministry` e `Activity` estão implementados; os demais tipos deste documento permanecem planejados.
+Descoberta em andamento. Os cortes verticais iniciais de `Member`, `Ministry`, `Activity` e `AvailabilityRequest` estão implementados; os demais tipos deste documento permanecem planejados.
 
 ## Objetivo
 
@@ -88,7 +88,7 @@ Registra uma disponibilidade ou indisponibilidade do membro na organização par
 
 ### AvailabilityRequest
 
-Abre para um time a coleta referente a um `SchedulePeriod` e a um prazo de resposta. Cada time escolhe seu próprio horizonte — quinze dias, um mês, trimestre ou intervalo excepcional. Uma resposta distingue `pending`, restrições enviadas e confirmação explícita de `NoRestrictions`.
+É um Aggregate Root separado aberto por `OpenAvailabilityRequest` para um time ativo da mesma Organization. Possui `SchedulePeriod` civil inclusivo, prazo de resposta como `Instant` UTC e estado `open`. Cada time escolhe seu próprio horizonte — quinze dias, um mês, trimestre ou intervalo excepcional — e solicitações sobrepostas são permitidas. Destinatários, respostas, fechamento e lembretes permanecem em cortes posteriores; uma resposta distinguirá restrições enviadas e confirmação explícita de `NoRestrictions`.
 
 ### TeamSchedule
 
@@ -224,7 +224,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 7. Implementar `MinistryTeam`, `TeamMembership` e a primeira liderança vigente. **Concluído.**
 8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`. **Concluído.**
 9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável. **CreateActivity e ScheduleManualActivityOccurrence concluídos.**
-10. Implementar disponibilidade e sua coleta por período.
+10. Implementar disponibilidade e sua coleta por período. **OpenAvailabilityRequest concluído; declarações e fechamento permanecem planejados.**
 11. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
 12. Implementar publicação versionada, substituições e reações de auditoria/notificação.
 

@@ -198,12 +198,14 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Liderança única vigente e histórica para times ministeriais.
 - Activities com criação tenant-safe, ministérios participantes, persistência/outbox atômicas e Integration Event v1.
 - Ocorrências manuais de Activity com intenção civil preservada, resolução explícita de timezone e persistência/outbox atômicas.
+- Coletas de disponibilidade por time e período civil, com prazo UTC e persistência/outbox atômicas.
 
 ### Em evolução
 
 - Listagem paginada de Membership orientada pela primeira tela consumidora.
 - Times ministeriais e participação em times.
 - Recorrência, reagendamento, cancelamento e revisão controlada de ocorrências futuras após mudanças de regras IANA.
+- Declarações de disponibilidade, fechamento de coletas e resolução de precedência.
 - Disponibilidade e escalas versionadas por time.
 - Auditoria durável, notificações e consumidores idempotentes.
 - Avaliação dos traces locais e evolução orientada por lacunas observadas.
