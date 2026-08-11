@@ -1,6 +1,11 @@
 output "network_name" {
-  description = "Docker DNS/network boundary used by operational tools."
-  value       = docker_network.platform.name
+  description = "Data network consumed by operational tools such as Liquibase."
+  value       = docker_network.platform["data"].name
+}
+
+output "network_names" {
+  description = "Docker network boundaries keyed by their communication role."
+  value       = { for role, network in docker_network.platform : role => network.name }
 }
 
 output "postgres_host_endpoint" {
@@ -36,4 +41,9 @@ output "otel_http_container_endpoint" {
 output "jaeger_ui_url" {
   description = "Jaeger trace exploration UI available on the host."
   value       = "http://localhost:${var.jaeger_ui_port}"
+}
+
+output "api_url" {
+  description = "API base URL available on the host loopback interface."
+  value       = "http://localhost:${var.api_port}"
 }

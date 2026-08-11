@@ -8,11 +8,6 @@ variable "network_subnet" {
   type        = string
 }
 
-variable "network_gateway" {
-  description = "IPv4 gateway inside the local platform network."
-  type        = string
-}
-
 variable "postgres_image" {
   description = "Pinned PostgreSQL image used locally."
   type        = string
@@ -77,4 +72,57 @@ variable "jaeger_image" {
 variable "jaeger_ui_port" {
   description = "Jaeger UI port published on the host loopback interface."
   type        = number
+}
+
+variable "api_image" {
+  description = "Pre-built API image reference supplied by the delivery flow."
+  type        = string
+}
+
+variable "api_port" {
+  description = "API port published on the host loopback interface."
+  type        = number
+}
+
+variable "outbox_relay_image" {
+  description = "Pre-built outbox relay image reference supplied by the delivery flow."
+  type        = string
+}
+
+variable "api_enabled" {
+  description = "Whether the local API container should be running."
+  type        = bool
+}
+
+variable "outbox_relay_enabled" {
+  description = "Whether the local outbox relay container should be running."
+  type        = bool
+}
+
+variable "api_resources" {
+  description = "Local compute limits assigned independently to the API."
+  type = object({
+    cpu_shares = number
+    memory_mb  = number
+  })
+}
+
+variable "outbox_relay_resources" {
+  description = "Local compute limits assigned independently to the outbox relay."
+  type = object({
+    cpu_shares = number
+    memory_mb  = number
+  })
+}
+
+variable "api_environment" {
+  description = "Runtime environment supplied to the API by the environment composition root."
+  type        = map(string)
+  sensitive   = true
+}
+
+variable "outbox_relay_environment" {
+  description = "Runtime environment supplied to the outbox relay by the environment composition root."
+  type        = map(string)
+  sensitive   = true
 }

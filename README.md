@@ -33,12 +33,12 @@ Mais do que reunir tecnologias, o repositório registra as decisões, os limites
 
 ```mermaid
 flowchart LR
-    Client[Cliente HTTP] --> API[Fastify API]
+    Client[Cliente HTTP] --> API[Fastify API<br/>container]
     API --> APP[Application<br/>Commands · Queries]
     APP --> DOMAIN[Domain<br/>Aggregates · Policies · Events]
     APP --> UOW[Unit of Work]
     UOW --> PG[(PostgreSQL<br/>estado + outbox)]
-    PG --> RELAY[Outbox Relay]
+    PG --> RELAY[Outbox Relay<br/>container]
     RELAY --> KAFKA[(Kafka)]
     API -. OTLP traces .-> OTEL[OpenTelemetry Collector]
     RELAY -. OTLP traces .-> OTEL
@@ -188,6 +188,7 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Relay PostgreSQL independente, lease, retry exponencial com jitter e falha terminal.
 - Publicação Kafka em CloudEvents com entrega at-least-once.
 - Infraestrutura local com Terraform e migrations externas com Liquibase.
+- Imagens multi-stage independentes da API e do relay, executadas sem root e provisionadas com recursos separados em redes locais segmentadas por responsabilidade.
 - Membership com `RegisterMember`, `GetMemberDetails`, Readers específicos, persistência PostgreSQL, entradas HTTP localizadas e Integration Event v1.
 - Ministries com `CreateMinistry`, unicidade de nome ativo por organização, persistência/outbox atômicas, entrada HTTP localizada e Integration Event v1.
 - Funções ministeriais com `DefineMinistryRole`, identidade estável, unicidade entre funções ativas e Integration Event v1.

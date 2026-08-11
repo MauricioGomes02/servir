@@ -1,7 +1,6 @@
 # Override only values that conflict with your local Docker/VPN environment.
-network_name    = "servir-platform"
-network_subnet  = "172.28.0.0/24"
-network_gateway = "172.28.0.1"
+network_name   = "servir-platform"
+network_subnet = "172.28.0.0/24"
 
 postgres_port              = 5432
 postgres_database          = "servir"
@@ -16,3 +15,42 @@ otel_collector_image = "otel/opentelemetry-collector-contrib:0.157.0"
 otel_http_port       = 4318
 jaeger_image         = "cr.jaegertracing.io/jaegertracing/jaeger:2.20.0"
 jaeger_ui_port       = 16686
+
+api_image               = "servir-api:local"
+api_port                = 3000
+api_enabled             = false
+outbox_relay_image      = "servir-outbox-relay:local"
+outbox_relay_enabled    = false
+
+api_resources = {
+  cpu_shares = 512
+  memory_mb  = 512
+}
+
+outbox_relay_resources = {
+  cpu_shares = 256
+  memory_mb  = 256
+}
+
+api_environment = {
+  NODE_ENV                           = "production"
+  HOST                               = "0.0.0.0"
+  PORT                               = "3000"
+  LOG_LEVEL                          = "info"
+  PERSISTENCE_MODE                   = "postgres"
+  DATABASE_URL                       = "postgresql://servir_migrator:servir_migrator_local@postgres:5432/servir"
+  OTEL_SERVICE_NAME                  = "servir-api"
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "http://otel-collector:4318/v1/traces"
+  OTEL_SDK_DISABLED                  = "false"
+}
+
+outbox_relay_environment = {
+  NODE_ENV                           = "production"
+  LOG_LEVEL                          = "info"
+  DATABASE_URL                       = "postgresql://servir_migrator:servir_migrator_local@postgres:5432/servir"
+  KAFKA_BROKERS                      = "kafka:9092"
+  KAFKA_CLIENT_ID                    = "servir-outbox-relay"
+  OTEL_SERVICE_NAME                  = "servir-outbox-relay"
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "http://otel-collector:4318/v1/traces"
+  OTEL_SDK_DISABLED                  = "false"
+}

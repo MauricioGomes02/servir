@@ -5,15 +5,16 @@ variable "network_name" {
 }
 
 variable "network_subnet" {
-  description = "IPv4 CIDR reserved for the local platform network. Change it if it overlaps another Docker/VPN network."
+  description = "IPv4 parent CIDR split into edge, data, messaging, and observability bridge networks."
   type        = string
   default     = "172.28.0.0/24"
 }
 
 variable "network_gateway" {
-  description = "IPv4 gateway inside the local platform network."
+  description = "Deprecated compatibility input; gateways are derived from network_subnet."
   type        = string
-  default     = "172.28.0.1"
+  default     = null
+  nullable    = true
 }
 
 variable "postgres_image" {
@@ -113,4 +114,67 @@ variable "jaeger_ui_port" {
     condition     = var.jaeger_ui_port >= 1 && var.jaeger_ui_port <= 65535
     error_message = "jaeger_ui_port must be between 1 and 65535."
   }
+}
+
+variable "api_image" {
+  description = "Pre-built API image available to the local Docker daemon."
+  type        = string
+  default     = "servir-api:local"
+}
+
+variable "api_port" {
+  description = "API port published only on host loopback."
+  type        = number
+  default     = 3000
+
+  validation {
+    condition     = var.api_port >= 1 && var.api_port <= 65535
+    error_message = "api_port must be between 1 and 65535."
+  }
+}
+
+variable "outbox_relay_image" {
+  description = "Pre-built outbox relay image available to the local Docker daemon."
+  type        = string
+  default     = "servir-outbox-relay:local"
+}
+
+variable "api_enabled" {
+  description = "Starts the API after Liquibase has prepared the schema."
+  type        = bool
+  default     = false
+}
+
+variable "outbox_relay_enabled" {
+  description = "Starts the outbox relay after Liquibase has prepared the schema and Kafka topics."
+  type        = bool
+  default     = false
+}
+
+variable "api_resources" {
+  description = "Compute resources reserved for the local API container."
+  type = object({
+    cpu_shares = number
+    memory_mb  = number
+  })
+}
+
+variable "outbox_relay_resources" {
+  description = "Compute resources reserved for the local outbox relay container."
+  type = object({
+    cpu_shares = number
+    memory_mb  = number
+  })
+}
+
+variable "api_environment" {
+  description = "Complete runtime environment for the API container."
+  type        = map(string)
+  sensitive   = true
+}
+
+variable "outbox_relay_environment" {
+  description = "Complete runtime environment for the outbox relay container."
+  type        = map(string)
+  sensitive   = true
 }

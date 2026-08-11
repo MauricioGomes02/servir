@@ -21,4 +21,4 @@ services:
 networks:
   platform:
     external: true
-    name: ${PLATFORM_NETWORK_NAME:-servir-platform}
+    name: ${PLATFORM_DATA_NETWORK_NAME:-servir-platform-data}

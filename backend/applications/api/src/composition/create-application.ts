@@ -32,6 +32,10 @@ export function createApplication(options: CreateApplicationOptions): FastifyIns
     await options.persistence.close();
   });
 
+  app.get('/health/live', async (_request, reply) =>
+    reply.status(200).send(Object.freeze({ status: 'ok' })),
+  );
+
   for (const module of applicationModules) module.registerRoutes(app, container);
 
   return app;

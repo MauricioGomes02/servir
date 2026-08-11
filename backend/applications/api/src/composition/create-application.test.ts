@@ -43,6 +43,18 @@ const UUIDS = [
 ];
 
 describe('createApplication', () => {
+  it('exposes a transport-level liveness probe without touching persistence', async () => {
+    const app = createApplication({
+      persistence: createTestPersistence(),
+      logger: new InMemoryLogger(),
+    });
+    const response = await app.inject({ method: 'GET', url: '/health/live' });
+    await app.close();
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.json(), { status: 'ok' });
+  });
+
   it('composes the first executable vertical slice', async () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();

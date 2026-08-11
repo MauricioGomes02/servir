@@ -1,6 +1,11 @@
 output "network_name" {
-  description = "Docker network consumed by operational Compose jobs."
+  description = "Docker data network consumed by operational Compose jobs."
   value       = module.platform.network_name
+}
+
+output "network_names" {
+  description = "Docker network boundaries keyed by their communication role."
+  value       = module.platform.network_names
 }
 
 output "postgres_host_endpoint" {
@@ -36,4 +41,9 @@ output "otel_http_container_endpoint" {
 output "jaeger_ui_url" {
   description = "Jaeger trace exploration UI available on the host."
   value       = module.platform.jaeger_ui_url
+}
+
+output "api_url" {
+  description = "Containerized API base URL available on the host."
+  value       = module.platform.api_url
 }

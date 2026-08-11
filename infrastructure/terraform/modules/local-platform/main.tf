@@ -1,11 +1,23 @@
+locals {
+  network_segments = {
+    edge          = 0
+    data          = 1
+    messaging     = 2
+    observability = 3
+  }
+
+}
+
 resource "docker_network" "platform" {
-  name       = var.network_name
+  for_each = local.network_segments
+
+  name       = "${var.network_name}-${each.key}"
   driver     = "bridge"
   attachable = true
 
   ipam_config {
-    subnet  = var.network_subnet
-    gateway = var.network_gateway
+    subnet  = cidrsubnet(var.network_subnet, 2, each.value)
+    gateway = cidrhost(cidrsubnet(var.network_subnet, 2, each.value), 1)
   }
 
   labels {
@@ -96,7 +108,7 @@ resource "docker_container" "postgres" {
   ]
 
   networks_advanced {
-    name    = docker_network.platform.name
+    name    = docker_network.platform["data"].name
     aliases = ["postgres"]
   }
 
@@ -202,7 +214,7 @@ resource "docker_container" "kafka" {
   ]
 
   networks_advanced {
-    name    = docker_network.platform.name
+    name    = docker_network.platform["messaging"].name
     aliases = ["kafka"]
   }
 
@@ -249,7 +261,7 @@ resource "docker_container" "jaeger" {
   read_only = true
 
   networks_advanced {
-    name    = docker_network.platform.name
+    name    = docker_network.platform["observability"].name
     aliases = ["jaeger"]
   }
 
@@ -286,7 +298,7 @@ resource "docker_container" "otel_collector" {
   command = ["--config=/etc/otelcol-contrib/config.yaml"]
 
   networks_advanced {
-    name    = docker_network.platform.name
+    name    = docker_network.platform["observability"].name
     aliases = ["otel-collector"]
   }
 
@@ -323,4 +335,129 @@ resource "docker_container" "otel_collector" {
   }
 
   depends_on = [docker_container.jaeger]
+}
+
+resource "docker_image" "api" {
+  name         = var.api_image
+  keep_locally = true
+}
+
+resource "docker_image" "outbox_relay" {
+  name         = var.outbox_relay_image
+  keep_locally = true
+}
+
+resource "docker_container" "api" {
+  name       = "servir-api"
+  hostname   = "api"
+  image      = docker_image.api.image_id
+  restart    = "unless-stopped"
+  must_run   = var.api_enabled
+  start      = var.api_enabled
+  read_only  = true
+  init       = true
+  memory     = var.api_resources.memory_mb
+  cpu_shares = var.api_resources.cpu_shares
+
+  env = [for name, value in var.api_environment : "${name}=${value}"]
+
+  networks_advanced {
+    name    = docker_network.platform["edge"].name
+    aliases = ["api"]
+  }
+
+  networks_advanced {
+    name = docker_network.platform["data"].name
+  }
+
+  networks_advanced {
+    name = docker_network.platform["observability"].name
+  }
+
+  ports {
+    internal = 3000
+    external = var.api_port
+    ip       = "127.0.0.1"
+  }
+
+  healthcheck {
+    test         = ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/live').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+    interval     = "10s"
+    timeout      = "5s"
+    retries      = 6
+    start_period = "10s"
+  }
+
+  capabilities {
+    drop = ["ALL"]
+  }
+
+  security_opts = ["no-new-privileges:true"]
+
+  labels {
+    label = "servir.environment"
+    value = "local"
+  }
+
+  labels {
+    label = "servir.owner"
+    value = "terraform"
+  }
+
+  labels {
+    label = "servir.role"
+    value = "http-api"
+  }
+
+  depends_on = [docker_container.postgres, docker_container.otel_collector]
+}
+
+resource "docker_container" "outbox_relay" {
+  name       = "servir-outbox-relay"
+  hostname   = "outbox-relay"
+  image      = docker_image.outbox_relay.image_id
+  restart    = "unless-stopped"
+  must_run   = var.outbox_relay_enabled
+  start      = var.outbox_relay_enabled
+  read_only  = true
+  init       = true
+  memory     = var.outbox_relay_resources.memory_mb
+  cpu_shares = var.outbox_relay_resources.cpu_shares
+
+  env = [for name, value in var.outbox_relay_environment : "${name}=${value}"]
+
+  networks_advanced {
+    name = docker_network.platform["data"].name
+  }
+
+  networks_advanced {
+    name = docker_network.platform["messaging"].name
+  }
+
+  networks_advanced {
+    name = docker_network.platform["observability"].name
+  }
+
+  capabilities {
+    drop = ["ALL"]
+  }
+
+  security_opts = ["no-new-privileges:true"]
+
+  labels {
+    label = "servir.environment"
+    value = "local"
+  }
+
+  labels {
+    label = "servir.owner"
+    value = "terraform"
+  }
+
+  labels {
+    label = "servir.role"
+    value = "outbox-relay"
+  }
+
+  depends_on = [docker_container.postgres, docker_container.kafka, docker_container.otel_collector]
 }
