@@ -80,7 +80,7 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 ### ActivityOccurrence
 
-Representa uma execução concreta de uma atividade. Pode ter origem `generated` ou `manual`; reagendamento e cancelamento preservam revisões. Ocorrências passadas e ocorrências ligadas a publicações não são recalculadas silenciosamente quando uma recorrência muda.
+É um Aggregate Root separado que representa uma execução concreta de uma atividade. `ScheduleManualActivityOccurrence` cria a primeira origem, `manual`, preservando data, horário e timezone civis, além do offset resolvido e do `Instant` UTC. Horários inexistentes são rejeitados; horários ambíguos exigem `earlier` ou `later`. Reagendamento, cancelamento e origem `generated` permanecem futuros e preservarão revisões. Mudanças de regras IANA serão reconciliadas por revisão explícita de ocorrências futuras, nunca por recálculo silencioso.
 
 ### AvailabilityDeclaration
 
@@ -223,7 +223,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 6. Implementar qualificações ministeriais. **Concluído.**
 7. Implementar `MinistryTeam`, `TeamMembership` e a primeira liderança vigente. **Concluído.**
 8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`. **Concluído.**
-9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável. **CreateActivity concluído; ocorrência manual em andamento.**
+9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável. **CreateActivity e ScheduleManualActivityOccurrence concluídos.**
 10. Implementar disponibilidade e sua coleta por período.
 11. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
 12. Implementar publicação versionada, substituições e reações de auditoria/notificação.

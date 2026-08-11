@@ -26,9 +26,11 @@ import {
 import { organizationUnitOfWork } from '../modules/organizations-persistence-module';
 import {
   activityCreationFacts,
+  activityOccurrenceSchedulingFacts,
+  activityOccurrenceUnitOfWork,
   activityUnitOfWork,
 } from '../modules/activities-persistence-module';
-import type { Activity } from '@/modules/activities/domain';
+import type { Activity, ActivityOccurrence } from '@/modules/activities/domain';
 import { ServiceRegistry } from '../services';
 import {
   InMemoryMemberDetailsReader,
@@ -57,6 +59,7 @@ export function createTestPersistence(): ApplicationPersistence {
   const teamMemberships = new InMemoryTeamMembershipRepository();
   const teamLeaderships = new InMemoryTeamLeadershipRepository();
   const activities: Activity[] = [];
+  const activityOccurrences: ActivityOccurrence[] = [];
   const outbox = new InMemoryEventOutbox();
   const eventRelay = new InMemoryEventOutboxRelay(
     outbox,
@@ -158,6 +161,37 @@ export function createTestPersistence(): ApplicationPersistence {
                 ministryIds.some((id) => id.equals(item.id)),
             )
             .map((item) => item.id.toString()),
+        ),
+      });
+    },
+  });
+  services.add(
+    activityOccurrenceUnitOfWork,
+    new DirectUnitOfWork({
+      activityOccurrences: {
+        async add(occurrence: ActivityOccurrence) {
+          activityOccurrences.push(occurrence);
+          return { success: true as const, value: undefined };
+        },
+      },
+      outbox,
+    }),
+  );
+  services.add(activityOccurrenceSchedulingFacts, {
+    async find(organizationId, activityId, scheduledAt) {
+      return Object.freeze({
+        activityActive: activities.some(
+          (item) =>
+            item.organizationId.equals(organizationId) &&
+            item.id.equals(activityId) &&
+            item.status === 'active',
+        ),
+        scheduledAtExists: activityOccurrences.some(
+          (item) =>
+            item.organizationId.equals(organizationId) &&
+            item.activityId.equals(activityId) &&
+            item.scheduledAt.equals(scheduledAt) &&
+            item.status === 'scheduled',
         ),
       });
     },

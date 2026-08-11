@@ -1,10 +1,15 @@
 import type {
   ActivityCreationFactsReader,
+  ActivityOccurrenceSchedulingFactsReader,
+  ActivityOccurrenceWriteScope,
   ActivityWriteScope,
 } from '@/modules/activities/application';
-import type { ActivityCreated } from '@/modules/activities/domain';
+import type { ActivityCreated, ActivityOccurrenceScheduled } from '@/modules/activities/domain';
 import {
   mapActivityCreatedIntegrationEvent,
+  mapActivityOccurrenceScheduledIntegrationEvent,
+  PostgresActivityOccurrenceRepository,
+  PostgresActivityOccurrenceSchedulingFactsReader,
   PostgresActivityCreationFactsReader,
   PostgresActivityRepository,
 } from '@/modules/activities/infrastructure';
@@ -17,14 +22,30 @@ export const activityUnitOfWork =
 export const activityCreationFacts = defineService<ActivityCreationFactsReader>(
   'activities.creation-facts',
 );
+export const activityOccurrenceUnitOfWork = defineService<UnitOfWork<ActivityOccurrenceWriteScope>>(
+  'activities.occurrence-unit-of-work',
+);
+export const activityOccurrenceSchedulingFacts =
+  defineService<ActivityOccurrenceSchedulingFactsReader>('activities.occurrence-scheduling-facts');
 
 export function registerActivitiesPersistence(builder: PostgresPersistenceBuilder): void {
   builder.integrationEvents.register<ActivityCreated>(
     'activity.created',
     mapActivityCreatedIntegrationEvent,
   );
+  builder.integrationEvents.register<ActivityOccurrenceScheduled>(
+    'activity_occurrence.scheduled',
+    mapActivityOccurrenceScheduledIntegrationEvent,
+  );
   builder.addWriteScope(activityUnitOfWork, (client) => ({
     activities: new PostgresActivityRepository(client),
   }));
   builder.addValue(activityCreationFacts, (pool) => new PostgresActivityCreationFactsReader(pool));
+  builder.addWriteScope(activityOccurrenceUnitOfWork, (client) => ({
+    activityOccurrences: new PostgresActivityOccurrenceRepository(client),
+  }));
+  builder.addValue(
+    activityOccurrenceSchedulingFacts,
+    (pool) => new PostgresActivityOccurrenceSchedulingFactsReader(pool),
+  );
 }

@@ -27,7 +27,7 @@ Uma atividade marcada para `09/08/2026 às 10:00` ainda não identifica um `Inst
 
 ```mermaid
 flowchart LR
-    D[CivilDate] --> C[Conversão explícita futura]
+    D[CivilDate] --> C[Conversão explícita]
     T[CivilTime] --> C
     Z[TimeZoneId] --> C
     C --> I[Instant]
@@ -42,20 +42,20 @@ const time = CivilTime.create("10:00");
 const zone = TimeZoneId.create("America/Sao_Paulo");
 ```
 
-Os três valores permanecem separados. Um adapter temporal futuro poderá realizar a conversão, mas a operação consumidora deverá declarar sua política para transições de offset.
+Os três valores permanecem separados. `ScheduleManualActivityOccurrence` usa um adapter Temporal para convertê-los: rejeita horários inexistentes e exige `earlier` ou `later` quando o horário ocorre duas vezes. A ocorrência preserva também o offset resolvido e o `Instant` resultante.
 
 `SchedulePeriod` inclui as duas extremidades. Portanto, o período de `2026-08-01` a `2026-08-31` contém ambos os dias, e um período com início e fim iguais representa um único dia.
 
 ## Relações
 
-- `ActivityOccurrence` consumirá data civil, horário civil e zona no primeiro fluxo manual.
+- `ActivityOccurrence` consome data civil, horário civil e zona no fluxo manual.
 - `AvailabilityRequest` e `TeamSchedule` usarão `SchedulePeriod`.
 - `Instant` continuará representando fatos já posicionados na linha do tempo, como criação de eventos.
 - `Locale` continuará tratando idioma e apresentação, não timezone.
 
 ## Evolução
 
-- Definir a conversão para `Instant` e as políticas de horários ambíguos ou inexistentes com o primeiro consumidor.
+- Criar um fluxo controlado que, após atualização das regras IANA, re-resolva ocorrências futuras e sinalize divergências para revisão sem alterar compromissos silenciosamente.
 - Avaliar calendários, precisão de segundos ou períodos máximos somente diante de requisito concreto.
 - Acompanhar atualizações da base IANA no runtime sem expor uma biblioteca temporal no contrato do domínio.
 

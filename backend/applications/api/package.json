@@ -23,10 +23,11 @@
   "dependencies": {
     "@fastify/accepts": "^5.0.4",
     "@fastify/otel": "^0.20.1",
+    "@js-temporal/polyfill": "^0.5.1",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/instrumentation-http": "^0.221.0",
-    "@servir/integration-messaging": "1.0.0",
     "@servir/application-foundation": "1.0.0",
+    "@servir/integration-messaging": "1.0.0",
     "@servir/node-observability": "1.0.0",
     "awilix": "^13.0.5",
     "fastify": "^5.10.0",

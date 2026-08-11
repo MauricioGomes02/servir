@@ -77,7 +77,7 @@ flowchart TD
 | Ministry e funções | Cortes verticais iniciais | CreateMinistry e DefineMinistryRole estão implementados com invariantes de nomes ativos, persistência/outbox atômicas, Integration Events v1 e entradas HTTP; desativação e reativação permanecem orientadas por consumidores futuros |
 | Participação e qualificação ministerial | Cortes verticais iniciais | RequestMinistryMembership, ApproveMinistryMembership e QualifyMemberForMinistryRole implementados na root separada, com persistência/outbox atômicas, Integration Events v1 e entradas HTTP; rejeição, estados posteriores e revogação de qualificação permanecem planejados |
 | Times ministeriais | Cortes verticais iniciais | CreateMinistryTeam, AssignMemberToTeam e AppointTeamLeader implementados como roots históricas separadas, com isolamento por Organization, persistência/outbox atômicas, Integration Events v1 e entradas HTTP; substituição de liderança e responsabilidade por escala permanecem planejadas |
-| Activities e ocorrências | Corte vertical inicial | CreateActivity possui Aggregate separado, participantes tenant-safe e persistência/outbox atômicas; ocorrência manual permanece necessária antes da recorrência finita, versionada e idempotente |
+| Activities e ocorrências | Implementação inicial | CreateActivity e ScheduleManualActivityOccurrence possuem Aggregates separados, limites tenant-safe, resolução civil explícita e persistência/outbox atômicas; recorrência finita, revisão de regras IANA, reagendamento e cancelamento permanecem futuros |
 | Disponibilidade | Planejado | Declarações, precedência, resposta explícita e coleta flexível por time e período testadas |
 | Escalas por time | Planejado | Necessidades, atribuições, conflito global, apoio, snapshots publicados e substituições históricas testados |
 | Workspaces de aplicações | Implementação inicial | `backend` coordena workspaces npm; API e relay possuem manifestos próprios; `integration-messaging`, `application-foundation` e `node-observability` possuem ownership explícito e consumidores reais |
@@ -86,7 +86,7 @@ flowchart TD
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado, primeiro Presenter e títulos HTTP localizados estão definidos |
 | Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, container restrito à composição, tokens tipados, Mediator, módulos instaláveis e persistência PostgreSQL registrada pelo módulo estão testados; write scopes recebem outbox automaticamente, mappers usam registry O(1), contexto permanece explícito e doubles de persistência pertencem somente ao test support |
 | Visualização local de traces | Implementação inicial | Terraform provisiona Collector vendor-neutral e Jaeger efêmero; API e relay exportam por OTLP/HTTP e a UI permite avaliar spans antes de ampliar logging ou instrumentação |
-| Apresentação temporal e datas civis | Implementação inicial | `CivilDate`, `CivilTime`, `TimeZoneId` e `SchedulePeriod` preservam intenção civil e período inclusivo; API continua preservando `Instant` UTC; conversão, política de transições de offset e precedência de timezone permanecem por definir com o primeiro consumidor |
+| Apresentação temporal e datas civis | Implementação inicial | `CivilDate`, `CivilTime`, `TimeZoneId` e `SchedulePeriod` preservam intenção civil; ocorrências manuais resolvem offset e `Instant`, rejeitam lacunas e exigem desambiguação em sobreposições; reconciliação após mudanças IANA permanece futura |
 
 ## Exemplos
 

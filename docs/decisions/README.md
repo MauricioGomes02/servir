@@ -54,5 +54,6 @@
 | [050](050-accumulated-input-validation-and-normalization.md) | Validação acumulada de entrada e normalização segura | Aceita |
 | [051](051-civil-temporal-values.md) | Valores temporais civis canônicos | Aceita |
 | [052](052-create-activity-vertical-slice.md) | Primeiro corte vertical de Activity | Aceita |
+| [053](053-schedule-manual-activity-occurrence.md) | Agendamento manual de ocorrência de atividade | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

@@ -55,6 +55,11 @@ export class CreateActivityPresenter {
   }
 }
 
+export {
+  ScheduleManualActivityOccurrencePresenter,
+  type ScheduleManualActivityOccurrenceView,
+} from './schedule-manual-activity-occurrence-presenter';
+
 export const activityMessageCatalog: MessageCatalog = Object.freeze({
   'pt-BR': Object.freeze({
     'activity.name.invalid_type': 'O nome da atividade deve ser um texto.',
@@ -68,6 +73,25 @@ export const activityMessageCatalog: MessageCatalog = Object.freeze({
     'activity.creation.duplicate_ministry': 'Não repita ministérios participantes.',
     'activity.creation.ministry_not_active':
       'Um dos ministérios não foi encontrado ou não está ativo nesta organização.',
+    'civil_date.invalid_type': 'A data deve ser um texto no formato AAAA-MM-DD.',
+    'civil_date.invalid_format': 'A data deve usar o formato AAAA-MM-DD.',
+    'civil_date.invalid_value': 'A data informada não existe no calendário.',
+    'civil_time.invalid_type': 'O horário deve ser um texto no formato HH:mm.',
+    'civil_time.invalid_format': 'O horário deve usar o formato HH:mm.',
+    'civil_time.invalid_value': 'O horário informado não é válido.',
+    'time_zone_id.invalid_type': 'A timezone deve ser um texto.',
+    'time_zone_id.invalid_format': 'Informe uma timezone IANA, não um offset fixo.',
+    'time_zone_id.unknown': 'A timezone informada não foi reconhecida.',
+    'activity_occurrence.schedule.invalid_disambiguation':
+      'A desambiguação deve ser earlier ou later.',
+    'activity_occurrence.schedule.nonexistent_local_time':
+      'Este horário civil não existe nesta data e timezone.',
+    'activity_occurrence.schedule.ambiguous_local_time':
+      'Este horário ocorre duas vezes; escolha earlier ou later.',
+    'activity_occurrence.scheduling.activity_not_active':
+      'A atividade não foi encontrada ou não está ativa nesta organização.',
+    'activity_occurrence.scheduling.scheduled_at_already_exists':
+      'Já existe uma ocorrência vigente desta atividade neste instante.',
   }),
   'en-US': Object.freeze({
     'activity.name.invalid_type': 'The activity name must be text.',
@@ -81,5 +105,24 @@ export const activityMessageCatalog: MessageCatalog = Object.freeze({
     'activity.creation.duplicate_ministry': 'Do not repeat participating ministries.',
     'activity.creation.ministry_not_active':
       'A ministry was not found or is not active in this organization.',
+    'civil_date.invalid_type': 'The date must be text in YYYY-MM-DD format.',
+    'civil_date.invalid_format': 'The date must use YYYY-MM-DD format.',
+    'civil_date.invalid_value': 'The specified calendar date does not exist.',
+    'civil_time.invalid_type': 'The time must be text in HH:mm format.',
+    'civil_time.invalid_format': 'The time must use HH:mm format.',
+    'civil_time.invalid_value': 'The specified time is invalid.',
+    'time_zone_id.invalid_type': 'The timezone must be text.',
+    'time_zone_id.invalid_format': 'Provide an IANA timezone, not a fixed offset.',
+    'time_zone_id.unknown': 'The specified timezone was not recognized.',
+    'activity_occurrence.schedule.invalid_disambiguation':
+      'Disambiguation must be earlier or later.',
+    'activity_occurrence.schedule.nonexistent_local_time':
+      'This civil time does not exist on the specified date and timezone.',
+    'activity_occurrence.schedule.ambiguous_local_time':
+      'This time occurs twice; choose earlier or later.',
+    'activity_occurrence.scheduling.activity_not_active':
+      'The activity was not found or is not active in this organization.',
+    'activity_occurrence.scheduling.scheduled_at_already_exists':
+      'A current occurrence of this activity already exists at this instant.',
   }),
 });
