@@ -18,6 +18,8 @@ import type {
   MinistryTeamRepository,
   TeamMembershipAssignmentFactsReader,
   TeamMembershipRepository,
+  TeamLeaderAppointmentFactsReader,
+  TeamLeadershipRepository,
 } from '@/modules/ministries/application';
 import {
   Ministry,
@@ -26,12 +28,14 @@ import {
   MinistryRoleDefinitionErrorCodes,
   MinistryTeamCreationPolicyErrorCodes,
   TeamMembershipAssignmentPolicyErrorCodes,
+  TeamLeaderAppointmentPolicyErrorCodes,
   type MinistryId,
   type MinistryMembership,
   type MinistryName,
   type MinistryTeam,
   type MinistryTeamName,
   type TeamMembership,
+  type TeamLeadership,
 } from '@/modules/ministries/domain';
 import { failure, success } from '@/shared/core/result';
 
@@ -340,6 +344,66 @@ export class InMemoryTeamMembershipAssignmentFactsReader implements TeamMembersh
           membership.ministryTeamId.equals(teamId) &&
           membership.ministryMembershipId.equals(membershipId) &&
           membership.status === 'active',
+      ),
+    });
+  }
+}
+export class InMemoryTeamLeadershipRepository implements TeamLeadershipRepository {
+  private readonly stored: TeamLeadership[] = [];
+  async add(leadership: TeamLeadership) {
+    const conflict = this.stored.some(
+      (candidate) =>
+        candidate.organizationId.equals(leadership.organizationId) &&
+        candidate.ministryId.equals(leadership.ministryId) &&
+        candidate.ministryTeamId.equals(leadership.ministryTeamId) &&
+        candidate.status === 'active',
+    );
+    if (conflict)
+      return failure({
+        code: TeamLeaderAppointmentPolicyErrorCodes.ActiveLeadershipAlreadyExists,
+        field: 'ministryTeamId' as const,
+      });
+    this.stored.push(leadership);
+    return success();
+  }
+  get leaderships(): readonly TeamLeadership[] {
+    return Object.freeze([...this.stored]);
+  }
+}
+export class InMemoryTeamLeaderAppointmentFactsReader implements TeamLeaderAppointmentFactsReader {
+  constructor(
+    private readonly teams: () => readonly MinistryTeam[],
+    private readonly teamMemberships: () => readonly TeamMembership[],
+    private readonly teamLeaderships: () => readonly TeamLeadership[],
+  ) {}
+  async find(
+    organizationId: OrganizationId,
+    ministryId: MinistryId,
+    teamId: Parameters<TeamLeaderAppointmentFactsReader['find']>[2],
+    membershipId: Parameters<TeamLeaderAppointmentFactsReader['find']>[3],
+  ) {
+    return Object.freeze({
+      teamIsActive: this.teams().some(
+        (team) =>
+          team.organizationId.equals(organizationId) &&
+          team.ministryId.equals(ministryId) &&
+          team.id.equals(teamId) &&
+          team.status === 'active',
+      ),
+      teamMembershipIsActive: this.teamMemberships().some(
+        (membership) =>
+          membership.organizationId.equals(organizationId) &&
+          membership.ministryId.equals(ministryId) &&
+          membership.ministryTeamId.equals(teamId) &&
+          membership.id.equals(membershipId) &&
+          membership.status === 'active',
+      ),
+      activeLeadershipExists: this.teamLeaderships().some(
+        (leadership) =>
+          leadership.organizationId.equals(organizationId) &&
+          leadership.ministryId.equals(ministryId) &&
+          leadership.ministryTeamId.equals(teamId) &&
+          leadership.status === 'active',
       ),
     });
   }

@@ -6,3 +6,4 @@ export * from './register-approve-ministry-membership-route';
 export * from './register-qualify-member-for-ministry-role-route';
 export * from './register-create-ministry-team-route';
 export * from './register-assign-member-to-team-route';
+export * from './register-appoint-team-leader-route';

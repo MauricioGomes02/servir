@@ -7,4 +7,6 @@ export { PostgresMinistryTeamCreationFactsReader } from './postgres-ministry-tea
 export { PostgresMinistryTeamRepository } from './postgres-ministry-team-repository';
 export { PostgresTeamMembershipAssignmentFactsReader } from './postgres-team-membership-assignment-facts-reader';
 export { PostgresTeamMembershipRepository } from './postgres-team-membership-repository';
+export { PostgresTeamLeaderAppointmentFactsReader } from './postgres-team-leader-appointment-facts-reader';
+export { PostgresTeamLeadershipRepository } from './postgres-team-leadership-repository';
 export * from './ministry-membership-status-code';

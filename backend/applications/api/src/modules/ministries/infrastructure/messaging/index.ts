@@ -5,3 +5,4 @@ export * from './map-ministry-membership-approved-integration-event';
 export * from './map-member-qualified-for-ministry-role-integration-event';
 export * from './map-ministry-team-created-integration-event';
 export * from './map-member-assigned-to-team-integration-event';
+export * from './map-team-leader-appointed-integration-event';

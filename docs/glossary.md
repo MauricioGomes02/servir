@@ -97,6 +97,7 @@ Os termos abaixo foram confirmados pela descoberta. `Member` possui núcleo de d
 | MinistryRoleQualification | Aptidão ativa de um membro para exercer uma função ministerial. | Exigida por ScheduleAssignment. | João qualificado para guitarra e baixo. | Permissão HTTP para editar escala. |
 | MinistryTeam | Unidade operacional de um ministério que possui participantes e liderança. | É dono funcional de TeamSchedule. | Louvor A. | Hierarquia recursiva genérica sem regra. |
 | TeamMembership | Participação histórica de um vínculo ministerial em um time. | Exige MinistryMembership ativa. | João participa do Louvor A. | Qualificação automática para qualquer função. |
+| TeamLeadership | Liderança histórica e vigente de um time ministerial, inicialmente exercida por um único participante ativo. | Referencia TeamMembership e MinistryTeam do mesmo tenant. | João lidera o Louvor A. | Permissão técnica ou lista de líderes sem vigência. |
 | Activity | Evento planejado do negócio, distinto de Domain Event. | Possui ministérios participantes, recorrências e ocorrências. | Culto de domingo. | `SchedulePublished`. |
 | ActivityOccurrence | Execução concreta, manual ou gerada, de uma Activity. | É referenciada por planos e atribuições de vários times. | Culto de 09/08/2026 às 10h. | Regra “todo domingo”. |
 | AvailabilityDeclaration | Disponibilidade ou indisponibilidade vigente de um membro. | É resolvida para ActivityOccurrence; indisponibilidade prevalece. | Indisponível em 09/08 pela manhã. | Ausência de resposta interpretada como disponível. |

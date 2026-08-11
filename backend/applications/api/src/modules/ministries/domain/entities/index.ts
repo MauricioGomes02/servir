@@ -37,3 +37,7 @@ export { TeamMembership } from './team-membership';
 export { TeamMembershipId, TeamMembershipIdErrorCodes } from './team-membership-id';
 export type { TeamMembershipStatus } from './team-membership';
 export type { TeamMembershipIdError } from './team-membership-id';
+export { TeamLeadership } from './team-leadership';
+export { TeamLeadershipId, TeamLeadershipIdErrorCodes } from './team-leadership-id';
+export type { TeamLeadershipStatus } from './team-leadership';
+export type { TeamLeadershipIdError } from './team-leadership-id';

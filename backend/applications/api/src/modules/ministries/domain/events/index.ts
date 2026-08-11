@@ -24,3 +24,5 @@ export { createMinistryTeamCreated, isMinistryTeamCreated } from './ministry-tea
 export type { MinistryTeamCreated } from './ministry-team-created';
 export { createMemberAssignedToTeam, isMemberAssignedToTeam } from './member-assigned-to-team';
 export type { MemberAssignedToTeam } from './member-assigned-to-team';
+export { createTeamLeaderAppointed } from './team-leader-appointed';
+export type { TeamLeaderAppointed } from './team-leader-appointed';

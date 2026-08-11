@@ -5,3 +5,4 @@ export type * from './ministry-membership-approved-integration-event';
 export type * from './member-qualified-for-ministry-role-integration-event';
 export type * from './ministry-team-created-integration-event';
 export type * from './member-assigned-to-team-integration-event';
+export type * from './team-leader-appointed-integration-event';

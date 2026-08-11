@@ -70,6 +70,10 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 É um Aggregate Root histórico criado por `AssignMemberToTeam`. Associa um vínculo ministerial ativo a um time ativo do mesmo Ministry; apenas uma participação ativa existe por par, mas um membro pode participar de vários times. Participação de apoio numa ocorrência permanece futura e pode dispensar vínculo permanente com o time, mas exige vínculo e qualificação ativos no ministério.
 
+### TeamLeadership
+
+É um Aggregate Root histórico criado por `AppointTeamLeader`. Referencia uma `TeamMembership` ativa do próprio time e mantém inicialmente uma única liderança vigente por time. Encerramento, substituição e liderança colegiada permanecem planejados.
+
 ### Activity
 
 Representa o evento planejado do negócio, como “Culto de domingo” ou “Entrega de alimentos”. Declara ministérios participantes e padrões de recorrência versionados por vigência. O código usa `Activity` para não confundir o evento do calendário com `Domain Event`.
@@ -217,7 +221,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 4. Implementar solicitação de `MinistryMembership`. **Concluído.**
 5. Implementar aprovação de `MinistryMembership`. **Concluído.**
 6. Implementar qualificações ministeriais. **Concluído.**
-7. Implementar `MinistryTeam` e `TeamMembership`. **Concluído.** Implementar liderança em corte seguinte.
+7. Implementar `MinistryTeam`, `TeamMembership` e a primeira liderança vigente. **Concluído.**
 8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
 9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
 10. Implementar disponibilidade e sua coleta por período.

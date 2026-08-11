@@ -194,6 +194,7 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Qualificação ministerial e isolamento estrutural dos dados tenant-owned por Organization.
 - Times ministeriais com criação tenant-safe, persistência/outbox atômicas e Integration Event v1.
 - Participação histórica de membros em times ministeriais.
+- Liderança única vigente e histórica para times ministeriais.
 
 ### Em evolução
 

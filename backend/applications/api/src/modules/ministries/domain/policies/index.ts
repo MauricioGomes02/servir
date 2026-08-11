@@ -19,3 +19,4 @@ export type {
 export * from './ministry-role-qualification-policy';
 export * from './ministry-team-creation-policy';
 export * from './team-membership-assignment-policy';
+export * from './team-leader-appointment-policy';
