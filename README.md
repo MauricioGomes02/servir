@@ -1,103 +1,212 @@
 # Servir
 
-### Gestão ministerial orientada a domínio, eventos e decisões explícitas
+### Gestão ministerial com domínio rico, consistência transacional e arquitetura orientada a eventos
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-ES2022-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-persistência-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-eventos-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![Kafka](https://img.shields.io/badge/Apache_Kafka-eventos-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
 [![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-observabilidade-425CC7?logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
+[![Terraform](https://img.shields.io/badge/Terraform-infraestrutura-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io/)
 
-Servir é uma plataforma em construção para organizar membros, ministérios, times, atividades, disponibilidade e escalas de uma igreja local. O projeto explora como aplicar DDD e arquitetura orientada a eventos em um produto real, mantendo regras de negócio independentes de frameworks, bancos e brokers.
+Servir é uma plataforma em evolução para organizar a operação ministerial de igrejas locais: membros, ministérios, funções, times, atividades, disponibilidade e, futuramente, escalas colaborativas.
 
-Mais do que reunir tecnologias, o repositório registra as decisões, os limites e os trade-offs que sustentam cada incremento.
+O projeto transforma esse problema real em um estudo aplicado de Domain-Driven Design, arquitetura hexagonal e sistemas orientados a eventos. As regras de negócio permanecem independentes de HTTP, banco, broker e frameworks; decisões arquiteturais e trade-offs são registrados junto ao código.
 
-> **Estado atual:** a fundação arquitetural e o primeiro fluxo distribuído estão executáveis. Organizations e o registro inicial de Membership possuem cortes verticais completos. Consulte o [roadmap](docs/roadmap.md) para distinguir o que já existe do que está planejado.
+> **Estado atual:** o backend possui cortes verticais executáveis desde a criação da organização até a abertura de uma coleta de disponibilidade. API, PostgreSQL, outbox transacional, relay Kafka, observabilidade e infraestrutura local estão integrados. A interface web e a formação/publicação de escalas são os próximos grandes incrementos.
 
-## Por que este projeto é diferente?
+## O produto
 
-- **Domínio independente:** Aggregates, Value Objects, Policies e Domain Events não conhecem Fastify, PostgreSQL, Kafka ou SDKs.
-- **CQRS pragmático:** Commands usam Repositories orientados a Aggregates; Queries terão Readers e Read Models específicos por consumidor.
-- **Decisões nomeadas:** Readers fornecem fatos e Policies puras concentram regras de negócio.
-- **Consistência explícita:** Aggregate e outbox são persistidos na mesma transação por uma Unit of Work.
-- **Eventos duráveis:** um relay independente publica Integration Events versionados no Kafka com entrega at-least-once.
-- **Contratos interoperáveis:** mensagens externas usam CloudEvents e propagação W3C Trace Context.
-- **Observabilidade desacoplada:** logs JSON narram marcos do negócio, enquanto traces semânticos explicam request, caso de uso, lote, mensagem e dependências técnicas sem contaminar o domínio.
-- **Infraestrutura governada:** Terraform administra recursos persistentes; Liquibase administra migrations fora do lifecycle das aplicações.
-- **Falhas seguras:** erros esperados possuem códigos estáveis, localização e representação HTTP por Problem Details.
-- **Validação completa:** entradas estruturais independentes são acumuladas antes de I/O e normalizadas por regras documentadas.
-- **Composição modular:** Awilix monta dependências e lifetimes somente na composition root, sem Service Locator no núcleo ou nas rotas.
-- **Testes como especificação:** caminhos, condições, fluxo de dados, partições e limites orientam casos comportamentais determinísticos.
+Uma igreja local é representada por uma `Organization`, que também define a fronteira de tenant. Dentro dela, o Servir permite construir uma jornada como esta:
 
-## Arquitetura em uma visão
+```text
+criar organização
+  → registrar membros
+  → criar ministérios e suas funções
+  → solicitar e aprovar participação ministerial
+  → registrar qualificações
+  → formar times e definir liderança
+  → criar atividades e ocorrências
+  → abrir coletas de disponibilidade
+  → planejar e publicar escalas (próximo estágio)
+```
+
+O modelo não reduz essa operação a cadastros independentes. Ele preserva regras como vínculo ministerial aprovado, função pertencente ao mesmo ministério, liderança vigente, isolamento entre organizações, intenção civil de datas e histórico das decisões.
+
+### Capacidades
+
+| Área | Disponível hoje | Evolução planejada |
+|---|---|---|
+| Organizações | Criação e isolamento multi-tenant | Administração do ciclo da organização |
+| Membros | Registro e consulta de detalhes | Listagem orientada pela interface e associação com identidade de acesso |
+| Ministérios | Criação, funções, solicitação e aprovação de participação | Suspensão, encerramento e reativação |
+| Pessoas e times | Qualificações, times, participação e liderança vigente | Apoio temporário e substituição de liderança |
+| Atividades | Criação e agendamento manual de ocorrências | Recorrência, reagendamento e cancelamento |
+| Disponibilidade | Abertura de coleta por time e período | Respostas, precedência, fechamento e lembretes |
+| Escalas | Modelo de domínio documentado | Planejamento, atribuição, publicação e substituições históricas |
+
+O [roadmap](docs/roadmap.md) distingue o que está implementado do que ainda está em descoberta ou planejamento.
+
+## O que este projeto demonstra
+
+- **DDD aplicado:** Aggregates, Entities, Value Objects, Policies e linguagem ubíqua orientam o modelo.
+- **Arquitetura hexagonal:** o domínio não importa Fastify, PostgreSQL, Kafka ou SDKs.
+- **CQRS pragmático:** Commands alteram Aggregates; Queries usam Readers e Read Models orientados ao consumidor.
+- **Consistência explícita:** estado do Aggregate e mensagens de outbox são persistidos atomicamente pela Unit of Work.
+- **Mensageria durável:** um relay independente publica Integration Events versionados no Kafka com entrega at-least-once.
+- **Contratos interoperáveis:** eventos públicos usam CloudEvents; falhas HTTP usam Problem Details.
+- **Multi-tenancy estrutural:** dados tenant-owned carregam `organization_id` e constraints compostas impedem vínculos entre organizações.
+- **Tempo como domínio:** datas e horários civis preservam timezone, offset e desambiguação de DST antes da conversão para UTC.
+- **Validação completa:** erros independentes são acumulados, normalizados e apresentados com códigos estáveis e localização.
+- **Composição modular:** Mediator tipado, módulos instaláveis e registros de persistência reduzem alterações centrais.
+- **Observabilidade distribuída:** logs estruturados e traces correlacionam HTTP, casos de uso, PostgreSQL, relay e Kafka.
+- **Operação reproduzível:** Dockerfiles independentes, Terraform, Liquibase e redes segmentadas separam build, infraestrutura, deploy e schema.
+- **Decisões duráveis:** ADRs documentam contexto, alternativas e consequências de cada escolha relevante.
+
+## Arquitetura
 
 ```mermaid
 flowchart LR
-    Client[Cliente HTTP] --> API[Fastify API<br/>container]
-    API --> APP[Application<br/>Commands · Queries]
-    APP --> DOMAIN[Domain<br/>Aggregates · Policies · Events]
+    Client[Cliente HTTP] --> API[API Fastify]
+    API --> MED[Mediator]
+    MED --> APP[Application]
+    APP --> DOMAIN[Domain]
     APP --> UOW[Unit of Work]
     UOW --> PG[(PostgreSQL<br/>estado + outbox)]
-    PG --> RELAY[Outbox Relay<br/>container]
+    PG --> RELAY[Outbox Relay]
     RELAY --> KAFKA[(Kafka)]
-    API -. OTLP traces .-> OTEL[OpenTelemetry Collector]
-    RELAY -. OTLP traces .-> OTEL
-    OTEL --> JAEGER[Jaeger UI]
+    API -. OTLP .-> OTEL[OpenTelemetry Collector]
+    RELAY -. OTLP .-> OTEL
+    OTEL --> JAEGER[Jaeger]
 ```
 
-As dependências de código apontam para o núcleo. Ports pertencem às necessidades da Application; adapters traduzem HTTP, persistência, mensageria, tempo, identidade e telemetria.
+As dependências de código apontam para o núcleo. A Application define ports conforme as necessidades dos casos de uso; adapters traduzem HTTP, persistência, mensageria, identidade, tempo e telemetria.
 
-O fluxo distribuído já implementado é:
+Um fluxo de escrita executável segue este caminho:
 
 ```text
-POST /organizations
-  → CreateOrganization
-  → OrganizationCreated
-  → PostgreSQL: Organization + outbox no mesmo commit
-  → outbox-relay reivindica a mensagem sob lease
-  → CloudEvent organization.created.v1
-  → Kafka servir.organizations.events
+POST /organizations/{organizationId}/ministries
+  → CreateMinistry
+  → invariantes do Aggregate Ministry
+  → Ministry + outbox no mesmo commit PostgreSQL
+  → outbox relay reivindica a mensagem sob lease
+  → CloudEvent ministry.created.v1
+  → Kafka
   → confirmação da outbox
 ```
 
-Leia a [visão arquitetural](docs/architecture.md) e os [Architecture Decision Records](docs/decisions/README.md) para conhecer as razões por trás do desenho.
+A API e o relay são aplicações e imagens independentes. Isso permite comandos, dependências, recursos e escala próprios. Terraform administra sua infraestrutura de execução, mas não compila as imagens; a evolução do schema permanece sob responsabilidade exclusiva do Liquibase.
 
-## Domínio do produto
+Leia a [visão arquitetural](docs/architecture.md) para conhecer as fronteiras e a direção das dependências.
 
-O modelo parte da igreja local como fronteira operacional, sem impedir redes ou estruturas maiores no futuro.
+## Modelo de domínio
 
 ```mermaid
 flowchart TD
     O[Organization] --> M[Member]
     O --> MIN[Ministry]
-    MIN --> TEAM[Ministry Team]
-    M --> MM[Ministry Membership]
-    MM --> TEAM
+    MIN --> MR[MinistryRole]
+    M --> MM[MinistryMembership]
+    MIN --> MM
+    MM --> Q[Role Qualification]
+    MIN --> MT[MinistryTeam]
+    MM --> TM[TeamMembership]
+    MT --> TM
+    MT --> L[TeamLeadership]
     O --> A[Activity]
-    A --> AO[Activity Occurrence]
-    TEAM --> S[Team Schedule]
-    AO --> S
-    M --> AV[Availability]
-    AV --> S
+    A --> AO[ActivityOccurrence]
+    MT --> AR[AvailabilityRequest]
+    MT -. próximo estágio .-> S[TeamSchedule]
+    AO -. próximo estágio .-> S
 ```
 
-O domínio considera atividades manuais ou recorrentes, várias execuções de uma mesma atividade, escalas independentes por time, qualificações por função, indisponibilidade prioritária e histórico preservado. Os conceitos ainda em descoberta estão claramente separados dos já implementados na [documentação do domínio](docs/domain/README.md).
+Algumas escolhas importantes:
+
+- `Ministry` é um Aggregate Root separado de `Organization`, evitando carregar toda a igreja para alterar um ministério.
+- `Member` representa a pessoa conhecida pela organização; `User` será a identidade autenticável e não substitui o membro.
+- `MinistryRole` representa uma função exercida no ministério, não uma permissão técnica de acesso.
+- qualificações registram quais funções um membro está apto a exercer e sustentam futuras atribuições de escala.
+- atividades representam o evento planejado; ocorrências representam execuções concretas com data, horário e timezone preservados.
+- indisponibilidade prevalece sobre disponibilidade, e silêncio não significa disponibilidade total.
+- publicações futuras de escala serão snapshots versionados; mudanças não reescreverão o histórico.
+
+O modelo completo, invariantes e questões ainda abertas estão em [Domínio ministerial e escalas](docs/domain/ministry-scheduling.md).
+
+## Decisões que valem conhecer
+
+| Decisão | Por que importa |
+|---|---|
+| [Outbox durável com Kafka](docs/decisions/024-kafka-durable-outbox-relay.md) | Evita publicar eventos antes do commit e permite retry controlado |
+| [CQRS pragmático](docs/decisions/029-command-query-responsibility-separation.md) | Separa modelos de escrita e leitura sem antecipar bancos distintos |
+| [Mediator e módulos instaláveis](docs/decisions/042-typed-mediator-and-installable-modules.md) | Reduz composição manual ao adicionar casos de uso |
+| [Persistência registrada pelo módulo](docs/decisions/044-module-owned-persistence-registration.md) | Evita cadeias centrais de condições e mantém ownership local |
+| [Fronteiras multi-tenant](docs/decisions/046-organization-tenant-boundaries.md) | Protege o tenant também no schema, não apenas na aplicação |
+| [Valores temporais civis](docs/decisions/051-civil-temporal-values.md) | Preserva intenção humana diante de timezone e DST |
+| [Containers e redes segmentadas](docs/decisions/055-containerized-applications-and-local-network-segmentation.md) | Separa artefatos, recursos e conectividade de API e relay |
+
+Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 
 ## Tecnologias e responsabilidades
 
-| Tecnologia | Responsabilidade no Servir |
+| Tecnologia | Responsabilidade |
 |---|---|
 | TypeScript e Node.js | Domínio tipado, aplicações e adapters |
 | Fastify | Adapter HTTP e ciclo de requisição |
-| Awilix | Container tipado da composition root |
-| PostgreSQL | Estado transacional e outbox durável |
-| Kafka | Transporte de Integration Events |
-| CloudEvents | Envelope público interoperável |
-| OpenTelemetry | Traces e propagação de contexto |
-| Jaeger | Busca e visualização local de traces |
+| Awilix | Composition root e lifetimes explícitos |
+| PostgreSQL | Estado transacional, isolamento tenant e outbox |
+| Kafka e CloudEvents | Transporte e envelope dos Integration Events |
+| OpenTelemetry e Jaeger | Propagação, coleta e visualização de traces |
 | Liquibase | Evolução externa e versionada do schema |
-| Terraform | Ownership da infraestrutura local persistente |
-| Docker | Execução isolada dos serviços e ferramentas |
+| Terraform | Infraestrutura, redes, capacidade e serviços locais |
+| Docker | Artefatos isolados da API, relay e ferramentas operacionais |
+
+## Executar localmente
+
+### Desenvolvimento da API no host
+
+Provisionados PostgreSQL e migrations conforme o [guia de infraestrutura](infrastructure/README.md):
+
+```bash
+cd backend
+npm install
+npm run dev:api
+```
+
+A API usa os endpoints publicados em `localhost` descritos em [`.env.example`](backend/applications/api/.env.example).
+
+```bash
+curl --fail http://localhost:3000/health/live
+```
+
+Exemplo de criação:
+
+```bash
+curl -X POST http://localhost:3000/organizations \
+  -H "Content-Type: application/json" \
+  -H "Accept-Language: pt-BR" \
+  -d '{"name":"Igreja Batista Filadélfia de Canoas"}'
+```
+
+### Ambiente integrado
+
+O fluxo completo mantém responsabilidades separadas:
+
+1. construir as imagens da API e do relay;
+2. provisionar redes, serviços e recursos com Terraform;
+3. criar os tópicos Kafka pelo state de mensageria;
+4. aplicar migrations com Liquibase;
+5. habilitar API e relay independentemente.
+
+Comandos, variáveis, ordem de bootstrap e cuidados com volumes estão documentados em [Infraestrutura](infrastructure/README.md).
+
+## Qualidade e testes
+
+```bash
+cd backend
+npm run check
+```
+
+Esse comando verifica formatação, lint, testes automatizados e build de todos os workspaces. A estratégia combina testes de domínio, aplicação, adapters, contratos de ports, composição HTTP e integrações PostgreSQL condicionais. Consulte a [estratégia de testes](docs/testing-strategy.md).
 
 ## Estrutura do repositório
 
@@ -108,127 +217,33 @@ servir/
 │   │   ├── api/                  # API HTTP e composition root
 │   │   └── outbox-relay/         # Worker independente da outbox
 │   └── packages/
-│       ├── application-foundation/ # Contratos transversais sem runtime
-│       ├── node-observability/     # Logging e mecânica OpenTelemetry para Node
-│       └── integration-messaging/  # Contratos serializáveis compartilhados
-├── frontend/                     # Aplicações web futuras
+│       ├── application-foundation/
+│       ├── integration-messaging/
+│       └── node-observability/
 ├── infrastructure/
 │   ├── database/liquibase/       # Migrations canônicas
-│   └── terraform/                # Plataforma local e tópicos Kafka
+│   ├── observability/            # Pipeline local de telemetria
+│   └── terraform/                # Plataforma e catálogo Kafka
 ├── docs/
-│   ├── decisions/                # ADRs
-│   ├── domain/                   # Descoberta e modelagem do negócio
+│   ├── decisions/                # Architecture Decision Records
+│   ├── domain/                   # Descoberta e regras do negócio
 │   └── primitives/               # Contratos arquiteturais
-└── .codex/skills/                # Guardrails de contribuição assistida
+└── .codex/skills/                # Guardrails locais de desenvolvimento
 ```
-
-## Comece em poucos minutos
-
-### Pré-requisitos
-
-- Node.js compatível com ES2022 e npm workspaces.
-- Docker, Terraform e Docker Compose para executar a API local com PostgreSQL e o fluxo completo.
-- No Windows, a infraestrutura foi preparada para execução pelo WSL com acesso ao Docker Engine.
-
-### API local
-
-A API usa PostgreSQL como persistência de runtime. Depois de provisionar o banco e aplicar as migrations Liquibase conforme o guia de infraestrutura:
-
-```bash
-cd backend
-npm install
-npm run dev:api
-```
-
-Em outro terminal:
-
-```bash
-curl -X POST http://localhost:3000/organizations \
-  -H "Content-Type: application/json" \
-  -H "Accept-Language: pt-BR" \
-  -d '{"name":"Igreja Batista Filadélfia de Canoas"}'
-```
-
-Uma criação válida responde com `201 Created` e a representação direta do recurso. Falhas esperadas usam `application/problem+json` conforme RFC 9457.
-
-### Testes e build
-
-```bash
-cd backend
-npm run check
-```
-
-O comando `check` verifica a formatação, executa o lint, roda os testes e compila todos os
-workspaces. Durante o desenvolvimento, use `npm run format` para formatar o código e
-`npm run lint:fix` para aplicar as correções automáticas seguras do lint.
-
-### Fluxo completo com PostgreSQL e Kafka
-
-O fluxo completo possui quatro etapas:
-
-1. Provisionar PostgreSQL, Kafka, rede e volumes com Terraform.
-2. Provisionar o tópico Kafka com o state de mensageria.
-3. Aplicar o schema com o job Liquibase.
-4. Executar API e outbox relay em processos separados.
-
-Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no guia de [infraestrutura local e migrations](infrastructure/README.md). Os arquivos `.env.example` da [API](backend/applications/api/.env.example) e do [relay](backend/applications/outbox-relay/.env.example) documentam a configuração de cada processo.
-
-## Estado atual
-
-### Implementado
-
-- Primitivas de domínio, Result, Notification, Instant, valores temporais civis e IDs nominais com UUIDv7.
-- Contexto de execução com correlação e request; locale é resolvido na apresentação e o trace é propagado pelos adapters.
-- Logging estruturado, instrumentação HTTP/PostgreSQL e tracing de casos de uso.
-- Representação REST de sucesso e Problem Details localizado para falhas.
-- Container restrito à composition root, Service Collection, Mediator tipado e manifestos instaláveis por bounded context.
-- Runtime PostgreSQL-only com uma única composição de persistência; adapters em memória são doubles de teste.
-- `CreateOrganization` completo com PostgreSQL e outbox atômica.
-- Outbox transacional com Integration Event versionado.
-- Relay PostgreSQL independente, lease, retry exponencial com jitter e falha terminal.
-- Publicação Kafka em CloudEvents com entrega at-least-once.
-- Infraestrutura local com Terraform e migrations externas com Liquibase.
-- Imagens multi-stage independentes da API e do relay, executadas sem root e provisionadas com recursos separados em redes locais segmentadas por responsabilidade.
-- Membership com `RegisterMember`, `GetMemberDetails`, Readers específicos, persistência PostgreSQL, entradas HTTP localizadas e Integration Event v1.
-- Ministries com `CreateMinistry`, unicidade de nome ativo por organização, persistência/outbox atômicas, entrada HTTP localizada e Integration Event v1.
-- Funções ministeriais com `DefineMinistryRole`, identidade estável, unicidade entre funções ativas e Integration Event v1.
-- Participação ministerial com solicitação e aprovação explícitas, vínculo vigente único, persistência/outbox atômicas e Integration Events v1.
-- Qualificação ministerial e isolamento estrutural dos dados tenant-owned por Organization.
-- Times ministeriais com criação tenant-safe, persistência/outbox atômicas e Integration Event v1.
-- Participação histórica de membros em times ministeriais.
-- Liderança única vigente e histórica para times ministeriais.
-- Activities com criação tenant-safe, ministérios participantes, persistência/outbox atômicas e Integration Event v1.
-- Ocorrências manuais de Activity com intenção civil preservada, resolução explícita de timezone e persistência/outbox atômicas.
-- Coletas de disponibilidade por time e período civil, com prazo UTC e persistência/outbox atômicas.
-
-### Em evolução
-
-- Listagem paginada de Membership orientada pela primeira tela consumidora.
-- Times ministeriais e participação em times.
-- Recorrência, reagendamento, cancelamento e revisão controlada de ocorrências futuras após mudanças de regras IANA.
-- Declarações de disponibilidade, fechamento de coletas e resolução de precedência.
-- Disponibilidade e escalas versionadas por time.
-- Auditoria durável, notificações e consumidores idempotentes.
-- Avaliação dos traces locais e evolução orientada por lacunas observadas.
-- Frontend e documentação bilíngue.
-
-O [roadmap completo](docs/roadmap.md) preserva critérios de saída e evita apresentar intenção como funcionalidade pronta.
 
 ## Documentação
 
 - [Arquitetura](docs/architecture.md)
-- [Filosofia e princípios](docs/philosophy.md)
+- [Domínio](docs/domain/README.md)
 - [Vocabulário ubíquo](docs/glossary.md)
-- [Domínio ministerial](docs/domain/README.md)
-- [Primitivas arquiteturais](docs/primitives/README.md)
 - [Architecture Decision Records](docs/decisions/README.md)
 - [Estratégia de testes](docs/testing-strategy.md)
-- [Validação de entrada e normalização](docs/input-validation-and-normalization.md)
+- [Validação e normalização](docs/input-validation-and-normalization.md)
 - [Relay durável de outbox](docs/outbox-relay.md)
 - [Infraestrutura e migrations](infrastructure/README.md)
 - [Roadmap](docs/roadmap.md)
 
-> A documentação em português é atualmente a fonte canônica. Uma versão em inglês está registrada no roadmap.
+> A documentação em português é a fonte canônica atual. A organização bilíngue permanece registrada no roadmap.
 
 ## Autor
 
