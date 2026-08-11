@@ -22,4 +22,22 @@ describe('combineValidationResults', () => {
       ['organization.id.empty', 'member.id.invalid_format'],
     );
   });
+
+  it('flattens nested validation groups without losing their errors', () => {
+    const nestedErrors = [
+      { code: 'item.invalid', field: 'items[0]' },
+      { code: 'item.invalid', field: 'items[1]' },
+    ] as const;
+    const result = combineValidationResults(
+      failure({ ...nestedErrors[0], errors: nestedErrors }),
+      failure({ code: 'name.empty', field: 'name' }),
+    );
+
+    assert.equal(result.success, false);
+    if (!result.success)
+      assert.deepEqual(
+        result.error.errors.map(({ code, field }) => ({ code, field })),
+        [...nestedErrors, { code: 'name.empty', field: 'name' }],
+      );
+  });
 });

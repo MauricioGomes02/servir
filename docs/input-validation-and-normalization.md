@@ -6,7 +6,7 @@ Reduzir ciclos de correção na API e impedir que pequenas diferenças de repres
 
 ## Validações independentes
 
-Handlers validam todas as entradas estruturais independentes antes de consultar Readers, Repositories ou iniciar uma Unit of Work. `combineValidationResults` usa `Notification` para acumular violações e devolve uma coleção imutável em ordem de entrada. O primeiro erro permanece disponível como erro primário para compatibilidade; Presenters traduzem a coleção completa e Problem Details a expõe em `errors`.
+Handlers validam todas as entradas estruturais independentes antes de consultar Readers, Repositories ou iniciar uma Unit of Work. `combineValidationResults` usa `Notification` para acumular violações e devolve uma coleção imutável em ordem de entrada. Grupos produzidos por estruturas compostas, como arrays, são achatados ao compor com outros campos para não perder violações internas. O primeiro erro permanece disponível como erro primário para compatibilidade; Presenters traduzem a coleção completa e Problem Details a expõe em `errors`.
 
 Exemplos de validações independentes são os formatos de `organizationId`, `ministryId`, `memberId` e `name` recebidos pelo mesmo Command. Ausência de Aggregate, conflito de unicidade, elegibilidade e transição de estado são decisões dependentes e permanecem fail-fast.
 

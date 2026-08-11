@@ -2,7 +2,7 @@
 
 ## Estado
 
-Descoberta em andamento. Os cortes verticais iniciais de `Member` e `Ministry` estão implementados; os demais tipos deste documento permanecem planejados.
+Descoberta em andamento. Os cortes verticais iniciais de `Member`, `Ministry` e `Activity` estão implementados; os demais tipos deste documento permanecem planejados.
 
 ## Objetivo
 
@@ -76,7 +76,7 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 ### Activity
 
-Representa o evento planejado do negócio, como “Culto de domingo” ou “Entrega de alimentos”. Declara ministérios participantes e padrões de recorrência versionados por vigência. O código usa `Activity` para não confundir o evento do calendário com `Domain Event`.
+É um Aggregate Root separado de Organization e de suas ocorrências. Representa o evento planejado do negócio, como “Culto de domingo” ou “Entrega de alimentos”. `CreateActivity` cria uma atividade ativa com nome ativo único por Organization e pelo menos um ministério participante ativo do mesmo tenant. Padrões de recorrência permanecem versionados por vigência. O código usa `Activity` para não confundir o evento do calendário com `Domain Event`.
 
 ### ActivityOccurrence
 
@@ -223,7 +223,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 6. Implementar qualificações ministeriais. **Concluído.**
 7. Implementar `MinistryTeam`, `TeamMembership` e a primeira liderança vigente. **Concluído.**
 8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`. **Concluído.**
-9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
+9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável. **CreateActivity concluído; ocorrência manual em andamento.**
 10. Implementar disponibilidade e sua coleta por período.
 11. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
 12. Implementar publicação versionada, substituições e reações de auditoria/notificação.

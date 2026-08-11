@@ -19,6 +19,7 @@ Usar quando várias validações podem ser avaliadas com segurança na mesma ten
 4. Não misturar erros técnicos, warnings ou logs.
 5. Expor itens somente leitura.
 6. Em handlers, acumular todas as entradas estruturais independentes antes de qualquer I/O; manter decisões dependentes fail-fast.
+7. Ao combinar grupos de validação aninhados, achatar seus erros em ordem para preservar cada violação estrutural.
 
 ## Exemplo correto
 

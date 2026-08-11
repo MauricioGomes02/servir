@@ -24,6 +24,11 @@ import {
   teamLeadershipUnitOfWork,
 } from '../modules/ministries-persistence-module';
 import { organizationUnitOfWork } from '../modules/organizations-persistence-module';
+import {
+  activityCreationFacts,
+  activityUnitOfWork,
+} from '../modules/activities-persistence-module';
+import type { Activity } from '@/modules/activities/domain';
 import { ServiceRegistry } from '../services';
 import {
   InMemoryMemberDetailsReader,
@@ -51,6 +56,7 @@ export function createTestPersistence(): ApplicationPersistence {
   const ministryTeams = new InMemoryMinistryTeamRepository();
   const teamMemberships = new InMemoryTeamMembershipRepository();
   const teamLeaderships = new InMemoryTeamLeadershipRepository();
+  const activities: Activity[] = [];
   const outbox = new InMemoryEventOutbox();
   const eventRelay = new InMemoryEventOutboxRelay(
     outbox,
@@ -119,6 +125,43 @@ export function createTestPersistence(): ApplicationPersistence {
       () => teamLeaderships.leaderships,
     ),
   );
+  services.add(
+    activityUnitOfWork,
+    new DirectUnitOfWork({
+      activities: {
+        async add(activity: Activity) {
+          activities.push(activity);
+          return { success: true as const, value: undefined };
+        },
+      },
+      outbox,
+    }),
+  );
+  services.add(activityCreationFacts, {
+    async find(organizationId, name, ministryIds) {
+      return Object.freeze({
+        organizationExists: organizations.organizations.some((item) =>
+          item.id.equals(organizationId),
+        ),
+        activeNameExists: activities.some(
+          (item) =>
+            item.organizationId.equals(organizationId) &&
+            item.status === 'active' &&
+            item.name.toString().toLowerCase() === name.toString().toLowerCase(),
+        ),
+        activeMinistryIds: new Set(
+          ministries.ministries
+            .filter(
+              (item) =>
+                item.organizationId.equals(organizationId) &&
+                item.status === 'active' &&
+                ministryIds.some((id) => id.equals(item.id)),
+            )
+            .map((item) => item.id.toString()),
+        ),
+      });
+    },
+  });
 
   return {
     services,

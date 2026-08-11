@@ -196,12 +196,13 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 - Times ministeriais com criação tenant-safe, persistência/outbox atômicas e Integration Event v1.
 - Participação histórica de membros em times ministeriais.
 - Liderança única vigente e histórica para times ministeriais.
+- Activities com criação tenant-safe, ministérios participantes, persistência/outbox atômicas e Integration Event v1.
 
 ### Em evolução
 
 - Listagem paginada de Membership orientada pela primeira tela consumidora.
 - Times ministeriais e participação em times.
-- Atividades, recorrência e ocorrências apoiadas pela modelagem temporal civil já definida.
+- Ocorrências manuais e recorrência apoiadas pela modelagem temporal civil já definida.
 - Disponibilidade e escalas versionadas por time.
 - Auditoria durável, notificações e consumidores idempotentes.
 - Avaliação dos traces locais e evolução orientada por lacunas observadas.

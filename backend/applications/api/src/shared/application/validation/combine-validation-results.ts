@@ -24,6 +24,8 @@ export function combineValidationResults<
 
   for (const result of results) {
     if (result.success) values.push(result.value);
+    else if ('errors' in result.error && Array.isArray(result.error.errors))
+      notification.addMany(result.error.errors as readonly NotificationError[]);
     else notification.add(result.error);
   }
 

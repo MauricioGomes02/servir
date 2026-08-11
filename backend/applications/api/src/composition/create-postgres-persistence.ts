@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { registerActivitiesPersistence } from './modules/activities-persistence-module';
 import { registerMembershipPersistence } from './modules/membership-persistence-module';
 import { registerMinistriesPersistence } from './modules/ministries-persistence-module';
 import { registerOrganizationsPersistence } from './modules/organizations-persistence-module';
@@ -14,6 +15,7 @@ export function createPostgresPersistence(connectionString: string): PostgresPer
   registerOrganizationsPersistence(builder);
   registerMembershipPersistence(builder);
   registerMinistriesPersistence(builder);
+  registerActivitiesPersistence(builder);
 
   return {
     services: builder.services,

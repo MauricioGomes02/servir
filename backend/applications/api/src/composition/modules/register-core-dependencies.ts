@@ -11,6 +11,7 @@ import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import { asFunction } from 'awilix';
 
 import { membershipMessageCatalog } from '@/modules/membership/presentation';
+import { activityMessageCatalog } from '@/modules/activities/presentation';
 import { ministryMessageCatalog } from '@/modules/ministries/presentation';
 import { organizationMessageCatalog } from '@/modules/organizations/presentation';
 import type { ApplicationContainer } from '../container';
@@ -34,12 +35,14 @@ export function registerCoreDependencies(
       () =>
         new InMemoryMessageTranslator({
           'pt-BR': {
+            ...activityMessageCatalog['pt-BR'],
             ...httpProblemMessageCatalog['pt-BR'],
             ...membershipMessageCatalog['pt-BR'],
             ...ministryMessageCatalog['pt-BR'],
             ...organizationMessageCatalog['pt-BR'],
           },
           'en-US': {
+            ...activityMessageCatalog['en-US'],
             ...httpProblemMessageCatalog['en-US'],
             ...membershipMessageCatalog['en-US'],
             ...ministryMessageCatalog['en-US'],
