@@ -86,7 +86,7 @@ flowchart TD
 | Apresentação e localização de erros | Implementação inicial | Locale e fallback, port de tradução, adapter em memória, erro apresentado, primeiro Presenter e títulos HTTP localizados estão definidos |
 | Adapter HTTP e Composition Root | Implementação inicial | Factory Fastify, container restrito à composição, tokens tipados, Mediator, módulos instaláveis e persistência PostgreSQL registrada pelo módulo estão testados; write scopes recebem outbox automaticamente, mappers usam registry O(1), contexto permanece explícito e doubles de persistência pertencem somente ao test support |
 | Visualização local de traces | Implementação inicial | Terraform provisiona Collector vendor-neutral e Jaeger efêmero; API e relay exportam por OTLP/HTTP e a UI permite avaliar spans antes de ampliar logging ou instrumentação |
-| Apresentação temporal e datas civis | Planejado | API preserva `Instant` UTC; apresentação converte com locale e timezone IANA; agendamentos modelam data civil, horário civil e zona separadamente; precedência entre timezone da operação, usuário, organização e aplicação permanece por definir com o primeiro consumidor |
+| Apresentação temporal e datas civis | Implementação inicial | `CivilDate`, `CivilTime`, `TimeZoneId` e `SchedulePeriod` preservam intenção civil e período inclusivo; API continua preservando `Instant` UTC; conversão, política de transições de offset e precedência de timezone permanecem por definir com o primeiro consumidor |
 
 ## Exemplos
 

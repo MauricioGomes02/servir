@@ -177,7 +177,7 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 
 ### Implementado
 
-- Primitivas de domínio, Result, Notification, Instant e IDs nominais com UUIDv7.
+- Primitivas de domínio, Result, Notification, Instant, valores temporais civis e IDs nominais com UUIDv7.
 - Contexto de execução com correlação e request; locale é resolvido na apresentação e o trace é propagado pelos adapters.
 - Logging estruturado, instrumentação HTTP/PostgreSQL e tracing de casos de uso.
 - Representação REST de sucesso e Problem Details localizado para falhas.
@@ -201,7 +201,7 @@ Os comandos, variáveis, cuidados de rede e proteção dos volumes estão no gui
 
 - Listagem paginada de Membership orientada pela primeira tela consumidora.
 - Times ministeriais e participação em times.
-- Atividades, recorrência e ocorrências com modelagem temporal explícita.
+- Atividades, recorrência e ocorrências apoiadas pela modelagem temporal civil já definida.
 - Disponibilidade e escalas versionadas por time.
 - Auditoria durável, notificações e consumidores idempotentes.
 - Avaliação dos traces locais e evolução orientada por lacunas observadas.

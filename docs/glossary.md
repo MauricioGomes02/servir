@@ -40,6 +40,10 @@ Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos 
 | Presenter | Componente da apresentação que converte a saída tipada de um caso de uso em uma representação segura e independente do transporte. | Usa Message Translator e Context quando apresenta falhas esperadas. | `CreateOrganizationPresenter`. | Controller retornando Entity ou inspecionando mensagens de erro. |
 | Clock | Port que fornece tempo de forma controlável. | Injetado onde tempo é uma dependência. | `clock.now()`. | `new Date()` disperso. |
 | Instant | Value Object que representa um ponto absoluto na linha do tempo, normalizado em UTC. | Produzido por Clock; usado por Events. | `2026-07-27T15:00:00.000Z`. | Horário civil sem offset. |
+| CivilDate | Value Object de uma data gregoriana sem horário, offset ou timezone. | Compõe ocorrências e períodos. | `2026-08-09`. | `Instant` truncado para meia-noite. |
+| CivilTime | Value Object de um horário civil com precisão de minuto, sem data, offset ou timezone. | Compõe a intenção local de uma ocorrência. | `10:00`. | `2026-08-09T10:00:00Z`. |
+| TimeZoneId | Value Object de uma zona IANA válida e canônica. | Converte intenção civil em `Instant` por uma política explícita. | `America/Sao_Paulo`. | Offset fixo `-03:00`. |
+| SchedulePeriod | Value Object de um intervalo inclusivo entre duas CivilDates. | Delimita disponibilidade e escalas sem impor timezone. | Agosto de 2026, incluindo o primeiro e o último dia. | Duração em milissegundos. |
 | CorrelationId | Identificador que correlaciona operações relacionadas. | Campo de Context/Message. | Mesmo ID em passos de um fluxo. | ID da entidade de negócio. |
 | Handler | Componente que trata um tipo de mensagem. | Recebe Command, Query ou Event. | `CancelOrderHandler`. | Service com dezenas de métodos. |
 | Mediator | Dispatcher tipado entre uma mensagem e seu único Handler. | Aplica pipelines transversais sem esconder Context ou Unit of Work. | `mediator.send(CreateMinistryMessage, input, context)`. | Service Locator ou bus dinâmico sem tipos. |

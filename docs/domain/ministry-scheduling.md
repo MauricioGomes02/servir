@@ -222,7 +222,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 5. Implementar aprovação de `MinistryMembership`. **Concluído.**
 6. Implementar qualificações ministeriais. **Concluído.**
 7. Implementar `MinistryTeam`, `TeamMembership` e a primeira liderança vigente. **Concluído.**
-8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`.
+8. Introduzir valores temporais civis exigidos por `ActivityOccurrence` e `SchedulePeriod`. **Concluído.**
 9. Implementar Activity manual; adicionar recorrência somente depois do fluxo manual estável.
 10. Implementar disponibilidade e sua coleta por período.
 11. Implementar rascunho, necessidades e atribuições de `TeamSchedule`.
