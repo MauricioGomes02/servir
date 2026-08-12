@@ -2,21 +2,20 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
-import { parseMessageId } from '@/shared/application/messaging';
+import { parseMessageId, type EventEnvelope } from '@/shared/application/messaging';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
-import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
-import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
+import { success } from '@/shared/core/result';
 import {
   Ministry,
   MinistryId,
   MinistryRoleDefinitionErrorCodes,
   MinistryRoleId,
 } from '../../../domain';
-import { InMemoryMinistryRepository } from '@/composition/test-support';
+import type { MinistryWriteScope } from '../../ports';
 import { DefineMinistryRoleErrorCodes, DefineMinistryRoleHandler } from '.';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {
@@ -27,7 +26,7 @@ function value<T>(result: { success: true; value: T } | { success: false }): T {
 async function fixture(withMinistry = true) {
   const organizationId = value(OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599e120'));
   const ministryId = value(MinistryId.create('0198f334-6dc5-7c20-9af1-91d7e599e121'));
-  const repository = new InMemoryMinistryRepository();
+  let storedMinistry: Ministry | undefined;
   if (withMinistry) {
     const ministry = value(
       Ministry.create({
@@ -39,9 +38,33 @@ async function fixture(withMinistry = true) {
       }),
     );
     ministry.acknowledgeDomainEvents(ministry.pendingDomainEvents);
-    await repository.add(ministry);
+    storedMinistry = ministry;
   }
-  const outbox = new InMemoryEventOutbox();
+  const envelopes: EventEnvelope[] = [];
+  const repository: MinistryWriteScope['ministries'] = {
+    async add(ministry) {
+      storedMinistry = ministry;
+      return success();
+    },
+    async findById(receivedOrganizationId, receivedMinistryId) {
+      return storedMinistry?.organizationId.equals(receivedOrganizationId) &&
+        storedMinistry.id.equals(receivedMinistryId)
+        ? storedMinistry
+        : undefined;
+    },
+    async save(ministry) {
+      storedMinistry = ministry;
+      return success();
+    },
+  };
+  const scope: MinistryWriteScope = {
+    ministries: repository,
+    outbox: {
+      async add(received) {
+        envelopes.push(...received);
+      },
+    },
+  };
   const handler = new DefineMinistryRoleHandler({
     clock: new FixedClock(value(Instant.create('2026-08-06T15:01:00.000Z'))),
     ministryRoleIdGenerator: new SequenceIdGenerator([
@@ -55,13 +78,17 @@ async function fixture(withMinistry = true) {
     messageIdGenerator: new SequenceIdGenerator([
       value(parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599e125')),
     ]),
-    unitOfWork: new DirectUnitOfWork({ ministries: repository, outbox }),
+    unitOfWork: {
+      async execute(work) {
+        return work(scope);
+      },
+    },
     logger: new InMemoryLogger(),
   });
   return {
     handler,
     repository,
-    outbox,
+    envelopes,
     organizationId,
     ministryId,
     context: createExecutionContext({
@@ -82,8 +109,8 @@ describe('DefineMinistryRoleHandler', () => {
       f.context,
     );
     assert.equal(result.success, true);
-    assert.equal(f.outbox.envelopes.length, 1);
-    assert.equal(f.outbox.envelopes[0]?.event.name, 'ministry.role_defined');
+    assert.equal(f.envelopes.length, 1);
+    assert.equal(f.envelopes[0]?.event.name, 'ministry.role_defined');
     const stored = await f.repository.findById(f.organizationId, f.ministryId);
     assert.equal(stored?.roles[0]?.name.toString(), 'Vocal');
     assert.equal(stored?.pendingDomainEvents.length, 0);
@@ -102,7 +129,7 @@ describe('DefineMinistryRoleHandler', () => {
     assert.equal(result.success, false);
     if (!result.success)
       assert.equal(result.error.code, DefineMinistryRoleErrorCodes.MinistryNotFound);
-    assert.equal(f.outbox.envelopes.length, 0);
+    assert.equal(f.envelopes.length, 0);
   });
 
   it('rejects a duplicate active role ignoring case without another outbox message', async () => {
@@ -126,6 +153,6 @@ describe('DefineMinistryRoleHandler', () => {
     assert.equal(duplicate.success, false);
     if (!duplicate.success)
       assert.equal(duplicate.error.code, MinistryRoleDefinitionErrorCodes.ActiveNameAlreadyExists);
-    assert.equal(f.outbox.envelopes.length, 1);
+    assert.equal(f.envelopes.length, 1);
   });
 });

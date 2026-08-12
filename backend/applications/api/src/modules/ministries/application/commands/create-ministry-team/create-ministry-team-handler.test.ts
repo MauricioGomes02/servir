@@ -1,16 +1,20 @@
 import assert from 'node:assert/strict';
 import { it } from 'node:test';
-import { InMemoryMinistryTeamRepository } from '@/composition/test-support/persistence-doubles';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
-import { parseMessageId } from '@/shared/application/messaging';
+import { parseMessageId, type EventEnvelope } from '@/shared/application/messaging';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
-import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
-import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
-import { MinistryId, MinistryTeamCreationPolicy, MinistryTeamId } from '../../../domain';
+import { success } from '@/shared/core/result';
+import {
+  MinistryId,
+  MinistryTeamCreationPolicy,
+  MinistryTeamId,
+  type MinistryTeam,
+} from '../../../domain';
+import type { MinistryTeamWriteScope } from '../../ports';
 import { CreateMinistryTeamHandler } from './create-ministry-team-handler';
 function value<T>(result: { success: true; value: T } | { success: false }): T {
   assert.equal(result.success, true);
@@ -18,8 +22,21 @@ function value<T>(result: { success: true; value: T } | { success: false }): T {
   return result.value;
 }
 it('persists the active ministry team and envelope in the same scope', async () => {
-  const teams = new InMemoryMinistryTeamRepository();
-  const outbox = new InMemoryEventOutbox();
+  const teams: MinistryTeam[] = [];
+  const envelopes: EventEnvelope[] = [];
+  const scope: MinistryTeamWriteScope = {
+    ministryTeams: {
+      async add(team) {
+        teams.push(team);
+        return success();
+      },
+    },
+    outbox: {
+      async add(received) {
+        envelopes.push(...received);
+      },
+    },
+  };
   const handler = new CreateMinistryTeamHandler({
     clock: new FixedClock(value(Instant.create('2026-08-10T12:00:00.000Z'))),
     ministryTeamIdGenerator: new SequenceIdGenerator([
@@ -33,7 +50,11 @@ it('persists the active ministry team and envelope in the same scope', async () 
     ]),
     facts: { find: async () => ({ ministryIsActive: true, activeNameExists: false }) },
     policy: new MinistryTeamCreationPolicy(),
-    unitOfWork: new DirectUnitOfWork({ ministryTeams: teams, outbox }),
+    unitOfWork: {
+      async execute(work) {
+        return work(scope);
+      },
+    },
   });
   const result = await handler.handle(
     {
@@ -44,6 +65,6 @@ it('persists the active ministry team and envelope in the same scope', async () 
     createExecutionContext({ correlationId: value(parseCorrelationId('create-ministry-team')) }),
   );
   assert.equal(result.success, true);
-  assert.equal(teams.teams.length, 1);
-  assert.equal(outbox.envelopes[0]?.event.name, 'ministry_team.created');
+  assert.equal(teams.length, 1);
+  assert.equal(envelopes[0]?.event.name, 'ministry_team.created');
 });
