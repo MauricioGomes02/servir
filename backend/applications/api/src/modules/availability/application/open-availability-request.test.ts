@@ -1,14 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
-import { parseMessageId } from '@/shared/application/messaging';
+import { parseMessageId, type EventEnvelope } from '@/shared/application/messaging';
 import { success } from '@/shared/core/result';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
-import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
-import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import {
   AvailabilityRequestId,
   AvailabilityRequestOpeningPolicy,
@@ -24,7 +22,7 @@ function value<T>(result: { success: true; value: T } | { success: false }): T {
 
 function handler(input: {
   requests: AvailabilityRequest[];
-  outbox: InMemoryEventOutbox;
+  envelopes: EventEnvelope[];
   reads: { value: number };
 }) {
   return new OpenAvailabilityRequestHandler({
@@ -45,24 +43,32 @@ function handler(input: {
       },
     },
     policy: new AvailabilityRequestOpeningPolicy(),
-    unitOfWork: new DirectUnitOfWork({
-      availabilityRequests: {
-        async add(request) {
-          input.requests.push(request);
-          return success();
-        },
+    unitOfWork: {
+      async execute(work) {
+        return work({
+          availabilityRequests: {
+            async add(request) {
+              input.requests.push(request);
+              return success();
+            },
+          },
+          outbox: {
+            async add(received) {
+              input.envelopes.push(...received);
+            },
+          },
+        });
       },
-      outbox: input.outbox,
-    }),
+    },
   });
 }
 
 describe('OpenAvailabilityRequestHandler', () => {
   it('persists the request and outbox in the same scope', async () => {
     const requests: AvailabilityRequest[] = [];
-    const outbox = new InMemoryEventOutbox();
+    const envelopes: EventEnvelope[] = [];
     const reads = { value: 0 };
-    const result = await handler({ requests, outbox, reads }).handle(
+    const result = await handler({ requests, envelopes, reads }).handle(
       {
         organizationId: '0198f334-6dc5-7c20-9af1-91d7e59b0021',
         ministryTeamId: '0198f334-6dc5-7c20-9af1-91d7e59b0022',
@@ -77,13 +83,13 @@ describe('OpenAvailabilityRequestHandler', () => {
 
     assert.equal(result.success, true);
     assert.equal(requests.length, 1);
-    assert.equal(outbox.envelopes[0]?.event.name, 'availability_request.opened');
+    assert.equal(envelopes[0]?.event.name, 'availability_request.opened');
     assert.deepEqual(requests[0]?.pendingDomainEvents, []);
   });
 
   it('reports every malformed independent input before reading facts', async () => {
     const reads = { value: 0 };
-    const result = await handler({ requests: [], outbox: new InMemoryEventOutbox(), reads }).handle(
+    const result = await handler({ requests: [], envelopes: [], reads }).handle(
       {
         organizationId: 'invalid',
         ministryTeamId: 'invalid',
