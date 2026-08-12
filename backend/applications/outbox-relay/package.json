@@ -28,6 +28,6 @@
     "@types/pg": "^8.20.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.0",
-    "typescript": "^5.8.0"
+    "typescript": "6.0.3"
   }
 }
