@@ -2,7 +2,7 @@
 
 ## Estado
 
-Núcleo de domínio, `RegisterMember`, `GetMemberDetails`, persistência PostgreSQL, contrato de integração v1 e entradas HTTP implementados.
+Núcleo de domínio, `RegisterMember`, `GetMemberDetails`, `ListMembers`, persistência PostgreSQL, contrato de integração v1 e entradas HTTP implementados.
 
 ## Motivação
 
@@ -94,9 +94,14 @@ O adapter PostgreSQL projeta somente `name` e `status`, usando os IDs já valida
 
 `registeredAt` permanece fora dessa representação até a implementação da estratégia de apresentação temporal e timezone registrada no roadmap.
 
+## Listagem
+
+`ListMembers` atende a navegação administrativa da primeira interface sem reconstituir Aggregates. `GET /organizations/{organizationId}/members` aceita `page`, `pageSize`, busca por prefixo em `search` e filtro `active | inactive` em `status`. A resposta preserva ordenação estável por nome e identidade, além de totais exatos adequados ao volume esperado de uma igreja local.
+
+O Reader PostgreSQL aplica `organization_id` em toda consulta e devolve ausência quando a própria Organization não existe. Assim, uma Organization existente sem membros produz uma página vazia, enquanto tenant inexistente produz `404`. O índice de listagem combina tenant, nome normalizado para ordenação e identidade.
+
 ## Próximos comportamentos candidatos
 
-- Definir a Query paginada de membros exigida pela primeira tela consumidora.
 - Desativação e reativação preservam histórico por eventos próprios.
 - Renomeação registra fato sem alterar publicações históricas que guardem snapshots.
 

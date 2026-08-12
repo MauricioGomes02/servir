@@ -1,5 +1,6 @@
 import type {
   MemberDetailsReader,
+  MemberListReader,
   MemberWriteScope,
   OrganizationRegistrationFactsReader,
 } from '@/modules/membership/application';
@@ -7,6 +8,7 @@ import type { MemberRegistered } from '@/modules/membership/domain';
 import {
   mapMemberRegisteredIntegrationEvent,
   PostgresMemberDetailsReader,
+  PostgresMemberListReader,
   PostgresMemberRepository,
   PostgresOrganizationRegistrationFactsReader,
 } from '@/modules/membership/infrastructure';
@@ -19,6 +21,7 @@ export const memberUnitOfWork =
 export const memberDetailsReader = defineService<MemberDetailsReader>(
   'membership.member-details-reader',
 );
+export const memberListReader = defineService<MemberListReader>('membership.member-list-reader');
 export const organizationRegistrationFacts = defineService<OrganizationRegistrationFactsReader>(
   'membership.organization-registration-facts',
 );
@@ -31,6 +34,7 @@ export function registerMembershipPersistence(builder: PostgresPersistenceBuilde
     members: new PostgresMemberRepository(client),
   }));
   builder.addValue(memberDetailsReader, (pool) => new PostgresMemberDetailsReader(pool));
+  builder.addValue(memberListReader, (pool) => new PostgresMemberListReader(pool));
   builder.addValue(
     organizationRegistrationFacts,
     (pool) => new PostgresOrganizationRegistrationFactsReader(pool),

@@ -2,6 +2,7 @@ import {
   createMemberDetails,
   type MemberDetails,
   type MemberDetailsReader,
+  type MemberListReader,
   type MemberRepository,
   type OrganizationRegistrationFactsReader,
 } from '@/modules/membership/application';
@@ -88,6 +89,47 @@ export class InMemoryMemberDetailsReader implements MemberDetailsReader {
           name: member.name.toString(),
           status: member.status,
         });
+  }
+}
+export class InMemoryMemberListReader implements MemberListReader {
+  constructor(
+    private readonly organizationIds: () => readonly OrganizationId[],
+    private readonly members: () => readonly Member[],
+  ) {}
+  async list(criteria: Parameters<MemberListReader['list']>[0]) {
+    if (!this.organizationIds().some((id) => id.equals(criteria.organizationId))) return undefined;
+    const filtered = this.members()
+      .filter((item) => item.organizationId.equals(criteria.organizationId))
+      .filter((item) => criteria.status === undefined || item.status === criteria.status)
+      .filter(
+        (item) =>
+          criteria.search === undefined ||
+          item.name
+            .toString()
+            .toLocaleLowerCase('pt-BR')
+            .startsWith(criteria.search.toLocaleLowerCase('pt-BR')),
+      )
+      .sort(
+        (left, right) =>
+          left.name.toString().toLowerCase().localeCompare(right.name.toString().toLowerCase()) ||
+          left.id.toString().localeCompare(right.id.toString()),
+      );
+    const start = (criteria.page - 1) * criteria.pageSize;
+    return Object.freeze({
+      items: Object.freeze(
+        filtered
+          .slice(start, start + criteria.pageSize)
+          .map((item) =>
+            Object.freeze({ id: item.id, name: item.name.toString(), status: item.status }),
+          ),
+      ),
+      pagination: Object.freeze({
+        page: criteria.page,
+        pageSize: criteria.pageSize,
+        totalItems: filtered.length,
+        totalPages: filtered.length === 0 ? 0 : Math.ceil(filtered.length / criteria.pageSize),
+      }),
+    });
   }
 }
 export class InMemoryOrganizationRegistrationFactsReader implements OrganizationRegistrationFactsReader {

@@ -42,6 +42,8 @@ const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7d1',
   '0198f334-6dc5-7c20-9af1-91d7e599c7d2',
   '0198f334-6dc5-7c20-9af1-91d7e599c7d3',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7d4',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7d5',
 ];
 
 describe('createApplication', () => {
@@ -61,7 +63,7 @@ describe('createApplication', () => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
     const monotonicInstants = [
-      100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725, 800, 825,
+      100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725, 800, 825, 900, 925,
     ];
     const app = createApplication({
       persistence: createTestPersistence(),
@@ -195,6 +197,15 @@ describe('createApplication', () => {
       items: [{ id: UUIDS[12], name: 'Louvor', status: 'active' }],
       pagination: { page: 1, pageSize: 1, totalItems: 1, totalPages: 1 },
     });
+    const membersResponse = await app.inject({
+      method: 'GET',
+      url: `/organizations/${UUIDS[2]}/members?pageSize=1&search=mar&status=active`,
+    });
+    assert.equal(membersResponse.statusCode, 200);
+    assert.deepEqual(membersResponse.json(), {
+      items: [{ id: UUIDS[7], name: 'Maria da Silva', status: 'active' }],
+      pagination: { page: 1, pageSize: 1, totalItems: 1, totalPages: 1 },
+    });
 
     await app.close();
 
@@ -218,7 +229,7 @@ describe('createApplication', () => {
     const requestRecords = logger.records.filter(
       (record) => record.eventName === 'http.request.completed',
     );
-    assert.equal(requestRecords.length, 9);
+    assert.equal(requestRecords.length, 10);
     assert.deepEqual(requestRecords[0]?.context, {
       correlationId: UUIDS[1],
       requestId: UUIDS[0],

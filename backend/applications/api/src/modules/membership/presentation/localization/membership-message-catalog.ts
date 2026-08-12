@@ -2,6 +2,11 @@ import type { MessageCatalog } from '@/shared/presentation/localization';
 
 export const membershipMessageCatalog: MessageCatalog = Object.freeze({
   'pt-BR': Object.freeze({
+    'member.list.page.invalid': 'A pagina deve ser um inteiro positivo.',
+    'member.list.page_size.invalid': 'O tamanho da pagina deve estar entre 1 e {max}.',
+    'member.list.search.invalid': 'A busca deve ser um texto com no maximo {max} caracteres.',
+    'member.list.status.invalid': 'O status deve ser active ou inactive.',
+    'member.list.organization_not_found': 'Organizacao nao encontrada.',
     'organization.id.invalid_type': 'O identificador da organização deve ser um texto.',
     'organization.id.empty': 'Informe o identificador da organização.',
     'organization.id.too_long':
@@ -18,6 +23,11 @@ export const membershipMessageCatalog: MessageCatalog = Object.freeze({
     'member.details.not_found': 'O membro informado não foi encontrado nesta organização.',
   }),
   'en-US': Object.freeze({
+    'member.list.page.invalid': 'Page must be a positive integer.',
+    'member.list.page_size.invalid': 'Page size must be between 1 and {max}.',
+    'member.list.search.invalid': 'Search must be text with at most {max} characters.',
+    'member.list.status.invalid': 'Status must be active or inactive.',
+    'member.list.organization_not_found': 'Organization not found.',
     'organization.id.invalid_type': 'The organization identifier must be text.',
     'organization.id.empty': 'Enter the organization identifier.',
     'organization.id.too_long':

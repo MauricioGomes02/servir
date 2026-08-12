@@ -8,6 +8,7 @@ import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import type { ApplicationPersistence } from '../persistence';
 import {
   memberDetailsReader,
+  memberListReader,
   memberUnitOfWork,
   organizationRegistrationFacts,
 } from '../modules/membership-persistence-module';
@@ -43,6 +44,7 @@ import {
 import { ServiceRegistry } from '../services';
 import {
   InMemoryMemberDetailsReader,
+  InMemoryMemberListReader,
   InMemoryMemberRepository,
   InMemoryMinistryCreationFactsReader,
   InMemoryMinistryListReader,
@@ -86,6 +88,13 @@ export function createTestPersistence(): ApplicationPersistence {
   );
   services.add(memberUnitOfWork, new DirectUnitOfWork({ members, outbox }));
   services.add(memberDetailsReader, new InMemoryMemberDetailsReader(() => members.members));
+  services.add(
+    memberListReader,
+    new InMemoryMemberListReader(
+      () => organizations.organizations.map(({ id }) => id),
+      () => members.members,
+    ),
+  );
   services.add(
     organizationRegistrationFacts,
     new InMemoryOrganizationRegistrationFactsReader(() =>

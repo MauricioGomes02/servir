@@ -6,6 +6,7 @@ export {
 export { MemberStatusCodes, fromMemberStatusCode, toMemberStatusCode } from './member-status-code';
 
 export { PostgresMemberDetailsReader } from './postgres-member-details-reader';
+export { PostgresMemberListReader } from './postgres-member-list-reader';
 
 export {
   PostgresMemberDetailsReaderError,
