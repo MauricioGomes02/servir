@@ -17,8 +17,10 @@ jaeger_image         = "cr.jaegertracing.io/jaegertracing/jaeger:2.20.0"
 jaeger_ui_port       = 16686
 
 api_image               = "servir-api:local"
-api_port                = 3000
 api_enabled             = false
+frontend_image          = "servir-frontend:local"
+frontend_port           = 3001
+frontend_enabled        = false
 outbox_relay_image      = "servir-outbox-relay:local"
 outbox_relay_enabled    = false
 
@@ -28,6 +30,11 @@ api_resources = {
 }
 
 outbox_relay_resources = {
+  cpu_shares = 256
+  memory_mb  = 256
+}
+
+frontend_resources = {
   cpu_shares = 256
   memory_mb  = 256
 }
@@ -42,6 +49,14 @@ api_environment = {
   OTEL_SERVICE_NAME                  = "servir-api"
   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "http://otel-collector:4318/v1/traces"
   OTEL_SDK_DISABLED                  = "false"
+}
+
+frontend_environment = {
+  NODE_ENV      = "production"
+  HOST          = "0.0.0.0"
+  PORT          = "3001"
+  API_BASE_URL  = "http://api:3000"
+  API_TIMEOUT_MS = "10000"
 }
 
 outbox_relay_environment = {

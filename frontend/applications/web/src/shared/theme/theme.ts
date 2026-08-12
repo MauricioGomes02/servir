@@ -15,7 +15,6 @@ export function applyTheme(preference: ThemePreference): void {
         : 'light'
       : preference;
   document.documentElement.dataset.theme = resolved;
-  document.documentElement.style.colorScheme = resolved;
 }
 
 export function setThemePreference(preference: ThemePreference): void {

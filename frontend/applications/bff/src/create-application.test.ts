@@ -11,6 +11,27 @@ const config = {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('frontend BFF', () => {
+  it('exposes liveness with defensive browser headers', async () => {
+    const app = await createApplication(config, { logger: false });
+    const response = await app.inject({ method: 'GET', url: '/health/live' });
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ status: 'ok' });
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('DENY');
+    expect(response.headers['cache-control']).toBe('no-cache');
+  });
+
+  it('does not turn an unknown bff operation into a spa document', async () => {
+    const app = await createApplication(config, { logger: false });
+    const response = await app.inject({ method: 'GET', url: '/bff/unknown' });
+    await app.close();
+
+    expect(response.statusCode).toBe(404);
+    expect(response.headers['content-type']).toContain('application/problem+json');
+  });
+
   it('forwards only the organization creation contract to the private api', async () => {
     const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
       new Response(JSON.stringify({ id: 'organization-id', name: 'Comunidade Servir' }), {

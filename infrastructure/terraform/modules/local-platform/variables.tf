@@ -79,14 +79,19 @@ variable "api_image" {
   type        = string
 }
 
-variable "api_port" {
-  description = "API port published on the host loopback interface."
-  type        = number
-}
-
 variable "outbox_relay_image" {
   description = "Pre-built outbox relay image reference supplied by the delivery flow."
   type        = string
+}
+
+variable "frontend_image" {
+  description = "Pre-built frontend BFF image reference supplied by the delivery flow."
+  type        = string
+}
+
+variable "frontend_port" {
+  description = "Frontend BFF port published on the host loopback interface."
+  type        = number
 }
 
 variable "api_enabled" {
@@ -96,6 +101,11 @@ variable "api_enabled" {
 
 variable "outbox_relay_enabled" {
   description = "Whether the local outbox relay container should be running."
+  type        = bool
+}
+
+variable "frontend_enabled" {
+  description = "Whether the local frontend BFF container should be running."
   type        = bool
 }
 
@@ -115,6 +125,14 @@ variable "outbox_relay_resources" {
   })
 }
 
+variable "frontend_resources" {
+  description = "Local compute limits assigned independently to the frontend BFF."
+  type = object({
+    cpu_shares = number
+    memory_mb  = number
+  })
+}
+
 variable "api_environment" {
   description = "Runtime environment supplied to the API by the environment composition root."
   type        = map(string)
@@ -123,6 +141,12 @@ variable "api_environment" {
 
 variable "outbox_relay_environment" {
   description = "Runtime environment supplied to the outbox relay by the environment composition root."
+  type        = map(string)
+  sensitive   = true
+}
+
+variable "frontend_environment" {
+  description = "Runtime environment supplied to the frontend BFF by the environment composition root."
   type        = map(string)
   sensitive   = true
 }

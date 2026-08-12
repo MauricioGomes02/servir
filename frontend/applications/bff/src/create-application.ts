@@ -52,6 +52,24 @@ export async function createApplication(
 ): Promise<FastifyInstance> {
   const app = Fastify({ logger: options.logger ?? true, bodyLimit: 32 * 1024 });
 
+  app.addHook('onSend', async (request, reply, payload) => {
+    reply.header('x-content-type-options', 'nosniff');
+    reply.header('referrer-policy', 'strict-origin-when-cross-origin');
+    reply.header('x-frame-options', 'DENY');
+    reply.header(
+      'content-security-policy',
+      "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'",
+    );
+    if (request.url.startsWith('/assets/')) {
+      reply.header('cache-control', 'public, max-age=31536000, immutable');
+    } else if (!request.url.startsWith('/bff/')) {
+      reply.header('cache-control', 'no-cache');
+    }
+    return payload;
+  });
+
+  app.get('/health/live', () => ({ status: 'ok' }));
+
   app.post('/bff/organizations', (request, reply) =>
     sendToApi(request, reply, config, '/organizations'),
   );
@@ -69,7 +87,16 @@ export async function createApplication(
   const webRoot = resolve(import.meta.dirname, '../../web/dist');
   if (existsSync(webRoot)) {
     await app.register(staticFiles, { root: webRoot, wildcard: false });
-    app.setNotFoundHandler((_request, reply) => reply.sendFile('index.html'));
+    app.setNotFoundHandler((request, reply) => {
+      if (request.url.startsWith('/bff/') || request.url.startsWith('/health/')) {
+        return reply.status(404).type('application/problem+json').send({
+          type: '/problems/not-found',
+          title: 'Recurso não encontrado.',
+          status: 404,
+        });
+      }
+      return reply.sendFile('index.html');
+    });
   }
   return app;
 }

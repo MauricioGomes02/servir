@@ -5,7 +5,7 @@ variable "network_name" {
 }
 
 variable "network_subnet" {
-  description = "IPv4 parent CIDR split into edge, data, messaging, and observability bridge networks."
+  description = "IPv4 parent CIDR split into edge, application, data, messaging, and observability bridge networks."
   type        = string
   default     = "172.28.0.0/24"
 }
@@ -123,20 +123,33 @@ variable "api_image" {
 }
 
 variable "api_port" {
-  description = "API port published only on host loopback."
+  description = "Deprecated compatibility input; the containerized API is private and no longer publishes a host port."
   type        = number
-  default     = 3000
-
-  validation {
-    condition     = var.api_port >= 1 && var.api_port <= 65535
-    error_message = "api_port must be between 1 and 65535."
-  }
+  default     = null
+  nullable    = true
 }
 
 variable "outbox_relay_image" {
   description = "Pre-built outbox relay image available to the local Docker daemon."
   type        = string
   default     = "servir-outbox-relay:local"
+}
+
+variable "frontend_image" {
+  description = "Pre-built frontend BFF image available to the local Docker daemon."
+  type        = string
+  default     = "servir-frontend:local"
+}
+
+variable "frontend_port" {
+  description = "Frontend BFF port published only on host loopback."
+  type        = number
+  default     = 3001
+
+  validation {
+    condition     = var.frontend_port >= 1 && var.frontend_port <= 65535
+    error_message = "frontend_port must be between 1 and 65535."
+  }
 }
 
 variable "api_enabled" {
@@ -147,6 +160,12 @@ variable "api_enabled" {
 
 variable "outbox_relay_enabled" {
   description = "Starts the outbox relay after Liquibase has prepared the schema and Kafka topics."
+  type        = bool
+  default     = false
+}
+
+variable "frontend_enabled" {
+  description = "Starts the frontend BFF after the private API is enabled."
   type        = bool
   default     = false
 }
@@ -167,6 +186,14 @@ variable "outbox_relay_resources" {
   })
 }
 
+variable "frontend_resources" {
+  description = "Compute resources reserved for the local frontend BFF container."
+  type = object({
+    cpu_shares = number
+    memory_mb  = number
+  })
+}
+
 variable "api_environment" {
   description = "Complete runtime environment for the API container."
   type        = map(string)
@@ -175,6 +202,12 @@ variable "api_environment" {
 
 variable "outbox_relay_environment" {
   description = "Complete runtime environment for the outbox relay container."
+  type        = map(string)
+  sensitive   = true
+}
+
+variable "frontend_environment" {
+  description = "Complete runtime environment for the frontend BFF container."
   type        = map(string)
   sensitive   = true
 }

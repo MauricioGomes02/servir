@@ -1,9 +1,10 @@
 locals {
   network_segments = {
     edge          = 0
-    data          = 1
-    messaging     = 2
-    observability = 3
+    application   = 1
+    data          = 2
+    messaging     = 3
+    observability = 4
   }
 
 }
@@ -16,8 +17,8 @@ resource "docker_network" "platform" {
   attachable = true
 
   ipam_config {
-    subnet  = cidrsubnet(var.network_subnet, 2, each.value)
-    gateway = cidrhost(cidrsubnet(var.network_subnet, 2, each.value), 1)
+    subnet  = cidrsubnet(var.network_subnet, 3, each.value)
+    gateway = cidrhost(cidrsubnet(var.network_subnet, 3, each.value), 1)
   }
 
   labels {
@@ -347,6 +348,11 @@ resource "docker_image" "outbox_relay" {
   keep_locally = true
 }
 
+resource "docker_image" "frontend" {
+  name         = var.frontend_image
+  keep_locally = true
+}
+
 resource "docker_container" "api" {
   name       = "servir-api"
   hostname   = "api"
@@ -362,7 +368,7 @@ resource "docker_container" "api" {
   env = [for name, value in var.api_environment : "${name}=${value}"]
 
   networks_advanced {
-    name    = docker_network.platform["edge"].name
+    name    = docker_network.platform["application"].name
     aliases = ["api"]
   }
 
@@ -372,12 +378,6 @@ resource "docker_container" "api" {
 
   networks_advanced {
     name = docker_network.platform["observability"].name
-  }
-
-  ports {
-    internal = 3000
-    external = var.api_port
-    ip       = "127.0.0.1"
   }
 
   healthcheck {
@@ -410,6 +410,74 @@ resource "docker_container" "api" {
   }
 
   depends_on = [docker_container.postgres, docker_container.otel_collector]
+}
+
+resource "docker_container" "frontend" {
+  name       = "servir-frontend"
+  hostname   = "frontend"
+  image      = docker_image.frontend.image_id
+  restart    = "unless-stopped"
+  must_run   = var.frontend_enabled
+  start      = var.frontend_enabled
+  read_only  = true
+  init       = true
+  memory     = var.frontend_resources.memory_mb
+  cpu_shares = var.frontend_resources.cpu_shares
+
+  env = [for name, value in var.frontend_environment : "${name}=${value}"]
+
+  networks_advanced {
+    name    = docker_network.platform["edge"].name
+    aliases = ["frontend"]
+  }
+
+  networks_advanced {
+    name = docker_network.platform["application"].name
+  }
+
+  ports {
+    internal = 3001
+    external = var.frontend_port
+    ip       = "127.0.0.1"
+  }
+
+  healthcheck {
+    test         = ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health/live').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+    interval     = "10s"
+    timeout      = "5s"
+    retries      = 6
+    start_period = "10s"
+  }
+
+  capabilities {
+    drop = ["ALL"]
+  }
+
+  security_opts = ["no-new-privileges:true"]
+
+  labels {
+    label = "servir.environment"
+    value = "local"
+  }
+
+  labels {
+    label = "servir.owner"
+    value = "terraform"
+  }
+
+  labels {
+    label = "servir.role"
+    value = "frontend-bff"
+  }
+
+  depends_on = [docker_container.api]
+
+  lifecycle {
+    precondition {
+      condition     = !var.frontend_enabled || var.api_enabled
+      error_message = "frontend_enabled requires api_enabled because the BFF depends on the private API."
+    }
+  }
 }
 
 resource "docker_container" "outbox_relay" {

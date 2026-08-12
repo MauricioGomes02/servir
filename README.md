@@ -137,15 +137,15 @@ O modelo completo, invariantes e questões ainda abertas estão em [Domínio min
 
 ## Decisões que valem conhecer
 
-| Decisão                                                                                                           | Por que importa                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [Outbox durável com Kafka](docs/decisions/024-kafka-durable-outbox-relay.md)                                      | Evita publicar eventos antes do commit e permite retry controlado  |
-| [CQRS pragmático](docs/decisions/029-command-query-responsibility-separation.md)                                  | Separa modelos de escrita e leitura sem antecipar bancos distintos |
-| [Mediator e módulos instaláveis](docs/decisions/042-typed-mediator-and-installable-modules.md)                    | Reduz composição manual ao adicionar casos de uso                  |
-| [Persistência registrada pelo módulo](docs/decisions/044-module-owned-persistence-registration.md)                | Evita cadeias centrais de condições e mantém ownership local       |
-| [Fronteiras multi-tenant](docs/decisions/046-organization-tenant-boundaries.md)                                   | Protege o tenant também no schema, não apenas na aplicação         |
-| [Valores temporais civis](docs/decisions/051-civil-temporal-values.md)                                            | Preserva intenção humana diante de timezone e DST                  |
-| [Containers e redes segmentadas](docs/decisions/055-containerized-applications-and-local-network-segmentation.md) | Separa artefatos, recursos e conectividade de API e relay          |
+| Decisão                                                                                            | Por que importa                                                    |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [Outbox durável com Kafka](docs/decisions/024-kafka-durable-outbox-relay.md)                       | Evita publicar eventos antes do commit e permite retry controlado  |
+| [CQRS pragmático](docs/decisions/029-command-query-responsibility-separation.md)                   | Separa modelos de escrita e leitura sem antecipar bancos distintos |
+| [Mediator e módulos instaláveis](docs/decisions/042-typed-mediator-and-installable-modules.md)     | Reduz composição manual ao adicionar casos de uso                  |
+| [Persistência registrada pelo módulo](docs/decisions/044-module-owned-persistence-registration.md) | Evita cadeias centrais de condições e mantém ownership local       |
+| [Fronteiras multi-tenant](docs/decisions/046-organization-tenant-boundaries.md)                    | Protege o tenant também no schema, não apenas na aplicação         |
+| [Valores temporais civis](docs/decisions/051-civil-temporal-values.md)                             | Preserva intenção humana diante de timezone e DST                  |
+| [API privada atrás do BFF](docs/decisions/058-private-api-behind-containerized-frontend-bff.md)    | Expõe somente a fronteira web e isola a API na rede de aplicação   |
 
 Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 
@@ -198,7 +198,7 @@ O fluxo completo mantém responsabilidades separadas:
 2. provisionar redes, serviços e recursos com Terraform;
 3. criar os tópicos Kafka pelo state de mensageria;
 4. aplicar migrations com Liquibase;
-5. habilitar API e relay independentemente.
+5. habilitar API, frontend BFF e relay conforme suas dependências.
 
 Comandos, variáveis, ordem de bootstrap e cuidados com volumes estão documentados em [Infraestrutura](infrastructure/README.md).
 

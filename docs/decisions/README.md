@@ -59,5 +59,6 @@
 | [055](055-containerized-applications-and-local-network-segmentation.md) | Aplicações containerizadas e segmentação da rede local       | Aceita |
 | [056](056-unit-and-postgresql-integration-test-boundaries.md)           | Fronteiras entre testes unitários e integração PostgreSQL    | Aceita |
 | [057](057-vue-web-application-foundation.md)                            | Fundação responsiva e acessível da aplicação web Vue         | Aceita |
+| [058](058-private-api-behind-containerized-frontend-bff.md)             | API privada atrás do frontend BFF containerizado             | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

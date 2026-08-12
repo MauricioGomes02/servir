@@ -43,7 +43,7 @@ output "jaeger_ui_url" {
   value       = module.platform.jaeger_ui_url
 }
 
-output "api_url" {
-  description = "Containerized API base URL available on the host."
-  value       = module.platform.api_url
+output "frontend_url" {
+  description = "Containerized frontend BFF URL available on the host."
+  value       = module.platform.frontend_url
 }

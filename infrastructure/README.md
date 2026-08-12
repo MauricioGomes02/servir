@@ -1,17 +1,17 @@
 # Infraestrutura
 
-Esta pasta concentra recursos operacionais externos às aplicações. Terraform administra a plataforma Docker, incluindo API e relay, e o catálogo de tópicos Kafka em states separados; Compose executa somente ferramentas descartáveis. As aplicações não criam infraestrutura, não aplicam migrations e não administram tópicos.
+Esta pasta concentra recursos operacionais externos às aplicações. Terraform administra a plataforma Docker, incluindo frontend BFF, API e relay, e o catálogo de tópicos Kafka em states separados; Compose executa somente ferramentas descartáveis. As aplicações não criam infraestrutura, não aplicam migrations e não administram tópicos.
 
 ## Responsabilidades
 
-| Responsável | Recursos |
-|---|---|
-| Terraform `local` | Redes segmentadas, IPAM, volumes protegidos e infraestrutura de execução de PostgreSQL/Kafka/Collector/Jaeger/API/relay |
-| Terraform `local-messaging` | Tópicos e suas configurações persistentes |
-| Compose | Execuções sob demanda de Liquibase |
-| Dockerfiles das aplicações | Builds multi-stage independentes e reproduzíveis da API e do relay |
-| Pipeline de entrega | Build, análise, publicação e promoção das referências de imagem |
-| Aplicações | Consumo dos endpoints e contratos já provisionados |
+| Responsável                 | Recursos                                                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Terraform `local`           | Redes segmentadas, IPAM, volumes protegidos e infraestrutura de execução de PostgreSQL/Kafka/Collector/Jaeger/frontend/API/relay |
+| Terraform `local-messaging` | Tópicos e suas configurações persistentes                                                                                        |
+| Compose                     | Execuções sob demanda de Liquibase                                                                                               |
+| Dockerfiles das aplicações  | Builds multi-stage independentes e reproduzíveis do frontend, da API e do relay                                                  |
+| Pipeline de entrega         | Build, análise, publicação e promoção das referências de imagem                                                                  |
+| Aplicações                  | Consumo dos endpoints e contratos já provisionados                                                                               |
 
 Terraform e Compose nunca devem declarar ownership sobre o mesmo container, volume ou rede.
 
@@ -37,25 +37,27 @@ terraform plan -out=local.tfplan
 terraform apply local.tfplan
 ```
 
-Antes do primeiro plano, construa as duas imagens fora do Terraform, sempre usando `backend` como contexto:
+Antes do primeiro plano, construa as três imagens fora do Terraform. Backend e frontend possuem contextos independentes:
 
 ```bash
 docker build -f applications/api/Dockerfile -t servir-api:local .
 docker build -f applications/outbox-relay/Dockerfile -t servir-outbox-relay:local .
+cd ../frontend
+docker build -t servir-frontend:local .
 ```
 
-No primeiro bootstrap, mantenha `api_enabled = false` e `outbox_relay_enabled = false`. Terraform prepara os containers e seus recursos sem iniciar processos antes de o schema e dos tópicos existirem. Depois de aplicar Liquibase e o catálogo Kafka, habilite cada workload no `terraform.tfvars`, gere um novo plano e aplique-o.
+No primeiro bootstrap, mantenha `frontend_enabled = false`, `api_enabled = false` e `outbox_relay_enabled = false`. Terraform prepara os containers e seus recursos sem iniciar processos antes de o schema e dos tópicos existirem. Depois de aplicar Liquibase e o catálogo Kafka, habilite cada workload no `terraform.tfvars`, gere um novo plano e aplique-o. O frontend exige a API habilitada.
 
 O primeiro `terraform init` gera `.terraform.lock.hcl`, que deve ser versionado para fixar os checksums selecionados do provider. Os arquivos `.terraform/`, `terraform.tfvars`, planos e states permanecem ignorados.
 
 Os outputs distinguem endpoints por origem:
 
-| Consumidor | PostgreSQL | Kafka | OTLP/HTTP | API |
-|---|---|---|---|---|
-| Processo no host/WSL | `localhost:5432` | `localhost:29092` | `http://localhost:4318/v1/traces` | `http://localhost:3000` |
-| Container autorizado | `postgres:5432` | `kafka:9092` | `http://otel-collector:4318/v1/traces` | `http://api:3000` na rede `edge` |
+| Consumidor           | PostgreSQL       | Kafka             | OTLP/HTTP                              | HTTP público                                       |
+| -------------------- | ---------------- | ----------------- | -------------------------------------- | -------------------------------------------------- |
+| Processo no host/WSL | `localhost:5432` | `localhost:29092` | `http://localhost:4318/v1/traces`      | `http://localhost:3001` (frontend/BFF)             |
+| Container autorizado | `postgres:5432`  | `kafka:9092`      | `http://otel-collector:4318/v1/traces` | BFF acessa `http://api:3000` na rede `application` |
 
-O bloco `172.28.0.0/24` é dividido por padrão em quatro bridges `/26`: `edge`, `data`, `messaging` e `observability`. Altere o bloco pai no `terraform.tfvars` antes do primeiro apply se houver sobreposição com VPN ou outra rede Docker. Gateways são derivados, containers usam DNS e IPs fixos não fazem parte do contrato.
+O bloco `172.28.0.0/24` é dividido por padrão em oito faixas `/27`; cinco formam as bridges `edge`, `application`, `data`, `messaging` e `observability`, enquanto três permanecem reservadas. Altere o bloco pai no `terraform.tfvars` antes do primeiro apply se houver sobreposição com VPN ou outra rede Docker. Gateways são derivados, containers usam DNS e IPs fixos não fazem parte do contrato.
 
 ## Provisionar os tópicos
 
@@ -99,20 +101,21 @@ docker compose run --rm liquibase status
 
 ## Executar as aplicações containerizadas
 
-Com os respectivos flags habilitados, `terraform apply` inicia containers independentes usando as imagens prontas indicadas por `api_image` e `outbox_relay_image`. CPU, memória e todo o ambiente de cada processo são fornecidos separadamente pelo `terraform.tfvars`; o módulo não possui configuração de runtime embutida. As configurações locais de exemplo usam somente DNS das redes autorizadas:
+Com os respectivos flags habilitados, `terraform apply` inicia containers independentes usando as imagens prontas indicadas por `frontend_image`, `api_image` e `outbox_relay_image`. CPU, memória e todo o ambiente de cada processo são fornecidos separadamente pelo `terraform.tfvars`; o módulo não possui configuração de runtime embutida. As configurações locais de exemplo usam somente DNS das redes autorizadas:
 
 ```text
 API: postgres:5432 e otel-collector:4318
+Frontend BFF: api:3000
 Relay: postgres:5432, kafka:9092 e otel-collector:4318
 ```
 
-Valide a API pelo host:
+Valide a entrada pública pelo host:
 
 ```bash
-curl --fail http://localhost:3000/health/live
+curl --fail http://localhost:3001/health/live
 ```
 
-O endpoint de liveness verifica processo e transporte sem consultar dependências. Para desenvolvimento com hot reload, `npm run dev:api` e `npm run dev:relay` continuam disponíveis no host usando os respectivos `.env.example`.
+O endpoint valida somente processo e transporte do BFF. A API possui liveness próprio na rede `application`; seu container não publica porta no host. Para desenvolvimento com hot reload, frontend, API e relay continuam executáveis no host por seus workspaces e arquivos `.env.example`.
 
 Mapas de ambiente marcados como sensíveis ainda são armazenados no state. As credenciais simplificadas existem apenas para desenvolvimento local. Ambientes compartilhados exigem imagens publicadas por CI, identidades separadas, permissões mínimas e integração com um gerenciador de segredos.
 
@@ -130,14 +133,15 @@ Esse incremento transporta somente traces. Logs continuam estruturados no stdout
 
 ## Rede e segurança local
 
-- As bridges `edge`, `data`, `messaging` e `observability` limitam comunicação lateral por responsabilidade.
-- A API participa de `edge`, `data` e `observability`; não alcança Kafka.
+- As bridges `edge`, `application`, `data`, `messaging` e `observability` limitam comunicação lateral por responsabilidade.
+- O frontend BFF participa de `edge` e `application` e é o único workload HTTP publicado.
+- A API participa de `application`, `data` e `observability`; não alcança Kafka nem publica porta.
 - O relay participa de `data`, `messaging` e `observability`; não publica portas.
 - PostgreSQL participa somente de `data`, e Kafka somente de `messaging`.
 - PostgreSQL e Kafka publicam portas apenas em `127.0.0.1`.
 - Collector e Jaeger publicam OTLP/HTTP e UI apenas em `127.0.0.1`.
 - O listener `INTERNAL` do Kafka anuncia `kafka:9092`; o listener `EXTERNAL` anuncia `localhost:29092`.
-- API e relay executam como usuário não-root, com root filesystem somente leitura, capabilities removidas e `no-new-privileges`.
+- Frontend BFF, API e relay executam como usuário não-root, com root filesystem somente leitura, capabilities removidas e `no-new-privileges`.
 - PLAINTEXT é aceito somente neste ambiente local; produção requer autenticação e criptografia definidas pela IaC do ambiente.
 - O nó Kafka combina broker e controller em KRaft. Essa topologia não representa alta disponibilidade.
 

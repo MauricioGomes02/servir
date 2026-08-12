@@ -1,6 +1,8 @@
-import { createApplication } from './create-application.js';
-import { readBffConfig } from './config.js';
+import { startService } from './service.js';
 
-const config = readBffConfig(process.env);
-const app = await createApplication(config);
-await app.listen({ host: config.host, port: config.port });
+try {
+  await startService();
+} catch (error) {
+  console.error('frontend bff startup failed', error);
+  process.exitCode = 1;
+}

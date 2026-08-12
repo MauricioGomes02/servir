@@ -43,7 +43,7 @@ output "jaeger_ui_url" {
   value       = "http://localhost:${var.jaeger_ui_port}"
 }
 
-output "api_url" {
-  description = "API base URL available on the host loopback interface."
-  value       = "http://localhost:${var.api_port}"
+output "frontend_url" {
+  description = "Frontend BFF URL available on the host loopback interface."
+  value       = "http://localhost:${var.frontend_port}"
 }

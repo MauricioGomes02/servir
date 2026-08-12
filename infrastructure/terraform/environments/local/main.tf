@@ -21,10 +21,14 @@ module "platform" {
   jaeger_ui_port       = var.jaeger_ui_port
 
   api_image                = var.api_image
-  api_port                 = var.api_port
   api_enabled              = var.api_enabled
   api_resources            = var.api_resources
   api_environment          = var.api_environment
+  frontend_image           = var.frontend_image
+  frontend_port            = var.frontend_port
+  frontend_enabled         = var.frontend_enabled
+  frontend_resources       = var.frontend_resources
+  frontend_environment     = var.frontend_environment
   outbox_relay_image       = var.outbox_relay_image
   outbox_relay_enabled     = var.outbox_relay_enabled
   outbox_relay_resources   = var.outbox_relay_resources
