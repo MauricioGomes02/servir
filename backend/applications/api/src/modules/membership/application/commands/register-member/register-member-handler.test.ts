@@ -13,7 +13,6 @@ import { parseDomainEventId, type DomainEventId } from '@/shared/domain/domain-e
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
-import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 
@@ -22,11 +21,8 @@ import {
   MemberNameErrorCodes,
   MemberRegistrationPolicy,
   MemberRegistrationPolicyErrorCodes,
+  type Member,
 } from '../../../domain';
-import {
-  InMemoryMemberRepository,
-  InMemoryOrganizationRegistrationFactsReader,
-} from '@/composition/test-support';
 import type { MemberWriteScope } from '../../ports';
 import { RegisterMemberHandler } from '.';
 
@@ -71,9 +67,18 @@ function createFixture(options?: {
   readonly outbox?: EventOutbox;
 }) {
   const ids = fixtureIds();
-  const members = new InMemoryMemberRepository();
-  const outbox = options?.outbox ?? new InMemoryEventOutbox();
-  const organizations = options?.organizationExists === false ? [] : [ids.organizationId];
+  const storedMembers: Member[] = [];
+  const members = {
+    async save(member: Member) {
+      storedMembers.push(member);
+    },
+  };
+  const storedEnvelopes: EventEnvelope[] = [];
+  const outbox = options?.outbox ?? {
+    async add(envelopes: readonly EventEnvelope[]) {
+      storedEnvelopes.push(...envelopes);
+    },
+  };
   const scope: MemberWriteScope = { members, outbox };
   const logger = new InMemoryLogger();
   const handler = new RegisterMemberHandler({
@@ -81,7 +86,13 @@ function createFixture(options?: {
     memberIdGenerator: new SequenceIdGenerator([ids.memberId]),
     domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([ids.eventId]),
     messageIdGenerator: new SequenceIdGenerator<MessageId>([ids.messageId]),
-    organizationRegistrationFacts: new InMemoryOrganizationRegistrationFactsReader(organizations),
+    organizationRegistrationFacts: {
+      async findById(organizationId) {
+        return options?.organizationExists === false
+          ? undefined
+          : Object.freeze({ organizationId });
+      },
+    },
     registrationPolicy: new MemberRegistrationPolicy(),
     unitOfWork: new DirectUnitOfWork(scope),
     logger,
@@ -90,7 +101,7 @@ function createFixture(options?: {
     correlationId: ids.correlationId,
   });
 
-  return { handler, context, ids, members, outbox, logger };
+  return { handler, context, ids, members, outbox, logger, storedMembers, storedEnvelopes };
 }
 
 describe('RegisterMemberHandler', () => {
@@ -163,18 +174,12 @@ describe('RegisterMemberHandler', () => {
       organizationId: fixture.ids.organizationId,
       name: 'Maria da Silva',
     });
-    assert.equal(fixture.members.members.length, 1);
-    assert.deepEqual(fixture.members.members[0]?.pendingDomainEvents, []);
-    assert.equal(fixture.outbox instanceof InMemoryEventOutbox, true);
-
-    if (!(fixture.outbox instanceof InMemoryEventOutbox)) {
-      return;
-    }
-
-    assert.equal(fixture.outbox.envelopes.length, 1);
-    assert.equal(fixture.outbox.envelopes[0]?.correlationId, fixture.ids.correlationId);
-    assert.equal(fixture.outbox.envelopes[0]?.messageId, fixture.ids.messageId);
-    assert.equal(fixture.outbox.envelopes[0]?.event.name, 'member.registered');
+    assert.equal(fixture.storedMembers.length, 1);
+    assert.deepEqual(fixture.storedMembers[0]?.pendingDomainEvents, []);
+    assert.equal(fixture.storedEnvelopes.length, 1);
+    assert.equal(fixture.storedEnvelopes[0]?.correlationId, fixture.ids.correlationId);
+    assert.equal(fixture.storedEnvelopes[0]?.messageId, fixture.ids.messageId);
+    assert.equal(fixture.storedEnvelopes[0]?.event.name, 'member.registered');
   });
 
   it('rejects an invalid organization identifier without persistence', async () => {
@@ -195,7 +200,7 @@ describe('RegisterMemberHandler', () => {
     }
 
     assert.equal(result.error.code, OrganizationIdErrorCodes.InvalidFormat);
-    assert.deepEqual(fixture.members.members, []);
+    assert.deepEqual(fixture.storedMembers, []);
   });
 
   it('rejects registration when the organization does not exist', async () => {
@@ -216,7 +221,7 @@ describe('RegisterMemberHandler', () => {
     }
 
     assert.equal(result.error.code, MemberRegistrationPolicyErrorCodes.OrganizationNotFound);
-    assert.deepEqual(fixture.members.members, []);
+    assert.deepEqual(fixture.storedMembers, []);
   });
 
   it('rejects an invalid member name without persistence', async () => {
@@ -237,7 +242,7 @@ describe('RegisterMemberHandler', () => {
     }
 
     assert.equal(result.error.code, MemberNameErrorCodes.Empty);
-    assert.deepEqual(fixture.members.members, []);
+    assert.deepEqual(fixture.storedMembers, []);
   });
 
   it('keeps the event pending when atomic persistence fails', async () => {
@@ -263,7 +268,7 @@ describe('RegisterMemberHandler', () => {
     );
 
     assert.equal(received.length, 1);
-    assert.equal(fixture.members.members.length, 1);
-    assert.equal(fixture.members.members[0]?.pendingDomainEvents.length, 1);
+    assert.equal(fixture.storedMembers.length, 1);
+    assert.equal(fixture.storedMembers[0]?.pendingDomainEvents.length, 1);
   });
 });

@@ -35,15 +35,15 @@ O modelo não reduz essa operação a cadastros independentes. Ele preserva regr
 
 ### Capacidades
 
-| Área | Disponível hoje | Evolução planejada |
-|---|---|---|
-| Organizações | Criação e isolamento multi-tenant | Administração do ciclo da organização |
-| Membros | Registro e consulta de detalhes | Listagem orientada pela interface e associação com identidade de acesso |
-| Ministérios | Criação, funções, solicitação e aprovação de participação | Suspensão, encerramento e reativação |
-| Pessoas e times | Qualificações, times, participação e liderança vigente | Apoio temporário e substituição de liderança |
-| Atividades | Criação e agendamento manual de ocorrências | Recorrência, reagendamento e cancelamento |
-| Disponibilidade | Abertura de coleta por time e período | Respostas, precedência, fechamento e lembretes |
-| Escalas | Modelo de domínio documentado | Planejamento, atribuição, publicação e substituições históricas |
+| Área            | Disponível hoje                                           | Evolução planejada                                              |
+| --------------- | --------------------------------------------------------- | --------------------------------------------------------------- |
+| Organizações    | Criação e isolamento multi-tenant                         | Administração do ciclo da organização                           |
+| Membros         | Registro, consulta de detalhes e listagem paginada        | Associação com identidade de acesso                             |
+| Ministérios     | Criação, funções, solicitação e aprovação de participação | Suspensão, encerramento e reativação                            |
+| Pessoas e times | Qualificações, times, participação e liderança vigente    | Apoio temporário e substituição de liderança                    |
+| Atividades      | Criação e agendamento manual de ocorrências               | Recorrência, reagendamento e cancelamento                       |
+| Disponibilidade | Abertura de coleta por time e período                     | Respostas, precedência, fechamento e lembretes                  |
+| Escalas         | Modelo de domínio documentado                             | Planejamento, atribuição, publicação e substituições históricas |
 
 O [roadmap](docs/roadmap.md) distingue o que está implementado do que ainda está em descoberta ou planejamento.
 
@@ -134,31 +134,31 @@ O modelo completo, invariantes e questões ainda abertas estão em [Domínio min
 
 ## Decisões que valem conhecer
 
-| Decisão | Por que importa |
-|---|---|
-| [Outbox durável com Kafka](docs/decisions/024-kafka-durable-outbox-relay.md) | Evita publicar eventos antes do commit e permite retry controlado |
-| [CQRS pragmático](docs/decisions/029-command-query-responsibility-separation.md) | Separa modelos de escrita e leitura sem antecipar bancos distintos |
-| [Mediator e módulos instaláveis](docs/decisions/042-typed-mediator-and-installable-modules.md) | Reduz composição manual ao adicionar casos de uso |
-| [Persistência registrada pelo módulo](docs/decisions/044-module-owned-persistence-registration.md) | Evita cadeias centrais de condições e mantém ownership local |
-| [Fronteiras multi-tenant](docs/decisions/046-organization-tenant-boundaries.md) | Protege o tenant também no schema, não apenas na aplicação |
-| [Valores temporais civis](docs/decisions/051-civil-temporal-values.md) | Preserva intenção humana diante de timezone e DST |
-| [Containers e redes segmentadas](docs/decisions/055-containerized-applications-and-local-network-segmentation.md) | Separa artefatos, recursos e conectividade de API e relay |
+| Decisão                                                                                                           | Por que importa                                                    |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [Outbox durável com Kafka](docs/decisions/024-kafka-durable-outbox-relay.md)                                      | Evita publicar eventos antes do commit e permite retry controlado  |
+| [CQRS pragmático](docs/decisions/029-command-query-responsibility-separation.md)                                  | Separa modelos de escrita e leitura sem antecipar bancos distintos |
+| [Mediator e módulos instaláveis](docs/decisions/042-typed-mediator-and-installable-modules.md)                    | Reduz composição manual ao adicionar casos de uso                  |
+| [Persistência registrada pelo módulo](docs/decisions/044-module-owned-persistence-registration.md)                | Evita cadeias centrais de condições e mantém ownership local       |
+| [Fronteiras multi-tenant](docs/decisions/046-organization-tenant-boundaries.md)                                   | Protege o tenant também no schema, não apenas na aplicação         |
+| [Valores temporais civis](docs/decisions/051-civil-temporal-values.md)                                            | Preserva intenção humana diante de timezone e DST                  |
+| [Containers e redes segmentadas](docs/decisions/055-containerized-applications-and-local-network-segmentation.md) | Separa artefatos, recursos e conectividade de API e relay          |
 
 Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 
 ## Tecnologias e responsabilidades
 
-| Tecnologia | Responsabilidade |
-|---|---|
-| TypeScript e Node.js | Domínio tipado, aplicações e adapters |
-| Fastify | Adapter HTTP e ciclo de requisição |
-| Awilix | Composition root e lifetimes explícitos |
-| PostgreSQL | Estado transacional, isolamento tenant e outbox |
-| Kafka e CloudEvents | Transporte e envelope dos Integration Events |
-| OpenTelemetry e Jaeger | Propagação, coleta e visualização de traces |
-| Liquibase | Evolução externa e versionada do schema |
-| Terraform | Infraestrutura, redes, capacidade e serviços locais |
-| Docker | Artefatos isolados da API, relay e ferramentas operacionais |
+| Tecnologia             | Responsabilidade                                            |
+| ---------------------- | ----------------------------------------------------------- |
+| TypeScript e Node.js   | Domínio tipado, aplicações e adapters                       |
+| Fastify                | Adapter HTTP e ciclo de requisição                          |
+| Awilix                 | Composition root e lifetimes explícitos                     |
+| PostgreSQL             | Estado transacional, isolamento tenant e outbox             |
+| Kafka e CloudEvents    | Transporte e envelope dos Integration Events                |
+| OpenTelemetry e Jaeger | Propagação, coleta e visualização de traces                 |
+| Liquibase              | Evolução externa e versionada do schema                     |
+| Terraform              | Infraestrutura, redes, capacidade e serviços locais         |
+| Docker                 | Artefatos isolados da API, relay e ferramentas operacionais |
 
 ## Executar localmente
 
@@ -206,7 +206,13 @@ cd backend
 npm run check
 ```
 
-Esse comando verifica formatação, lint, testes automatizados e build de todos os workspaces. A estratégia combina testes de domínio, aplicação, adapters, contratos de ports, composição HTTP e integrações PostgreSQL condicionais. Consulte a [estratégia de testes](docs/testing-strategy.md).
+Esse comando verifica formatação, lint, testes unitários e build de todos os workspaces. Integrações PostgreSQL são explícitas e exigem banco com migrations aplicadas:
+
+```bash
+TEST_DATABASE_URL=postgresql://... npm run test:integration
+```
+
+A estratégia combina testes de domínio e Application rápidos com validação real de repositories, readers, transações, constraints e isolamento multi-tenant no PostgreSQL. Consulte a [estratégia de testes](docs/testing-strategy.md).
 
 ## Estrutura do repositório
 

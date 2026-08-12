@@ -12,12 +12,10 @@ import { parseDomainEventId, type DomainEventId } from '@/shared/domain/domain-e
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
-import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 
-import { OrganizationId, OrganizationNameErrorCodes } from '../../../domain';
-import { InMemoryOrganizationRepository } from '@/composition/test-support';
+import { OrganizationId, OrganizationNameErrorCodes, type Organization } from '../../../domain';
 import type { OrganizationWriteScope } from '../../ports';
 import { CreateOrganizationHandler } from '.';
 
@@ -53,12 +51,23 @@ function fixtureIds() {
   };
 }
 
-function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
+function createFixture(outbox?: EventOutbox) {
   const ids = fixtureIds();
-  const organizations = new InMemoryOrganizationRepository();
+  const storedOrganizations: Organization[] = [];
+  const organizations = {
+    async save(organization: Organization) {
+      storedOrganizations.push(organization);
+    },
+  };
+  const storedEnvelopes: EventEnvelope[] = [];
+  const recordingOutbox: EventOutbox = outbox ?? {
+    async add(envelopes) {
+      storedEnvelopes.push(...envelopes);
+    },
+  };
   const scope: OrganizationWriteScope = {
     organizations,
-    outbox,
+    outbox: recordingOutbox,
   };
   const unitOfWork = new DirectUnitOfWork(scope);
   const logger = new InMemoryLogger();
@@ -79,7 +88,9 @@ function createFixture(outbox: EventOutbox = new InMemoryEventOutbox()) {
     context,
     ids,
     organizations,
-    outbox,
+    outbox: recordingOutbox,
+    storedOrganizations,
+    storedEnvelopes,
     logger,
   };
 }
@@ -103,19 +114,12 @@ describe('CreateOrganizationHandler', () => {
 
     assert.equal(result.value.organizationId, fixture.ids.organizationId);
     assert.equal(result.value.name, 'Comunidade Servir');
-    assert.equal(fixture.organizations.organizations.length, 1);
-    assert.deepEqual(fixture.organizations.organizations[0]?.pendingDomainEvents, []);
-
-    assert.equal(fixture.outbox instanceof InMemoryEventOutbox, true);
-
-    if (!(fixture.outbox instanceof InMemoryEventOutbox)) {
-      return;
-    }
-
-    assert.equal(fixture.outbox.envelopes.length, 1);
-    assert.equal(fixture.outbox.envelopes[0]?.correlationId, fixture.ids.correlationId);
-    assert.equal(fixture.outbox.envelopes[0]?.messageId, fixture.ids.messageId);
-    assert.equal(fixture.outbox.envelopes[0]?.event.name, 'organization.created');
+    assert.equal(fixture.storedOrganizations.length, 1);
+    assert.deepEqual(fixture.storedOrganizations[0]?.pendingDomainEvents, []);
+    assert.equal(fixture.storedEnvelopes.length, 1);
+    assert.equal(fixture.storedEnvelopes[0]?.correlationId, fixture.ids.correlationId);
+    assert.equal(fixture.storedEnvelopes[0]?.messageId, fixture.ids.messageId);
+    assert.equal(fixture.storedEnvelopes[0]?.event.name, 'organization.created');
   });
 
   it('records the successful business process without personal data', async () => {
@@ -171,13 +175,8 @@ describe('CreateOrganizationHandler', () => {
     }
 
     assert.equal(result.error.code, OrganizationNameErrorCodes.Empty);
-    assert.deepEqual(fixture.organizations.organizations, []);
-
-    assert.equal(fixture.outbox instanceof InMemoryEventOutbox, true);
-
-    if (fixture.outbox instanceof InMemoryEventOutbox) {
-      assert.deepEqual(fixture.outbox.envelopes, []);
-    }
+    assert.deepEqual(fixture.storedOrganizations, []);
+    assert.deepEqual(fixture.storedEnvelopes, []);
   });
 
   it('keeps the event pending when atomic persistence fails', async () => {
@@ -202,7 +201,7 @@ describe('CreateOrganizationHandler', () => {
     );
 
     assert.equal(received.length, 1);
-    assert.equal(fixture.organizations.organizations.length, 1);
-    assert.equal(fixture.organizations.organizations[0]?.pendingDomainEvents.length, 1);
+    assert.equal(fixture.storedOrganizations.length, 1);
+    assert.equal(fixture.storedOrganizations[0]?.pendingDomainEvents.length, 1);
   });
 });

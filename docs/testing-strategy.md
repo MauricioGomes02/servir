@@ -9,9 +9,9 @@ Usar testes como especificações executáveis e selecionar casos sistematicamen
 Suites, casos, helpers e fixtures de teste são nomeados em inglês, acompanhando o código e o vocabulário ubíquo. O nome descreve comportamento observável, não a técnica aplicada nem um detalhe de implementação.
 
 ```ts
-describe('OrganizationName', () => {
-  it('accepts a name with exactly 120 characters', () => {});
-  it('rejects a name longer than 120 characters', () => {});
+describe("OrganizationName", () => {
+  it("accepts a name with exactly 120 characters", () => {});
+  it("rejects a name longer than 120 characters", () => {});
 });
 ```
 
@@ -60,6 +60,16 @@ O projeto aplica as técnicas complementares abaixo, adaptadas das orientações
 - Testar adapters por sua borda pública sem vazar detalhes de framework, banco ou SDK para os testes do núcleo.
 
 ## Estrutura dos testes
+
+### Suítes executáveis
+
+- `npm run test:unit` executa arquivos `*.test.ts`, exceto `*.integration.test.ts`, sem exigir serviços externos.
+- `npm run test:integration` executa exclusivamente `*.integration.test.ts` e exige `TEST_DATABASE_URL` apontando para um PostgreSQL com o changelog Liquibase aplicado.
+- `npm test` é um alias da suíte unitária. `npm run check` inclui a suíte unitária; pipelines com infraestrutura executam a integração como etapa separada.
+
+Repositories, Readers, transações, constraints e isolamento de tenant são testados somente no PostgreSQL. Testes unitários de handlers podem fornecer objetos mínimos que implementam seus ports para capturar entradas e simular resultados, mas esses objetos não constituem adapters de persistência nem recebem suítes de contrato próprias.
+
+Um teste de integração sem banco configurado falha por configuração ausente em vez de aparecer como ignorado. Fixtures usam identidades determinísticas e removem somente os registros que criaram.
 
 - Preparar apenas o estado relevante ao comportamento.
 - Agir por um contrato público.

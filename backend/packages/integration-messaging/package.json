@@ -12,7 +12,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc --noEmit"
+    "test": "npm run test:unit",
+    "test:unit": "tsc --noEmit"
   },
   "devDependencies": {
     "typescript": "^5.8.0"

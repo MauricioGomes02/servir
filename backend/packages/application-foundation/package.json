@@ -12,7 +12,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc --noEmit && tsx --test src/**/*.test.ts"
+    "test": "npm run test:unit",
+    "test:unit": "tsc --noEmit && node ../../scripts/run-tests.mjs unit src"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

@@ -5,13 +5,13 @@ import {
   CreateOrganizationHandler,
   CreateOrganizationMessage,
 } from '@/modules/organizations/application';
-import { OrganizationId } from '@/modules/organizations/domain';
+import { OrganizationId, type Organization } from '@/modules/organizations/domain';
 import {
   CreateOrganizationPresenter,
   organizationMessageCatalog,
 } from '@/modules/organizations/presentation';
 import { parseCorrelationId, parseRequestId } from '@/shared/application/context';
-import { parseMessageId } from '@/shared/application/messaging';
+import { parseMessageId, type EventEnvelope } from '@/shared/application/messaging';
 import { Mediator } from '@/shared/application/mediator';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
@@ -20,10 +20,7 @@ import { createFastifyApplication, httpProblemMessageCatalog } from '@/shared/in
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
-import { InMemoryEventOutbox } from '@/shared/infrastructure/messaging';
 import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
-
-import { InMemoryOrganizationRepository } from '@/composition/test-support';
 import { registerCreateOrganizationRoute } from './register-create-organization-route';
 
 function fixture() {
@@ -52,8 +49,8 @@ function fixture() {
     throw new Error('Invalid deterministic test fixture');
   }
 
-  const organizations = new InMemoryOrganizationRepository();
-  const outbox = new InMemoryEventOutbox();
+  const organizations: Organization[] = [];
+  const envelopes: EventEnvelope[] = [];
   const logger = new InMemoryLogger();
   const translator = new InMemoryMessageTranslator({
     'pt-BR': {
@@ -70,7 +67,18 @@ function fixture() {
     organizationIdGenerator: new SequenceIdGenerator([organizationId.value]),
     domainEventIdGenerator: new SequenceIdGenerator([domainEventId.value]),
     messageIdGenerator: new SequenceIdGenerator([messageId.value]),
-    unitOfWork: new DirectUnitOfWork({ organizations, outbox }),
+    unitOfWork: new DirectUnitOfWork({
+      organizations: {
+        async save(organization: Organization) {
+          organizations.push(organization);
+        },
+      },
+      outbox: {
+        async add(received: readonly EventEnvelope[]) {
+          envelopes.push(...received);
+        },
+      },
+    }),
     logger,
   });
   const presenter = new CreateOrganizationPresenter(translator);
@@ -89,12 +97,12 @@ function fixture() {
     presenter,
   });
 
-  return { app, organizations, outbox };
+  return { app, organizations, envelopes };
 }
 
 describe('registerCreateOrganizationRoute', () => {
   it('creates an organization through the request context', async () => {
-    const { app, organizations, outbox } = fixture();
+    const { app, organizations, envelopes } = fixture();
 
     const response = await app.inject({
       method: 'POST',
@@ -112,13 +120,13 @@ describe('registerCreateOrganizationRoute', () => {
     });
     assert.equal(response.headers.location, '/organizations/0198f334-6dc5-7c20-9af1-91d7e599c7b1');
     assert.equal(response.headers['x-correlation-id'], 'correlation-123');
-    assert.equal(organizations.organizations.length, 1);
-    assert.equal(outbox.envelopes.length, 1);
-    assert.equal(outbox.envelopes[0]?.correlationId, 'correlation-123');
+    assert.equal(organizations.length, 1);
+    assert.equal(envelopes.length, 1);
+    assert.equal(envelopes[0]?.correlationId, 'correlation-123');
   });
 
   it('presents invalid input in the negotiated locale without persisting', async () => {
-    const { app, organizations, outbox } = fixture();
+    const { app, organizations, envelopes } = fixture();
 
     const response = await app.inject({
       method: 'POST',
@@ -147,7 +155,7 @@ describe('registerCreateOrganizationRoute', () => {
         },
       ],
     });
-    assert.equal(organizations.organizations.length, 0);
-    assert.equal(outbox.envelopes.length, 0);
+    assert.equal(organizations.length, 0);
+    assert.equal(envelopes.length, 0);
   });
 });
