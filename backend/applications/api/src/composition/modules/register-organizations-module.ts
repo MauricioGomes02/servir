@@ -1,13 +1,24 @@
 import {
   CreateOrganizationHandler,
   CreateOrganizationMessage,
+  GetOrganizationDetailsHandler,
+  GetOrganizationDetailsMessage,
 } from '@/modules/organizations/application';
 import { OrganizationId } from '@/modules/organizations/domain';
-import { registerCreateOrganizationRoute } from '@/modules/organizations/infrastructure';
-import { CreateOrganizationPresenter } from '@/modules/organizations/presentation';
+import {
+  registerCreateOrganizationRoute,
+  registerGetOrganizationDetailsRoute,
+} from '@/modules/organizations/infrastructure';
+import {
+  CreateOrganizationPresenter,
+  GetOrganizationDetailsPresenter,
+} from '@/modules/organizations/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
-import { organizationUnitOfWork } from './organizations-persistence-module';
+import {
+  organizationDetailsReader,
+  organizationUnitOfWork,
+} from './organizations-persistence-module';
 
 export const organizationsModule: ApplicationModule = {
   register(container, options) {
@@ -21,6 +32,12 @@ export const organizationsModule: ApplicationModule = {
       logger: dependencies.logger,
     });
     dependencies.mediator.registerHandler(CreateOrganizationMessage, handler);
+    dependencies.mediator.registerHandler(
+      GetOrganizationDetailsMessage,
+      new GetOrganizationDetailsHandler(
+        options.persistence.services.get(organizationDetailsReader),
+      ),
+    );
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;
@@ -28,6 +45,11 @@ export const organizationsModule: ApplicationModule = {
       mediator: dependencies.mediator,
       messageTranslator: dependencies.translator,
       presenter: new CreateOrganizationPresenter(dependencies.translator),
+    });
+    registerGetOrganizationDetailsRoute(app, {
+      mediator: dependencies.mediator,
+      messageTranslator: dependencies.translator,
+      presenter: new GetOrganizationDetailsPresenter(dependencies.translator),
     });
   },
 };

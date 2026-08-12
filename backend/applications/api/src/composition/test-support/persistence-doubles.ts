@@ -6,7 +6,10 @@ import {
   type OrganizationRegistrationFactsReader,
 } from '@/modules/membership/application';
 import type { Member, MemberId, OrganizationRegistrationFacts } from '@/modules/membership/domain';
-import type { OrganizationRepository } from '@/modules/organizations/application';
+import type {
+  OrganizationDetailsReader,
+  OrganizationRepository,
+} from '@/modules/organizations/application';
 import type { Organization, OrganizationId } from '@/modules/organizations/domain';
 import type {
   MinistryCreationFactsReader,
@@ -46,6 +49,15 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   }
   get organizations(): readonly Organization[] {
     return Object.freeze([...this.stored]);
+  }
+}
+export class InMemoryOrganizationDetailsReader implements OrganizationDetailsReader {
+  constructor(private readonly organizations: () => readonly Organization[]) {}
+  async findById(organizationId: OrganizationId) {
+    const organization = this.organizations().find((item) => item.id.equals(organizationId));
+    return organization === undefined
+      ? undefined
+      : Object.freeze({ id: organization.id, name: organization.name.toString() });
   }
 }
 export class InMemoryMemberRepository implements MemberRepository {

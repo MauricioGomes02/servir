@@ -23,7 +23,10 @@ import {
   teamLeaderAppointmentFacts,
   teamLeadershipUnitOfWork,
 } from '../modules/ministries-persistence-module';
-import { organizationUnitOfWork } from '../modules/organizations-persistence-module';
+import {
+  organizationDetailsReader,
+  organizationUnitOfWork,
+} from '../modules/organizations-persistence-module';
 import {
   activityCreationFacts,
   activityOccurrenceSchedulingFacts,
@@ -53,6 +56,7 @@ import {
   InMemoryTeamLeadershipRepository,
   InMemoryOrganizationRegistrationFactsReader,
   InMemoryOrganizationRepository,
+  InMemoryOrganizationDetailsReader,
 } from './persistence-doubles';
 
 export function createTestPersistence(): ApplicationPersistence {
@@ -74,6 +78,10 @@ export function createTestPersistence(): ApplicationPersistence {
   );
   const services = new ServiceRegistry();
   services.add(organizationUnitOfWork, new DirectUnitOfWork({ organizations, outbox }));
+  services.add(
+    organizationDetailsReader,
+    new InMemoryOrganizationDetailsReader(() => organizations.organizations),
+  );
   services.add(memberUnitOfWork, new DirectUnitOfWork({ members, outbox }));
   services.add(memberDetailsReader, new InMemoryMemberDetailsReader(() => members.members));
   services.add(
