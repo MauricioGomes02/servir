@@ -3,6 +3,9 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createOrganization } from '../../composition';
 import { fieldErrors, HttpProblem } from '@/shared/http/problem-details';
+import AppButton from '@/shared/presentation/components/AppButton.vue';
+import AppField from '@/shared/presentation/components/AppField.vue';
+import AppIcon from '@/shared/presentation/components/AppIcon.vue';
 
 const router = useRouter();
 const name = ref('');
@@ -39,33 +42,32 @@ async function submit(): Promise<void> {
 <template>
   <section class="hero" aria-labelledby="page-title">
     <div class="hero-copy">
-      <p class="eyebrow">Comece por sua comunidade</p>
-      <h1 id="page-title">Organize o cuidado. Simplifique a escala.</h1>
+      <span class="hero-symbol" aria-hidden="true"><AppIcon name="community" /></span>
+      <p class="eyebrow">Tecnologia a serviço de pessoas</p>
+      <h1 id="page-title">Mais tempo para cuidar da sua comunidade.</h1>
       <p class="lead">
-        Crie o espaço da sua igreja para conectar pessoas, ministérios e atividades com clareza.
+        Reúna pessoas, ministérios e atividades em um espaço simples, acolhedor e feito para a
+        rotina da sua igreja.
       </p>
+      <ul class="benefit-list" aria-label="Benefícios">
+        <li>Organização sem perder a proximidade</li>
+        <li>Clareza para líderes e voluntários</li>
+      </ul>
     </div>
 
     <form class="form-card" novalidate @submit.prevent="submit">
       <fieldset :disabled="submitting">
-        <legend>Crie sua organização</legend>
-        <p class="form-intro">Você poderá adicionar membros e ministérios no próximo passo.</p>
+        <legend>Crie o espaço da sua igreja</legend>
+        <p class="eyebrow">Primeiro passo</p>
+        <p class="form-intro">Leva menos de um minuto. Você poderá configurar tudo com calma.</p>
 
-        <label for="organization-name">Nome da igreja ou comunidade</label>
-        <input
+        <AppField
           id="organization-name"
           v-model="name"
-          name="name"
-          type="text"
-          autocomplete="organization"
-          maxlength="120"
-          required
-          :aria-invalid="nameErrors.length > 0"
-          :aria-describedby="nameErrors.length > 0 ? 'organization-name-errors' : undefined"
+          label="Nome da igreja ou comunidade"
+          :errors="nameErrors"
+          :maxlength="120"
         />
-        <ul v-if="nameErrors.length" id="organization-name-errors" class="field-errors">
-          <li v-for="error in nameErrors" :key="error">{{ error }}</li>
-        </ul>
 
         <p v-if="problem && nameErrors.length === 0" class="form-error" role="alert">
           {{ problem.problem.title }}
@@ -74,10 +76,7 @@ async function submit(): Promise<void> {
           </small>
         </p>
 
-        <button type="submit">
-          <span v-if="submitting">Criando…</span>
-          <span v-else>Criar organização</span>
-        </button>
+        <AppButton type="submit" :loading="submitting">Criar minha organização</AppButton>
         <p class="status" aria-live="polite">
           {{ submitting ? 'Criando sua organização.' : '' }}
         </p>

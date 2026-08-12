@@ -3,6 +3,9 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import type { Organization } from '../../application/organization';
 import { getOrganizationDetails } from '../../composition';
 import { HttpProblem } from '@/shared/http/problem-details';
+import AppFeatureCard from '@/shared/presentation/components/AppFeatureCard.vue';
+import AppIcon from '@/shared/presentation/components/AppIcon.vue';
+import AppStatusBadge from '@/shared/presentation/components/AppStatusBadge.vue';
 
 const props = defineProps<{ organizationId: string }>();
 const organization = ref<Organization>();
@@ -44,36 +47,53 @@ onBeforeUnmount(() => abortController.abort());
       <RouterLink :to="{ name: 'create-organization' }">Voltar ao início</RouterLink>
     </div>
     <template v-else-if="organization">
+      <nav class="breadcrumb" aria-label="Navegação estrutural">
+        <RouterLink :to="{ name: 'create-organization' }">Início</RouterLink
+        ><span aria-hidden="true">/</span><span>Organização</span>
+      </nav>
       <header class="workspace-heading">
         <div>
+          <span class="workspace-symbol" aria-hidden="true"><AppIcon name="community" /></span>
           <p class="eyebrow">Sua comunidade</p>
           <h1 id="workspace-title">{{ organization.name }}</h1>
-          <p>O espaço está pronto. Os próximos módulos serão conectados a esta organização.</p>
+          <p>Um lugar para organizar quem serve, onde serve e quando a comunidade se reúne.</p>
         </div>
-        <span class="status-pill">Ativa</span>
+        <AppStatusBadge tone="success">Organização ativa</AppStatusBadge>
       </header>
-      <nav aria-label="Áreas da organização">
-        <ul class="feature-grid">
-          <li>
-            <article>
-              <h2>Membros</h2>
-              <p>Cadastre e acompanhe as pessoas da comunidade.</p>
-            </article>
-          </li>
-          <li>
-            <article>
-              <h2>Ministérios</h2>
-              <p>Organize funções, participantes e times.</p>
-            </article>
-          </li>
-          <li>
-            <article>
-              <h2>Atividades</h2>
-              <p>Planeje encontros e suas ocorrências.</p>
-            </article>
-          </li>
-        </ul>
-      </nav>
+      <section class="workspace-section" aria-labelledby="areas-title">
+        <header class="section-heading">
+          <div>
+            <p class="eyebrow">Tudo em um só lugar</p>
+            <h2 id="areas-title">Áreas da organização</h2>
+          </div>
+          <p>Comece pelo que sua comunidade precisa agora.</p>
+        </header>
+        <nav aria-label="Áreas da organização">
+          <ul class="feature-grid">
+            <li>
+              <AppFeatureCard
+                title="Membros"
+                description="Cadastre e acompanhe as pessoas da comunidade."
+                icon="people"
+              />
+            </li>
+            <li>
+              <AppFeatureCard
+                title="Ministérios"
+                description="Organize funções, participantes e times."
+                icon="ministry"
+              />
+            </li>
+            <li>
+              <AppFeatureCard
+                title="Atividades"
+                description="Planeje encontros e suas ocorrências."
+                icon="calendar"
+              />
+            </li>
+          </ul>
+        </nav>
+      </section>
     </template>
   </section>
 </template>

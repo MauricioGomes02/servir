@@ -15,7 +15,7 @@ describe('CreateOrganizationView', () => {
     });
 
     expect(
-      getByRole('heading', { name: 'Organize o cuidado. Simplifique a escala.' }),
+      getByRole('heading', { name: 'Mais tempo para cuidar da sua comunidade.' }),
     ).toBeVisible();
     expect(getByLabelText('Nome da igreja ou comunidade')).toBeRequired();
     const accessibility = await axe(container, {
