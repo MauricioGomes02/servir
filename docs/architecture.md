@@ -34,6 +34,10 @@ flowchart LR
 
 Dependências de código apontam para dentro: adaptadores conhecem contratos da aplicação e do domínio; o domínio não conhece adaptadores.
 
+A interface reside em um workspace independente com duas aplicações. A web Vue executa no navegador e organiza cada feature entre services de Application, gateways de Infrastructure e componentes de Presentation. Componentes não conhecem `fetch`, caminhos do BFF ou contratos da API interna. A URL preserva o `organizationId` como contexto explícito do tenant, enquanto estado global só entra quando houver compartilhamento e lifecycle próprios.
+
+O BFF Fastify é a única fronteira pública de servidor da interface. O navegador acessa somente rotas relativas `/bff/*`; cada rota é registrada explicitamente e traduz uma necessidade da tela para a API privada configurada por `API_BASE_URL`. O BFF também serve o bundle estático da web, portanto web e BFF possuem código, build e testes separados, mas o artefato inicial executa apenas o processo do BFF. A API não se torna confiável por estar numa rede privada: autenticação, autorização e isolamento de Organization continuam responsabilidades de suas fronteiras. A decisão completa está no [ADR 057](decisions/057-vue-web-application-foundation.md).
+
 Capacidades transversais usadas por mais de uma aplicação residem em pacotes nomeados, não em um diretório `shared` genérico. `application-foundation` contém contratos independentes de runtime, como `Logger` e `IdGenerator<TId>`; `node-observability` implementa adapters de observabilidade e a mecânica comum do OpenTelemetry para Node. API e relay especializam os contratos conforme suas necessidades e escolhem explicitamente suas instrumentações, enquanto nomes, atributos, links e decisões semânticas de cada processo permanecem locais.
 
 Mecânicas pequenas e equivalentes, como parsing de severidade e extração segura de atributos técnicos, também podem ser compartilhadas. Lifecycle, sinais, ordem de shutdown, códigos fallback e configuração específica permanecem nas applications porque expressam garantias operacionais distintas.

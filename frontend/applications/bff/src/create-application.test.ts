@@ -1,0 +1,53 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createApplication } from './create-application.js';
+
+const config = {
+  apiBaseUrl: new URL('http://private-api:3000'),
+  apiTimeoutMs: 10_000,
+  host: '0.0.0.0',
+  port: 3001,
+};
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe('frontend BFF', () => {
+  it('forwards only the organization creation contract to the private api', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'organization-id', name: 'Comunidade Servir' }), {
+        status: 201,
+        headers: { 'content-type': 'application/json', 'x-correlation-id': 'correlation-123' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/bff/organizations',
+      headers: { 'accept-language': 'pt-BR' },
+      payload: { name: 'Comunidade Servir' },
+    });
+    await app.close();
+
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe('http://private-api:3000/organizations');
+    expect(fetch.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
+    expect(response.statusCode).toBe(201);
+    expect(response.headers['x-correlation-id']).toBe('correlation-123');
+  });
+
+  it('returns a safe problem when the private api is unavailable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('private address')));
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({ method: 'GET', url: '/bff/organizations/id' });
+    await app.close();
+
+    expect(response.statusCode).toBe(502);
+    expect(response.json()).toEqual({
+      type: '/problems/upstream-unavailable',
+      title: 'O serviço está temporariamente indisponível.',
+      status: 502,
+    });
+  });
+});

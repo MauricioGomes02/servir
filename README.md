@@ -3,6 +3,7 @@
 ### Gestão ministerial com domínio rico, consistência transacional e arquitetura orientada a eventos
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3-42B883?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-ES2022-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-persistência-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Kafka](https://img.shields.io/badge/Apache_Kafka-eventos-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
@@ -13,7 +14,7 @@ Servir é uma plataforma em evolução para organizar a operação ministerial d
 
 O projeto transforma esse problema real em um estudo aplicado de Domain-Driven Design, arquitetura hexagonal e sistemas orientados a eventos. As regras de negócio permanecem independentes de HTTP, banco, broker e frameworks; decisões arquiteturais e trade-offs são registrados junto ao código.
 
-> **Estado atual:** o backend possui cortes verticais executáveis desde a criação da organização até a abertura de uma coleta de disponibilidade. API, PostgreSQL, outbox transacional, relay Kafka, observabilidade e infraestrutura local estão integrados. A interface web e a formação/publicação de escalas são os próximos grandes incrementos.
+> **Estado atual:** o backend possui cortes verticais executáveis desde a criação da organização até a abertura de uma coleta de disponibilidade. API, PostgreSQL, outbox transacional, relay Kafka, observabilidade e infraestrutura local estão integrados. A interface web Vue iniciou pelo fluxo de criação e workspace da organização; a formação/publicação de escalas permanece como próximo grande incremento do domínio.
 
 ## O produto
 
@@ -67,7 +68,9 @@ O [roadmap](docs/roadmap.md) distingue o que está implementado do que ainda est
 
 ```mermaid
 flowchart LR
-    Client[Cliente HTTP] --> API[API Fastify]
+    Client[Navegador] --> WEB[Web Vue]
+    Client --> BFF[BFF Fastify]
+    BFF --> API[API Fastify privada]
     API --> MED[Mediator]
     MED --> APP[Application]
     APP --> DOMAIN[Domain]
@@ -218,6 +221,7 @@ A estratégia combina testes de domínio e Application rápidos com validação 
 
 ```text
 servir/
+├── frontend/                          # Web Vue e BFF público independentes
 ├── backend/
 │   ├── applications/
 │   │   ├── api/                  # API HTTP e composition root
