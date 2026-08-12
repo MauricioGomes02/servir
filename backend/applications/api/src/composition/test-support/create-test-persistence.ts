@@ -13,6 +13,7 @@ import {
 } from '../modules/membership-persistence-module';
 import {
   ministryCreationFacts,
+  ministryListReader,
   ministryMembershipRequestFacts,
   ministryMembershipUnitOfWork,
   ministryUnitOfWork,
@@ -44,6 +45,7 @@ import {
   InMemoryMemberDetailsReader,
   InMemoryMemberRepository,
   InMemoryMinistryCreationFactsReader,
+  InMemoryMinistryListReader,
   InMemoryMinistryMembershipRepository,
   InMemoryMinistryMembershipRequestFactsReader,
   InMemoryMinistryRoleQualificationFactsReader,
@@ -91,6 +93,13 @@ export function createTestPersistence(): ApplicationPersistence {
     ),
   );
   services.add(ministryUnitOfWork, new DirectUnitOfWork({ ministries, outbox }));
+  services.add(
+    ministryListReader,
+    new InMemoryMinistryListReader(
+      () => organizations.organizations.map(({ id }) => id),
+      () => ministries.ministries,
+    ),
+  );
   services.add(
     ministryCreationFacts,
     new InMemoryMinistryCreationFactsReader(

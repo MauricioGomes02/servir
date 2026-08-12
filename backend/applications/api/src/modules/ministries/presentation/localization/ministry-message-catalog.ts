@@ -2,6 +2,11 @@ import type { MessageCatalog } from '@/shared/presentation/localization';
 
 export const ministryMessageCatalog: MessageCatalog = Object.freeze({
   'pt-BR': Object.freeze({
+    'ministry.list.page.invalid': 'A pagina deve ser um inteiro positivo.',
+    'ministry.list.page_size.invalid': 'O tamanho da pagina deve estar entre 1 e {max}.',
+    'ministry.list.search.invalid': 'A busca deve ser um texto com no maximo {max} caracteres.',
+    'ministry.list.status.invalid': 'O status deve ser active ou inactive.',
+    'ministry.list.organization_not_found': 'Organizacao nao encontrada.',
     'ministry.name.invalid_type': 'O nome do ministério deve ser um texto.',
     'ministry.name.empty': 'Informe o nome do ministério.',
     'ministry.name.too_long': 'O nome do ministério deve ter no máximo {maxLength} caracteres.',
@@ -55,6 +60,11 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'Este time já possui uma liderança ativa.',
   }),
   'en-US': Object.freeze({
+    'ministry.list.page.invalid': 'Page must be a positive integer.',
+    'ministry.list.page_size.invalid': 'Page size must be between 1 and {max}.',
+    'ministry.list.search.invalid': 'Search must be text with at most {max} characters.',
+    'ministry.list.status.invalid': 'Status must be active or inactive.',
+    'ministry.list.organization_not_found': 'Organization not found.',
     'ministry.name.invalid_type': 'The ministry name must be text.',
     'ministry.name.empty': 'Enter the ministry name.',
     'ministry.name.too_long': 'The ministry name must have at most {maxLength} characters.',

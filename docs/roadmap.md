@@ -52,6 +52,7 @@ flowchart TD
 |---|---|---|
 | Vocabulário e documentação | Em andamento | Links, ADRs e contratos revisados |
 | Documentação bilíngue | Planejado | Português definido como fonte canônica; versões em inglês organizadas em `docs/en/`; navegação entre idiomas e processo de sincronização definidos; skills voltadas apenas a agentes avaliadas para padronização em inglês |
+| Busca eficiente e global | Planejado | Evolução orientada por consumidores desde prefixo/B-tree até trigram, Full Text Search ou índice externo; autocomplete, sinônimos, ranking e consistência eventual entram somente com volume e UX comprovados |
 | Result | Implementação inicial | Semântica e testes estabilizados |
 | Notification | Implementação inicial | Acúmulo, imutabilidade e testes decididos |
 | Instant | Implementação inicial | UTC, imutabilidade, igualdade e serialização testadas |

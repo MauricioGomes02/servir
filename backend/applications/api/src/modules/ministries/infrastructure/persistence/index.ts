@@ -10,3 +10,4 @@ export { PostgresTeamMembershipRepository } from './postgres-team-membership-rep
 export { PostgresTeamLeaderAppointmentFactsReader } from './postgres-team-leader-appointment-facts-reader';
 export { PostgresTeamLeadershipRepository } from './postgres-team-leadership-repository';
 export * from './ministry-membership-status-code';
+export { PostgresMinistryListReader } from './postgres-ministry-list-reader';

@@ -55,6 +55,8 @@ Criar os primeiros Repository ports específicos junto aos Commands consumidores
 - Manter contrato pequeno e específico do Aggregate.
 - Distinguir adição de root nova e persistência de root carregada quando os consumidores exigirem garantias diferentes.
 - Tratar ausência esperada sem convertê-la em falha técnica; o caso de uso atribui a semântica de negócio.
+- Escolher paginação pelo consumidor e pelo volume esperado. `LIMIT/OFFSET` com total exato favorece coleções pequenas e navegação por páginas; cursor favorece feeds, grandes volumes e navegação sequencial. Nenhuma estratégia é padrão universal.
+- Alinhar índices à combinação concreta de tenant, filtros, busca e ordenação. Busca por prefixo, substring, relevância textual e navegação keyset possuem requisitos diferentes; novas estruturas exigem demanda ou medição.
 
 ## Anti-patterns
 

@@ -13,6 +13,7 @@ import type {
 import type { Organization, OrganizationId } from '@/modules/organizations/domain';
 import type {
   MinistryCreationFactsReader,
+  MinistryListReader,
   MinistryMembershipRepository,
   MinistryMembershipRequestFactsReader,
   MinistryRoleQualificationFactsReader,
@@ -156,6 +157,46 @@ export class InMemoryMinistryRepository implements MinistryRepository {
   }
   get ministries(): readonly Ministry[] {
     return Object.freeze([...this.stored]);
+  }
+}
+export class InMemoryMinistryListReader implements MinistryListReader {
+  constructor(
+    private readonly organizationIds: () => readonly OrganizationId[],
+    private readonly ministries: () => readonly Ministry[],
+  ) {}
+  async list(criteria: Parameters<MinistryListReader['list']>[0]) {
+    if (!this.organizationIds().some((id) => id.equals(criteria.organizationId))) return undefined;
+    const filtered = this.ministries()
+      .filter((item) => item.organizationId.equals(criteria.organizationId))
+      .filter((item) => criteria.status === undefined || item.status === criteria.status)
+      .filter(
+        (item) =>
+          criteria.search === undefined ||
+          item.name
+            .toString()
+            .toLocaleLowerCase('pt-BR')
+            .includes(criteria.search.toLocaleLowerCase('pt-BR')),
+      )
+      .sort(
+        (left, right) =>
+          left.name.toString().toLowerCase().localeCompare(right.name.toString().toLowerCase()) ||
+          left.id.toString().localeCompare(right.id.toString()),
+      );
+    const start = (criteria.page - 1) * criteria.pageSize;
+    const items = filtered.slice(start, start + criteria.pageSize);
+    return Object.freeze({
+      items: Object.freeze(
+        items.map((item) =>
+          Object.freeze({ id: item.id, name: item.name.toString(), status: item.status }),
+        ),
+      ),
+      pagination: Object.freeze({
+        page: criteria.page,
+        pageSize: criteria.pageSize,
+        totalItems: filtered.length,
+        totalPages: filtered.length === 0 ? 0 : Math.ceil(filtered.length / criteria.pageSize),
+      }),
+    });
   }
 }
 export class InMemoryMinistryCreationFactsReader implements MinistryCreationFactsReader {

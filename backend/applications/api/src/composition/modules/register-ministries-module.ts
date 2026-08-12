@@ -15,6 +15,8 @@ import {
   AssignMemberToTeamMessage,
   AppointTeamLeaderHandler,
   AppointTeamLeaderMessage,
+  ListMinistriesHandler,
+  ListMinistriesMessage,
 } from '@/modules/ministries/application';
 import {
   MinistryCreationPolicy,
@@ -40,6 +42,7 @@ import {
   registerCreateMinistryTeamRoute,
   registerAssignMemberToTeamRoute,
   registerAppointTeamLeaderRoute,
+  registerListMinistriesRoute,
 } from '@/modules/ministries/infrastructure';
 import {
   ApproveMinistryMembershipPresenter,
@@ -50,6 +53,7 @@ import {
   CreateMinistryTeamPresenter,
   AssignMemberToTeamPresenter,
   AppointTeamLeaderPresenter,
+  ListMinistriesPresenter,
 } from '@/modules/ministries/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
@@ -64,6 +68,7 @@ import {
   teamMembershipUnitOfWork,
   teamLeaderAppointmentFacts,
   teamLeadershipUnitOfWork,
+  ministryListReader,
 } from './ministries-persistence-module';
 
 export const ministriesModule: ApplicationModule = {
@@ -157,6 +162,10 @@ export const ministriesModule: ApplicationModule = {
     dependencies.mediator.registerHandler(CreateMinistryTeamMessage, createMinistryTeam);
     dependencies.mediator.registerHandler(AssignMemberToTeamMessage, assignMemberToTeam);
     dependencies.mediator.registerHandler(AppointTeamLeaderMessage, appointTeamLeader);
+    dependencies.mediator.registerHandler(
+      ListMinistriesMessage,
+      new ListMinistriesHandler(options.persistence.services.get(ministryListReader)),
+    );
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;
@@ -198,6 +207,11 @@ export const ministriesModule: ApplicationModule = {
     registerAppointTeamLeaderRoute(app, {
       mediator: dependencies.mediator,
       presenter: new AppointTeamLeaderPresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+    registerListMinistriesRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new ListMinistriesPresenter(dependencies.translator),
       messageTranslator: dependencies.translator,
     });
   },

@@ -40,6 +40,8 @@ const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7cf',
   '0198f334-6dc5-7c20-9af1-91d7e599c7d0',
   '0198f334-6dc5-7c20-9af1-91d7e599c7d1',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7d2',
+  '0198f334-6dc5-7c20-9af1-91d7e599c7d3',
 ];
 
 describe('createApplication', () => {
@@ -184,6 +186,16 @@ describe('createApplication', () => {
       method: 'GET',
       url: `/organizations/${UUIDS[2]}/members/${UUIDS[7]}`,
     });
+    const ministriesResponse = await app.inject({
+      method: 'GET',
+      url: `/organizations/${UUIDS[2]}/ministries?pageSize=1&search=lou&status=active`,
+    });
+    assert.equal(ministriesResponse.statusCode, 200);
+    assert.deepEqual(ministriesResponse.json(), {
+      items: [{ id: UUIDS[12], name: 'Louvor', status: 'active' }],
+      pagination: { page: 1, pageSize: 1, totalItems: 1, totalPages: 1 },
+    });
+
     await app.close();
 
     assert.equal(detailsResponse.statusCode, 200);
@@ -206,7 +218,7 @@ describe('createApplication', () => {
     const requestRecords = logger.records.filter(
       (record) => record.eventName === 'http.request.completed',
     );
-    assert.equal(requestRecords.length, 8);
+    assert.equal(requestRecords.length, 9);
     assert.deepEqual(requestRecords[0]?.context, {
       correlationId: UUIDS[1],
       requestId: UUIDS[0],

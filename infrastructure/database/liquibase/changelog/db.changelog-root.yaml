@@ -47,3 +47,6 @@ databaseChangeLog:
   - include:
       file: changes/016-create-availability-requests.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/017-add-ministry-list-index.sql
+      relativeToChangelogFile: true

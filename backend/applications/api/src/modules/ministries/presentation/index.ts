@@ -7,3 +7,4 @@ export * from './qualify-member-for-ministry-role';
 export * from './create-ministry-team';
 export * from './assign-member-to-team';
 export * from './appoint-team-leader';
+export * from './list-ministries-presenter';
