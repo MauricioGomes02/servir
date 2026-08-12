@@ -96,7 +96,7 @@ describe('PostgreSQL availability request persistence', () => {
     });
     assert.equal((await committed.handle(command, context)).success, true);
     const persisted = await inspection.query(
-      `SELECT r.status, o.event_type FROM availability_requests r JOIN outbox_messages o ON o.aggregate_id = r.id::text WHERE r.id = $1`,
+      `SELECT r.status, o.event_type FROM availability_requests r JOIN outbox_messages o ON o.aggregate_id = r.id WHERE r.id = $1`,
       [REQUEST_ID],
     );
     assert.equal(persisted.rowCount, 1);

@@ -88,7 +88,7 @@ describe('PostgreSQL activity persistence', () => {
       `SELECT a.status, am.ministry_id, o.event_type
        FROM activities a
        JOIN activity_ministries am ON am.activity_id = a.id
-       JOIN outbox_messages o ON o.aggregate_id = a.id::text
+       JOIN outbox_messages o ON o.aggregate_id = a.id
        WHERE a.id = $1`,
       [ACTIVITY_ID],
     );
