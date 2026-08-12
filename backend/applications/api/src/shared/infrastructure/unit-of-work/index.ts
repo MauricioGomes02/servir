@@ -1,5 +1,3 @@
-export { DirectUnitOfWork } from './direct-unit-of-work';
-
 export { PostgresUnitOfWork } from './postgres-unit-of-work';
 
 export {

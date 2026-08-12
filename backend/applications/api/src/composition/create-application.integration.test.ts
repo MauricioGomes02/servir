@@ -2,9 +2,13 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
+import { Pool } from 'pg';
+import { cleanupOrganizations, requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
 import { createApplication } from './create-application';
-import { createTestPersistence } from './test-support';
+import { createPostgresPersistence } from './create-postgres-persistence';
+
+const databaseUrl = requireTestDatabaseUrl();
 
 const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7b1',
@@ -49,7 +53,7 @@ const UUIDS = [
 describe('createApplication', () => {
   it('exposes a transport-level liveness probe without touching persistence', async () => {
     const app = createApplication({
-      persistence: createTestPersistence(),
+      persistence: createPostgresPersistence(databaseUrl),
       logger: new InMemoryLogger(),
     });
     const response = await app.inject({ method: 'GET', url: '/health/live' });
@@ -59,14 +63,14 @@ describe('createApplication', () => {
     assert.deepEqual(response.json(), { status: 'ok' });
   });
 
-  it('composes the first executable vertical slice', async () => {
+  it('composes the first executable vertical slice', async (testContext) => {
     const ids = [...UUIDS];
     const logger = new InMemoryLogger();
     const monotonicInstants = [
       100, 142, 200, 250, 300, 325, 400, 410, 500, 520, 600, 610, 700, 725, 800, 825, 900, 925,
     ];
     const app = createApplication({
-      persistence: createTestPersistence(),
+      persistence: createPostgresPersistence(databaseUrl),
       logger,
       monotonicNow: () => monotonicInstants.shift() ?? 142,
       uuidSource: () => {
@@ -78,6 +82,12 @@ describe('createApplication', () => {
 
         return id;
       },
+    });
+    const inspection = new Pool({ connectionString: databaseUrl });
+    await cleanupOrganizations(inspection, [UUIDS[2]]);
+    testContext.after(async () => {
+      await cleanupOrganizations(inspection, [UUIDS[2]]);
+      await inspection.end();
     });
 
     const response = await app.inject({
@@ -288,7 +298,7 @@ describe('createApplication', () => {
     const ids = [...UUIDS.slice(0, 6)];
     const instants = [0, 1, 2, 3, 4, 5];
     const app = createApplication({
-      persistence: createTestPersistence(),
+      persistence: createPostgresPersistence(databaseUrl),
       logger: new InMemoryLogger(),
       monotonicNow: () => instants.shift() ?? 3,
       uuidSource: () => {

@@ -10,12 +10,12 @@ import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
 import { Pool } from 'pg';
+import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
 import { createPostgresPersistence } from './create-postgres-persistence';
 import { activityCreationFacts, activityUnitOfWork } from './modules/activities-persistence-module';
 
-const databaseUrl = process.env.TEST_DATABASE_URL;
-const integrationIt = databaseUrl === undefined ? it.skip : it;
+const databaseUrl = requireTestDatabaseUrl();
 const ORGANIZATION_ID = '0198f334-6dc5-7c20-9af1-91d7e599d100';
 const MINISTRY_ID = '0198f334-6dc5-7c20-9af1-91d7e599d101';
 const ACTIVITY_ID = '0198f334-6dc5-7c20-9af1-91d7e599d102';
@@ -29,9 +29,7 @@ function value<T>(result: { success: true; value: T } | { success: false }): T {
 }
 
 describe('PostgreSQL activity persistence', () => {
-  integrationIt('commits activity, participants and outbox atomically', async (testContext) => {
-    assert.ok(databaseUrl);
-    if (!databaseUrl) return;
+  it('commits activity, participants and outbox atomically', async (testContext) => {
     const inspection = new Pool({ connectionString: databaseUrl });
     const persistence = createPostgresPersistence(databaseUrl);
     async function cleanup() {

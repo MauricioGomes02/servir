@@ -47,13 +47,11 @@ Um adapter transacional salva aggregates e outbox no mesmo commit; outro process
 
 ```ts
 export interface UnitOfWork<TScope extends object> {
-  execute<TResult>(
-    work: (scope: TScope) => Promise<TResult>,
-  ): Promise<TResult>;
+  execute<TResult>(work: (scope: TScope) => Promise<TResult>): Promise<TResult>;
 }
 ```
 
-O bounded context define o escopo com seus Repository ports e sua outbox. O callback concluído autoriza commit; uma exceção autoriza rollback e é propagada. `DirectUnitOfWork` executa o mesmo contrato sem oferecer transação e serve somente para testes ou composições que não exigem atomicidade real.
+O bounded context define o escopo com seus Repository ports e sua outbox. O callback concluído autoriza commit; uma exceção autoriza rollback e é propagada. A composição de produção usa exclusivamente o adapter transacional PostgreSQL. Testes unitários de handlers fornecem somente uma implementação local mínima do port quando precisam observar o escopo, sem manter um adapter reutilizável que possa ser confundido com uma garantia transacional.
 
 Eventos pendentes são observados sem remoção antes do commit. Depois do commit, `acknowledgeDomainEvents(events)` confirma somente o snapshot persistido; no rollback, eles permanecem pendentes e a instância alterada deve ser descartada.
 

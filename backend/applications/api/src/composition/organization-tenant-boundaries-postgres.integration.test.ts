@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { Pool } from 'pg';
+import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
-const databaseUrl = process.env.TEST_DATABASE_URL;
-const integrationIt = databaseUrl === undefined ? it.skip : it;
+const databaseUrl = requireTestDatabaseUrl();
 const ids = {
   firstOrganization: '0198f334-6dc5-7c20-9af1-91d7e599fa01',
   secondOrganization: '0198f334-6dc5-7c20-9af1-91d7e599fa02',
@@ -18,9 +18,7 @@ const ids = {
 } as const;
 
 describe('PostgreSQL organization tenant boundaries', () => {
-  integrationIt('rejects relationships that cross organization boundaries', async (testContext) => {
-    assert.notEqual(databaseUrl, undefined);
-    if (databaseUrl === undefined) return;
+  it('rejects relationships that cross organization boundaries', async (testContext) => {
     const pool = new Pool({ connectionString: databaseUrl });
     async function cleanup() {
       await pool.query(

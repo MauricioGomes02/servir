@@ -1,24 +1,34 @@
 import assert from 'node:assert/strict';
 import { it } from 'node:test';
 import { createApplication } from '@/composition/create-application';
-import { createTestPersistence } from '@/composition/test-support';
+import { createPostgresPersistence } from '@/composition/create-postgres-persistence';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
+import { cleanupOrganizations, requireTestDatabaseUrl } from '@/test-support/postgres-integration';
+import { Pool } from 'pg';
+
+const databaseUrl = requireTestDatabaseUrl();
 
 const IDS = Array.from(
   { length: 40 },
   (_, index) => `0198f334-6dc5-7c20-9af1-${(0x91d7e59c0000 + index).toString(16)}`,
 );
 
-it('opens an availability request through its ministry team resource', async () => {
+it('opens an availability request through its ministry team resource', async (testContext) => {
   const ids = [...IDS];
   const app = createApplication({
-    persistence: createTestPersistence(),
+    persistence: createPostgresPersistence(databaseUrl),
     logger: new InMemoryLogger(),
     uuidSource: () => {
       const id = ids.shift();
       if (!id) throw new Error('Deterministic UUID source exhausted');
       return id;
     },
+  });
+  const inspection = new Pool({ connectionString: databaseUrl });
+  await cleanupOrganizations(inspection, [IDS[2]]);
+  testContext.after(async () => {
+    await cleanupOrganizations(inspection, [IDS[2]]);
+    await inspection.end();
   });
   const organization = await app.inject({
     method: 'POST',

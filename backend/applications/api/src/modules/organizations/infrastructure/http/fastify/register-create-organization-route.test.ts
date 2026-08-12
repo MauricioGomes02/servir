@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import {
   CreateOrganizationHandler,
   CreateOrganizationMessage,
+  type OrganizationWriteScope,
 } from '@/modules/organizations/application';
 import { OrganizationId, type Organization } from '@/modules/organizations/domain';
 import {
@@ -13,6 +14,7 @@ import {
 import { parseCorrelationId, parseRequestId } from '@/shared/application/context';
 import { parseMessageId, type EventEnvelope } from '@/shared/application/messaging';
 import { Mediator } from '@/shared/application/mediator';
+import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import { parseDomainEventId } from '@/shared/domain/domain-event';
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
@@ -20,7 +22,6 @@ import { createFastifyApplication, httpProblemMessageCatalog } from '@/shared/in
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
-import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { registerCreateOrganizationRoute } from './register-create-organization-route';
 
 function fixture() {
@@ -62,23 +63,29 @@ function fixture() {
       ...organizationMessageCatalog['en-US'],
     },
   });
+  const scope: OrganizationWriteScope = {
+    organizations: {
+      async save(organization: Organization) {
+        organizations.push(organization);
+      },
+    },
+    outbox: {
+      async add(received: readonly EventEnvelope[]) {
+        envelopes.push(...received);
+      },
+    },
+  };
+  const unitOfWork: UnitOfWork<OrganizationWriteScope> = {
+    async execute(work) {
+      return work(scope);
+    },
+  };
   const handler = new CreateOrganizationHandler({
     clock: new FixedClock(instant.value),
     organizationIdGenerator: new SequenceIdGenerator([organizationId.value]),
     domainEventIdGenerator: new SequenceIdGenerator([domainEventId.value]),
     messageIdGenerator: new SequenceIdGenerator([messageId.value]),
-    unitOfWork: new DirectUnitOfWork({
-      organizations: {
-        async save(organization: Organization) {
-          organizations.push(organization);
-        },
-      },
-      outbox: {
-        async add(received: readonly EventEnvelope[]) {
-          envelopes.push(...received);
-        },
-      },
-    }),
+    unitOfWork,
     logger,
   });
   const presenter = new CreateOrganizationPresenter(translator);

@@ -6,8 +6,16 @@ import { createLeaseId, OutboxLeaseError, OutboxLeaseErrorCodes } from '@/applic
 
 import { PostgresOutboxMessageStore } from './postgres-outbox-message-store';
 
-const databaseUrl = process.env.TEST_DATABASE_URL;
-const integrationIt = databaseUrl === undefined ? it.skip : it;
+function requireTestDatabaseUrl(): string {
+  const databaseUrl = process.env.TEST_DATABASE_URL;
+  if (databaseUrl === undefined || databaseUrl.trim().length === 0) {
+    throw new Error('TEST_DATABASE_URL is required for PostgreSQL integration tests');
+  }
+  return databaseUrl;
+}
+
+const databaseUrl = requireTestDatabaseUrl();
+const integrationIt = it;
 
 const CLAIMED_AT = '2026-07-29T15:00:00.000Z';
 const FIRST_EXPIRATION = '2026-07-29T15:01:00.000Z';

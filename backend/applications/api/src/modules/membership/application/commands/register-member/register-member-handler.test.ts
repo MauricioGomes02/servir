@@ -13,8 +13,8 @@ import { parseDomainEventId, type DomainEventId } from '@/shared/domain/domain-e
 import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
-import { DirectUnitOfWork } from '@/shared/infrastructure/unit-of-work';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
+import type { UnitOfWork } from '@/shared/application/unit-of-work';
 
 import {
   MemberId,
@@ -80,6 +80,11 @@ function createFixture(options?: {
     },
   };
   const scope: MemberWriteScope = { members, outbox };
+  const unitOfWork: UnitOfWork<MemberWriteScope> = {
+    async execute(work) {
+      return work(scope);
+    },
+  };
   const logger = new InMemoryLogger();
   const handler = new RegisterMemberHandler({
     clock: new FixedClock(ids.occurredAt),
@@ -94,7 +99,7 @@ function createFixture(options?: {
       },
     },
     registrationPolicy: new MemberRegistrationPolicy(),
-    unitOfWork: new DirectUnitOfWork(scope),
+    unitOfWork,
     logger,
   });
   const context = createExecutionContext({
