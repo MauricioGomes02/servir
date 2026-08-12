@@ -15,7 +15,9 @@ Esta pasta concentra recursos operacionais externos às aplicações. Terraform 
 
 Terraform e Compose nunca devem declarar ownership sobre o mesmo container, volume ou rede.
 
-O Kafka executa sem privilégios com UID/GID `1000:1000`. Antes do broker, o stack executa uma vez o container encerrado `servir-kafka-data-init`, sem rede e somente com a capability `CHOWN`, para preparar o volume persistente. Uma mudança nesse inicializador substitui apenas o container Kafka; o volume protegido e seus dados são preservados.
+O Kafka executa sem privilégios com UID/GID `1000:1000`. Antes do broker, um `terraform_data` registra a preparação do volume persistente e usa `local-exec` para executar um container BusyBox descartável, sem rede e somente com a capability `CHOWN`. O job ajusta o ownership para `1000:1000`, termina e é removido; falha diferente de zero interrompe o apply. Seus `triggers_replace` repetem a preparação quando mudam o volume, a imagem inicializadora ou a versão explícita do procedimento. O Kafka é substituído depois dessa nova execução, enquanto o volume protegido e seus dados são preservados.
+
+Esse provisioner é uma exceção local e limitada. O provider Docker gerencia adequadamente containers duráveis, mas um container removido após executar deixa drift permanente no refresh; o state precisa representar a preparação concluída, não a existência do job. O comando exige que Terraform seja executado em Linux/WSL com o Docker CLI apontando para o mesmo daemon do provider. Terraform conhece o código de saída e os gatilhos, mas não inspeciona posteriormente o ownership interno do volume. Ambientes compartilhados devem usar o mecanismo nativo da plataforma, como init containers e políticas do storage driver, em vez de reproduzir este `local-exec`.
 
 ## Pré-requisitos
 

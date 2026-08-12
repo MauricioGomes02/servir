@@ -142,47 +142,29 @@ resource "docker_container" "postgres" {
   }
 }
 
-resource "docker_container" "kafka_data_permissions" {
-  name         = "servir-kafka-data-init"
-  image        = docker_image.volume_initializer.image_id
-  command      = ["sh", "-c", "chown -R 1000:1000 /data"]
-  user         = "0:0"
-  network_mode = "none"
-  must_run     = false
-  attach       = true
-  logs         = true
-  read_only    = true
+resource "terraform_data" "kafka_data_permissions" {
+  triggers_replace = [
+    docker_volume.kafka_data.id,
+    docker_image.volume_initializer.image_id,
+    "permissions-v1",
+  ]
 
-  capabilities {
-    add  = ["CAP_CHOWN"]
-    drop = ["ALL"]
-  }
-
-  volumes {
-    volume_name    = docker_volume.kafka_data.name
-    container_path = "/data"
-  }
-
-  labels {
-    label = "servir.environment"
-    value = "local"
-  }
-
-  labels {
-    label = "servir.owner"
-    value = "terraform"
-  }
-
-  labels {
-    label = "servir.role"
-    value = "volume-initializer"
-  }
-
-  lifecycle {
-    postcondition {
-      condition     = self.exit_code == 0
-      error_message = "Kafka data volume permission initialization must finish successfully."
-    }
+  provisioner "local-exec" {
+    interpreter = ["/bin/sh", "-c"]
+    command     = <<-EOT
+      docker run --rm \
+        --network none \
+        --read-only \
+        --cap-drop ALL \
+        --cap-add CHOWN \
+        --user 0:0 \
+        --label servir.environment=local \
+        --label servir.owner=terraform \
+        --label servir.role=volume-initializer \
+        --mount type=volume,source=${docker_volume.kafka_data.name},target=/data \
+        ${docker_image.volume_initializer.image_id} \
+        sh -c 'chown -R 1000:1000 /data'
+    EOT
   }
 }
 
@@ -249,7 +231,7 @@ resource "docker_container" "kafka" {
   }
 
   lifecycle {
-    replace_triggered_by = [docker_container.kafka_data_permissions.id]
+    replace_triggered_by = [terraform_data.kafka_data_permissions.id]
   }
 }
 
