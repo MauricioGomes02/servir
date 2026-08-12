@@ -101,7 +101,7 @@ docker compose run --rm liquibase status
 
 ## Executar as aplicações containerizadas
 
-Com os respectivos flags habilitados, `terraform apply` inicia containers independentes usando as imagens prontas indicadas por `frontend_image`, `api_image` e `outbox_relay_image`. CPU, memória e todo o ambiente de cada processo são fornecidos separadamente pelo `terraform.tfvars`; o módulo não possui configuração de runtime embutida. As configurações locais de exemplo usam somente DNS das redes autorizadas:
+Com os respectivos flags habilitados, `terraform apply` inicia containers independentes usando as imagens prontas indicadas por `frontend_image`, `api_image` e `outbox_relay_image`. CPU, memória e todo o ambiente de cada processo são fornecidos separadamente pelo `terraform.tfvars`; o módulo não possui configuração de runtime embutida. O limite total de memória mais swap é declarado como o dobro da memória de cada workload, tornando explícito o comportamento padrão do Docker e evitando drift recorrente no plano. Isso permite uma margem de swap igual à memória configurada sem reservá-la antecipadamente. As configurações locais de exemplo usam somente DNS das redes autorizadas:
 
 ```text
 API: postgres:5432 e otel-collector:4318
@@ -116,6 +116,8 @@ curl --fail http://localhost:3001/health/live
 ```
 
 O endpoint valida somente processo e transporte do BFF. A API possui liveness próprio na rede `application`; seu container não publica porta no host. Para desenvolvimento com hot reload, frontend, API e relay continuam executáveis no host por seus workspaces e arquivos `.env.example`.
+
+O Terraform aguarda o health check do Kafka, que consulta o broker com `kafka-topics`, antes de concluir sua criação e liberar o relay dependente. Essa ordem reduz corridas no bootstrap, mas não substitui o retry do relay: Kafka pode reiniciar ou ficar temporariamente indisponível depois que ambos estiverem ativos. O KafkaJS 2.2.4 pode emitir `TimeoutNegativeWarning` no Node 24 depois de retries de conexão; o aviso nasce no agendamento interno da biblioteca, que o Node normaliza para `1 ms`, e não no intervalo de polling da outbox. Confirme pelos logs que o evento `outbox.relay.started` ocorreu e investigue erros persistentes de conexão em vez de ocultar warnings globalmente.
 
 Mapas de ambiente marcados como sensíveis ainda são armazenados no state. As credenciais simplificadas existem apenas para desenvolvimento local. Ambientes compartilhados exigem imagens publicadas por CI, identidades separadas, permissões mínimas e integração com um gerenciador de segredos.
 

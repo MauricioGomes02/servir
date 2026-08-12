@@ -354,16 +354,17 @@ resource "docker_image" "frontend" {
 }
 
 resource "docker_container" "api" {
-  name       = "servir-api"
-  hostname   = "api"
-  image      = docker_image.api.image_id
-  restart    = "unless-stopped"
-  must_run   = var.api_enabled
-  start      = var.api_enabled
-  read_only  = true
-  init       = true
-  memory     = var.api_resources.memory_mb
-  cpu_shares = var.api_resources.cpu_shares
+  name        = "servir-api"
+  hostname    = "api"
+  image       = docker_image.api.image_id
+  restart     = "unless-stopped"
+  must_run    = var.api_enabled
+  start       = var.api_enabled
+  read_only   = true
+  init        = true
+  memory      = var.api_resources.memory_mb
+  memory_swap = var.api_resources.memory_mb * 2
+  cpu_shares  = var.api_resources.cpu_shares
 
   env = [for name, value in var.api_environment : "${name}=${value}"]
 
@@ -413,16 +414,17 @@ resource "docker_container" "api" {
 }
 
 resource "docker_container" "frontend" {
-  name       = "servir-frontend"
-  hostname   = "frontend"
-  image      = docker_image.frontend.image_id
-  restart    = "unless-stopped"
-  must_run   = var.frontend_enabled
-  start      = var.frontend_enabled
-  read_only  = true
-  init       = true
-  memory     = var.frontend_resources.memory_mb
-  cpu_shares = var.frontend_resources.cpu_shares
+  name        = "servir-frontend"
+  hostname    = "frontend"
+  image       = docker_image.frontend.image_id
+  restart     = "unless-stopped"
+  must_run    = var.frontend_enabled
+  start       = var.frontend_enabled
+  read_only   = true
+  init        = true
+  memory      = var.frontend_resources.memory_mb
+  memory_swap = var.frontend_resources.memory_mb * 2
+  cpu_shares  = var.frontend_resources.cpu_shares
 
   env = [for name, value in var.frontend_environment : "${name}=${value}"]
 
@@ -481,16 +483,17 @@ resource "docker_container" "frontend" {
 }
 
 resource "docker_container" "outbox_relay" {
-  name       = "servir-outbox-relay"
-  hostname   = "outbox-relay"
-  image      = docker_image.outbox_relay.image_id
-  restart    = "unless-stopped"
-  must_run   = var.outbox_relay_enabled
-  start      = var.outbox_relay_enabled
-  read_only  = true
-  init       = true
-  memory     = var.outbox_relay_resources.memory_mb
-  cpu_shares = var.outbox_relay_resources.cpu_shares
+  name        = "servir-outbox-relay"
+  hostname    = "outbox-relay"
+  image       = docker_image.outbox_relay.image_id
+  restart     = "unless-stopped"
+  must_run    = var.outbox_relay_enabled
+  start       = var.outbox_relay_enabled
+  read_only   = true
+  init        = true
+  memory      = var.outbox_relay_resources.memory_mb
+  memory_swap = var.outbox_relay_resources.memory_mb * 2
+  cpu_shares  = var.outbox_relay_resources.cpu_shares
 
   env = [for name, value in var.outbox_relay_environment : "${name}=${value}"]
 
