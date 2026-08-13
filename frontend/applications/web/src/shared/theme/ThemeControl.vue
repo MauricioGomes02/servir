@@ -1,34 +1,14 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue';
 import AppIcon from '@/shared/presentation/components/AppIcon.vue';
-import { readThemePreference, setThemePreference, type ThemePreference } from './theme';
+import { useThemeControl } from './use-theme-control';
 
-const preference = ref(readThemePreference());
-const open = ref(false);
-const trigger = ref<HTMLButtonElement>();
-
-function chooseTheme(value: ThemePreference): void {
-  preference.value = value;
-  setThemePreference(value);
-}
-
-function closeMenu(restoreFocus = false): void {
-  open.value = false;
-  if (restoreFocus) trigger.value?.focus();
-}
-
-function onKeydown(event: KeyboardEvent): void {
-  if (event.key === 'Escape' && open.value) closeMenu(true);
-}
-
-document.addEventListener('keydown', onKeydown);
-onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
+const { chooseTheme, closeMenu, open, preference, setTrigger } = useThemeControl();
 </script>
 
 <template>
   <div class="settings">
     <button
-      ref="trigger"
+      :ref="setTrigger"
       class="icon-button"
       type="button"
       aria-label="Abrir configurações"
@@ -69,3 +49,5 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     </section>
   </div>
 </template>
+
+<style src="./theme-control.css"></style>

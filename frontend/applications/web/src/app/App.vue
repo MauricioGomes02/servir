@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { RouterView } from 'vue-router';
-import { useRoute } from 'vue-router';
 import ThemeControl from '@/shared/theme/ThemeControl.vue';
+import { useAppNavigation } from './use-app-navigation';
 
-const route = useRoute();
-const homeRoute = computed(() => {
-  const organizationId = route.params.organizationId;
-  return typeof organizationId === 'string'
-    ? { name: 'organization-home', params: { organizationId } }
-    : { name: 'create-organization' };
-});
+const { homeRoute } = useAppNavigation();
 </script>
 
 <template>
@@ -26,3 +19,5 @@ const homeRoute = computed(() => {
     <RouterView />
   </main>
 </template>
+
+<style src="./app.css"></style>

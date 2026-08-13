@@ -15,3 +15,5 @@ withDefaults(
     <slot v-else />
   </button>
 </template>
+
+<style src="./app-button.css"></style>

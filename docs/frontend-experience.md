@@ -132,6 +132,20 @@ Tokens semânticos representam papéis como superfície, texto, ação, informa�
 
 Um padrão só se torna componente compartilhado quando consumidores reais demonstram o mesmo contrato de interação. Compartilhar aparência sem compartilhar comportamento não é justificativa suficiente.
 
+## Organização de uma experiência Vue
+
+O Single-File Component preserva o template semântico e conecta dependências de apresentação. Quando uma view possui estado, efeitos ou ações relevantes, essa funcionalidade reside em um composable `use-*.ts` próximo à tela. Estilos exclusivos ficam em uma folha `*.css` importada pelo próprio SFC; tokens, resets e regras verdadeiramente transversais permanecem globais.
+
+```text
+experience/
+├── ExperienceView.vue
+├── use-experience-view.ts
+├── experience-view.css
+└── ExperienceView.test.ts
+```
+
+O template não é extraído para `.html`, pois o SFC é a unidade de apresentação compreendida pelo compilador e pelas ferramentas Vue. Componentes pequenos sem lógica de tela não exigem um composable vazio. CSS e comportamento só são promovidos para compartilhamento quando consumidores reais comprovam o mesmo contrato.
+
 ## Critérios de aceite de uma experiência
 
 Antes de considerar uma página ou fluxo pronto, verificar:

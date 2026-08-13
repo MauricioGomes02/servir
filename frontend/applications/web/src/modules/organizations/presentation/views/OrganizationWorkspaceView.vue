@@ -31,3 +31,5 @@ defineProps<{ organizationId: string }>();
     </section>
   </section>
 </template>
+
+<style src="./organization-workspace-view.css"></style>

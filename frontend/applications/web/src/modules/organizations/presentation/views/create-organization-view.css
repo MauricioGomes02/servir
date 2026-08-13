@@ -1,0 +1,100 @@
+.hero {
+  display: grid;
+  gap: var(--space-10);
+  align-items: center;
+  width: min(100% - 2rem, var(--content-width));
+  margin-inline: auto;
+  padding-block: clamp(2.5rem, 7vw, 6.5rem);
+}
+
+.hero-copy {
+  max-width: 42rem;
+}
+
+.hero-symbol {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-lg);
+  color: var(--color-action);
+  background: var(--color-surface-muted);
+  transform: rotate(-4deg);
+}
+
+.hero-symbol svg {
+  width: 2rem;
+  height: 2rem;
+  transform: rotate(4deg);
+}
+
+.lead {
+  max-width: 55ch;
+  color: var(--color-text-subtle);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+}
+
+.benefit-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  list-style: none;
+  font-weight: 700;
+}
+
+.benefit-list li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.benefit-list li::before {
+  content: '✓';
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  color: var(--color-action);
+  background: var(--color-success-muted);
+}
+
+.form-card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-md);
+}
+
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 7rem;
+  height: 0.45rem;
+  border-radius: 0 0 0 var(--radius-full);
+  background: var(--color-accent);
+}
+
+.form-intro {
+  margin: calc(var(--space-2) * -1) 0 var(--space-3);
+  color: var(--color-text-subtle);
+}
+
+@media (width >= 48rem) {
+  .hero {
+    grid-template-columns: minmax(0, 1.15fr) minmax(22rem, 0.85fr);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .form-card {
+    border-width: 2px;
+  }
+}

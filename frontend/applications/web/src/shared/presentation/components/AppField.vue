@@ -32,3 +32,5 @@ withDefaults(
     </ul>
   </div>
 </template>
+
+<style src="./app-field.css"></style>

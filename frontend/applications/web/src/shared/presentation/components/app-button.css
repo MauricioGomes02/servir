@@ -1,0 +1,41 @@
+.app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.app-button-primary {
+  color: var(--color-on-action);
+  background: var(--color-action);
+}
+
+.app-button-secondary {
+  border-color: var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.app-button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-button {
+    transition:
+      transform 160ms ease,
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .app-button:hover {
+    background: var(--color-action-hover);
+    transform: translateY(-0.1rem);
+  }
+}

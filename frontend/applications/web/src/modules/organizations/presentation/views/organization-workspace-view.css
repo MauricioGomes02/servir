@@ -1,0 +1,29 @@
+.next-step {
+  display: grid;
+  gap: var(--space-6);
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-muted);
+}
+
+.next-step p {
+  max-width: 60ch;
+  color: var(--color-text-subtle);
+}
+
+.next-step h2 {
+  margin-block: var(--space-2);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.next-step .app-button {
+  width: fit-content;
+  text-decoration: none;
+}
+
+@media (width >= 48rem) {
+  .next-step {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

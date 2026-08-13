@@ -1,0 +1,117 @@
+.organization-shell {
+  display: grid;
+  width: min(100% - 2rem, var(--content-width));
+  margin-inline: auto;
+  padding-block: var(--space-4) var(--space-12);
+}
+
+.organization-sidebar {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--color-surface);
+}
+
+.organization-context {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.organization-context .workspace-symbol {
+  float: none;
+  margin: 0;
+}
+
+.organization-context div {
+  display: grid;
+  min-width: 0;
+}
+
+.organization-context small {
+  color: var(--color-text-subtle);
+}
+
+.organization-context strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.organization-navigation {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.organization-navigation a {
+  display: block;
+  min-height: 2.75rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  color: var(--color-text-subtle);
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.organization-navigation a.is-active {
+  color: var(--color-action);
+  background: var(--color-surface-muted);
+}
+
+.organization-content {
+  min-width: 0;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  border: 1px solid var(--color-border-subtle);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--color-surface);
+}
+
+@media (width >= 48rem) {
+  .organization-shell {
+    grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
+  }
+
+  .organization-sidebar {
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  .organization-context {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .organization-context .status-badge {
+    grid-column: 2;
+  }
+
+  .organization-navigation {
+    display: grid;
+    overflow: visible;
+  }
+
+  .organization-navigation a {
+    border-radius: var(--radius-sm);
+  }
+
+  .organization-content {
+    min-height: 38rem;
+    border-top: 1px solid var(--color-border-subtle);
+    border-left: 0;
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .organization-sidebar,
+  .organization-content {
+    border-width: 2px;
+  }
+}

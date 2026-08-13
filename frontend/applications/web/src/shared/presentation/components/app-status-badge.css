@@ -1,0 +1,16 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  color: var(--color-text-subtle);
+  background: var(--color-border-subtle);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.status-badge-success {
+  color: var(--color-success);
+  background: var(--color-success-muted);
+}

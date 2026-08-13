@@ -1,43 +1,13 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import type { Organization } from '../../application/organization';
-import { getOrganizationDetails } from '../../composition';
-import { HttpProblem } from '@/shared/http/problem-details';
+import { toRef } from 'vue';
 import AppIcon from '@/shared/presentation/components/AppIcon.vue';
 import AppStatusBadge from '@/shared/presentation/components/AppStatusBadge.vue';
+import { useOrganizationShell } from './use-organization-shell';
 
 const props = defineProps<{ organizationId: string }>();
-const organization = ref<Organization>();
-const problem = ref<HttpProblem>();
-const loading = ref(true);
-const abortController = new AbortController();
-
-async function load(): Promise<void> {
-  loading.value = true;
-  problem.value = undefined;
-  try {
-    organization.value = await getOrganizationDetails.execute(
-      props.organizationId,
-      abortController.signal,
-    );
-  } catch (error) {
-    if (!abortController.signal.aborted) {
-      problem.value =
-        error instanceof HttpProblem
-          ? error
-          : new HttpProblem({
-              type: 'about:blank',
-              title: 'Não foi possível carregar a organização.',
-              status: 0,
-            });
-    }
-  } finally {
-    loading.value = false;
-  }
-}
-
-onMounted(load);
-onBeforeUnmount(() => abortController.abort());
+const { load, loading, organization, problem } = useOrganizationShell(
+  toRef(props, 'organizationId'),
+);
 </script>
 
 <template>
@@ -86,3 +56,5 @@ onBeforeUnmount(() => abortController.abort());
     </div>
   </div>
 </template>
+
+<style src="./organization-shell.css"></style>
