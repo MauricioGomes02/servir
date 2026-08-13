@@ -2,6 +2,8 @@
 
 Cada termo possui um significado único. Exemplos demonstram uso; anti-exemplos delimitam o conceito.
 
+Na interface, linguagem ubíqua descreve o trabalho que a pessoa reconhece; nomes técnicos de Commands, Aggregates, endpoints e identificadores permanecem internos quando não ajudam a tarefa. Uma **tarefa** é um objetivo observável do usuário, como publicar uma escala, e uma **página** oferece contexto para uma ou mais tarefas; nenhuma delas é sinônimo de entidade ou operação CRUD.
+
 | Termo | Definição e responsabilidade | Relações | Exemplo | Anti-exemplo |
 |---|---|---|---|---|
 | Entity | Objeto definido por identidade e continuidade; protege comportamento ligado a essa identidade. | Pode integrar um Aggregate. | `Organization` com `OrganizationId`. | DTO mutável com apenas getters/setters. |

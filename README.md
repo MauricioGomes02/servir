@@ -63,6 +63,7 @@ O [roadmap](docs/roadmap.md) distingue o que está implementado do que ainda est
 - **Observabilidade distribuída:** logs estruturados e traces correlacionam HTTP, casos de uso, PostgreSQL, relay e Kafka.
 - **Operação reproduzível:** Dockerfiles independentes, Terraform, Liquibase e redes segmentadas separam build, infraestrutura, deploy e schema.
 - **Decisões duráveis:** ADRs documentam contexto, alternativas e consequências de cada escolha relevante.
+- **Experiência orientada a tarefas:** a interface representa o trabalho da igreja, com estados, acessibilidade e recuperação explícitos, sem espelhar CRUDs ou Aggregates.
 
 ## Arquitetura
 
@@ -146,6 +147,7 @@ O modelo completo, invariantes e questões ainda abertas estão em [Domínio min
 | [Fronteiras multi-tenant](docs/decisions/046-organization-tenant-boundaries.md)                    | Protege o tenant também no schema, não apenas na aplicação         |
 | [Valores temporais civis](docs/decisions/051-civil-temporal-values.md)                             | Preserva intenção humana diante de timezone e DST                  |
 | [API privada atrás do BFF](docs/decisions/058-private-api-behind-containerized-frontend-bff.md)    | Expõe somente a fronteira web e isola a API na rede de aplicação   |
+| [Frontend orientado a tarefas](docs/decisions/060-task-oriented-frontend-experience.md)           | Separa experiência, arquitetura de informação e estrutura interna  |
 
 Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 
@@ -244,6 +246,7 @@ servir/
 ## Documentação
 
 - [Arquitetura](docs/architecture.md)
+- [Experiência da aplicação web](docs/frontend-experience.md)
 - [Domínio](docs/domain/README.md)
 - [Vocabulário ubíquo](docs/glossary.md)
 - [Architecture Decision Records](docs/decisions/README.md)

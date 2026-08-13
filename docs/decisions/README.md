@@ -61,5 +61,6 @@
 | [057](057-vue-web-application-foundation.md)                            | Fundação responsiva e acessível da aplicação web Vue         | Aceita |
 | [058](058-private-api-behind-containerized-frontend-bff.md)             | API privada atrás do frontend BFF containerizado             | Aceita |
 | [059](059-product-visual-language-and-reusable-web-components.md)       | Linguagem visual de produto e componentes web reutilizáveis  | Aceita |
+| [060](060-task-oriented-frontend-experience.md)                        | Experiência frontend orientada a tarefas                     | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.
