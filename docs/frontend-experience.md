@@ -147,6 +147,14 @@ Antes de considerar uma página ou fluxo pronto, verificar:
 
 Testes automatizados devem preferir papéis, nomes e comportamento acessíveis. Eles complementam, mas não substituem revisão visual, navegação real por teclado e auditorias de contraste e responsividade.
 
+## Cortes implementados
+
+- Criação da organização conduz ao espaço identificado na URL.
+- Início comunica honestamente que pendências operacionais dependem de dados ainda não disponíveis e orienta o próximo passo útil.
+- Ministérios oferece busca, criação e listagem de ativos, distinguindo organização sem ministérios, busca sem resultado, carregamento e erro recuperável.
+
+O Início ainda não apresenta próximas atividades, coletas de disponibilidade ou escalas pendentes porque esses read models não estão implementados. Informação operacional não deve ser simulada para preencher o layout.
+
 ## Anti-patterns
 
 - Criar uma página porque uma Entity, Aggregate ou endpoint existe.

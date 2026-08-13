@@ -17,6 +17,7 @@ jaeger_image         = "cr.jaegertracing.io/jaegertracing/jaeger:2.20.0"
 jaeger_ui_port       = 16686
 
 api_image               = "servir-api:local"
+api_port                = 3000
 api_enabled             = false
 frontend_image          = "servir-frontend:local"
 frontend_port           = 3001

@@ -21,7 +21,7 @@ async function submit(): Promise<void> {
   try {
     const organization = await createOrganization.execute(name.value);
     await router.push({
-      name: 'organization-workspace',
+      name: 'organization-home',
       params: { organizationId: organization.id },
     });
   } catch (error) {
@@ -67,6 +67,7 @@ async function submit(): Promise<void> {
           label="Nome da igreja ou comunidade"
           :errors="nameErrors"
           :maxlength="120"
+          autocomplete="organization"
         />
 
         <p v-if="problem && nameErrors.length === 0" class="form-error" role="alert">

@@ -123,10 +123,15 @@ variable "api_image" {
 }
 
 variable "api_port" {
-  description = "Deprecated compatibility input; the containerized API is private and no longer publishes a host port."
+  description = "Optional API port published only on host loopback for local BFF development."
   type        = number
   default     = null
   nullable    = true
+
+  validation {
+    condition     = var.api_port == null || (var.api_port >= 1 && var.api_port <= 65535)
+    error_message = "api_port must be null or between 1 and 65535."
+  }
 }
 
 variable "outbox_relay_image" {

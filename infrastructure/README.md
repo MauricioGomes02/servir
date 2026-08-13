@@ -56,7 +56,7 @@ Os outputs distinguem endpoints por origem:
 
 | Consumidor           | PostgreSQL       | Kafka             | OTLP/HTTP                              | HTTP público                                       |
 | -------------------- | ---------------- | ----------------- | -------------------------------------- | -------------------------------------------------- |
-| Processo no host/WSL | `localhost:5432` | `localhost:29092` | `http://localhost:4318/v1/traces`      | `http://localhost:3001` (frontend/BFF)             |
+| Processo no host/WSL | `localhost:5432` | `localhost:29092` | `http://localhost:4318/v1/traces`      | `http://localhost:3001` (BFF) / `http://localhost:3000` (API local opcional) |
 | Container autorizado | `postgres:5432`  | `kafka:9092`      | `http://otel-collector:4318/v1/traces` | BFF acessa `http://api:3000` na rede `application` |
 
 O bloco `172.28.0.0/24` é dividido por padrão em oito faixas `/27`; cinco formam as bridges `edge`, `application`, `data`, `messaging` e `observability`, enquanto três permanecem reservadas. Altere o bloco pai no `terraform.tfvars` antes do primeiro apply se houver sobreposição com VPN ou outra rede Docker. Gateways são derivados, containers usam DNS e IPs fixos não fazem parte do contrato.
@@ -117,7 +117,7 @@ Valide a entrada pública pelo host:
 curl --fail http://localhost:3001/health/live
 ```
 
-O endpoint valida somente processo e transporte do BFF. A API possui liveness próprio na rede `application`; seu container não publica porta no host. Para desenvolvimento com hot reload, frontend, API e relay continuam executáveis no host por seus workspaces e arquivos `.env.example`.
+O endpoint valida somente processo e transporte do BFF. A API possui liveness próprio na rede `application`; no ambiente local, `api_port` pode publicá-la exclusivamente em loopback para que um BFF executado no host reutilize o container existente. O navegador continua acessando somente `/bff/*`, e remover `api_port` restaura a topologia sem publicação. Para desenvolvimento do frontend com hot reload e `api_port = 3000`, execute `npm run dev:bff` e `npm run dev:web` no workspace `frontend`; não é necessário reconstruir imagens. API e relay também continuam executáveis no host por seus workspaces e arquivos `.env.example`.
 
 O Terraform aguarda o health check do Kafka, que consulta o broker com `kafka-topics`, antes de concluir sua criação e liberar o relay dependente. Essa ordem reduz corridas no bootstrap, mas não substitui o retry do relay: Kafka pode reiniciar ou ficar temporariamente indisponível depois que ambos estiverem ativos. O KafkaJS 2.2.4 pode emitir `TimeoutNegativeWarning` no Node 24 depois de retries de conexão; o aviso nasce no agendamento interno da biblioteca, que o Node normaliza para `1 ms`, e não no intervalo de polling da outbox. Confirme pelos logs que o evento `outbox.relay.started` ocorreu e investigue erros persistentes de conexão em vez de ocultar warnings globalmente.
 

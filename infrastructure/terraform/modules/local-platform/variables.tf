@@ -79,6 +79,13 @@ variable "api_image" {
   type        = string
 }
 
+variable "api_port" {
+  description = "Optional API port published on host loopback for local development."
+  type        = number
+  default     = null
+  nullable    = true
+}
+
 variable "outbox_relay_image" {
   description = "Pre-built outbox relay image reference supplied by the delivery flow."
   type        = string

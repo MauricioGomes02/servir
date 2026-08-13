@@ -8,8 +8,21 @@ export const organizationRoutes: readonly RouteRecordRaw[] = [
   },
   {
     path: '/organizations/:organizationId',
-    name: 'organization-workspace',
-    component: () => import('./views/OrganizationWorkspaceView.vue'),
+    component: () => import('./views/OrganizationShell.vue'),
     props: true,
+    children: [
+      {
+        path: '',
+        name: 'organization-home',
+        component: () => import('./views/OrganizationWorkspaceView.vue'),
+        props: true,
+      },
+      {
+        path: 'ministries',
+        name: 'organization-ministries',
+        component: () => import('@/features/manage-ministries/MinistriesView.vue'),
+        props: true,
+      },
+    ],
   },
 ];

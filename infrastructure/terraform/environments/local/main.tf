@@ -21,6 +21,7 @@ module "platform" {
   jaeger_ui_port       = var.jaeger_ui_port
 
   api_image                = var.api_image
+  api_port                 = var.api_port
   api_enabled              = var.api_enabled
   api_resources            = var.api_resources
   api_environment          = var.api_environment

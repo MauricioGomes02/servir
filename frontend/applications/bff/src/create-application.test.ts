@@ -71,4 +71,50 @@ describe('frontend BFF', () => {
       status: 502,
     });
   });
+
+  it('forwards the ministry list filters explicitly', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ items: [], pagination: { totalItems: 0 } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id/ministries?page=2&pageSize=10&search=M%C3%BAsica&status=active&ignored=value',
+    });
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/ministries?page=2&pageSize=10&search=M%C3%BAsica&status=active',
+    );
+  });
+
+  it('forwards ministry creation without exposing another api operation', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'ministry-id', name: 'Música', status: 'active' }), {
+        status: 201,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/bff/organizations/organization-id/ministries',
+      payload: { name: 'Música' },
+    });
+    await app.close();
+
+    expect(response.statusCode).toBe(201);
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/ministries',
+    );
+    expect(fetch.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
+  });
 });

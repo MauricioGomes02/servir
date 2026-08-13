@@ -8,6 +8,13 @@ interface OrganizationParameters {
   readonly organizationId: string;
 }
 
+interface MinistryListQuery {
+  readonly page?: string;
+  readonly pageSize?: string;
+  readonly search?: string;
+  readonly status?: string;
+}
+
 async function sendToApi(
   request: FastifyRequest,
   reply: FastifyReply,
@@ -81,6 +88,33 @@ export async function createApplication(
         reply,
         config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}`,
+      ),
+  );
+  app.get<{ Params: OrganizationParameters; Querystring: MinistryListQuery }>(
+    '/bff/organizations/:organizationId/ministries',
+    (request, reply) => {
+      const query = new URLSearchParams();
+      for (const name of ['page', 'pageSize', 'search', 'status'] as const) {
+        const value = request.query[name];
+        if (value !== undefined) query.set(name, value);
+      }
+      const suffix = query.size > 0 ? `?${query.toString()}` : '';
+      return sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries${suffix}`,
+      );
+    },
+  );
+  app.post<{ Params: OrganizationParameters }>(
+    '/bff/organizations/:organizationId/ministries',
+    (request, reply) =>
+      sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries`,
       ),
   );
 

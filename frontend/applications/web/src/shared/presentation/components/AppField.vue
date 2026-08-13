@@ -1,6 +1,16 @@
 <script setup lang="ts">
 const model = defineModel<string>({ required: true });
-defineProps<{ id: string; label: string; errors?: readonly string[]; maxlength?: number }>();
+withDefaults(
+  defineProps<{
+    id: string;
+    label: string;
+    errors?: readonly string[];
+    maxlength?: number;
+    autocomplete?: string;
+    required?: boolean;
+  }>(),
+  { errors: undefined, maxlength: undefined, autocomplete: 'off', required: true },
+);
 </script>
 
 <template>
@@ -11,9 +21,9 @@ defineProps<{ id: string; label: string; errors?: readonly string[]; maxlength?:
       v-model="model"
       :name="id"
       type="text"
-      autocomplete="organization"
+      :autocomplete="autocomplete"
       :maxlength="maxlength"
-      required
+      :required="required"
       :aria-invalid="Boolean(errors?.length)"
       :aria-describedby="errors?.length ? `${id}-errors` : undefined"
     />

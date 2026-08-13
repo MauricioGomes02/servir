@@ -350,6 +350,15 @@ resource "docker_container" "api" {
 
   env = [for name, value in var.api_environment : "${name}=${value}"]
 
+  dynamic "ports" {
+    for_each = var.api_port == null ? [] : [var.api_port]
+    content {
+      internal = 3000
+      external = ports.value
+      ip       = "127.0.0.1"
+    }
+  }
+
   networks_advanced {
     name    = docker_network.platform["application"].name
     aliases = ["api"]
