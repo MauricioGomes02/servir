@@ -6,6 +6,19 @@ O Servir apoia o trabalho de pessoas que organizam ministérios, atividades, dis
 
 Este documento é a referência viva para projetar, implementar e avaliar a experiência web. As regras do domínio continuam soberanas, enquanto decisões de interação seguem adequação à tarefa, usabilidade, acessibilidade e arquitetura da informação.
 
+## Hierarquia de autoridade
+
+Quando critérios entrarem em tensão, aplicar esta ordem:
+
+1. requisitos e regras de negócio do domínio do Servir;
+2. princípios de interação da ISO 9241-110:2020;
+3. heurísticas de usabilidade de Nielsen;
+4. princípios de design de interação de Don Norman;
+5. WCAG 2.2 e HTML semântico;
+6. princípios de percepção e organização visual, incluindo Gestalt;
+7. convenções da web e padrões consistentes do Servir;
+8. preferências visuais e tendências, somente quando não contradisserem os anteriores.
+
 ## Princípio central
 
 Projetar para a tarefa, não para a entidade. Toda página deve responder a uma pergunta relevante ou permitir concluir uma tarefa reconhecível pelo usuário.
@@ -61,9 +74,90 @@ flowchart LR
 
 A evolução da interface prioriza cortes verticais desse fluxo. Cadastros de suporte entram quando ajudam a concluí-lo, não como uma coleção antecipada de CRUDs.
 
+## Especificações por área
+
+### Início
+
+Responde “O que precisa da minha atenção agora?”. Mostra próxima atividade relevante, escalas pendentes de montagem ou publicação, coletas de disponibilidade abertas com progresso e uma lista curta de próximas atividades quando esses dados existirem. Não vira coleção de métricas sem ação. Cards só entram quando comunicam estado ou ação, nunca como decoração.
+
+### Escalas
+
+- Apresentar atividade, data, horário, ministério, equipe e pessoas alocadas.
+- Diferenciar inequivocamente rascunho e publicação.
+- Manter salvar rascunho e publicar como ações principais quando aplicáveis.
+- Confirmar publicação quando seus efeitos forem relevantes.
+- Preservar histórico e versões; nunca sobrescrever silenciosamente uma escala publicada.
+- Indicar conflitos e ausência de disponibilidade antes da publicação.
+- Oferecer ao membro uma visualização própria após a publicação.
+
+### Atividades
+
+- Oferecer lista e calendário, não apenas calendário.
+- Distinguir atividade planejada de ocorrência concreta.
+- Mostrar data, horário, local ou contexto, ministérios envolvidos e estado.
+- Permitir acesso rápido à escala e à disponibilidade relacionadas.
+- Não misturar configuração da atividade e execução da ocorrência sem necessidade.
+
+### Disponibilidade
+
+- Mostrar período da coleta e atividade ou contexto relacionado.
+- Comunicar progresso de respostas, como `8 de 12`.
+- Distinguir disponível, indisponível e não respondeu por texto ou semântica além de cor.
+- Nunca interpretar silêncio como disponibilidade.
+- Oferecer filtros por ministério ou equipe somente quando o volume justificar.
+
+### Ministérios
+
+- Listar ministérios com resumo útil de membros, funções e equipes quando os dados existirem.
+- Separar visão geral, pessoas, funções e equipes no detalhe.
+- Não expor nomes de Aggregates, Commands ou endpoints.
+- Manter linguagem coerente com o trabalho ministerial.
+
+### Pessoas
+
+- Permitir busca e filtros por ministério, equipe e estado quando o volume justificar.
+- Consolidar ministérios, funções, equipes e disponibilidade relevantes na página da pessoa.
+- Não confundir função ministerial com permissão técnica.
+- Usar “função ministerial” para Vocal, Músico e responsabilidades equivalentes.
+- Usar “acesso” ou “permissão” para Administrador, Coordenador e autorizações técnicas.
+
 ## Princípios de interação
 
-Cada experiência deve:
+### ISO 9241-110:2020
+
+- **Adequação à tarefa:** apoiar o trabalho real sem etapas ou informações desnecessárias.
+- **Autoexplicatividade:** tornar significado, estado e uso compreensíveis pela própria interface.
+- **Conformidade com expectativas:** preservar termos, controles e resultados previsíveis.
+- **Adequação ao aprendizado:** permitir compreensão progressiva sem memorização arbitrária.
+- **Controlabilidade:** permitir iniciar, interromper, voltar, revisar ou desfazer quando fizer sentido.
+- **Robustez contra erros:** prevenir erros, tolerar entradas razoáveis e apoiar recuperação.
+- **Engajamento do usuário:** considerar necessidades, preferências e contexto de uso.
+
+### Heurísticas de Nielsen
+
+1. Comunicar continuamente o estado do sistema.
+2. Usar linguagem e conceitos do trabalho da igreja.
+3. Preservar controle, liberdade e saídas apropriadas.
+4. Manter consistência interna e convenções da plataforma.
+5. Prevenir erros antes que ocorram.
+6. Favorecer reconhecimento em vez de lembrança.
+7. Atender iniciantes sem impedir eficiência de usuários frequentes.
+8. Manter somente conteúdo relevante à tarefa; minimalismo não significa ausência de informação.
+9. Explicar erros e orientar diagnóstico e recuperação.
+10. Oferecer ajuda contextual quando a interface não puder ser autoexplicativa.
+
+### Don Norman e correspondência entre controle e resultado
+
+- **Affordance:** considerar o que o elemento permite fazer.
+- **Signifier:** tornar perceptível que algo é clicável, editável, selecionável ou arrastável.
+- **Feedback:** toda ação relevante produz resposta observável.
+- **Mapping:** a relação entre controle e resultado precisa ser compreensível.
+- **Constraints:** limitar ações inválidas antes que aconteçam.
+- **Modelo conceitual:** formar um modelo mental coerente com o produto.
+
+Um elemento que parece acionável deve realizar uma ação observável. Um link para a página atual, sem mudança de estado ou contexto, não deve conservar aparência e cursor de link. Da mesma forma, conteúdo estático não recebe signifiers de controle.
+
+Em conjunto, cada experiência deve:
 
 - apoiar a tarefa sem exigir trabalho ou dados desnecessários;
 - explicar por si mesma significado, estado e ações disponíveis;
@@ -76,6 +170,18 @@ Cada experiência deve:
 - revelar ajuda contextual somente quando a própria interface não bastar.
 
 Affordances e signifiers devem tornar ações reconhecíveis. Aparência clicável, foco, labels, agrupamento e posição precisam corresponder ao resultado produzido. Animação ou decoração não substitui feedback.
+
+## Percepção visual, Gestalt e carga cognitiva
+
+- **Proximidade:** itens próximos comunicam relação.
+- **Similaridade:** aparência semelhante comunica função ou categoria semelhante.
+- **Região comum:** limites visuais agrupam uma unidade real.
+- **Continuidade:** alinhamento e fluxo orientam a leitura.
+- **Figura e fundo:** conteúdo principal se distingue do contexto.
+- **Hierarquia visual:** tamanho, peso, posição, espaço e contraste determinam a ordem de atenção.
+- **Espaço em branco:** espaçamento comunica agrupamento e separação; não é sobra.
+
+A interface mantém contexto visível durante tarefas longas, divide tarefas complexas em etapas compreensíveis e não pede dados que o sistema já possui. Códigos internos e identificadores técnicos ficam ocultos quando não ajudam o usuário. Informação essencial não fica escondida em menus ou estados difíceis de descobrir. Cor, ícone e posição nunca são o único canal de significado.
 
 ## Estados como contrato
 
@@ -91,6 +197,8 @@ Loading, vazio, erro e sucesso não são acabamentos posteriores. Todo fluxo ass
 - publicado.
 
 O estado deve ser comunicado por texto ou semântica acessível além de cor e posição. Um estado vazio explica o contexto e, quando possível, oferece o próximo passo. Um erro preserva a entrada válida, identifica o problema e permite tentar novamente. A interface nunca apresenta sucesso antes da confirmação real da operação.
+
+Botões primários representam a ação principal da tela. Ações destrutivas são visualmente distintas e pedem confirmação quando houver risco. Busca, filtros, tabelas, listas, paginação, ordenação e formulários mantêm contratos uniformes. Carregando, vazio, sucesso, erro, desabilitado, salvando, salvo, rascunho e publicado são estados de primeira classe dos componentes aos quais se aplicam.
 
 ## Formulários e prevenção de erros
 
@@ -124,6 +232,15 @@ Projetar para diferentes larguras, não para uma lista de aparelhos. Mobile não
 
 Tabelas extensas exigem uma estratégia explícita, como colunas prioritárias, rolagem controlada, lista resumida ou navegação para detalhes. Ações críticas não podem desaparecer apenas por falta de espaço, e `hover` nunca é requisito para descobrir ou executar uma operação.
 
+## Navegação
+
+- A navegação principal é estável e torna a localização atual perceptível.
+- Breadcrumbs entram somente quando a profundidade justificar.
+- Funcionalidades essenciais não ficam escondidas sem necessidade.
+- Voltar preserva contexto sempre que possível.
+- URLs representam recursos ou tarefas de maneira previsível.
+- Controles de navegação só apresentam affordance de link quando podem mudar página, contexto ou estado de forma observável.
+
 ## Linguagem visual e componentes
 
 Hierarquia nasce de conteúdo, tipografia, espaço, alinhamento e contraste antes de efeitos decorativos. Proximidade, similaridade e região comum indicam relações. Cards são usados quando comunicam uma unidade, estado ou ação; não são o contêiner padrão de todo conteúdo.
@@ -131,6 +248,8 @@ Hierarquia nasce de conteúdo, tipografia, espaço, alinhamento e contraste ante
 Tokens semânticos representam papéis como superfície, texto, ação, informação, atenção, sucesso e perigo nos temas claro e escuro. Ícones reforçam significado, mas não substituem labels ambíguas.
 
 Um padrão só se torna componente compartilhado quando consumidores reais demonstram o mesmo contrato de interação. Compartilhar aparência sem compartilhar comportamento não é justificativa suficiente.
+
+A escala tipográfica e o espaçamento são consistentes. Hierarquia de títulos e conteúdo precede cores decorativas. Contraste serve à leitura e à prioridade; estilos concorrentes, bordas, sombras, gradientes e efeitos são limitados ao que acrescenta significado. Cores semânticas de sucesso, atenção, erro e informação preservam o mesmo papel. Tendências visuais não são adotadas sem justificativa funcional.
 
 ## Organização de uma experiência Vue
 
@@ -148,15 +267,35 @@ O template não é extraído para `.html`, pois o SFC é a unidade de apresenta�
 
 ## Critérios de aceite de uma experiência
 
-Antes de considerar uma página ou fluxo pronto, verificar:
+### Ordem de decisão antes de implementar
+
+1. Qual tarefa do usuário esta experiência resolve?
+2. Qual informação é mais importante para essa tarefa?
+3. Qual é o estado atual do sistema e como ele será comunicado?
+4. Quais ações são possíveis e quais signifiers deixam isso claro?
+5. Quais erros podem ocorrer e como preveni-los?
+6. O usuário reconhece as opções sem memorizar informações?
+7. O comportamento é consistente com outras experiências?
+8. A tarefa funciona por teclado e atende à WCAG aplicável?
+9. A experiência permanece compreensível em carregamento, vazio, erro e sucesso?
+10. A linguagem ubíqua é preservada sem expor detalhes técnicos desnecessários?
+
+### Checklist antes de considerar uma tela pronta
+
+Verificar:
 
 - a tarefa principal e a informação mais importante são evidentes;
 - o usuário sabe onde está, o que pode fazer e o resultado da ação;
+- controles aparentam ser acionáveis somente quando produzem resultado observável;
 - loading, vazio, erro, sucesso e demais estados aplicáveis foram projetados;
 - erros comuns são prevenidos e erros ocorridos permitem recuperação;
+- mensagens explicam como recuperar-se do problema;
+- o usuário não memoriza algo que poderia permanecer visível;
 - termos correspondem ao trabalho real, sem IDs ou jargão técnico desnecessário;
 - padrões de navegação, formulários, filtros e ações permanecem consistentes;
 - a tarefa funciona por teclado, em diferentes larguras e sem depender de cor;
+- foco é visível, previsível e não fica preso;
+- o resultado de cada ação é comunicado;
 - a página contém somente informação útil à tarefa atual.
 
 Testes automatizados devem preferir papéis, nomes e comportamento acessíveis. Eles complementam, mas não substituem revisão visual, navegação real por teclado e auditorias de contraste e responsividade.
@@ -177,8 +316,10 @@ O Início ainda não apresenta próximas atividades, coletas de disponibilidade 
 - Expor IDs quando o usuário pode reconhecer nome e contexto.
 - Usar cards para todo agrupamento.
 - Ocultar ações essenciais em menus arbitrários.
+- Exibir hover, cursor, foco ou aparência de controle em conteúdo sem ação observável.
 - Usar cor, ícone ou posição como único significado.
 - Criar padrões diferentes para a mesma operação.
+- Substituir feedback funcional por animação decorativa.
 - Priorizar tendência visual sobre tarefa, compreensão ou acessibilidade.
 - Tratar um framework ou design system como justificativa de UX.
 

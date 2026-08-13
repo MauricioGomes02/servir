@@ -258,6 +258,7 @@ servir/
 - [Roadmap](docs/roadmap.md)
 
 > A documentação em português é a fonte canônica atual. A organização bilíngue permanece registrada no roadmap.
+> Toda nova tela ou alteração de interação deve seguir a ordem de decisão e o checklist do guia de experiência antes de ser considerada pronta.
 
 ## Autor
 

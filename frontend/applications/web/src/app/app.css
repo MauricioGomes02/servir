@@ -33,6 +33,10 @@
   text-decoration: none;
 }
 
+.brand-static {
+  cursor: default;
+}
+
 .brand > span:last-child {
   display: grid;
   line-height: 1.1;

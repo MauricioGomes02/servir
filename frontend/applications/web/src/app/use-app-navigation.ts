@@ -3,6 +3,9 @@ import { useRoute } from 'vue-router';
 
 export function useAppNavigation() {
   const route = useRoute();
+  const brandCanNavigate = computed(
+    () => typeof route.params.organizationId === 'string' && route.name !== 'organization-home',
+  );
   const homeRoute = computed(() => {
     const organizationId = route.params.organizationId;
     return typeof organizationId === 'string'
@@ -10,5 +13,5 @@ export function useAppNavigation() {
       : { name: 'create-organization' };
   });
 
-  return { homeRoute };
+  return { brandCanNavigate, homeRoute };
 }
