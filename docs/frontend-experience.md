@@ -249,6 +249,8 @@ Tokens semânticos representam papéis como superfície, texto, ação, informa�
 
 Um padrão só se torna componente compartilhado quando consumidores reais demonstram o mesmo contrato de interação. Compartilhar aparência sem compartilhar comportamento não é justificativa suficiente.
 
+Botões seguem o contrato específico do [Button Design System](design-system/button.md), incluindo escolha semântica, hierarquia, microcopy, target, estados, feedback e acessibilidade. Um link pode compartilhar aparência de ação, mas continua semanticamente responsável por navegação.
+
 A escala tipográfica e o espaçamento são consistentes. Hierarquia de títulos e conteúdo precede cores decorativas. Contraste serve à leitura e à prioridade; estilos concorrentes, bordas, sombras, gradientes e efeitos são limitados ao que acrescenta significado. Cores semânticas de sucesso, atenção, erro e informação preservam o mesmo papel. Tendências visuais não são adotadas sem justificativa funcional.
 
 ## Organização de uma experiência Vue

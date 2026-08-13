@@ -34,7 +34,9 @@
   --color-success: var(--green-700);
   --color-success-muted: var(--green-100);
   --color-danger: var(--red-700);
+  --color-danger-hover: #85242a;
   --color-danger-muted: var(--red-100);
+  --color-on-danger: var(--neutral-0);
   --color-focus: #075fff;
   --font-sans:
     inter, avenir, ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, 'Segoe UI',
@@ -55,6 +57,15 @@
   --shadow-sm: 0 0.25rem 1rem rgb(16 23 19 / 7%);
   --shadow-md: 0 1.25rem 3.5rem rgb(16 23 19 / 11%);
   --content-width: 75rem;
+  --button-height-small: 2.25rem;
+  --button-height-medium: 2.75rem;
+  --button-height-large: 3rem;
+  --button-padding-inline-small: 0.75rem;
+  --button-padding-inline: 1.25rem;
+  --button-padding-inline-large: 1.5rem;
+  --button-gap: 0.5rem;
+  --button-radius: var(--radius-full);
+  --button-motion-duration: 160ms;
 }
 
 [data-theme='dark'] {
@@ -76,7 +87,9 @@
   --color-success: #75d7b4;
   --color-success-muted: #1a3b30;
   --color-danger: #ffabb0;
+  --color-danger-hover: #ffc1c5;
   --color-danger-muted: #492327;
+  --color-on-danger: #321114;
   --color-focus: #9ebaff;
   --shadow-sm: 0 0.25rem 1rem rgb(0 0 0 / 20%);
   --shadow-md: 0 1.25rem 3.5rem rgb(0 0 0 / 32%);

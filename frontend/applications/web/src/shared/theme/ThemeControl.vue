@@ -14,11 +14,18 @@ const { chooseTheme, closeMenu, open, preference, setTrigger } = useThemeControl
       aria-label="Abrir configurações"
       aria-haspopup="dialog"
       :aria-expanded="open"
+      aria-controls="appearance-settings"
       @click="open = !open"
     >
       <AppIcon name="settings" />
     </button>
-    <section v-if="open" class="settings-panel" role="dialog" aria-label="Configurações">
+    <section
+      v-if="open"
+      id="appearance-settings"
+      class="settings-panel"
+      role="dialog"
+      aria-label="Configurações"
+    >
       <header>
         <div>
           <p class="eyebrow">Preferências</p>

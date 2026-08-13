@@ -67,6 +67,18 @@ legend {
   outline-offset: 0.2rem;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 .icon-button,
 .text-button {
   border: 0;
@@ -84,6 +96,10 @@ legend {
   border-radius: var(--radius-full);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
+}
+
+.icon-button:active {
+  transform: scale(0.96);
 }
 
 .text-button {

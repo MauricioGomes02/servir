@@ -33,6 +33,7 @@ const {
         <p>Organize os espaços onde pessoas, funções e equipes servem juntas.</p>
       </div>
       <AppButton
+        :variant="showCreation ? 'tertiary' : 'primary'"
         :aria-expanded="showCreation"
         aria-controls="ministry-creation"
         @click="showCreation = !showCreation"

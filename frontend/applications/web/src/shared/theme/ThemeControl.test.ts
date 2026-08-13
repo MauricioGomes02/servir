@@ -18,6 +18,14 @@ describe('ThemeControl', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Abrir configurações' }));
 
     expect(view.getByRole('dialog', { name: 'Configurações' })).toBeVisible();
+    expect(view.getByRole('button', { name: 'Abrir configurações' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(view.getByRole('button', { name: 'Abrir configurações' })).toHaveAttribute(
+      'aria-controls',
+      'appearance-settings',
+    );
     expect(view.getByRole('radio', { name: 'Usar tema do sistema' })).toBeChecked();
   });
 

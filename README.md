@@ -247,6 +247,7 @@ servir/
 
 - [Arquitetura](docs/architecture.md)
 - [Experiência da aplicação web](docs/frontend-experience.md)
+- [Design System](docs/design-system/README.md)
 - [Domínio](docs/domain/README.md)
 - [Vocabulário ubíquo](docs/glossary.md)
 - [Architecture Decision Records](docs/decisions/README.md)

@@ -4,10 +4,19 @@ defineProps<{ name: 'settings' | 'community' | 'people' | 'ministry' | 'calendar
 
 <template>
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path
+    <g
       v-if="name === 'settings'"
-      d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8 3.5-2.1-1.2.1-2.4-2.1-1.2-2 1.3-2.1-1.2-2 1.2.1 2.4L4 12l2.1 1.2-.1 2.4 2.1 1.2 2-1.3 2.1 1.2 2-1.2-.1-2.4L20 12Z"
-    />
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="12" cy="12" r="3" />
+      <path
+        d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.42 1.42-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V19.6h-2v-.08A1.7 1.7 0 0 0 12.36 18a1.7 1.7 0 0 0-1.88.34l-.06.06L9 16.98l.06-.06A1.7 1.7 0 0 0 9.4 15a1.7 1.7 0 0 0-1.56-1.04H7.8v-2h.04A1.7 1.7 0 0 0 9.4 10.92a1.7 1.7 0 0 0-.34-1.88L9 8.98l1.42-1.42.06.06A1.7 1.7 0 0 0 12.36 8 1.7 1.7 0 0 0 13.4 6.44V6.4h2v.04A1.7 1.7 0 0 0 16.44 8a1.7 1.7 0 0 0 1.88-.34l.06-.06L19.8 9.02l-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.96 12H21v2h-.04A1.7 1.7 0 0 0 19.4 15Z"
+      />
+    </g>
     <path v-else-if="name === 'community'" d="M4 20v-9l8-6 8 6v9h-6v-6h-4v6H4Z" />
     <path
       v-else-if="name === 'people'"
