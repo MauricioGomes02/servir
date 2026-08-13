@@ -248,6 +248,7 @@ servir/
 - [Arquitetura](docs/architecture.md)
 - [Experiência da aplicação web](docs/frontend-experience.md)
 - [Design System](docs/design-system/README.md)
+- [Referência visual e de experiências](docs/design-system/servir-ux-ui-reference.md)
 - [Domínio](docs/domain/README.md)
 - [Vocabulário ubíquo](docs/glossary.md)
 - [Architecture Decision Records](docs/decisions/README.md)

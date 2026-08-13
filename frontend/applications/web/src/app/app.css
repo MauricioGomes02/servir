@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  max-width: var(--content-width);
+  width: min(100% - 2rem, var(--content-width));
   margin-inline: auto;
   padding: var(--space-4);
 }
@@ -58,12 +58,11 @@
   place-items: center;
   width: 2.6rem;
   aspect-ratio: 1;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-sm);
   color: var(--color-on-action);
   background: var(--color-action);
   font-size: 1.15rem;
   font-weight: 850;
-  transform: rotate(-3deg);
 }
 
 @media (width >= 48rem) {

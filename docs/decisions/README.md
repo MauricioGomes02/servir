@@ -63,5 +63,6 @@
 | [059](059-product-visual-language-and-reusable-web-components.md)       | Linguagem visual de produto e componentes web reutilizáveis  | Aceita |
 | [060](060-task-oriented-frontend-experience.md)                        | Experiência frontend orientada a tarefas                     | Aceita |
 | [061](061-optional-loopback-api-for-local-development.md)              | API opcional em loopback para desenvolvimento local          | Aceita |
+| [062](062-indigo-navy-product-identity.md)                             | Identidade de produto indigo e navy                           | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

@@ -7,9 +7,10 @@
 
 .organization-sidebar {
   padding: var(--space-4);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-navigation);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: var(--color-surface);
+  color: var(--color-navigation-active);
+  background: var(--color-navigation);
 }
 
 .organization-context {
@@ -18,7 +19,7 @@
   gap: var(--space-3);
   align-items: center;
   padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
 }
 
 .organization-context .workspace-symbol {
@@ -32,7 +33,7 @@
 }
 
 .organization-context small {
-  color: var(--color-text-subtle);
+  color: var(--color-navigation-text);
 }
 
 .organization-context strong {
@@ -54,16 +55,17 @@
   display: block;
   min-height: 2.75rem;
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-full);
-  color: var(--color-text-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--color-navigation-text);
   font-weight: 750;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .organization-navigation a.is-active {
-  color: var(--color-action);
-  background: var(--color-surface-muted);
+  border-left: 0.25rem solid var(--color-action);
+  color: var(--color-navigation-active);
+  background: var(--color-navigation-active-surface);
 }
 
 .organization-content {
@@ -72,12 +74,12 @@
   border: 1px solid var(--color-border-subtle);
   border-top: 0;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--color-background);
 }
 
 @media (width >= 48rem) {
   .organization-shell {
-    grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
+    grid-template-columns: minmax(15rem, 17.5rem) minmax(0, 1fr);
   }
 
   .organization-sidebar {

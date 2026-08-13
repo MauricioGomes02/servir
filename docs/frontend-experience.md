@@ -243,6 +243,8 @@ Tabelas extensas exigem uma estratégia explícita, como colunas prioritárias, 
 
 ## Linguagem visual e componentes
 
+A direção visual vigente usa navegação navy, ação principal indigo, superfícies neutras e estados semânticos independentes. O [guia visual do Servir](design-system/servir-ux-ui-reference.md) e seus mockups complementam este documento; imagens de telas futuras são conceituais e não autorizam dados ou capacidades simuladas. A decisão está registrada no [ADR 062](decisions/062-indigo-navy-product-identity.md).
+
 Hierarquia nasce de conteúdo, tipografia, espaço, alinhamento e contraste antes de efeitos decorativos. Proximidade, similaridade e região comum indicam relações. Cards são usados quando comunicam uma unidade, estado ou ação; não são o contêiner padrão de todo conteúdo.
 
 Tokens semânticos representam papéis como superfície, texto, ação, informação, atenção, sucesso e perigo nos temas claro e escuro. Ícones reforçam significado, mas não substituem labels ambíguas.
@@ -328,3 +330,5 @@ O Início ainda não apresenta próximas atividades, coletas de disponibilidade 
 ## Referências
 
 Esta orientação consolida a especificação de UI/UX fornecida para o Servir e se apoia em ISO 9241-110:2020, heurísticas de Nielsen, princípios de Don Norman, WCAG 2.2, HTML semântico e princípios de percepção da Gestalt. A decisão arquitetural correspondente está no [ADR 060](decisions/060-task-oriented-frontend-experience.md).
+
+A identidade visual e o uso normativo dos mockups estão registrados no [ADR 062](decisions/062-indigo-navy-product-identity.md).
