@@ -117,4 +117,26 @@ describe('frontend BFF', () => {
     );
     expect(fetch.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
   });
+
+  it('forwards tenant-scoped ministry details explicitly', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'ministry-id', name: 'Música', roles: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id/ministries/ministry-id',
+    });
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/ministries/ministry-id',
+    );
+  });
 });

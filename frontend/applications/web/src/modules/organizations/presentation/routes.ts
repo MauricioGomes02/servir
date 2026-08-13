@@ -23,6 +23,12 @@ export const organizationRoutes: readonly RouteRecordRaw[] = [
         component: () => import('@/features/manage-ministries/MinistriesView.vue'),
         props: true,
       },
+      {
+        path: 'ministries/:ministryId',
+        name: 'ministry-details',
+        component: () => import('@/features/manage-ministries/MinistryDetailsView.vue'),
+        props: true,
+      },
     ],
   },
 ];

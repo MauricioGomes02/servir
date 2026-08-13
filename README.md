@@ -14,7 +14,7 @@ Servir é uma plataforma em evolução para organizar a operação ministerial d
 
 O projeto transforma esse problema real em um estudo aplicado de Domain-Driven Design, arquitetura hexagonal e sistemas orientados a eventos. As regras de negócio permanecem independentes de HTTP, banco, broker e frameworks; decisões arquiteturais e trade-offs são registrados junto ao código.
 
-> **Estado atual:** o backend possui cortes verticais executáveis desde a criação da organização até a abertura de uma coleta de disponibilidade. API, PostgreSQL, outbox transacional, relay Kafka, observabilidade e infraestrutura local estão integrados. A interface web Vue oferece criação da organização, Início orientado a próximos passos e gestão inicial de ministérios; a formação/publicação de escalas permanece como próximo grande incremento do domínio.
+> **Estado atual:** o backend possui cortes verticais executáveis desde a criação da organização até a abertura de uma coleta de disponibilidade. API, PostgreSQL, outbox transacional, relay Kafka, observabilidade e infraestrutura local estão integrados. A interface web Vue oferece criação da organização, Início orientado a próximos passos e gestão de ministérios com busca, criação e detalhe de suas funções; a formação/publicação de escalas permanece como próximo grande incremento do domínio.
 
 ## O produto
 
@@ -147,7 +147,7 @@ O modelo completo, invariantes e questões ainda abertas estão em [Domínio min
 | [Fronteiras multi-tenant](docs/decisions/046-organization-tenant-boundaries.md)                    | Protege o tenant também no schema, não apenas na aplicação         |
 | [Valores temporais civis](docs/decisions/051-civil-temporal-values.md)                             | Preserva intenção humana diante de timezone e DST                  |
 | [API privada atrás do BFF](docs/decisions/058-private-api-behind-containerized-frontend-bff.md)    | Expõe somente a fronteira web e isola a API na rede de aplicação   |
-| [Frontend orientado a tarefas](docs/decisions/060-task-oriented-frontend-experience.md)           | Separa experiência, arquitetura de informação e estrutura interna  |
+| [Frontend orientado a tarefas](docs/decisions/060-task-oriented-frontend-experience.md)            | Separa experiência, arquitetura de informação e estrutura interna  |
 
 Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 

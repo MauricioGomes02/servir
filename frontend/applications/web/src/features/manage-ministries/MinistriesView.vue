@@ -110,7 +110,14 @@ const {
       <ul class="ministry-list">
         <li v-for="ministry in page.items" :key="ministry.id">
           <div>
-            <strong>{{ ministry.name }}</strong>
+            <RouterLink
+              :to="{
+                name: 'ministry-details',
+                params: { organizationId, ministryId: ministry.id },
+              }"
+            >
+              {{ ministry.name }}
+            </RouterLink>
             <span>Estruture funções, pessoas e equipes</span>
           </div>
           <AppStatusBadge tone="success">Ativo</AppStatusBadge>

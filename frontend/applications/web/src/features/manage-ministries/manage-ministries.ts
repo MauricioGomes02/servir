@@ -1,4 +1,5 @@
 import type {
+  MinistryDetails,
   MinistryGateway,
   MinistryListFilters,
   MinistryPage,
@@ -7,6 +8,10 @@ import type {
 
 export class ManageMinistries {
   constructor(private readonly gateway: MinistryGateway) {}
+
+  get(organizationId: string, ministryId: string, signal?: AbortSignal): Promise<MinistryDetails> {
+    return this.gateway.get(organizationId, ministryId, signal);
+  }
 
   list(
     organizationId: string,

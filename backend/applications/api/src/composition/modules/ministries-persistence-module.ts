@@ -10,6 +10,7 @@ import type {
   TeamLeaderAppointmentFactsReader,
   TeamLeadershipWriteScope,
   MinistryListReader,
+  MinistryDetailsReader,
 } from '@/modules/ministries/application';
 import type {
   MinistryCreated,
@@ -42,6 +43,7 @@ import {
   PostgresTeamLeaderAppointmentFactsReader,
   PostgresTeamLeadershipRepository,
   PostgresMinistryListReader,
+  PostgresMinistryDetailsReader,
 } from '@/modules/ministries/infrastructure';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import type { PostgresPersistenceBuilder } from '../persistence';
@@ -77,6 +79,9 @@ export const teamLeaderAppointmentFacts = defineService<TeamLeaderAppointmentFac
   'ministries.team-leader-appointment-facts',
 );
 export const ministryListReader = defineService<MinistryListReader>('ministries.list-reader');
+export const ministryDetailsReader = defineService<MinistryDetailsReader>(
+  'ministries.details-reader',
+);
 export function registerMinistriesPersistence(builder: PostgresPersistenceBuilder): void {
   builder.integrationEvents.register<MinistryCreated>(
     'ministry.created',
@@ -144,4 +149,5 @@ export function registerMinistriesPersistence(builder: PostgresPersistenceBuilde
     (pool) => new PostgresTeamLeaderAppointmentFactsReader(pool),
   );
   builder.addValue(ministryListReader, (pool) => new PostgresMinistryListReader(pool));
+  builder.addValue(ministryDetailsReader, (pool) => new PostgresMinistryDetailsReader(pool));
 }

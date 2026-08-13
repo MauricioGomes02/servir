@@ -17,6 +17,8 @@ import {
   AppointTeamLeaderMessage,
   ListMinistriesHandler,
   ListMinistriesMessage,
+  GetMinistryDetailsHandler,
+  GetMinistryDetailsMessage,
 } from '@/modules/ministries/application';
 import {
   MinistryCreationPolicy,
@@ -43,6 +45,7 @@ import {
   registerAssignMemberToTeamRoute,
   registerAppointTeamLeaderRoute,
   registerListMinistriesRoute,
+  registerGetMinistryDetailsRoute,
 } from '@/modules/ministries/infrastructure';
 import {
   ApproveMinistryMembershipPresenter,
@@ -54,6 +57,7 @@ import {
   AssignMemberToTeamPresenter,
   AppointTeamLeaderPresenter,
   ListMinistriesPresenter,
+  GetMinistryDetailsPresenter,
 } from '@/modules/ministries/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
@@ -69,6 +73,7 @@ import {
   teamLeaderAppointmentFacts,
   teamLeadershipUnitOfWork,
   ministryListReader,
+  ministryDetailsReader,
 } from './ministries-persistence-module';
 
 export const ministriesModule: ApplicationModule = {
@@ -166,6 +171,10 @@ export const ministriesModule: ApplicationModule = {
       ListMinistriesMessage,
       new ListMinistriesHandler(options.persistence.services.get(ministryListReader)),
     );
+    dependencies.mediator.registerHandler(
+      GetMinistryDetailsMessage,
+      new GetMinistryDetailsHandler(options.persistence.services.get(ministryDetailsReader)),
+    );
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;
@@ -212,6 +221,11 @@ export const ministriesModule: ApplicationModule = {
     registerListMinistriesRoute(app, {
       mediator: dependencies.mediator,
       presenter: new ListMinistriesPresenter(dependencies.translator),
+      messageTranslator: dependencies.translator,
+    });
+    registerGetMinistryDetailsRoute(app, {
+      mediator: dependencies.mediator,
+      presenter: new GetMinistryDetailsPresenter(dependencies.translator),
       messageTranslator: dependencies.translator,
     });
   },

@@ -46,7 +46,11 @@ describe('GetOrganizationDetailsHandler', () => {
   });
 
   it('returns a stable absence when the organization does not exist', async () => {
-    const reader: OrganizationDetailsReader = { async findById() { return undefined; } };
+    const reader: OrganizationDetailsReader = {
+      async findById() {
+        return undefined;
+      },
+    };
     const result = await new GetOrganizationDetailsHandler(reader).handle(
       { organizationId: id },
       context,

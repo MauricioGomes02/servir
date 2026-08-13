@@ -13,6 +13,11 @@ function listPath(organizationId: string, filters: MinistryListFilters): string 
 
 export function createHttpMinistryGateway(client: HttpClient): MinistryGateway {
   return {
+    get: (organizationId, ministryId, signal) =>
+      client.get(
+        `/bff/organizations/${encodeURIComponent(organizationId)}/ministries/${encodeURIComponent(ministryId)}`,
+        signal,
+      ),
     list: (organizationId, filters, signal) =>
       client.get(listPath(organizationId, filters), signal),
     create: (organizationId, name, signal) =>

@@ -16,6 +16,7 @@ import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 import { createPostgresPersistence } from './create-postgres-persistence';
 import {
   ministryCreationFacts,
+  ministryDetailsReader,
   ministryListReader,
   ministryUnitOfWork,
 } from './modules/ministries-persistence-module';
@@ -27,6 +28,7 @@ const ROLLED_BACK_MINISTRY_ID = '0198f334-6dc5-7c20-9af1-91d7e599f102';
 const EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599f103';
 const ROLLED_BACK_EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599f104';
 const MESSAGE_ID = '0198f334-6dc5-7c20-9af1-91d7e599f105';
+const ROLE_ID = '0198f334-6dc5-7c20-9af1-91d7e599f106';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {
   assert.equal(result.success, true);
@@ -125,6 +127,32 @@ describe('PostgreSQL ministry persistence', () => {
       {
         items: [{ id: MINISTRY_ID, name: 'Louvor', status: 'active' }],
         pagination: { page: 1, pageSize: 1, totalItems: 1, totalPages: 1 },
+      },
+    );
+
+    await inspection.query(
+      'INSERT INTO ministry_roles (id, organization_id, ministry_id, name, status) VALUES ($1, $2, $3, $4, 1)',
+      [ROLE_ID, ORGANIZATION_ID, MINISTRY_ID, 'Guitarra'],
+    );
+    const details = await persistence.services
+      .get(ministryDetailsReader)
+      .find(organizationId, value(MinistryId.create(MINISTRY_ID)));
+    assert.deepEqual(
+      details && {
+        id: details.id.toString(),
+        name: details.name,
+        status: details.status,
+        roles: details.roles.map((role) => ({
+          id: role.id.toString(),
+          name: role.name,
+          status: role.status,
+        })),
+      },
+      {
+        id: MINISTRY_ID,
+        name: 'Louvor',
+        status: 'active',
+        roles: [{ id: ROLE_ID, name: 'Guitarra', status: 'active' }],
       },
     );
 

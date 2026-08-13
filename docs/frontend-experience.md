@@ -23,27 +23,27 @@ Quando critérios entrarem em tensão, aplicar esta ordem:
 
 Projetar para a tarefa, não para a entidade. Toda página deve responder a uma pergunta relevante ou permitir concluir uma tarefa reconhecível pelo usuário.
 
-| Área | Pergunta orientadora |
-| --- | --- |
-| Início | O que precisa da minha atenção agora? |
-| Escalas | Quem vai servir? |
-| Disponibilidade | Quem pode servir? |
-| Atividades | Quando precisamos de pessoas? |
-| Ministérios | Como a estrutura ministerial está organizada? |
-| Pessoas | Quem são as pessoas e onde elas servem? |
+| Área            | Pergunta orientadora                          |
+| --------------- | --------------------------------------------- |
+| Início          | O que precisa da minha atenção agora?         |
+| Escalas         | Quem vai servir?                              |
+| Disponibilidade | Quem pode servir?                             |
+| Atividades      | Quando precisamos de pessoas?                 |
+| Ministérios     | Como a estrutura ministerial está organizada? |
+| Pessoas         | Quem são as pessoas e onde elas servem?       |
 
 Uma capacidade existente no backend não justifica, isoladamente, uma página, item de menu ou card. A interface pode combinar várias consultas e ações para sustentar uma única tarefa; o BFF pode compor contratos orientados a essa experiência sem expor a topologia da API privada.
 
 ## Separação de responsabilidades
 
-| Backend | Frontend |
-| --- | --- |
-| Preserva invariantes e consistência | Conduz tarefas e preserva o contexto do usuário |
-| Modela Aggregates, Entities e Value Objects | Modela páginas, jornadas e estados percebidos |
-| Expõe Commands e Queries | Oferece ações e informações em linguagem de produto |
-| Produz falhas estruturadas | Explica o problema e orienta a recuperação |
-| Controla autorização e isolamento do tenant | Torna possibilidades e restrições compreensíveis |
-| Persiste fatos e histórico | Comunica progresso, resultado e próximos passos |
+| Backend                                     | Frontend                                            |
+| ------------------------------------------- | --------------------------------------------------- |
+| Preserva invariantes e consistência         | Conduz tarefas e preserva o contexto do usuário     |
+| Modela Aggregates, Entities e Value Objects | Modela páginas, jornadas e estados percebidos       |
+| Expõe Commands e Queries                    | Oferece ações e informações em linguagem de produto |
+| Produz falhas estruturadas                  | Explica o problema e orienta a recuperação          |
+| Controla autorização e isolamento do tenant | Torna possibilidades e restrições compreensíveis    |
+| Persiste fatos e histórico                  | Comunica progresso, resultado e próximos passos     |
 
 A separação técnica entre componentes, serviços e gateways permanece. Esses limites evitam acoplamento com transporte, mas não devem copiar nomes ou camadas do backend por simetria. Componentes Vue não dependem de `fetch`, rotas do BFF, DTOs da API privada ou conceitos técnicos que não sejam úteis ao usuário.
 
@@ -309,6 +309,7 @@ Testes automatizados devem preferir papéis, nomes e comportamento acessíveis. 
 - Criação da organização conduz ao espaço identificado na URL.
 - Início comunica honestamente que pendências operacionais dependem de dados ainda não disponíveis e orienta o próximo passo útil.
 - Ministérios oferece busca, criação e listagem de ativos, distinguindo organização sem ministérios, busca sem resultado, carregamento e erro recuperável.
+- O detalhe do ministério apresenta identidade, estado e funções ministeriais reais, com navegação a partir da lista e estado vazio próprio; pessoas, times e liderança aguardam read models orientados à experiência.
 
 O Início ainda não apresenta próximas atividades, coletas de disponibilidade ou escalas pendentes porque esses read models não estão implementados. Informação operacional não deve ser simulada para preencher o layout.
 

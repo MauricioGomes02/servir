@@ -75,6 +75,22 @@
   gap: var(--space-1);
 }
 
+.ministry-list a {
+  width: fit-content;
+  color: var(--color-text);
+  font-weight: 750;
+  text-decoration-thickness: 0.08em;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ministry-list a:hover {
+    color: var(--color-action);
+    text-decoration-color: currentcolor;
+  }
+}
+
 .ministry-list li span:not(.status-badge) {
   color: var(--color-text-subtle);
   font-size: 0.9rem;

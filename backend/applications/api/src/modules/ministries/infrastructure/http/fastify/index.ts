@@ -7,4 +7,5 @@ export * from './register-qualify-member-for-ministry-role-route';
 export * from './register-create-ministry-team-route';
 export * from './register-assign-member-to-team-route';
 export * from './register-appoint-team-leader-route';
+export { registerGetMinistryDetailsRoute } from './register-get-ministry-details-route';
 export { registerListMinistriesRoute } from './register-list-ministries-route';

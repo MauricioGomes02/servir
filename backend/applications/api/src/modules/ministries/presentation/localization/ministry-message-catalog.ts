@@ -2,6 +2,7 @@ import type { MessageCatalog } from '@/shared/presentation/localization';
 
 export const ministryMessageCatalog: MessageCatalog = Object.freeze({
   'pt-BR': Object.freeze({
+    'ministry.details.not_found': 'O ministério informado não foi encontrado nesta organização.',
     'ministry.list.page.invalid': 'A pagina deve ser um inteiro positivo.',
     'ministry.list.page_size.invalid': 'O tamanho da pagina deve estar entre 1 e {max}.',
     'ministry.list.search.invalid': 'A busca deve ser um texto com no maximo {max} caracteres.',
@@ -60,6 +61,7 @@ export const ministryMessageCatalog: MessageCatalog = Object.freeze({
       'Este time já possui uma liderança ativa.',
   }),
   'en-US': Object.freeze({
+    'ministry.details.not_found': 'The specified ministry was not found in this organization.',
     'ministry.list.page.invalid': 'Page must be a positive integer.',
     'ministry.list.page_size.invalid': 'Page size must be between 1 and {max}.',
     'ministry.list.search.invalid': 'Search must be text with at most {max} characters.',

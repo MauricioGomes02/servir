@@ -8,6 +8,10 @@ interface OrganizationParameters {
   readonly organizationId: string;
 }
 
+interface MinistryParameters extends OrganizationParameters {
+  readonly ministryId: string;
+}
+
 interface MinistryListQuery {
   readonly page?: string;
   readonly pageSize?: string;
@@ -115,6 +119,16 @@ export async function createApplication(
         reply,
         config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries`,
+      ),
+  );
+  app.get<{ Params: MinistryParameters }>(
+    '/bff/organizations/:organizationId/ministries/:ministryId',
+    (request, reply) =>
+      sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries/${encodeURIComponent(request.params.ministryId)}`,
       ),
   );
 

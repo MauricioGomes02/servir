@@ -11,3 +11,4 @@ export { PostgresTeamLeaderAppointmentFactsReader } from './postgres-team-leader
 export { PostgresTeamLeadershipRepository } from './postgres-team-leadership-repository';
 export * from './ministry-membership-status-code';
 export { PostgresMinistryListReader } from './postgres-ministry-list-reader';
+export * from './postgres-ministry-details-reader';
