@@ -265,50 +265,49 @@ src/
 
 Essa árvore descreve destinos de código existente e consumidores reais. Não autoriza diretórios vazios nem telas futuras.
 
-## Mapeamento da estrutura atual
+## Migração realizada
 
-| Origem atual                               | Destino e responsabilidade                                                                 |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `app/router`                               | permanece em `app/router` e passa a consumir APIs públicas das pages                       |
-| `modules/organizations/presentation/views` | pages de criação, home e layout; ação de criação migra para feature                        |
-| `modules/organizations/application`        | modelo e query migram para `entities/organization`; mutation migra para feature            |
-| `modules/organizations/infrastructure`     | operações `/bff` migram para a entity ou feature proprietária                              |
-| `features/manage-ministries`               | separar pages, queries/modelo de `entities/ministry` e mutation `features/create-ministry` |
-| `shared/http`                              | renomear para `shared/api`                                                                 |
-| `shared/presentation/components`           | organizar por contratos em `shared/ui`                                                     |
-| `shared/theme` e `shared/styles`           | permanecem compartilhados; integração global pertence a `app`                              |
+| Origem removida                  | Destino e responsabilidade implementados                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| `modules/organizations`          | pages de criação, home e layout; entity de leitura e feature de criação              |
+| `features/manage-ministries`     | pages de lista e detalhe, queries em `entities/ministry` e feature `create-ministry` |
+| `shared/http`                    | infraestrutura transversal em `shared/api`                                           |
+| `shared/presentation/components` | componentes independentes do produto em `shared/ui`                                  |
+| imports internos entre módulos   | APIs públicas locais protegidas contra deep imports pelo ESLint                      |
+| busca local de ministérios       | termo aplicado preservado na URL e restaurado pela page                              |
+| `shared/theme` e `shared/styles` | permanecem compartilhados; integração global pertence a `app`                        |
 
 ## Estratégia incremental
 
-### Fase 1 — limites verificáveis
+### Fase 1 — limites verificáveis — concluída
 
 - estabilizar este documento e o ADR;
 - criar APIs públicas somente para módulos com consumidores externos;
 - configurar aliases e lint contra dependências invertidas e deep imports;
 - não mover arquivos sem um corte estrutural verificável.
 
-### Fase 2 — fundação compartilhada
+### Fase 2 — fundação compartilhada — concluída
 
 - migrar `shared/http` para `shared/api`;
 - migrar componentes genéricos para `shared/ui`;
 - preservar contratos públicos;
 - manter tema e tokens sem conhecimento do produto.
 
-### Fase 3 — Organization
+### Fase 3 — Organization — concluída
 
 - separar pages de criação, home e shell;
 - mover leitura e modelo para `entities/organization`;
 - mover criação para `features/create-organization`;
 - remover `application/infrastructure/presentation` quando não restar consumidor.
 
-### Fase 4 — Ministries
+### Fase 4 — Ministries — concluída
 
 - mover lista e detalhe para pages;
 - mover queries, modelo e visualizações reutilizáveis para `entities/ministry`;
 - isolar `create-ministry` como feature;
-- levar filtros e busca à URL quando o contrato for estabilizado.
+- preservar filtros e busca navegáveis na URL.
 
-### Fase 5 — server state
+### Fase 5 — server state — orientada por necessidade futura
 
 - medir duplicação, refetch e compartilhamento;
 - introduzir cache somente com necessidade concreta;

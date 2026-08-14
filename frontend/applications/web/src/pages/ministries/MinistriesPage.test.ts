@@ -1,5 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue';
 import { axe } from 'vitest-axe';
+import { createMemoryHistory, createRouter } from 'vue-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MinistriesPage from './MinistriesPage.vue';
 
@@ -18,6 +19,29 @@ const emptyPage = {
   pagination: { page: 1, pageSize: 20, totalItems: 0, totalPages: 0 },
 };
 
+async function renderPage(path = '/organizations/organization-id/ministries') {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/organizations/:organizationId/ministries', component: MinistriesPage },
+      {
+        path: '/organizations/:organizationId/ministries/:ministryId',
+        name: 'ministry-details',
+        component: { template: '<p>Ministry details</p>' },
+      },
+    ],
+  });
+  await router.push(path);
+  await router.isReady();
+  return {
+    router,
+    ...render(MinistriesPage, {
+      props: { organizationId: 'organization-id' },
+      global: { plugins: [router] },
+    }),
+  };
+}
+
 describe('MinistriesPage', () => {
   beforeEach(() => {
     requests.get.mockReset().mockResolvedValue(emptyPage);
@@ -25,9 +49,7 @@ describe('MinistriesPage', () => {
   });
 
   it('explains the next action when the organization has no ministries', async () => {
-    const { container, findByRole, getByRole } = render(MinistriesPage, {
-      props: { organizationId: 'organization-id' },
-    });
+    const { container, findByRole, getByRole } = await renderPage();
 
     expect(
       await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' }),
@@ -43,10 +65,8 @@ describe('MinistriesPage', () => {
     expect(accessibility.violations).toEqual([]);
   });
 
-  it('distinguishes an empty search from an organization without ministries', async () => {
-    const { findByRole, getByLabelText, getByRole } = render(MinistriesPage, {
-      props: { organizationId: 'organization-id' },
-    });
+  it('stores an applied search in the URL', async () => {
+    const { findByRole, getByLabelText, getByRole, router } = await renderPage();
     await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' });
 
     await fireEvent.update(getByLabelText('Buscar ministérios'), 'Música');
@@ -54,6 +74,24 @@ describe('MinistriesPage', () => {
 
     expect(await findByRole('heading', { name: 'Nenhum ministério encontrado' })).toBeVisible();
     expect(getByRole('button', { name: 'Limpar busca' })).toBeVisible();
+    expect(router.currentRoute.value.query.search).toBe('Música');
+    expect(requests.get).toHaveBeenLastCalledWith(
+      '/bff/organizations/organization-id/ministries?pageSize=20&search=M%C3%BAsica&status=active',
+      expect.any(AbortSignal),
+    );
+  });
+
+  it('restores the applied search from the URL', async () => {
+    const { findByRole, getByLabelText } = await renderPage(
+      '/organizations/organization-id/ministries?search=M%C3%BAsica',
+    );
+
+    await findByRole('heading', { name: 'Nenhum ministério encontrado' });
+    expect(getByLabelText('Buscar ministérios')).toHaveValue('Música');
+    expect(requests.get).toHaveBeenCalledWith(
+      '/bff/organizations/organization-id/ministries?pageSize=20&search=M%C3%BAsica&status=active',
+      expect.any(AbortSignal),
+    );
   });
 
   it('creates a ministry and refreshes the visible structure', async () => {
@@ -62,9 +100,7 @@ describe('MinistriesPage', () => {
       items: [{ id: 'ministry-id', name: 'Música', status: 'active' }],
       pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
     });
-    const { findByRole, getByLabelText, getByRole, getByText } = render(MinistriesPage, {
-      props: { organizationId: 'organization-id' },
-    });
+    const { findByRole, getByLabelText, getByRole, getByText } = await renderPage();
     await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' });
 
     await fireEvent.click(getByRole('button', { name: 'Criar primeiro ministério' }));

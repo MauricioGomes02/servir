@@ -6,6 +6,11 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
 
+const publicModuleApi = {
+  group: ['@/pages/*/*', '@/features/*/*', '@/entities/*/*', '@/shared/api/*', '@/shared/ui/*'],
+  message: 'Consume the module public API instead of a deep import.',
+};
+
 export default tseslint.config(
   { ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**'] },
   eslint.configs.recommended,
@@ -27,12 +32,7 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
-            {
-              group: ['@/shared/api/*', '@/shared/ui/*'],
-              message: 'Consume the module public API instead of a deep import.',
-            },
-          ],
+          patterns: [publicModuleApi],
         },
       ],
     },
@@ -44,13 +44,10 @@ export default tseslint.config(
         'error',
         {
           patterns: [
+            publicModuleApi,
             {
               group: ['@/app/**', '@/pages/**', '@/features/**', '@/entities/**', '@/modules/**'],
               message: 'Shared code cannot depend on product or application layers.',
-            },
-            {
-              group: ['@/shared/api/*', '@/shared/ui/*'],
-              message: 'Consume the module public API instead of a deep import.',
             },
           ],
         },
@@ -64,13 +61,10 @@ export default tseslint.config(
         'error',
         {
           patterns: [
+            publicModuleApi,
             {
               group: ['@/app/**', '@/pages/**', '@/features/**', '@/modules/**'],
               message: 'Entities can depend only on entities and shared code.',
-            },
-            {
-              group: ['@/shared/api/*', '@/shared/ui/*'],
-              message: 'Consume the module public API instead of a deep import.',
             },
           ],
         },
@@ -84,13 +78,10 @@ export default tseslint.config(
         'error',
         {
           patterns: [
+            publicModuleApi,
             {
               group: ['@/app/**', '@/pages/**', '@/modules/**'],
               message: 'Features cannot depend on pages, app, or legacy modules.',
-            },
-            {
-              group: ['@/shared/api/*', '@/shared/ui/*'],
-              message: 'Consume the module public API instead of a deep import.',
             },
           ],
         },
@@ -104,13 +95,10 @@ export default tseslint.config(
         'error',
         {
           patterns: [
+            publicModuleApi,
             {
               group: ['@/app/**', '@/modules/**'],
               message: 'Pages cannot depend on app or legacy modules.',
-            },
-            {
-              group: ['@/shared/api/*', '@/shared/ui/*'],
-              message: 'Consume the module public API instead of a deep import.',
             },
           ],
         },
