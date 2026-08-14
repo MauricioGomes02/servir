@@ -1,5 +1,5 @@
 import { computed, onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
-import { fieldErrors, HttpProblem } from '@/shared/http/problem-details';
+import { fieldErrors, HttpProblem } from '@/shared/api';
 import { manageMinistries } from './composition';
 import type { MinistryPage } from './ministry';
 

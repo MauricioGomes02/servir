@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import AppIcon from '@/shared/presentation/components/AppIcon.vue';
-import AppStatusBadge from '@/shared/presentation/components/AppStatusBadge.vue';
+import { AppIcon, AppStatusBadge } from '@/shared/ui';
 import { useOrganizationShell } from './use-organization-shell';
 
 const props = defineProps<{ organizationId: string }>();

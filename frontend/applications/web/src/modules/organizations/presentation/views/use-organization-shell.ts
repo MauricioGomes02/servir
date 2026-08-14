@@ -1,7 +1,7 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
 import type { Organization } from '../../application/organization';
 import { getOrganizationDetails } from '../../composition';
-import { HttpProblem } from '@/shared/http/problem-details';
+import { HttpProblem } from '@/shared/api';
 
 export function useOrganizationShell(organizationId: Ref<string>) {
   const organization = ref<Organization>();

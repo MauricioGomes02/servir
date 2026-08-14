@@ -1,5 +1,5 @@
 import type { OrganizationGateway } from '@/modules/organizations/application/organization';
-import { httpClient, type HttpClient } from '@/shared/http/http-client';
+import { httpClient, type HttpClient } from '@/shared/api';
 
 export function createHttpOrganizationGateway(client: HttpClient): OrganizationGateway {
   return {

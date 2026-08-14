@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import AppButton from '@/shared/presentation/components/AppButton.vue';
-import AppField from '@/shared/presentation/components/AppField.vue';
-import AppStatusBadge from '@/shared/presentation/components/AppStatusBadge.vue';
+import { AppButton, AppField, AppStatusBadge } from '@/shared/ui';
 import { useMinistriesView } from './use-ministries-view';
 
 const props = defineProps<{ organizationId: string }>();

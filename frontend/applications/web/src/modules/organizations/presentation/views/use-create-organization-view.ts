@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { fieldErrors, HttpProblem } from '@/shared/http/problem-details';
+import { fieldErrors, HttpProblem } from '@/shared/api';
 import { createOrganization } from '../../composition';
 
 export function useCreateOrganizationView() {

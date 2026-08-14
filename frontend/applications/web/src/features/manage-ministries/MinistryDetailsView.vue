@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import AppButton from '@/shared/presentation/components/AppButton.vue';
-import AppStatusBadge from '@/shared/presentation/components/AppStatusBadge.vue';
+import { AppButton, AppStatusBadge } from '@/shared/ui';
 import { useMinistryDetailsView } from './use-ministry-details-view';
 
 const props = defineProps<{ organizationId: string; ministryId: string }>();

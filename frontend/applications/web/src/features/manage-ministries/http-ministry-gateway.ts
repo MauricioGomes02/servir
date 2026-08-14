@@ -1,4 +1,4 @@
-import { httpClient, type HttpClient } from '@/shared/http/http-client';
+import { httpClient, type HttpClient } from '@/shared/api';
 import type { MinistryGateway, MinistryListFilters } from './ministry';
 
 function listPath(organizationId: string, filters: MinistryListFilters): string {

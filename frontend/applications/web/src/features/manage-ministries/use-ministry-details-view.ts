@@ -1,5 +1,5 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
-import { HttpProblem } from '@/shared/http/problem-details';
+import { HttpProblem } from '@/shared/api';
 import { manageMinistries } from './composition';
 import type { MinistryDetails } from './ministry';
 

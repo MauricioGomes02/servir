@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import AppButton from '@/shared/presentation/components/AppButton.vue';
-import AppField from '@/shared/presentation/components/AppField.vue';
-import AppIcon from '@/shared/presentation/components/AppIcon.vue';
+import { AppButton, AppField, AppIcon } from '@/shared/ui';
 import { useCreateOrganizationView } from './use-create-organization-view';
 
 const { name, nameErrors, problem, submit, submitting } = useCreateOrganizationView();

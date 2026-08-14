@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppIcon from '@/shared/presentation/components/AppIcon.vue';
+import { AppIcon } from '@/shared/ui';
 import { useThemeControl } from './use-theme-control';
 
 const { chooseTheme, closeMenu, open, preference, setTrigger } = useThemeControl();
