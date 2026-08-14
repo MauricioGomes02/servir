@@ -26,13 +26,14 @@ export const router = createRouter({
         {
           path: 'ministries',
           name: 'organization-ministries',
-          component: () => import('@/features/manage-ministries/MinistriesView.vue'),
+          component: () => import('@/pages/ministries').then((module) => module.MinistriesPage),
           props: true,
         },
         {
           path: 'ministries/:ministryId',
           name: 'ministry-details',
-          component: () => import('@/features/manage-ministries/MinistryDetailsView.vue'),
+          component: () =>
+            import('@/pages/ministry-details').then((module) => module.MinistryDetailsPage),
           props: true,
         },
       ],

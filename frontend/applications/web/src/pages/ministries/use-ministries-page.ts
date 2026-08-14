@@ -1,23 +1,16 @@
-import { computed, onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
-import { fieldErrors, HttpProblem } from '@/shared/api';
-import { manageMinistries } from './composition';
-import type { MinistryPage } from './ministry';
+import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
+import { listMinistries, type MinistryPage } from '@/entities/ministry';
+import { useCreateMinistry } from '@/features/create-ministry';
+import { HttpProblem } from '@/shared/api';
 
-export function useMinistriesView(organizationId: Ref<string>) {
+export function useMinistriesPage(organizationId: Ref<string>) {
   const page = ref<MinistryPage>();
   const loading = ref(true);
   const problem = ref<HttpProblem>();
   const search = ref('');
   const appliedSearch = ref('');
   const showCreation = ref(false);
-  const name = ref('');
-  const creating = ref(false);
-  const creationProblem = ref<HttpProblem>();
   let requestController: AbortController | undefined;
-
-  const nameErrors = computed(() =>
-    creationProblem.value ? fieldErrors(creationProblem.value.problem, 'name') : [],
-  );
 
   async function load(): Promise<void> {
     requestController?.abort();
@@ -25,7 +18,7 @@ export function useMinistriesView(organizationId: Ref<string>) {
     loading.value = true;
     problem.value = undefined;
     try {
-      page.value = await manageMinistries.list(
+      page.value = await listMinistries(
         organizationId.value,
         { search: appliedSearch.value || undefined, status: 'active', pageSize: 20 },
         requestController.signal,
@@ -57,27 +50,16 @@ export function useMinistriesView(organizationId: Ref<string>) {
     await load();
   }
 
-  async function createMinistry(): Promise<void> {
-    creationProblem.value = undefined;
-    creating.value = true;
-    try {
-      await manageMinistries.create(organizationId.value, name.value);
-      name.value = '';
-      showCreation.value = false;
-      await load();
-    } catch (error) {
-      creationProblem.value =
-        error instanceof HttpProblem
-          ? error
-          : new HttpProblem({
-              type: 'about:blank',
-              title: 'Não foi possível criar o ministério.',
-              status: 0,
-            });
-    } finally {
-      creating.value = false;
-    }
-  }
+  const {
+    create,
+    creating,
+    name,
+    nameErrors,
+    problem: creationProblem,
+  } = useCreateMinistry(organizationId, async () => {
+    showCreation.value = false;
+    await load();
+  });
 
   onMounted(load);
   onBeforeUnmount(() => requestController?.abort());
@@ -86,7 +68,7 @@ export function useMinistriesView(organizationId: Ref<string>) {
     appliedSearch,
     applySearch,
     clearSearch,
-    createMinistry,
+    createMinistry: create,
     creating,
     creationProblem,
     load,

@@ -1,9 +1,8 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
+import { getMinistry, type MinistryDetails } from '@/entities/ministry';
 import { HttpProblem } from '@/shared/api';
-import { manageMinistries } from './composition';
-import type { MinistryDetails } from './ministry';
 
-export function useMinistryDetailsView(organizationId: Ref<string>, ministryId: Ref<string>) {
+export function useMinistryDetailsPage(organizationId: Ref<string>, ministryId: Ref<string>) {
   const ministry = ref<MinistryDetails>();
   const loading = ref(true);
   const problem = ref<HttpProblem>();
@@ -15,7 +14,7 @@ export function useMinistryDetailsView(organizationId: Ref<string>, ministryId: 
     loading.value = true;
     problem.value = undefined;
     try {
-      ministry.value = await manageMinistries.get(
+      ministry.value = await getMinistry(
         organizationId.value,
         ministryId.value,
         requestController.signal,

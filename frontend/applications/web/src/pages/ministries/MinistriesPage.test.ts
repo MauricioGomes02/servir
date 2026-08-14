@@ -1,28 +1,31 @@
 import { fireEvent, render } from '@testing-library/vue';
 import { axe } from 'vitest-axe';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import MinistriesView from './MinistriesView.vue';
+import MinistriesPage from './MinistriesPage.vue';
 
-const services = vi.hoisted(() => ({
-  list: vi.fn(),
-  create: vi.fn(),
+const requests = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
 }));
 
-vi.mock('./composition', () => ({ manageMinistries: services }));
+vi.mock('@/shared/api', async (importOriginal) => ({
+  ...(await importOriginal()),
+  httpClient: requests,
+}));
 
 const emptyPage = {
   items: [],
   pagination: { page: 1, pageSize: 20, totalItems: 0, totalPages: 0 },
 };
 
-describe('MinistriesView', () => {
+describe('MinistriesPage', () => {
   beforeEach(() => {
-    services.list.mockReset().mockResolvedValue(emptyPage);
-    services.create.mockReset();
+    requests.get.mockReset().mockResolvedValue(emptyPage);
+    requests.post.mockReset();
   });
 
   it('explains the next action when the organization has no ministries', async () => {
-    const { container, findByRole, getByRole } = render(MinistriesView, {
+    const { container, findByRole, getByRole } = render(MinistriesPage, {
       props: { organizationId: 'organization-id' },
     });
 
@@ -30,9 +33,8 @@ describe('MinistriesView', () => {
       await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' }),
     ).toBeVisible();
     expect(getByRole('button', { name: 'Criar primeiro ministério' })).toBeVisible();
-    expect(services.list).toHaveBeenCalledWith(
-      'organization-id',
-      { search: undefined, status: 'active', pageSize: 20 },
+    expect(requests.get).toHaveBeenCalledWith(
+      '/bff/organizations/organization-id/ministries?pageSize=20&status=active',
       expect.any(AbortSignal),
     );
     const accessibility = await axe(container, {
@@ -42,7 +44,7 @@ describe('MinistriesView', () => {
   });
 
   it('distinguishes an empty search from an organization without ministries', async () => {
-    const { findByRole, getByLabelText, getByRole } = render(MinistriesView, {
+    const { findByRole, getByLabelText, getByRole } = render(MinistriesPage, {
       props: { organizationId: 'organization-id' },
     });
     await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' });
@@ -55,12 +57,12 @@ describe('MinistriesView', () => {
   });
 
   it('creates a ministry and refreshes the visible structure', async () => {
-    services.create.mockResolvedValue({ id: 'ministry-id', name: 'Música', status: 'active' });
-    services.list.mockResolvedValueOnce(emptyPage).mockResolvedValueOnce({
+    requests.post.mockResolvedValue({ id: 'ministry-id', name: 'Música', status: 'active' });
+    requests.get.mockResolvedValueOnce(emptyPage).mockResolvedValueOnce({
       items: [{ id: 'ministry-id', name: 'Música', status: 'active' }],
       pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
     });
-    const { findByRole, getByLabelText, getByRole, getByText } = render(MinistriesView, {
+    const { findByRole, getByLabelText, getByRole, getByText } = render(MinistriesPage, {
       props: { organizationId: 'organization-id' },
     });
     await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' });
@@ -71,6 +73,10 @@ describe('MinistriesView', () => {
 
     expect(await findByRole('heading', { name: '1 ministério ativo' })).toBeVisible();
     expect(getByText('Música')).toBeVisible();
-    expect(services.create).toHaveBeenCalledWith('organization-id', 'Música');
+    expect(requests.post).toHaveBeenCalledWith(
+      '/bff/organizations/organization-id/ministries',
+      { name: 'Música' },
+      undefined,
+    );
   });
 });

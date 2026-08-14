@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { AppButton, AppField, AppStatusBadge } from '@/shared/ui';
-import { useMinistriesView } from './use-ministries-view';
+import { useMinistriesPage } from './use-ministries-page';
 
 const props = defineProps<{ organizationId: string }>();
 const {
@@ -19,7 +19,7 @@ const {
   problem,
   search,
   showCreation,
-} = useMinistriesView(toRef(props, 'organizationId'));
+} = useMinistriesPage(toRef(props, 'organizationId'));
 </script>
 
 <template>
@@ -125,4 +125,4 @@ const {
   </section>
 </template>
 
-<style src="./ministries-view.css"></style>
+<style src="./ministries-page.css"></style>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { AppButton, AppStatusBadge } from '@/shared/ui';
-import { useMinistryDetailsView } from './use-ministry-details-view';
+import { useMinistryDetailsPage } from './use-ministry-details-page';
 
 const props = defineProps<{ organizationId: string; ministryId: string }>();
-const { load, loading, ministry, problem } = useMinistryDetailsView(
+const { load, loading, ministry, problem } = useMinistryDetailsPage(
   toRef(props, 'organizationId'),
   toRef(props, 'ministryId'),
 );
@@ -73,4 +73,4 @@ const { load, loading, ministry, problem } = useMinistryDetailsView(
   </article>
 </template>
 
-<style src="./ministry-details-view.css"></style>
+<style src="./ministry-details-page.css"></style>

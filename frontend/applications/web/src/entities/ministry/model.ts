@@ -32,13 +32,3 @@ export interface MinistryListFilters {
   readonly page?: number;
   readonly pageSize?: number;
 }
-
-export interface MinistryGateway {
-  get(organizationId: string, ministryId: string, signal?: AbortSignal): Promise<MinistryDetails>;
-  list(
-    organizationId: string,
-    filters: MinistryListFilters,
-    signal?: AbortSignal,
-  ): Promise<MinistryPage>;
-  create(organizationId: string, name: string, signal?: AbortSignal): Promise<MinistrySummary>;
-}
