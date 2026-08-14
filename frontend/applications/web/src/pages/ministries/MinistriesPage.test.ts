@@ -115,4 +115,18 @@ describe('MinistriesPage', () => {
       undefined,
     );
   });
+
+  it('describes opening and closing the ministry creation form explicitly', async () => {
+    const { findByRole, getByRole, queryByRole } = await renderPage();
+    await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' });
+
+    await fireEvent.click(getByRole('button', { name: 'Criar novo ministério' }));
+
+    const closeForm = getByRole('button', { name: 'Fechar formulário' });
+    expect(closeForm).toHaveClass('app-button-secondary');
+    expect(getByRole('group', { name: 'Criar um ministério' })).toBeVisible();
+
+    await fireEvent.click(closeForm);
+    expect(queryByRole('group', { name: 'Criar um ministério' })).not.toBeInTheDocument();
+  });
 });

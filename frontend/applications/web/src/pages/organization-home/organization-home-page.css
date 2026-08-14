@@ -18,12 +18,16 @@
 }
 
 .next-step .app-button {
-  width: fit-content;
+  width: 100%;
   text-decoration: none;
 }
 
 @media (width >= 48rem) {
   .next-step {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .next-step .app-button {
+    width: fit-content;
   }
 }

@@ -31,12 +31,12 @@ const {
         <p>Organize os espaços onde pessoas, funções e equipes servem juntas.</p>
       </div>
       <AppButton
-        :variant="showCreation ? 'tertiary' : 'primary'"
+        :variant="showCreation ? 'secondary' : 'primary'"
         :aria-expanded="showCreation"
         aria-controls="ministry-creation"
         @click="showCreation = !showCreation"
       >
-        {{ showCreation ? 'Cancelar' : 'Novo ministério' }}
+        {{ showCreation ? 'Fechar formulário' : 'Criar novo ministério' }}
       </AppButton>
     </header>
 

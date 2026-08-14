@@ -23,7 +23,7 @@ defineProps<{ organizationId: string }>();
         </p>
       </div>
       <RouterLink
-        class="app-button app-button-primary"
+        class="app-button app-button-primary app-button-large"
         :to="{ name: 'organization-ministries', params: { organizationId } }"
       >
         Ver ministérios
