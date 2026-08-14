@@ -247,6 +247,7 @@ servir/
 
 - [Arquitetura](docs/architecture.md)
 - [Experiência da aplicação web](docs/frontend-experience.md)
+- [Arquitetura do frontend web](docs/frontend-architecture.md)
 - [Design System](docs/design-system/README.md)
 - [Referência visual e de experiências](docs/design-system/servir-ux-ui-reference.md)
 - [Domínio](docs/domain/README.md)

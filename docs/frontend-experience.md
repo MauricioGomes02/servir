@@ -6,6 +6,8 @@ O Servir apoia o trabalho de pessoas que organizam ministérios, atividades, dis
 
 Este documento é a referência viva para projetar, implementar e avaliar a experiência web. As regras do domínio continuam soberanas, enquanto decisões de interação seguem adequação à tarefa, usabilidade, acessibilidade e arquitetura da informação.
 
+A organização técnica das pages, features, entities de frontend, estado e dependências está definida em [Arquitetura do frontend web](frontend-architecture.md). Experiência determina o que a pessoa precisa realizar; arquitetura técnica determina onde o comportamento reside.
+
 ## Hierarquia de autoridade
 
 Quando critérios entrarem em tensão, aplicar esta ordem:
