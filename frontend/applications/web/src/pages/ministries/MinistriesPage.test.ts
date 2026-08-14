@@ -112,6 +112,8 @@ describe('MinistriesPage', () => {
     );
     expect(detailsLink).toHaveTextContent('Música');
     expect(detailsLink).toHaveTextContent('Ver detalhes');
+    expect(detailsLink.querySelector('.ministry-list-action')).toHaveTextContent('Ver detalhes');
+    expect(container.querySelector('.ministry-details')).not.toBeInTheDocument();
     const accessibility = await axe(container, {
       rules: { 'color-contrast': { enabled: false } },
     });

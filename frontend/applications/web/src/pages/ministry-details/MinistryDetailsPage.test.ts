@@ -1,6 +1,6 @@
 import { render } from '@testing-library/vue';
-import { RouterLinkStub } from '@vue/test-utils';
 import { axe } from 'vitest-axe';
+import { createMemoryHistory, createRouter } from 'vue-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MinistryDetailsPage from './MinistryDetailsPage.vue';
 
@@ -10,10 +10,28 @@ vi.mock('@/shared/api', async (importOriginal) => ({
   httpClient: requests,
 }));
 
-function renderView() {
+async function renderView() {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      {
+        path: '/organizations/:organizationId/ministries',
+        name: 'organization-ministries',
+        component: { template: '<p>Ministries</p>' },
+      },
+      {
+        path: '/organizations/:organizationId/ministries/:ministryId',
+        component: MinistryDetailsPage,
+        props: true,
+      },
+    ],
+  });
+  await router.push('/organizations/organization-id/ministries/ministry-id');
+  await router.isReady();
+
   return render(MinistryDetailsPage, {
     props: { organizationId: 'organization-id', ministryId: 'ministry-id' },
-    global: { stubs: { RouterLink: RouterLinkStub } },
+    global: { plugins: [router] },
   });
 }
 
@@ -27,9 +45,14 @@ describe('MinistryDetailsPage', () => {
       status: 'active',
       roles: [{ id: 'role-id', name: 'Guitarra', status: 'active' }],
     });
-    const { container, findByRole, getByText, queryByText } = renderView();
+    const { container, findByRole, getByRole, getByText, queryByText } = await renderView();
 
     expect(await findByRole('heading', { name: 'Louvor' })).toBeVisible();
+    const backLink = getByRole('link', { name: 'Voltar para a lista de ministérios' });
+    expect(getByRole('navigation', { name: 'Navegação do ministério' })).toContainElement(backLink);
+    expect(backLink).toHaveClass('ministry-back-link', 'app-button-secondary');
+    expect(backLink).toHaveAttribute('href', '/organizations/organization-id/ministries');
+    expect(backLink.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
     expect(getByText('Guitarra')).toBeVisible();
     expect(queryByText('Liderança')).not.toBeInTheDocument();
     expect(requests.get).toHaveBeenCalledWith(
@@ -49,7 +72,7 @@ describe('MinistryDetailsPage', () => {
       status: 'active',
       roles: [],
     });
-    const { findByText } = renderView();
+    const { findByText } = await renderView();
 
     expect(await findByText('Nenhuma função ministerial foi definida ainda.')).toBeVisible();
   });

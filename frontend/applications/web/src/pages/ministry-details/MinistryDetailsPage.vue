@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppButton, AppStatusBadge } from '@/shared/ui';
+import { AppButton, AppIcon, AppStatusBadge } from '@/shared/ui';
 import { useMinistryDetailsPage } from './use-ministry-details-page';
 
 const props = defineProps<{ organizationId: string; ministryId: string }>();
@@ -28,17 +28,20 @@ const { load, loading, ministry, problem } = useMinistryDetailsPage(
         :to="{ name: 'organization-ministries', params: { organizationId } }"
         class="app-button app-button-tertiary"
       >
-        Voltar aos ministérios
+        Voltar para a lista de ministérios
       </RouterLink>
     </div>
   </section>
   <article v-else-if="ministry" class="ministry-details" aria-labelledby="ministry-title">
-    <RouterLink
-      class="ministry-back-link"
-      :to="{ name: 'organization-ministries', params: { organizationId } }"
-    >
-      Ministérios
-    </RouterLink>
+    <nav class="ministry-details-navigation" aria-label="Navegação do ministério">
+      <RouterLink
+        class="ministry-back-link app-button app-button-secondary"
+        :to="{ name: 'organization-ministries', params: { organizationId } }"
+      >
+        <AppIcon name="back" />
+        <span>Voltar para a lista de ministérios</span>
+      </RouterLink>
+    </nav>
     <header class="ministry-details-header">
       <div>
         <p class="eyebrow">Estrutura ministerial</p>

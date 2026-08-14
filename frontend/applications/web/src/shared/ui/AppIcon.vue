@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { ArrowRight, CalendarDays, Church, HandHeart, Settings, Users } from '@lucide/vue';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Church,
+  HandHeart,
+  Settings,
+  Users,
+} from '@lucide/vue';
 
-type AppIconName = 'settings' | 'community' | 'people' | 'ministry' | 'calendar' | 'arrow';
+type AppIconName = 'settings' | 'community' | 'people' | 'ministry' | 'calendar' | 'back' | 'arrow';
 
 const icons = {
   settings: Settings,
@@ -9,6 +17,7 @@ const icons = {
   people: Users,
   ministry: HandHeart,
   calendar: CalendarDays,
+  back: ArrowLeft,
   arrow: ArrowRight,
 };
 

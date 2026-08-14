@@ -121,7 +121,7 @@ const {
             </div>
             <div class="ministry-list-meta">
               <AppStatusBadge tone="success">Ativo</AppStatusBadge>
-              <span class="ministry-details">
+              <span class="ministry-list-action">
                 Ver detalhes
                 <AppIcon name="arrow" />
               </span>
