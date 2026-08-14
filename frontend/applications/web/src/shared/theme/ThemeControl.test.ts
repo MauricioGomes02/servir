@@ -27,6 +27,26 @@ describe('ThemeControl', () => {
       'appearance-settings',
     );
     expect(view.getByRole('radio', { name: 'Usar tema do sistema' })).toBeChecked();
+    expect(view.getByRole('radio', { name: 'Usar tema do sistema' })).toHaveFocus();
+  });
+
+  it('opens through the shortcut and supports arrow navigation', async () => {
+    const view = render(ThemeControl);
+    const trigger = view.getByRole('button', { name: 'Abrir configurações' });
+
+    await fireEvent.keyDown(document, { key: 'T', altKey: true, shiftKey: true });
+
+    const systemTheme = view.getByRole('radio', { name: 'Usar tema do sistema' });
+    expect(systemTheme).toHaveFocus();
+
+    await fireEvent.keyDown(systemTheme, { key: 'ArrowRight' });
+    expect(view.getByRole('radio', { name: 'Tema claro' })).toBeChecked();
+    expect(view.getByRole('radio', { name: 'Tema claro' })).toHaveFocus();
+    expect(localStorage.getItem('servir.theme')).toBe('light');
+
+    await fireEvent.keyDown(document, { key: 'Escape' });
+    expect(view.queryByRole('dialog', { name: 'Configurações' })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
 
   it('persists an explicit dark theme and closes with Escape', async () => {

@@ -20,38 +20,40 @@ const { load, loading, organization, problem } = useOrganizationLayout(
     <RouterLink :to="{ name: 'create-organization' }">Voltar ao início</RouterLink>
   </section>
   <div v-else-if="organization" class="organization-shell">
-    <aside class="organization-sidebar">
-      <header class="organization-context">
-        <span class="workspace-symbol" aria-hidden="true"><AppIcon name="community" /></span>
-        <div>
-          <small>Organização</small>
-          <strong>{{ organization.name }}</strong>
-        </div>
-        <AppStatusBadge tone="success">Ativa</AppStatusBadge>
-      </header>
-      <nav aria-label="Navegação da organização">
-        <ul class="organization-navigation">
-          <li>
-            <RouterLink
-              :to="{ name: 'organization-home', params: { organizationId } }"
-              exact-active-class="is-active"
-            >
-              Início
-            </RouterLink>
-          </li>
-          <li>
-            <RouterLink
-              :to="{ name: 'organization-ministries', params: { organizationId } }"
-              active-class="is-active"
-            >
-              Ministérios
-            </RouterLink>
-          </li>
-        </ul>
-      </nav>
-    </aside>
-    <div class="organization-content">
-      <RouterView />
+    <header class="organization-context">
+      <span class="workspace-symbol" aria-hidden="true"><AppIcon name="community" /></span>
+      <div>
+        <small>Organização</small>
+        <strong>{{ organization.name }}</strong>
+      </div>
+      <AppStatusBadge tone="success">Ativa</AppStatusBadge>
+    </header>
+    <div class="organization-workspace">
+      <aside class="organization-sidebar">
+        <nav aria-label="Navegação da organização">
+          <ul class="organization-navigation">
+            <li>
+              <RouterLink
+                :to="{ name: 'organization-home', params: { organizationId } }"
+                exact-active-class="is-active"
+              >
+                Início
+              </RouterLink>
+            </li>
+            <li>
+              <RouterLink
+                :to="{ name: 'organization-ministries', params: { organizationId } }"
+                active-class="is-active"
+              >
+                Ministérios
+              </RouterLink>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      <div class="organization-content">
+        <RouterView />
+      </div>
     </div>
   </div>
 </template>

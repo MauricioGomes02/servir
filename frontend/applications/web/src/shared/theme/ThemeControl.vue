@@ -2,7 +2,17 @@
 import { AppIcon } from '@/shared/ui';
 import { useThemeControl } from './use-theme-control';
 
-const { chooseTheme, closeMenu, open, preference, setTrigger } = useThemeControl();
+const {
+  chooseTheme,
+  closeMenu,
+  onThemeKeydown,
+  open,
+  preference,
+  setPanel,
+  setTrigger,
+  themeOptions,
+  toggleMenu,
+} = useThemeControl();
 </script>
 
 <template>
@@ -15,13 +25,15 @@ const { chooseTheme, closeMenu, open, preference, setTrigger } = useThemeControl
       aria-haspopup="dialog"
       :aria-expanded="open"
       aria-controls="appearance-settings"
-      @click="open = !open"
+      aria-keyshortcuts="Alt+Shift+T"
+      @click="toggleMenu"
     >
       <AppIcon name="settings" />
     </button>
     <section
       v-if="open"
       id="appearance-settings"
+      :ref="setPanel"
       class="settings-panel"
       role="dialog"
       aria-label="Configurações"
@@ -33,13 +45,12 @@ const { chooseTheme, closeMenu, open, preference, setTrigger } = useThemeControl
         </div>
         <button class="text-button" type="button" @click="closeMenu(true)">Fechar</button>
       </header>
-      <fieldset class="theme-options">
+      <p id="theme-shortcut" class="theme-shortcut">
+        Atalho: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>
+      </p>
+      <fieldset class="theme-options" aria-describedby="theme-shortcut">
         <legend>Aparência</legend>
-        <label
-          v-for="option in ['system', 'light', 'dark'] as const"
-          :key="option"
-          :for="`theme-${option}`"
-        >
+        <label v-for="option in themeOptions" :key="option" :for="`theme-${option}`">
           <input
             :id="`theme-${option}`"
             v-model="preference"
@@ -47,6 +58,7 @@ const { chooseTheme, closeMenu, open, preference, setTrigger } = useThemeControl
             name="theme"
             :value="option"
             @change="chooseTheme(option)"
+            @keydown="onThemeKeydown"
           />
           <span>{{
             { system: 'Usar tema do sistema', light: 'Tema claro', dark: 'Tema escuro' }[option]

@@ -14,7 +14,7 @@ describe('OrganizationLayout', () => {
   beforeEach(() => {
     requests.get.mockReset().mockResolvedValue({
       id: 'organization-id',
-      name: 'Comunidade Servir',
+      name: 'Comunidade Evangélica Servir e Transformar do Bairro Primavera',
     });
   });
 
@@ -49,7 +49,9 @@ describe('OrganizationLayout', () => {
       { global: { plugins: [router] } },
     );
 
-    expect(await findByText('Comunidade Servir')).toBeVisible();
+    expect(
+      await findByText('Comunidade Evangélica Servir e Transformar do Bairro Primavera'),
+    ).toBeVisible();
     const navigation = getByRole('navigation', { name: 'Navegação da organização' });
     expect(getByRole('link', { name: 'Início' })).toHaveClass('is-active');
     expect(getByRole('link', { name: 'Ministérios' })).not.toHaveClass('is-active');

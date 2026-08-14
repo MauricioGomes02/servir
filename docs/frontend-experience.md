@@ -228,6 +228,8 @@ A interface segue WCAG 2.2 e os princípios Perceptível, Operável, Compreensí
 - preferências de movimento, contraste, zoom e esquema de cores preservam a tarefa;
 - ARIA complementa a semântica nativa somente quando necessário.
 
+Atalhos aceleram tarefas frequentes, mas nunca substituem controles visíveis. Devem ser documentados na própria interface, evitar campos editáveis, preservar o comportamento esperado das teclas e administrar o foco na abertura e no fechamento. Grupos de seleção seguem a navegação de teclado convencional, incluindo setas e, quando aplicável, `Home` e `End`.
+
 ## Responsividade
 
 Projetar para diferentes larguras, não para uma lista de aparelhos. Mobile não é o desktop comprimido: conteúdo e ações são priorizados conforme a tarefa.
@@ -246,6 +248,8 @@ Tabelas extensas exigem uma estratégia explícita, como colunas prioritárias, 
 ## Linguagem visual e componentes
 
 A direção visual vigente usa navy como signifier persistente da navegação, ação principal indigo, superfícies neutras e estados semânticos independentes. A navegação não precisa ocupar uma grande superfície escura: no desktop pode usar uma sidebar leve e, no mobile, tabs visíveis enquanto houver poucos destinos. O [guia visual do Servir](design-system/servir-ux-ui-reference.md) e seus mockups complementam este documento; imagens de telas futuras são conceituais e não autorizam dados ou capacidades simuladas. As decisões estão registradas nos [ADRs 062](decisions/062-indigo-navy-product-identity.md) e [065](decisions/065-lightweight-responsive-navigation-shell.md).
+
+O nome da organização é contexto primário da área autenticada e permanece legível fora da coluna estreita de navegação. Nomes extensos podem ocupar mais de uma linha; truncamento só é aceitável quando houver uma forma evidente e acessível de obter o conteúdo completo.
 
 Hierarquia nasce de conteúdo, tipografia, espaço, alinhamento e contraste antes de efeitos decorativos. Proximidade, similaridade e região comum indicam relações. Cards são usados quando comunicam uma unidade, estado ou ação; não são o contêiner padrão de todo conteúdo.
 
