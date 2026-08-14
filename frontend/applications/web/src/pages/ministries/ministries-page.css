@@ -61,43 +61,85 @@
 }
 
 .ministry-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  min-height: 5.5rem;
-  padding-block: var(--space-4);
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.ministry-list li > div {
+.ministry-list-link {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-4);
+  min-height: 5.5rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
 }
 
-.ministry-list a {
-  width: fit-content;
-  color: var(--color-text);
+.ministry-summary {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.ministry-summary strong {
+  overflow-wrap: anywhere;
   font-weight: 750;
-  text-decoration-thickness: 0.08em;
-  text-decoration-color: transparent;
-  text-underline-offset: 0.2em;
+}
+
+.ministry-summary span {
+  color: var(--color-text-subtle);
+  font-size: 0.9rem;
+}
+
+.ministry-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.ministry-details {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-action);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.ministry-details svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 160ms ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .ministry-list a:hover {
-    color: var(--color-action);
-    text-decoration-color: currentcolor;
+  .ministry-list-link:hover {
+    background: var(--color-surface-muted);
+  }
+
+  .ministry-list-link:hover .ministry-details svg {
+    transform: translateX(0.2rem);
   }
 }
 
-.ministry-list li span:not(.status-badge) {
-  color: var(--color-text-subtle);
-  font-size: 0.9rem;
+@media (width >= 36rem) {
+  .ministry-list-link {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .ministry-list-meta {
+    justify-content: end;
+  }
 }
 
 @media (prefers-contrast: more) {
   .search-bar input {
     border-width: 2px;
+  }
+
+  .ministry-list-link {
+    outline: 1px solid transparent;
   }
 }

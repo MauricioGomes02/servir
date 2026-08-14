@@ -94,6 +94,30 @@ describe('MinistriesPage', () => {
     );
   });
 
+  it('makes the complete ministry row an explicit details link', async () => {
+    requests.get.mockResolvedValue({
+      items: [{ id: 'music-ministry-id', name: 'Música', status: 'active' }],
+      pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
+    });
+    const { container, findByRole } = await renderPage();
+
+    const detailsLink = await findByRole('link', {
+      name: 'Ver detalhes do ministério Música',
+    });
+
+    expect(detailsLink).toHaveClass('ministry-list-link');
+    expect(detailsLink).toHaveAttribute(
+      'href',
+      '/organizations/organization-id/ministries/music-ministry-id',
+    );
+    expect(detailsLink).toHaveTextContent('Música');
+    expect(detailsLink).toHaveTextContent('Ver detalhes');
+    const accessibility = await axe(container, {
+      rules: { 'color-contrast': { enabled: false } },
+    });
+    expect(accessibility.violations).toEqual([]);
+  });
+
   it('creates a ministry and refreshes the visible structure', async () => {
     requests.post.mockResolvedValue({ id: 'ministry-id', name: 'Música', status: 'active' });
     requests.get.mockResolvedValueOnce(emptyPage).mockResolvedValueOnce({

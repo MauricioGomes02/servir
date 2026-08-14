@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppButton, AppField, AppStatusBadge } from '@/shared/ui';
+import { AppButton, AppField, AppIcon, AppStatusBadge } from '@/shared/ui';
 import { useMinistriesPage } from './use-ministries-page';
 
 const props = defineProps<{ organizationId: string }>();
@@ -107,18 +107,26 @@ const {
       </div>
       <ul class="ministry-list">
         <li v-for="ministry in page.items" :key="ministry.id">
-          <div>
-            <RouterLink
-              :to="{
-                name: 'ministry-details',
-                params: { organizationId, ministryId: ministry.id },
-              }"
-            >
-              {{ ministry.name }}
-            </RouterLink>
-            <span>Estruture funções, pessoas e equipes</span>
-          </div>
-          <AppStatusBadge tone="success">Ativo</AppStatusBadge>
+          <RouterLink
+            class="ministry-list-link"
+            :aria-label="`Ver detalhes do ministério ${ministry.name}`"
+            :to="{
+              name: 'ministry-details',
+              params: { organizationId, ministryId: ministry.id },
+            }"
+          >
+            <div class="ministry-summary">
+              <strong>{{ ministry.name }}</strong>
+              <span>Estruture funções, pessoas e equipes</span>
+            </div>
+            <div class="ministry-list-meta">
+              <AppStatusBadge tone="success">Ativo</AppStatusBadge>
+              <span class="ministry-details">
+                Ver detalhes
+                <AppIcon name="arrow" />
+              </span>
+            </div>
+          </RouterLink>
         </li>
       </ul>
     </section>
