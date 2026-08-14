@@ -41,9 +41,9 @@
   --color-on-danger: var(--neutral-0);
   --color-info: #175cd3;
   --color-navigation: var(--navy-950);
-  --color-navigation-text: #c8d0e3;
-  --color-navigation-active: #fff;
-  --color-navigation-active-surface: #192952;
+  --color-navigation-text: var(--neutral-600);
+  --color-navigation-active: var(--brand-800);
+  --color-navigation-active-surface: var(--brand-50);
   --color-focus: #6558ff;
   --font-sans:
     inter, avenir, ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, 'Segoe UI',
@@ -78,14 +78,14 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --color-background: #0b1020;
-  --color-surface: #121a2d;
-  --color-surface-raised: #182238;
-  --color-surface-muted: #1c2740;
+  --color-background: #151927;
+  --color-surface: #1c2232;
+  --color-surface-raised: #232a3c;
+  --color-surface-muted: #2a3247;
   --color-text: #f8f9fc;
-  --color-text-subtle: #b7c0d4;
-  --color-border: #46516a;
-  --color-border-subtle: #293550;
+  --color-text-subtle: #c0c7d7;
+  --color-border: #515b72;
+  --color-border-subtle: #343d52;
   --color-action: #a69cff;
   --color-action-hover: #beb7ff;
   --color-on-action: #11112f;
@@ -98,11 +98,11 @@
   --color-danger-muted: #492327;
   --color-on-danger: #321114;
   --color-info: #84adff;
-  --color-navigation: #080f25;
-  --color-navigation-text: #c8d0e3;
-  --color-navigation-active: #fff;
-  --color-navigation-active-surface: #202e59;
+  --color-navigation: #33436e;
+  --color-navigation-text: #c0c7d7;
+  --color-navigation-active: #dedaff;
+  --color-navigation-active-surface: #343a61;
   --color-focus: #b4acff;
-  --shadow-sm: 0 0.25rem 1rem rgb(0 0 0 / 20%);
-  --shadow-md: 0 1.25rem 3.5rem rgb(0 0 0 / 32%);
+  --shadow-sm: 0 0.25rem 1rem rgb(0 0 0 / 14%);
+  --shadow-md: 0 1.25rem 3.5rem rgb(0 0 0 / 22%);
 }

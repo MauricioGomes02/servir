@@ -245,7 +245,7 @@ Tabelas extensas exigem uma estratégia explícita, como colunas prioritárias, 
 
 ## Linguagem visual e componentes
 
-A direção visual vigente usa navegação navy, ação principal indigo, superfícies neutras e estados semânticos independentes. O [guia visual do Servir](design-system/servir-ux-ui-reference.md) e seus mockups complementam este documento; imagens de telas futuras são conceituais e não autorizam dados ou capacidades simuladas. A decisão está registrada no [ADR 062](decisions/062-indigo-navy-product-identity.md).
+A direção visual vigente usa navy como signifier persistente da navegação, ação principal indigo, superfícies neutras e estados semânticos independentes. A navegação não precisa ocupar uma grande superfície escura: no desktop pode usar uma sidebar leve e, no mobile, tabs visíveis enquanto houver poucos destinos. O [guia visual do Servir](design-system/servir-ux-ui-reference.md) e seus mockups complementam este documento; imagens de telas futuras são conceituais e não autorizam dados ou capacidades simuladas. As decisões estão registradas nos [ADRs 062](decisions/062-indigo-navy-product-identity.md) e [065](decisions/065-lightweight-responsive-navigation-shell.md).
 
 Hierarquia nasce de conteúdo, tipografia, espaço, alinhamento e contraste antes de efeitos decorativos. Proximidade, similaridade e região comum indicam relações. Cards são usados quando comunicam uma unidade, estado ou ação; não são o contêiner padrão de todo conteúdo.
 

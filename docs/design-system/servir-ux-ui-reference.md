@@ -106,14 +106,14 @@ A direção usa a hierarquia já estabelecida no repositório: adequação à ta
 
 Cada página deve responder uma pergunta ou permitir concluir uma tarefa.
 
-| Área | Pergunta principal |
-|---|---|
-| Início | O que precisa da minha atenção agora? |
-| Escalas | Quem vai servir? |
-| Disponibilidade | Quem pode servir? |
-| Atividades | Quando precisamos de pessoas? |
-| Ministérios | Como a estrutura ministerial está organizada? |
-| Pessoas | Quem são as pessoas e onde elas servem? |
+| Área            | Pergunta principal                            |
+| --------------- | --------------------------------------------- |
+| Início          | O que precisa da minha atenção agora?         |
+| Escalas         | Quem vai servir?                              |
+| Disponibilidade | Quem pode servir?                             |
+| Atividades      | Quando precisamos de pessoas?                 |
+| Ministérios     | Como a estrutura ministerial está organizada? |
+| Pessoas         | Quem são as pessoas e onde elas servem?       |
 
 ## 2.2 Estado do sistema sempre visível
 
@@ -185,7 +185,7 @@ Evitar:
 
 ## 3.2 Referência estética
 
-A prancha abaixo foi a direção visual aprovada como inspiração. Usar **paleta, leveza, navegação escura, contraste, radius e organização** como referência. Não copiar literalmente os conteúdos de “Igrejas”, “Mensagens”, gráficos ou quaisquer partes que não pertençam ao domínio atual.
+A prancha abaixo foi a direção visual aprovada como inspiração. Usar **paleta, leveza, identidade navy/indigo, contraste, radius e organização** como referência. A implementação vigente refina a grande superfície escura para uma navegação neutra com navy persistente em seus signifiers. Não copiar literalmente os conteúdos de “Igrejas”, “Mensagens”, gráficos ou quaisquer partes que não pertençam ao domínio atual.
 
 ![Prancha visual de inspiração — usar estética, não conteúdo](./assets/servir-visual-inspiration.png){width=92%}
 
@@ -193,23 +193,23 @@ A prancha abaixo foi a direção visual aprovada como inspiração. Usar **palet
 
 A identidade pode partir de indigo/violeta com navegação em azul-marinho profundo. Estados funcionais continuam usando cores semânticas próprias.
 
-| Token | Valor inicial | Uso |
-|---|---:|---|
-| `--color-brand-600` | `#5B4BFF` | CTA, seleção, marca, destaque principal |
-| `--color-brand-700` | `#4F46E5` | hover e texto de ação sobre fundo claro |
-| `--color-brand-800` | `#4338CA` | pressed / contraste reforçado |
-| `--color-brand-soft` | `#EFEDFF` | seleção suave, chips contextuais |
-| `--color-nav-bg` | `#0B1635` | sidebar desktop |
-| `--color-surface-app` | `#F7F8FC` | fundo geral |
-| `--color-surface` | `#FFFFFF` | superfícies principais |
-| `--color-surface-subtle` | `#F1F3F8` | campos neutros, grupos, skeleton |
-| `--color-border` | `#E4E7EC` | divisórias e contornos |
-| `--color-text` | `#111827` | texto principal |
-| `--color-text-secondary` | `#667085` | metadados e descrições |
-| `--color-success` | `#15803D` | concluído, disponível, válido |
-| `--color-warning` | `#B54708` | pendência, rascunho, não respondeu |
-| `--color-danger` | `#B42318` | conflito, indisponível, destrutivo |
-| `--color-info` | `#175CD3` | informação e coleta aberta |
+| Token                    | Valor inicial | Uso                                        |
+| ------------------------ | ------------: | ------------------------------------------ |
+| `--color-brand-600`      |     `#5B4BFF` | CTA, seleção, marca, destaque principal    |
+| `--color-brand-700`      |     `#4F46E5` | hover e texto de ação sobre fundo claro    |
+| `--color-brand-800`      |     `#4338CA` | pressed / contraste reforçado              |
+| `--color-brand-soft`     |     `#EFEDFF` | seleção suave, chips contextuais           |
+| `--color-nav-bg`         |     `#0B1635` | borda estrutural e signifiers da navegação |
+| `--color-surface-app`    |     `#F7F8FC` | fundo geral                                |
+| `--color-surface`        |     `#FFFFFF` | superfícies principais                     |
+| `--color-surface-subtle` |     `#F1F3F8` | campos neutros, grupos, skeleton           |
+| `--color-border`         |     `#E4E7EC` | divisórias e contornos                     |
+| `--color-text`           |     `#111827` | texto principal                            |
+| `--color-text-secondary` |     `#667085` | metadados e descrições                     |
+| `--color-success`        |     `#15803D` | concluído, disponível, válido              |
+| `--color-warning`        |     `#B54708` | pendência, rascunho, não respondeu         |
+| `--color-danger`         |     `#B42318` | conflito, indisponível, destrutivo         |
+| `--color-info`           |     `#175CD3` | informação e coleta aberta                 |
 
 ### Uso de cor
 
@@ -226,16 +226,16 @@ Família recomendada: **Inter**.
 
 Escala inicial:
 
-| Papel | Tamanho | Peso | Uso |
-|---|---:|---:|---|
-| Display | 32–36px | 700 | títulos principais desktop |
-| H1 | 28–32px | 700 | título de página |
-| H2 | 20–24px | 600–700 | seções principais |
-| H3 | 16–18px | 600 | blocos e subtítulos |
-| Body | 16px | 400 | conteúdo padrão |
-| Body small | 14px | 400–500 | metadados |
-| Label | 14–16px | 500–600 | campos e controles |
-| Caption | 12–13px | 500 | informações secundárias curtas |
+| Papel      | Tamanho |    Peso | Uso                            |
+| ---------- | ------: | ------: | ------------------------------ |
+| Display    | 32–36px |     700 | títulos principais desktop     |
+| H1         | 28–32px |     700 | título de página               |
+| H2         | 20–24px | 600–700 | seções principais              |
+| H3         | 16–18px |     600 | blocos e subtítulos            |
+| Body       |    16px |     400 | conteúdo padrão                |
+| Body small |    14px | 400–500 | metadados                      |
+| Label      | 14–16px | 500–600 | campos e controles             |
+| Caption    | 12–13px |     500 | informações secundárias curtas |
 
 Regras:
 
@@ -283,7 +283,7 @@ Não introduzir biblioteca de ícones automaticamente apenas por causa deste doc
 
 Estrutura preferida:
 
-- sidebar fixa ou sticky de aproximadamente 240–280px;
+- sidebar leve e sticky de aproximadamente 208–240px, com navy reservado à identidade e aos signifiers;
 - conteúdo com largura fluida e limite confortável em telas muito largas;
 - cabeçalho de página dentro do conteúdo, não uma topbar gigante;
 - ações globais raras; ações ficam próximas ao contexto que modificam.
@@ -293,17 +293,21 @@ Estrutura preferida:
 **Início**
 
 **Operação**
+
 - Escalas
 - Atividades
 - Disponibilidade
 
 **Pessoas**
+
 - Pessoas
 
 **Ministérios**
+
 - Ministérios
 
 **Administração**
+
 - Organização
 - Acessos
 - Configurações

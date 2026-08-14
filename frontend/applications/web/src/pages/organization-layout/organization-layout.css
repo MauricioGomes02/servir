@@ -1,16 +1,20 @@
 .organization-shell {
   display: grid;
+  gap: var(--space-4);
   width: min(100% - 2rem, var(--content-width));
   margin-inline: auto;
-  padding-block: var(--space-4) var(--space-12);
+  padding-block: var(--space-5) var(--space-12);
 }
 
 .organization-sidebar {
+  overflow: hidden;
   padding: var(--space-4);
-  border: 1px solid var(--color-navigation);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  color: var(--color-navigation-active);
-  background: var(--color-navigation);
+  border: 1px solid var(--color-border-subtle);
+  border-top: 0.25rem solid var(--color-navigation);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .organization-context {
@@ -19,11 +23,10 @@
   gap: var(--space-3);
   align-items: center;
   padding-bottom: var(--space-4);
-  border-bottom: 1px solid rgb(255 255 255 / 14%);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .organization-context .workspace-symbol {
-  float: none;
   margin: 0;
 }
 
@@ -43,47 +46,56 @@
 }
 
 .organization-navigation {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
-  overflow-x: auto;
   margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
 }
 
 .organization-navigation a {
-  display: block;
+  display: grid;
+  place-items: center;
   min-height: 2.75rem;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
   color: var(--color-navigation-text);
   font-weight: 750;
+  text-align: center;
   text-decoration: none;
-  white-space: nowrap;
 }
 
 .organization-navigation a.is-active {
-  border-left: 0.25rem solid var(--color-action);
   color: var(--color-navigation-active);
   background: var(--color-navigation-active-surface);
+  box-shadow: inset 0 -0.2rem 0 var(--color-action);
 }
 
 .organization-content {
   min-width: 0;
-  padding: clamp(1.5rem, 5vw, 3.5rem);
-  border: 1px solid var(--color-border-subtle);
-  border-top: 0;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  background: var(--color-background);
+  padding: var(--space-4) 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .organization-navigation a:not(.is-active):hover {
+    color: var(--color-text);
+    background: var(--color-surface-muted);
+  }
 }
 
 @media (width >= 48rem) {
   .organization-shell {
-    grid-template-columns: minmax(15rem, 17.5rem) minmax(0, 1fr);
+    grid-template-columns: minmax(13rem, 15rem) minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 4rem);
+    padding-top: var(--space-8);
   }
 
   .organization-sidebar {
-    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    position: sticky;
+    top: var(--space-5);
+    align-self: start;
+    padding: var(--space-5);
   }
 
   .organization-context {
@@ -92,28 +104,35 @@
 
   .organization-context .status-badge {
     grid-column: 2;
+    width: fit-content;
   }
 
   .organization-navigation {
-    display: grid;
-    overflow: visible;
+    grid-template-columns: 1fr;
   }
 
   .organization-navigation a {
-    border-radius: var(--radius-sm);
+    place-items: center start;
+    text-align: left;
+  }
+
+  .organization-navigation a.is-active {
+    box-shadow: inset 0.2rem 0 0 var(--color-action);
   }
 
   .organization-content {
-    min-height: 38rem;
-    border-top: 1px solid var(--color-border-subtle);
-    border-left: 0;
-    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    padding: var(--space-4) 0 var(--space-12);
   }
 }
 
 @media (prefers-contrast: more) {
-  .organization-sidebar,
-  .organization-content {
+  .organization-sidebar {
     border-width: 2px;
+    border-top-width: 0.3rem;
+  }
+
+  .organization-navigation a.is-active {
+    outline: 2px solid currentcolor;
+    outline-offset: -2px;
   }
 }
