@@ -32,4 +32,4 @@ defineProps<{ organizationId: string }>();
   </section>
 </template>
 
-<style src="./organization-workspace-view.css"></style>
+<style src="./organization-home-page.css"></style>

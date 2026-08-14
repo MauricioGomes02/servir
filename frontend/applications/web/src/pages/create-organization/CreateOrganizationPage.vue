@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { AppButton, AppField, AppIcon } from '@/shared/ui';
-import { useCreateOrganizationView } from './use-create-organization-view';
+import { useCreateOrganization } from '@/features/create-organization';
 
-const { name, nameErrors, problem, submit, submitting } = useCreateOrganizationView();
+const { name, nameErrors, problem, submit, submitting } = useCreateOrganization();
 </script>
 
 <template>
@@ -52,4 +52,4 @@ const { name, nameErrors, problem, submit, submitting } = useCreateOrganizationV
   </section>
 </template>
 
-<style src="./create-organization-view.css"></style>
+<style src="./create-organization-page.css"></style>

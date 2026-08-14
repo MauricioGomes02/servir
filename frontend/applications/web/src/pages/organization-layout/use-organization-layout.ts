@@ -1,9 +1,8 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
-import type { Organization } from '../../application/organization';
-import { getOrganizationDetails } from '../../composition';
+import { getOrganization, type Organization } from '@/entities/organization';
 import { HttpProblem } from '@/shared/api';
 
-export function useOrganizationShell(organizationId: Ref<string>) {
+export function useOrganizationLayout(organizationId: Ref<string>) {
   const organization = ref<Organization>();
   const problem = ref<HttpProblem>();
   const loading = ref(true);
@@ -15,10 +14,7 @@ export function useOrganizationShell(organizationId: Ref<string>) {
     loading.value = true;
     problem.value = undefined;
     try {
-      organization.value = await getOrganizationDetails.execute(
-        organizationId.value,
-        abortController.signal,
-      );
+      organization.value = await getOrganization(organizationId.value, abortController.signal);
     } catch (error) {
       if (!abortController.signal.aborted) {
         problem.value =

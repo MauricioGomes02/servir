@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { AppIcon, AppStatusBadge } from '@/shared/ui';
-import { useOrganizationShell } from './use-organization-shell';
+import { useOrganizationLayout } from './use-organization-layout';
 
 const props = defineProps<{ organizationId: string }>();
-const { load, loading, organization, problem } = useOrganizationShell(
+const { load, loading, organization, problem } = useOrganizationLayout(
   toRef(props, 'organizationId'),
 );
 </script>
@@ -56,4 +56,4 @@ const { load, loading, organization, problem } = useOrganizationShell(
   </div>
 </template>
 
-<style src="./organization-shell.css"></style>
+<style src="./organization-layout.css"></style>

@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { fieldErrors, HttpProblem } from '@/shared/api';
-import { createOrganization } from '../../composition';
+import { createOrganization } from './create-organization';
 
-export function useCreateOrganizationView() {
+export function useCreateOrganization() {
   const router = useRouter();
   const name = ref('');
   const submitting = ref(false);
@@ -16,7 +16,7 @@ export function useCreateOrganizationView() {
     problem.value = undefined;
     submitting.value = true;
     try {
-      const organization = await createOrganization.execute(name.value);
+      const organization = await createOrganization(name.value);
       await router.push({
         name: 'organization-home',
         params: { organizationId: organization.id },
