@@ -79,14 +79,41 @@
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
+.ministry-role-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}
+
 .ministry-roles h2 {
   margin: var(--space-1) 0 0;
   font-size: 1.25rem;
 }
 
-.ministry-roles > header > span {
+.ministry-role-actions > span {
   color: var(--color-text-subtle);
   font-weight: 750;
+}
+
+.ministry-role-form {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-muted);
+}
+
+.ministry-role-form fieldset {
+  max-width: 34rem;
+}
+
+.ministry-role-form legend {
+  font-size: 1.25rem;
+}
+
+.ministry-role-form-description {
+  max-width: 60ch;
+  color: var(--color-text-subtle);
 }
 
 .ministry-roles ul {
@@ -129,8 +156,23 @@
   }
 
   .ministry-roles > header,
+  .ministry-role-form,
   .ministry-roles li {
     padding-inline: var(--space-4);
+  }
+
+  .ministry-roles > header,
+  .ministry-role-actions {
+    align-items: stretch;
+  }
+
+  .ministry-roles > header {
+    display: grid;
+  }
+
+  .ministry-role-actions {
+    display: grid;
+    justify-content: stretch;
   }
 
   .ministry-roles li {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppButton, AppIcon, AppStatusBadge } from '@/shared/ui';
+import { AppButton, AppField, AppIcon, AppStatusBadge } from '@/shared/ui';
 import { useMinistryDetailsPage } from './use-ministry-details-page';
 
 const props = defineProps<{ organizationId: string; ministryId: string }>();
-const { load, loading, ministry, problem } = useMinistryDetailsPage(
+const { load, loading, ministry, problem, roleDefinition, roleFormOpen } = useMinistryDetailsPage(
   toRef(props, 'organizationId'),
   toRef(props, 'ministryId'),
 );
@@ -59,8 +59,56 @@ const { load, loading, ministry, problem } = useMinistryDetailsPage(
           <p class="eyebrow">Organização do serviço</p>
           <h2 id="ministry-roles-title">Funções ministeriais</h2>
         </div>
-        <span>{{ ministry.roles.length }}</span>
+        <div class="ministry-role-actions">
+          <span>
+            {{ ministry.roles.length }}
+            {{ ministry.roles.length === 1 ? 'função' : 'funções' }}
+          </span>
+          <AppButton
+            :variant="roleFormOpen ? 'secondary' : 'primary'"
+            :aria-expanded="roleFormOpen"
+            aria-controls="ministry-role-form"
+            @click="roleFormOpen = !roleFormOpen"
+          >
+            {{ roleFormOpen ? 'Fechar formulário' : 'Adicionar função ministerial' }}
+          </AppButton>
+        </div>
       </header>
+      <form
+        v-if="roleFormOpen"
+        id="ministry-role-form"
+        class="ministry-role-form"
+        aria-labelledby="ministry-role-form-title"
+        novalidate
+        @submit.prevent="roleDefinition.defineRole"
+      >
+        <fieldset :disabled="roleDefinition.defining.value">
+          <legend id="ministry-role-form-title">Criar função ministerial</legend>
+          <p class="ministry-role-form-description">
+            Informe como essa responsabilidade é reconhecida pelas pessoas do ministério.
+          </p>
+          <AppField
+            id="ministry-role-name"
+            v-model="roleDefinition.name.value"
+            label="Nome da função ministerial"
+            :errors="roleDefinition.nameErrors.value"
+            :maxlength="120"
+          />
+          <p
+            v-if="roleDefinition.problem.value && roleDefinition.nameErrors.value.length === 0"
+            class="form-error"
+            role="alert"
+          >
+            {{ roleDefinition.problem.value.problem.title }}
+          </p>
+          <AppButton type="submit" :loading="roleDefinition.defining.value">
+            Criar função ministerial
+          </AppButton>
+          <p class="status" aria-live="polite">
+            {{ roleDefinition.defining.value ? 'Criando função ministerial.' : '' }}
+          </p>
+        </fieldset>
+      </form>
       <p v-if="ministry.roles.length === 0" class="ministry-roles-empty">
         Nenhuma função ministerial foi definida ainda.
       </p>

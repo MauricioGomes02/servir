@@ -1,7 +1,8 @@
-import { render } from '@testing-library/vue';
+import { fireEvent, render } from '@testing-library/vue';
 import { axe } from 'vitest-axe';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { HttpProblem } from '@/shared/api';
 import MinistryDetailsPage from './MinistryDetailsPage.vue';
 
 const requests = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }));
@@ -36,7 +37,10 @@ async function renderView() {
 }
 
 describe('MinistryDetailsPage', () => {
-  beforeEach(() => requests.get.mockReset());
+  beforeEach(() => {
+    requests.get.mockReset();
+    requests.post.mockReset();
+  });
 
   it('presents the ministry and its real functions without speculative sections', async () => {
     requests.get.mockResolvedValue({
@@ -75,5 +79,59 @@ describe('MinistryDetailsPage', () => {
     const { findByText } = await renderView();
 
     expect(await findByText('Nenhuma função ministerial foi definida ainda.')).toBeVisible();
+  });
+
+  it('creates a ministry function and refreshes the visible structure', async () => {
+    requests.get
+      .mockResolvedValueOnce({ id: 'ministry-id', name: 'Louvor', status: 'active', roles: [] })
+      .mockResolvedValueOnce({
+        id: 'ministry-id',
+        name: 'Louvor',
+        status: 'active',
+        roles: [{ id: 'role-id', name: 'Guitarra', status: 'active' }],
+      });
+    requests.post.mockResolvedValue({ id: 'role-id', name: 'Guitarra', status: 'active' });
+    const { findByRole, findByText, getByLabelText, getByRole, queryByRole } = await renderView();
+    await findByRole('heading', { name: 'Louvor' });
+
+    await fireEvent.click(getByRole('button', { name: 'Adicionar função ministerial' }));
+    await fireEvent.update(getByLabelText('Nome da função ministerial'), 'Guitarra');
+    await fireEvent.click(getByRole('button', { name: 'Criar função ministerial' }));
+
+    expect(await findByText('Guitarra')).toBeVisible();
+    expect(requests.post).toHaveBeenCalledWith(
+      '/bff/organizations/organization-id/ministries/ministry-id/roles',
+      { name: 'Guitarra' },
+      undefined,
+    );
+    expect(queryByRole('form', { name: 'Criar função ministerial' })).not.toBeInTheDocument();
+  });
+
+  it('keeps the role form available when the name is rejected', async () => {
+    requests.get.mockResolvedValue({
+      id: 'ministry-id',
+      name: 'Louvor',
+      status: 'active',
+      roles: [],
+    });
+    requests.post.mockRejectedValue(
+      new HttpProblem({
+        type: '/problems/validation-error',
+        title: 'Revise os dados informados.',
+        status: 422,
+        errors: [
+          { code: 'ministry_role.name.empty', detail: 'Informe o nome.', pointer: '#/name' },
+        ],
+      }),
+    );
+    const { findByRole, findByText, getByLabelText, getByRole } = await renderView();
+    await findByRole('heading', { name: 'Louvor' });
+
+    await fireEvent.click(getByRole('button', { name: 'Adicionar função ministerial' }));
+    await fireEvent.update(getByLabelText('Nome da função ministerial'), '');
+    await fireEvent.click(getByRole('button', { name: 'Criar função ministerial' }));
+
+    expect(await findByText('Informe o nome.')).toBeVisible();
+    expect(getByRole('group', { name: 'Criar função ministerial' })).toBeVisible();
   });
 });

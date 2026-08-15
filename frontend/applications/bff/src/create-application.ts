@@ -12,6 +12,8 @@ interface MinistryParameters extends OrganizationParameters {
   readonly ministryId: string;
 }
 
+type MinistryRoleParameters = MinistryParameters;
+
 interface MinistryListQuery {
   readonly page?: string;
   readonly pageSize?: string;
@@ -129,6 +131,16 @@ export async function createApplication(
         reply,
         config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries/${encodeURIComponent(request.params.ministryId)}`,
+      ),
+  );
+  app.post<{ Params: MinistryRoleParameters }>(
+    '/bff/organizations/:organizationId/ministries/:ministryId/roles',
+    (request, reply) =>
+      sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries/${encodeURIComponent(request.params.ministryId)}/roles`,
       ),
   );
 

@@ -139,4 +139,28 @@ describe('frontend BFF', () => {
       'http://private-api:3000/organizations/organization-id/ministries/ministry-id',
     );
   });
+
+  it('forwards ministry role definition through an explicit BFF contract', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'role-id', name: 'Guitarra', status: 'active' }), {
+        status: 201,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/bff/organizations/organization-id/ministries/ministry-id/roles',
+      payload: { name: 'Guitarra' },
+    });
+    await app.close();
+
+    expect(response.statusCode).toBe(201);
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/ministries/ministry-id/roles',
+    );
+    expect(fetch.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
+  });
 });

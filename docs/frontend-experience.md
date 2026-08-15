@@ -315,7 +315,7 @@ Testes automatizados devem preferir papéis, nomes e comportamento acessíveis. 
 - Criação da organização conduz ao espaço identificado na URL.
 - Início comunica honestamente que pendências operacionais dependem de dados ainda não disponíveis e orienta o próximo passo útil.
 - Ministérios oferece busca, criação e listagem de ativos, distinguindo organização sem ministérios, busca sem resultado, carregamento e erro recuperável.
-- O detalhe do ministério apresenta identidade, estado e funções ministeriais reais, com navegação a partir da lista e estado vazio próprio; pessoas, times e liderança aguardam read models orientados à experiência.
+- O detalhe do ministério apresenta identidade, estado e funções ministeriais reais, permite adicionar uma função com feedback de validação e atualização confirmada pelo backend, e oferece navegação a partir da lista; pessoas, times e liderança aguardam read models orientados à experiência.
 
 O Início ainda não apresenta próximas atividades, coletas de disponibilidade ou escalas pendentes porque esses read models não estão implementados. Informação operacional não deve ser simulada para preencher o layout.
 

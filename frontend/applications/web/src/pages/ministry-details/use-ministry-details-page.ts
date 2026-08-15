@@ -1,17 +1,19 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
 import { getMinistry, type MinistryDetails } from '@/entities/ministry';
+import { useDefineMinistryRole } from '@/features/define-ministry-role';
 import { HttpProblem } from '@/shared/api';
 
 export function useMinistryDetailsPage(organizationId: Ref<string>, ministryId: Ref<string>) {
   const ministry = ref<MinistryDetails>();
   const loading = ref(true);
   const problem = ref<HttpProblem>();
+  const roleFormOpen = ref(false);
   let requestController: AbortController | undefined;
 
-  async function load(): Promise<void> {
+  async function fetchMinistry(indicateLoading: boolean): Promise<void> {
     requestController?.abort();
     requestController = new AbortController();
-    loading.value = true;
+    if (indicateLoading) loading.value = true;
     problem.value = undefined;
     try {
       ministry.value = await getMinistry(
@@ -30,12 +32,18 @@ export function useMinistryDetailsPage(organizationId: Ref<string>, ministryId: 
                 status: 0,
               });
     } finally {
-      if (!requestController.signal.aborted) loading.value = false;
+      if (!requestController.signal.aborted && indicateLoading) loading.value = false;
     }
   }
+
+  const load = (): Promise<void> => fetchMinistry(true);
+  const roleDefinition = useDefineMinistryRole(organizationId, ministryId, async () => {
+    await fetchMinistry(false);
+    roleFormOpen.value = false;
+  });
 
   onMounted(load);
   onBeforeUnmount(() => requestController?.abort());
 
-  return { load, loading, ministry, problem };
+  return { load, loading, ministry, problem, roleDefinition, roleFormOpen };
 }
