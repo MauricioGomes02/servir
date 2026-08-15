@@ -5,7 +5,7 @@ import {
   type AuthenticatedActorError,
 } from './authenticated-actor-error';
 
-const MAX_ISSUER_LENGTH = 2_048;
+const MAX_ISSUER_LENGTH = 255;
 const MAX_SUBJECT_LENGTH = 255;
 
 declare const issuerBrand: unique symbol;

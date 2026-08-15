@@ -56,3 +56,6 @@ databaseChangeLog:
   - include:
       file: changes/018-add-member-list-index.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/019-create-users.sql
+      relativeToChangelogFile: true

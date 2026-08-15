@@ -2,7 +2,7 @@
 
 ## Estado
 
-Decisão arquitetural e modelo inicial aprovados. Aggregates, persistência, adapters OIDC, sessão e interfaces ainda estão planejados.
+Modelo inicial aprovado. `AuthenticatedActor`, `User` global e provisionamento idempotente por identidade externa estão implementados; adapters OIDC, sessão, autorização organizacional e interfaces ainda estão planejados.
 
 ## Motivação
 
@@ -60,6 +60,8 @@ MemberAccessInvitation (tenant-scoped)
 
 Após o callback OIDC, a borda valida protocolo e claims. `ProvisionUserFromExternalIdentity` encontra idempotentemente um User pelo par `issuer + subject` ou cria um novo User. Repetir o mesmo login não cria outra conta.
 
+O caso de uso recebe a identidade exclusivamente pelo `ExecutionContext`; `issuer` e `subject` não são aceitos do body. O port `UserProvisioner` representa a operação atômica de encontrar ou inserir, e o adapter PostgreSQL usa uma constraint única para resolver tentativas concorrentes sem deixar Users órfãos. Esse primeiro fato não produz Domain Event nem Integration Event porque ainda não existe consumidor desacoplado.
+
 ### Convite de membro
 
 `InviteMemberToAccess` exige ator autorizado, Organization e Member ativos do mesmo tenant. O token aleatório é produzido por adapter criptograficamente seguro, devolvido apenas ao canal de entrega e persistido como digest. Logs e eventos carregam o ID do convite, nunca o token.
@@ -85,8 +87,8 @@ Um User pode existir sem acesso organizacional. Solicitação espontânea de ent
 
 ## Sequência incremental
 
-1. Definir ports OIDC, ator autenticado e extensão do `ExecutionContext`.
-2. Implementar `User` e provisionamento idempotente por identidade externa.
+1. ~~Definir ports OIDC, ator autenticado e extensão do `ExecutionContext`.~~
+2. ~~Implementar `User` e provisionamento idempotente por identidade externa.~~
 3. Validar access token na API e proteger rotas.
 4. Implementar login, callback, sessão e logout no BFF.
 5. Implementar `MemberAccessInvitation` e criação de convite.
