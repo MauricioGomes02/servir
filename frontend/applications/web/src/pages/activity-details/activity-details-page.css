@@ -1,0 +1,65 @@
+.activity-details,
+.activity-details-state {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.activity-details-navigation {
+  justify-self: start;
+}
+
+.activity-details-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.activity-details-header h1,
+.activity-participants h2 {
+  margin-block: var(--space-1) var(--space-2);
+}
+
+.activity-participants {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.activity-participants ul {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.activity-participants a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 3.5rem;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.activity-participants a:focus-visible,
+.activity-participants a:hover {
+  border-color: var(--color-action);
+  color: var(--color-action);
+  background: var(--color-surface-muted);
+}
+
+.activity-details-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

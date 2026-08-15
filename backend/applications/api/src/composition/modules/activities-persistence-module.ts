@@ -1,5 +1,7 @@
 import type {
   ActivityCreationFactsReader,
+  ActivityDetailsReader,
+  ActivityListReader,
   ActivityOccurrenceSchedulingFactsReader,
   ActivityOccurrenceWriteScope,
   ActivityWriteScope,
@@ -11,6 +13,8 @@ import {
   PostgresActivityOccurrenceRepository,
   PostgresActivityOccurrenceSchedulingFactsReader,
   PostgresActivityCreationFactsReader,
+  PostgresActivityDetailsReader,
+  PostgresActivityListReader,
   PostgresActivityRepository,
 } from '@/modules/activities/infrastructure';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
@@ -21,6 +25,10 @@ export const activityUnitOfWork =
   defineService<UnitOfWork<ActivityWriteScope>>('activities.unit-of-work');
 export const activityCreationFacts = defineService<ActivityCreationFactsReader>(
   'activities.creation-facts',
+);
+export const activityListReader = defineService<ActivityListReader>('activities.list-reader');
+export const activityDetailsReader = defineService<ActivityDetailsReader>(
+  'activities.details-reader',
 );
 export const activityOccurrenceUnitOfWork = defineService<UnitOfWork<ActivityOccurrenceWriteScope>>(
   'activities.occurrence-unit-of-work',
@@ -41,6 +49,8 @@ export function registerActivitiesPersistence(builder: PostgresPersistenceBuilde
     activities: new PostgresActivityRepository(client),
   }));
   builder.addValue(activityCreationFacts, (pool) => new PostgresActivityCreationFactsReader(pool));
+  builder.addValue(activityListReader, (pool) => new PostgresActivityListReader(pool));
+  builder.addValue(activityDetailsReader, (pool) => new PostgresActivityDetailsReader(pool));
   builder.addWriteScope(activityOccurrenceUnitOfWork, (client) => ({
     activityOccurrences: new PostgresActivityOccurrenceRepository(client),
   }));

@@ -56,6 +56,7 @@ A navegação principal representa o trabalho:
 - **Início:** atenção, pendências e próximos passos;
 - **Operação:** escalas, atividades e disponibilidade;
 - **Membros:** membros da organização e seus vínculos;
+- **Atividades:** encontros e ações que serão preparados para receber ocorrências e escalas;
 - **Ministérios:** ministérios, funções ministeriais e equipes;
 - **Administração:** organização, acessos e configurações.
 
@@ -317,6 +318,7 @@ Testes automatizados devem preferir papéis, nomes e comportamento acessíveis. 
 - Ministérios oferece busca, criação e listagem de ativos, distinguindo organização sem ministérios, busca sem resultado, carregamento e erro recuperável.
 - O detalhe do ministério apresenta identidade, estado e funções ministeriais reais, permite adicionar uma função com feedback de validação e atualização confirmada pelo backend, e oferece navegação a partir da lista; pessoas, times e liderança aguardam read models orientados à experiência.
 - Membros oferece cadastro, busca, total, paginação e perfis tenant-scoped, conduzindo ao perfil confirmado depois do cadastro sem simular contato, acesso ou vínculos ainda indisponíveis.
+- Atividades oferece criação com ministérios participantes, busca, total, paginação e detalhe tenant-scoped; ocorrências, calendário, disponibilidade e escalas permanecem passos explícitos posteriores.
 
 O Início ainda não apresenta próximas atividades, coletas de disponibilidade ou escalas pendentes porque esses read models não estão implementados. Informação operacional não deve ser simulada para preencher o layout.
 

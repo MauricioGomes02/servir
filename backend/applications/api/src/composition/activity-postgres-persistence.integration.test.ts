@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { CreateActivityHandler } from '@/modules/activities/application';
+import { OrganizationId } from '@/modules/organizations/domain';
 import { ActivityCreationPolicy, ActivityId } from '@/modules/activities/domain';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 import { parseMessageId } from '@/shared/application/messaging';
@@ -13,7 +14,12 @@ import { Pool } from 'pg';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
 import { createPostgresPersistence } from './create-postgres-persistence';
-import { activityCreationFacts, activityUnitOfWork } from './modules/activities-persistence-module';
+import {
+  activityCreationFacts,
+  activityDetailsReader,
+  activityListReader,
+  activityUnitOfWork,
+} from './modules/activities-persistence-module';
 
 const databaseUrl = requireTestDatabaseUrl();
 const ORGANIZATION_ID = '0198f334-6dc5-7c20-9af1-91d7e599d100';
@@ -94,6 +100,23 @@ describe('PostgreSQL activity persistence', () => {
     assert.equal(persisted.rows[0]?.status, 1);
     assert.equal(persisted.rows[0]?.ministry_id, MINISTRY_ID);
     assert.equal(persisted.rows[0]?.event_type, 'servir.activities.activity.created.v1');
+
+    const organizationId = value(OrganizationId.create(ORGANIZATION_ID));
+    const activityId = value(ActivityId.create(ACTIVITY_ID));
+    const page = await persistence.services.get(activityListReader).list({
+      organizationId,
+      page: 1,
+      pageSize: 20,
+      search: 'Culto',
+      status: 'active',
+    });
+    assert.equal(page?.pagination.totalItems, 1);
+    assert.equal(page?.items[0]?.ministryCount, 1);
+    const details = await persistence.services
+      .get(activityDetailsReader)
+      .find(organizationId, activityId);
+    assert.equal(details?.name, 'Culto de domingo');
+    assert.deepEqual(details?.ministries, [{ id: MINISTRY_ID, name: 'Louvor' }]);
 
     const failing = new CreateActivityHandler({
       ...common,

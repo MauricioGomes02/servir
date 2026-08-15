@@ -225,4 +225,41 @@ describe('frontend BFF', () => {
       'http://private-api:3000/organizations/organization-id/members/member-id',
     );
   });
+
+  it('forwards activity listing, creation and details explicitly', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ items: [], pagination: { totalItems: 0 } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id/activities?page=2&search=Culto&status=active&ignored=yes',
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/bff/organizations/organization-id/activities',
+      payload: { name: 'Culto', ministryIds: ['ministry-id'] },
+    });
+    await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id/activities/activity-id',
+    });
+    await app.close();
+
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/activities?page=2&search=Culto&status=active',
+    );
+    expect(fetch.mock.calls[1]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/activities',
+    );
+    expect(fetch.mock.calls[1]?.[1]).toMatchObject({ method: 'POST' });
+    expect(fetch.mock.calls[2]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/activities/activity-id',
+    );
+  });
 });

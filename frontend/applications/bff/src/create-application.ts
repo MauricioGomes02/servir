@@ -18,6 +18,10 @@ interface MemberParameters extends OrganizationParameters {
   readonly memberId: string;
 }
 
+interface ActivityParameters extends OrganizationParameters {
+  readonly activityId: string;
+}
+
 interface MinistryListQuery {
   readonly page?: string;
   readonly pageSize?: string;
@@ -26,6 +30,7 @@ interface MinistryListQuery {
 }
 
 type MemberListQuery = MinistryListQuery;
+type ActivityListQuery = MinistryListQuery;
 
 async function sendToApi(
   request: FastifyRequest,
@@ -184,6 +189,43 @@ export async function createApplication(
         reply,
         config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/members/${encodeURIComponent(request.params.memberId)}`,
+      ),
+  );
+  app.get<{ Params: OrganizationParameters; Querystring: ActivityListQuery }>(
+    '/bff/organizations/:organizationId/activities',
+    (request, reply) => {
+      const query = new URLSearchParams();
+      for (const name of ['page', 'pageSize', 'search', 'status'] as const) {
+        const value = request.query[name];
+        if (value !== undefined) query.set(name, value);
+      }
+      const suffix = query.size > 0 ? `?${query.toString()}` : '';
+      return sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/activities${suffix}`,
+      );
+    },
+  );
+  app.post<{ Params: OrganizationParameters }>(
+    '/bff/organizations/:organizationId/activities',
+    (request, reply) =>
+      sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/activities`,
+      ),
+  );
+  app.get<{ Params: ActivityParameters }>(
+    '/bff/organizations/:organizationId/activities/:activityId',
+    (request, reply) =>
+      sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/activities/${encodeURIComponent(request.params.activityId)}`,
       ),
   );
 

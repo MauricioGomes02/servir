@@ -59,6 +59,8 @@ export {
   ScheduleManualActivityOccurrencePresenter,
   type ScheduleManualActivityOccurrenceView,
 } from './schedule-manual-activity-occurrence-presenter';
+export * from './get-activity-details-presenter';
+export * from './list-activities-presenter';
 
 export const activityMessageCatalog: MessageCatalog = Object.freeze({
   'pt-BR': Object.freeze({
@@ -73,6 +75,12 @@ export const activityMessageCatalog: MessageCatalog = Object.freeze({
     'activity.creation.duplicate_ministry': 'Não repita ministérios participantes.',
     'activity.creation.ministry_not_active':
       'Um dos ministérios não foi encontrado ou não está ativo nesta organização.',
+    'activity.list.page.invalid': 'Informe uma página maior que zero.',
+    'activity.list.page_size.invalid': 'A quantidade por página deve estar entre 1 e {max}.',
+    'activity.list.search.invalid': 'A busca deve ser um texto com até {max} caracteres.',
+    'activity.list.status.invalid': 'O estado da atividade deve ser active ou inactive.',
+    'activity.list.organization_not_found': 'A organização informada não foi encontrada.',
+    'activity.details.not_found': 'A atividade informada não foi encontrada nesta organização.',
     'civil_date.invalid_type': 'A data deve ser um texto no formato AAAA-MM-DD.',
     'civil_date.invalid_format': 'A data deve usar o formato AAAA-MM-DD.',
     'civil_date.invalid_value': 'A data informada não existe no calendário.',
@@ -105,6 +113,12 @@ export const activityMessageCatalog: MessageCatalog = Object.freeze({
     'activity.creation.duplicate_ministry': 'Do not repeat participating ministries.',
     'activity.creation.ministry_not_active':
       'A ministry was not found or is not active in this organization.',
+    'activity.list.page.invalid': 'Provide a page greater than zero.',
+    'activity.list.page_size.invalid': 'Page size must be between 1 and {max}.',
+    'activity.list.search.invalid': 'Search must be text with at most {max} characters.',
+    'activity.list.status.invalid': 'Activity status must be active or inactive.',
+    'activity.list.organization_not_found': 'The specified organization was not found.',
+    'activity.details.not_found': 'The specified activity was not found in this organization.',
     'civil_date.invalid_type': 'The date must be text in YYYY-MM-DD format.',
     'civil_date.invalid_format': 'The date must use YYYY-MM-DD format.',
     'civil_date.invalid_value': 'The specified calendar date does not exist.',

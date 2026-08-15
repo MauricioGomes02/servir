@@ -49,6 +49,19 @@ export const router = createRouter({
             import('@/pages/member-details').then((module) => module.MemberDetailsPage),
           props: true,
         },
+        {
+          path: 'activities',
+          name: 'organization-activities',
+          component: () => import('@/pages/activities').then((module) => module.ActivitiesPage),
+          props: true,
+        },
+        {
+          path: 'activities/:activityId',
+          name: 'activity-details',
+          component: () =>
+            import('@/pages/activity-details').then((module) => module.ActivityDetailsPage),
+          props: true,
+        },
       ],
     },
   ],

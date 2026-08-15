@@ -14,7 +14,7 @@ Servir é uma plataforma em evolução para organizar a operação ministerial d
 
 O projeto transforma esse problema real em um estudo aplicado de Domain-Driven Design, arquitetura hexagonal e sistemas orientados a eventos. As regras de negócio permanecem independentes de HTTP, banco, broker e frameworks; decisões arquiteturais e trade-offs são registrados junto ao código.
 
-> **Estado atual:** o backend possui cortes verticais executáveis desde a criação da organização até a abertura de uma coleta de disponibilidade. API, PostgreSQL, outbox transacional, relay Kafka, observabilidade e infraestrutura local estão integrados. A interface web Vue oferece criação da organização, Início orientado a próximos passos e gestão de ministérios com busca, criação e detalhe de suas funções; a formação/publicação de escalas permanece como próximo grande incremento do domínio.
+> **Estado atual:** o backend possui cortes verticais executáveis desde a criação da organização até a abertura de uma coleta de disponibilidade. API, PostgreSQL, outbox transacional, relay Kafka, observabilidade e infraestrutura local estão integrados. A interface web Vue oferece criação da organização e jornadas de ministérios, membros e atividades; a formação/publicação de escalas permanece como próximo grande incremento do domínio.
 
 ## O produto
 
@@ -40,6 +40,7 @@ O modelo não reduz essa operação a cadastros independentes. Ele preserva regr
 | --------------- | --------------------------------------------------------- | --------------------------------------------------------------- |
 | Organizações    | Criação e isolamento multi-tenant                         | Administração do ciclo da organização                           |
 | Membros         | Registro, consulta de detalhes e listagem paginada        | Associação com identidade de acesso                             |
+| Atividades      | Criação, consulta de detalhes e listagem paginada         | Ocorrências recorrentes, reagendamento e cancelamento           |
 | Ministérios     | Criação, funções, solicitação e aprovação de participação | Suspensão, encerramento e reativação                            |
 | Pessoas e times | Qualificações, times, participação e liderança vigente    | Apoio temporário e substituição de liderança                    |
 | Atividades      | Criação e agendamento manual de ocorrências               | Recorrência, reagendamento e cancelamento                       |

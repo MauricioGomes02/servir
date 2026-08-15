@@ -25,3 +25,5 @@ export type {
   ResolvedCivilSchedule,
   ScheduleDisambiguation,
 } from './occurrence-ports';
+export * from './get-activity-details';
+export * from './list-activities';
