@@ -163,4 +163,66 @@ describe('frontend BFF', () => {
     );
     expect(fetch.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
   });
+
+  it('forwards only supported member list filters', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ items: [], pagination: { totalItems: 0 } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id/members?page=2&pageSize=20&search=Maria&status=active&ignored=value',
+    });
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/members?page=2&pageSize=20&search=Maria&status=active',
+    );
+  });
+
+  it('forwards member registration and details explicitly', async () => {
+    const fetch = vi
+      .fn<typeof globalThis.fetch>()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: 'member-id', name: 'Maria' }), {
+          status: 201,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: 'member-id', name: 'Maria', status: 'active' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const registration = await app.inject({
+      method: 'POST',
+      url: '/bff/organizations/organization-id/members',
+      payload: { name: 'Maria' },
+    });
+    const details = await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id/members/member-id',
+    });
+    await app.close();
+
+    expect(registration.statusCode).toBe(201);
+    expect(details.statusCode).toBe(200);
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/members',
+    );
+    expect(fetch.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
+    expect(fetch.mock.calls[1]?.[0].toString()).toBe(
+      'http://private-api:3000/organizations/organization-id/members/member-id',
+    );
+  });
 });

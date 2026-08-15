@@ -48,6 +48,14 @@ const { load, loading, organization, problem } = useOrganizationLayout(
                 Ministérios
               </RouterLink>
             </li>
+            <li>
+              <RouterLink
+                :to="{ name: 'organization-members', params: { organizationId } }"
+                active-class="is-active"
+              >
+                Membros
+              </RouterLink>
+            </li>
           </ul>
         </nav>
       </aside>

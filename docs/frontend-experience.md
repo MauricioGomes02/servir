@@ -32,7 +32,7 @@ Projetar para a tarefa, não para a entidade. Toda página deve responder a uma 
 | Disponibilidade | Quem pode servir?                             |
 | Atividades      | Quando precisamos de pessoas?                 |
 | Ministérios     | Como a estrutura ministerial está organizada? |
-| Pessoas         | Quem são as pessoas e onde elas servem?       |
+| Membros         | Quem são os membros e onde eles servem?       |
 
 Uma capacidade existente no backend não justifica, isoladamente, uma página, item de menu ou card. A interface pode combinar várias consultas e ações para sustentar uma única tarefa; o BFF pode compor contratos orientados a essa experiência sem expor a topologia da API privada.
 
@@ -55,7 +55,7 @@ A navegação principal representa o trabalho:
 
 - **Início:** atenção, pendências e próximos passos;
 - **Operação:** escalas, atividades e disponibilidade;
-- **Pessoas:** membros e equipes;
+- **Membros:** membros da organização e seus vínculos;
 - **Ministérios:** ministérios, funções ministeriais e equipes;
 - **Administração:** organização, acessos e configurações.
 
@@ -115,10 +115,10 @@ Responde “O que precisa da minha atenção agora?”. Mostra próxima atividad
 - Não expor nomes de Aggregates, Commands ou endpoints.
 - Manter linguagem coerente com o trabalho ministerial.
 
-### Pessoas
+### Membros
 
 - Permitir busca e filtros por ministério, equipe e estado quando o volume justificar.
-- Consolidar ministérios, funções, equipes e disponibilidade relevantes na página da pessoa.
+- Consolidar ministérios, funções, equipes e disponibilidade relevantes no perfil do membro.
 - Não confundir função ministerial com permissão técnica.
 - Usar “função ministerial” para Vocal, Músico e responsabilidades equivalentes.
 - Usar “acesso” ou “permissão” para Administrador, Coordenador e autorizações técnicas.
@@ -316,6 +316,7 @@ Testes automatizados devem preferir papéis, nomes e comportamento acessíveis. 
 - Início comunica honestamente que pendências operacionais dependem de dados ainda não disponíveis e orienta o próximo passo útil.
 - Ministérios oferece busca, criação e listagem de ativos, distinguindo organização sem ministérios, busca sem resultado, carregamento e erro recuperável.
 - O detalhe do ministério apresenta identidade, estado e funções ministeriais reais, permite adicionar uma função com feedback de validação e atualização confirmada pelo backend, e oferece navegação a partir da lista; pessoas, times e liderança aguardam read models orientados à experiência.
+- Membros oferece cadastro, busca, total, paginação e perfis tenant-scoped, conduzindo ao perfil confirmado depois do cadastro sem simular contato, acesso ou vínculos ainda indisponíveis.
 
 O Início ainda não apresenta próximas atividades, coletas de disponibilidade ou escalas pendentes porque esses read models não estão implementados. Informação operacional não deve ser simulada para preencher o layout.
 

@@ -14,12 +14,18 @@ interface MinistryParameters extends OrganizationParameters {
 
 type MinistryRoleParameters = MinistryParameters;
 
+interface MemberParameters extends OrganizationParameters {
+  readonly memberId: string;
+}
+
 interface MinistryListQuery {
   readonly page?: string;
   readonly pageSize?: string;
   readonly search?: string;
   readonly status?: string;
 }
+
+type MemberListQuery = MinistryListQuery;
 
 async function sendToApi(
   request: FastifyRequest,
@@ -141,6 +147,43 @@ export async function createApplication(
         reply,
         config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries/${encodeURIComponent(request.params.ministryId)}/roles`,
+      ),
+  );
+  app.get<{ Params: OrganizationParameters; Querystring: MemberListQuery }>(
+    '/bff/organizations/:organizationId/members',
+    (request, reply) => {
+      const query = new URLSearchParams();
+      for (const name of ['page', 'pageSize', 'search', 'status'] as const) {
+        const value = request.query[name];
+        if (value !== undefined) query.set(name, value);
+      }
+      const suffix = query.size > 0 ? `?${query.toString()}` : '';
+      return sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/members${suffix}`,
+      );
+    },
+  );
+  app.post<{ Params: OrganizationParameters }>(
+    '/bff/organizations/:organizationId/members',
+    (request, reply) =>
+      sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/members`,
+      ),
+  );
+  app.get<{ Params: MemberParameters }>(
+    '/bff/organizations/:organizationId/members/:memberId',
+    (request, reply) =>
+      sendToApi(
+        request,
+        reply,
+        config,
+        `/organizations/${encodeURIComponent(request.params.organizationId)}/members/${encodeURIComponent(request.params.memberId)}`,
       ),
   );
 

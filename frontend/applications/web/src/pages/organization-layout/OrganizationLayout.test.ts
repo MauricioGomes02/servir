@@ -37,6 +37,11 @@ describe('OrganizationLayout', () => {
               name: 'organization-ministries',
               component: { template: '<p>Ministries</p>' },
             },
+            {
+              path: 'members',
+              name: 'organization-members',
+              component: { template: '<p>Members</p>' },
+            },
           ],
         },
       ],
@@ -55,6 +60,7 @@ describe('OrganizationLayout', () => {
     const navigation = getByRole('navigation', { name: 'Navegação da organização' });
     expect(getByRole('link', { name: 'Início' })).toHaveClass('is-active');
     expect(getByRole('link', { name: 'Ministérios' })).not.toHaveClass('is-active');
+    expect(getByRole('link', { name: 'Membros' })).not.toHaveClass('is-active');
     expect(requests.get).toHaveBeenCalledWith(
       '/bff/organizations/organization-id',
       expect.any(AbortSignal),

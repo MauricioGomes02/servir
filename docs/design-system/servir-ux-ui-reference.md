@@ -113,7 +113,7 @@ Cada página deve responder uma pergunta ou permitir concluir uma tarefa.
 | Disponibilidade | Quem pode servir?                             |
 | Atividades      | Quando precisamos de pessoas?                 |
 | Ministérios     | Como a estrutura ministerial está organizada? |
-| Pessoas         | Quem são as pessoas e onde elas servem?       |
+| Membros         | Quem são os membros e onde eles servem?       |
 
 ## 2.2 Estado do sistema sempre visível
 
@@ -298,9 +298,9 @@ Estrutura preferida:
 - Atividades
 - Disponibilidade
 
-**Pessoas**
+**Membros**
 
-- Pessoas
+- Membros
 
 **Ministérios**
 
@@ -659,7 +659,7 @@ Tabs organizam dimensões do mesmo ministério. Não transformar cada informaç�
 
 ---
 
-# 9. Tela: Pessoas
+# 9. Tela: Membros
 
 **Status:** PRÓXIMO CORTE para frontend; backend já possui capacidades de membro.  
 **Pergunta:** “Quem são as pessoas e onde elas servem?”
@@ -668,7 +668,7 @@ Tabs organizam dimensões do mesmo ministério. Não transformar cada informaç�
 
 Cabeçalho:
 
-- Pessoas;
+- Membros;
 - busca;
 - filtros somente quando volume justificar;
 - CTA `Adicionar pessoa` quando existir caso de uso correspondente.

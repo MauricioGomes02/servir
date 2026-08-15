@@ -36,6 +36,19 @@ export const router = createRouter({
             import('@/pages/ministry-details').then((module) => module.MinistryDetailsPage),
           props: true,
         },
+        {
+          path: 'members',
+          name: 'organization-members',
+          component: () => import('@/pages/members').then((module) => module.MembersPage),
+          props: true,
+        },
+        {
+          path: 'members/:memberId',
+          name: 'member-details',
+          component: () =>
+            import('@/pages/member-details').then((module) => module.MemberDetailsPage),
+          props: true,
+        },
       ],
     },
   ],
