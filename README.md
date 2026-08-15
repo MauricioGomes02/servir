@@ -128,7 +128,7 @@ flowchart TD
 Algumas escolhas importantes:
 
 - `Ministry` é um Aggregate Root separado de `Organization`, evitando carregar toda a igreja para alterar um ministério.
-- `Member` representa a pessoa conhecida pela organização; `User` será a identidade autenticável e não substitui o membro.
+- `Member` representa a pessoa conhecida pela organização; `User` é a identidade autenticável global e se vincula ao cadastro correto por convite e acesso tenant-scoped, sem substituí-lo.
 - `MinistryRole` representa uma função exercida no ministério, não uma permissão técnica de acesso.
 - qualificações registram quais funções um membro está apto a exercer e sustentam futuras atribuições de escala.
 - atividades representam o evento planejado; ocorrências representam execuções concretas com data, horário e timezone preservados.
@@ -149,6 +149,7 @@ O modelo completo, invariantes e questões ainda abertas estão em [Domínio min
 | [Valores temporais civis](docs/decisions/051-civil-temporal-values.md)                             | Preserva intenção humana diante de timezone e DST                  |
 | [API privada atrás do BFF](docs/decisions/058-private-api-behind-containerized-frontend-bff.md)    | Expõe somente a fronteira web e isola a API na rede de aplicação   |
 | [Frontend orientado a tarefas](docs/decisions/060-task-oriented-frontend-experience.md)            | Separa experiência, arquitetura de informação e estrutura interna  |
+| [Identity & Access](docs/decisions/066-identity-access-and-member-linking.md)                      | Separa conta, acesso organizacional e vínculo seguro com Member    |
 
 Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 

@@ -76,7 +76,7 @@ No PostgreSQL, `registeredAt` usa `timestamptz`. O estado é persistido como `sm
 - Organizations fornece `OrganizationId` como referência nominal.
 - Ministries consumirá `MemberId` por meio de `MinistryMembership`.
 - Scheduling usará `MemberId` em disponibilidade e atribuições.
-- Identity & Access poderá associar `User` e `Member` por um fluxo futuro sem colocar credenciais no Aggregate.
+- Identity & Access associa `User` e `Member` por `OrganizationAccess` criado mediante convite explícito, sem colocar credenciais no Aggregate.
 
 ## Entrada HTTP
 

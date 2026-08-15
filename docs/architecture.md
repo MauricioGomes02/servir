@@ -56,6 +56,8 @@ Um builder acrescenta automaticamente a outbox PostgreSQL a cada write scope, en
 
 `Organization` é a fronteira de tenant dos dados de uma igreja local. O schema PostgreSQL é compartilhado, mas toda tabela tenant-owned carrega `organization_id`; relacionamentos entre essas tabelas usam constraints compostas para impedir referências entre Organizations. Repositories e Readers escopam leituras e escritas pelo tenant explicitamente, sem ambient context. IDs globalmente únicos ajudam a identidade, mas não substituem essa proteção. Tabelas operacionais globais podem permanecer sem tenant quando seus contratos não possuem um único proprietário. A decisão completa está no [ADR 046](decisions/046-organization-tenant-boundaries.md).
 
+Identity & Access separa `User` global, `OrganizationAccess` tenant-scoped e `MemberAccessInvitation`. Autenticação OIDC nasce na borda, enquanto autorização continua na API; `organizationId` seleciona contexto, mas não concede acesso. O vínculo com Member é explícito, exclusivo dentro da Organization e nunca inferido por nome ou e-mail. A decisão está no [ADR 066](decisions/066-identity-access-and-member-linking.md).
+
 ## Commands e Queries
 
 A Application aplica separação pragmática de responsabilidades. Commands alteram estado por meio de Aggregates, Repository ports e, quando necessário, Unit of Work. Queries não reconstituem Aggregates sem necessidade: cada consulta define um Read Model e um Reader port orientados ao consumidor.

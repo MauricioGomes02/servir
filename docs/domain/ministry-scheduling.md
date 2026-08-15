@@ -201,7 +201,7 @@ Nem todo fato candidato se tornará Integration Event. O primeiro consumidor def
 
 ## Member e User
 
-`Member` representa uma pessoa conhecida pela organização e pode participar do negócio antes de possuir acesso ao sistema. Seu núcleo inicial possui `MemberId`, `OrganizationId`, `MemberName`, estado ativo e o fato `MemberRegistered`. `User` representa uma identidade autenticável em Identity & Access. Uma associação futura entre ambos não deve transformar credenciais em propriedade do Aggregate de membro.
+`Member` representa uma pessoa conhecida pela organização e pode participar do negócio antes de possuir acesso ao sistema. Seu núcleo inicial possui `MemberId`, `OrganizationId`, `MemberName`, estado ativo e o fato `MemberRegistered`. `User` representa uma identidade autenticável em Identity & Access. `OrganizationAccess` poderá vincular ambos dentro do tenant mediante convite explícito, sem transformar credenciais em propriedade do Aggregate de membro.
 
 ## Questões abertas
 
