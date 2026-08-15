@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/vue';
+import { fireEvent, render, waitFor } from '@testing-library/vue';
 import { axe } from 'vitest-axe';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -99,7 +99,7 @@ describe('MinistriesPage', () => {
       items: [{ id: 'music-ministry-id', name: 'Música', status: 'active' }],
       pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
     });
-    const { container, findByRole } = await renderPage();
+    const { container, findByRole, router } = await renderPage();
 
     const detailsLink = await findByRole('link', {
       name: 'Ver detalhes do ministério Música',
@@ -114,10 +114,16 @@ describe('MinistriesPage', () => {
     expect(detailsLink).toHaveTextContent('Ver detalhes');
     expect(detailsLink.querySelector('.ministry-list-action')).toHaveTextContent('Ver detalhes');
     expect(container.querySelector('.ministry-details')).not.toBeInTheDocument();
+    detailsLink.focus();
+    expect(detailsLink).toHaveFocus();
     const accessibility = await axe(container, {
       rules: { 'color-contrast': { enabled: false } },
     });
     expect(accessibility.violations).toEqual([]);
+
+    await fireEvent.click(detailsLink);
+    await waitFor(() => expect(router.currentRoute.value.name).toBe('ministry-details'));
+    expect(router.currentRoute.value.params.ministryId).toBe('music-ministry-id');
   });
 
   it('creates a ministry and refreshes the visible structure', async () => {

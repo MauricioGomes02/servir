@@ -72,6 +72,9 @@
   border-radius: var(--radius-sm);
   color: var(--color-text);
   text-decoration: none;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease;
 }
 
 .ministry-summary {
@@ -83,6 +86,7 @@
 .ministry-summary strong {
   overflow-wrap: anywhere;
   font-weight: 750;
+  transition: color 160ms ease;
 }
 
 .ministry-summary span {
@@ -102,9 +106,18 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: var(--button-height-small);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--button-radius);
   color: var(--color-action);
+  background: var(--color-surface);
   font-size: 0.9rem;
   font-weight: 750;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .ministry-list-action svg {
@@ -113,9 +126,41 @@
   transition: transform 160ms ease;
 }
 
+.ministry-list-link:focus-visible {
+  background: var(--color-surface-muted);
+}
+
+.ministry-list-link:focus-visible .ministry-summary strong {
+  color: var(--color-action);
+}
+
+.ministry-list-link:focus-visible .ministry-list-action {
+  border-color: var(--color-action);
+  color: var(--color-on-action);
+  background: var(--color-action);
+}
+
+.ministry-list-link:focus-visible .ministry-list-action svg {
+  transform: translateX(0.2rem);
+}
+
+.ministry-list-link:active {
+  transform: translateY(0.0625rem) scale(0.995);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .ministry-list-link:hover {
     background: var(--color-surface-muted);
+  }
+
+  .ministry-list-link:hover .ministry-summary strong {
+    color: var(--color-action);
+  }
+
+  .ministry-list-link:hover .ministry-list-action {
+    border-color: var(--color-action);
+    color: var(--color-on-action);
+    background: var(--color-action);
   }
 
   .ministry-list-link:hover .ministry-list-action svg {
