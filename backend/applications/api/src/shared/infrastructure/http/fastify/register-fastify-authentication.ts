@@ -1,0 +1,37 @@
+import type { AccessTokenVerifier } from '@/shared/application/authentication';
+import { createExecutionContext } from '@/shared/application/context';
+import type { FastifyInstance } from 'fastify';
+
+import { HttpAuthenticationError } from './http-authentication-error';
+
+function bearerToken(authorization: string | undefined): string | undefined {
+  if (authorization === undefined) return undefined;
+
+  const match = /^Bearer ([^\s]+)$/i.exec(authorization);
+
+  if (match === null) throw HttpAuthenticationError.missingAccessToken();
+
+  return match[1];
+}
+
+export function registerFastifyAuthentication(
+  app: FastifyInstance,
+  accessTokenVerifier: AccessTokenVerifier,
+): void {
+  app.addHook('onRequest', async (request) => {
+    const accessToken = bearerToken(request.headers.authorization);
+
+    if (accessToken === undefined) return;
+
+    const result = await accessTokenVerifier.verify(accessToken);
+
+    if (!result.success) throw new HttpAuthenticationError(result.error.code);
+
+    if (request.executionContext === null) return;
+
+    request.executionContext = createExecutionContext({
+      ...request.executionContext,
+      actor: result.value,
+    });
+  });
+}

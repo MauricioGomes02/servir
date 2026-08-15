@@ -10,7 +10,7 @@ Objetos de framework vazam transporte, estado global e detalhes de autenticaçã
 
 ## Responsabilidades
 
-- Conter somente os metadados exigidos pelos consumidores; inicialmente `CorrelationId` e `RequestId`.
+- Conter somente os metadados exigidos pelos consumidores: `CorrelationId`, `RequestId` e, quando autenticado, `AuthenticatedActor`.
 - Ser imutável e explicitamente propagado.
 - Distinguir ausência de valor de valor inválido.
 
@@ -36,20 +36,23 @@ Um adapter HTTP valida ou cria `CorrelationId` e `RequestId` antes de construir 
 
 ```ts
 interface ExecutionContext {
+  readonly actor?: AuthenticatedActor;
   readonly correlationId: CorrelationId;
   readonly requestId?: RequestId;
 }
 ```
 
-O contrato cresce apenas quando mensagens, autorização ou tenancy demonstrarem a necessidade de novos campos.
+`AuthenticatedActor` transporta somente o par OIDC imutável `issuer` + `subject`, depois que um adapter valida o access token. Esses valores são opacos e não são normalizados, pois qualquer alteração poderia trocar a identidade reconhecida pelo provedor. O ator técnico não é `User`, `Member` nem autorização para uma `Organization`.
+
+Rotas que aceitam acesso anônimo usam o contexto sem ator. Rotas protegidas exigem o ator explicitamente e, em etapas posteriores, resolvem `User` e `OrganizationAccess`. A presença de `organizationId` na URL nunca concede acesso.
 
 ## Relacionamento com outras primitivas
 
-Logger e `EventEnvelope` usam `CorrelationId`; adapters propagam tracing técnico conforme W3C Trace Context sem expor tipos do OpenTelemetry ao núcleo. A captura e a extração W3C são implementadas uma vez em `@servir/node-observability`, enquanto cada aplicação decide em quais fronteiras usá-las. Policies podem receber identidade do ator quando semanticamente necessário.
+Logger e `EventEnvelope` usam `CorrelationId`; adapters propagam tracing técnico conforme W3C Trace Context sem expor tipos do OpenTelemetry ao núcleo. A captura e a extração W3C são implementadas uma vez em `@servir/node-observability`, enquanto cada aplicação decide em quais fronteiras usá-las. Policies podem receber a identidade de domínio já resolvida quando semanticamente necessário; não recebem tokens nem claims do transporte.
 
 ## Possíveis evoluções
 
-Adicionar causalidade, ator, tenant e locale junto aos consumidores que definirem sua semântica. Baggage permanece desabilitado por padrão e exige allowlist explícita.
+Adicionar causalidade, tenant e locale junto aos consumidores que definirem sua semântica. Baggage permanece desabilitado por padrão e exige allowlist explícita.
 
 ## Boas práticas
 

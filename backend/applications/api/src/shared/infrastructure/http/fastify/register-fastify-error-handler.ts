@@ -45,21 +45,24 @@ export function registerFastifyErrorHandler(
       ? HttpProblemMessageCodes.InternalErrorTitle
       : HttpProblemMessageCodes.InvalidRequestTitle;
 
-    return reply
+    const response = reply
       .status(statusCode)
       .type('application/problem+json')
-      .header('content-language', locale)
-      .send(
-        createHttpProblemDetails({
-          type,
-          title: messageTranslator.translate({
-            code: titleCode,
-            locale,
-          }),
-          status: statusCode,
-          correlationId: context?.correlationId,
-          requestId: context?.requestId,
+      .header('content-language', locale);
+
+    if (statusCode === 401) response.header('www-authenticate', 'Bearer');
+
+    return response.send(
+      createHttpProblemDetails({
+        type,
+        title: messageTranslator.translate({
+          code: titleCode,
+          locale,
         }),
-      );
+        status: statusCode,
+        correlationId: context?.correlationId,
+        requestId: context?.requestId,
+      }),
+    );
   });
 }

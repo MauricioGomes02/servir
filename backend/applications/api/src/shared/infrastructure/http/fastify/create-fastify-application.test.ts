@@ -2,11 +2,19 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  AuthenticationErrorCodes,
+  createAuthenticatedActor,
+  parseIdentityIssuer,
+  parseIdentitySubject,
+  type AccessTokenVerifier,
+} from '@/shared/application/authentication';
+import {
   parseCorrelationId,
   parseRequestId,
   type CorrelationId,
   type RequestId,
 } from '@/shared/application/context';
+import { failure, success } from '@/shared/core/result';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
@@ -62,6 +70,72 @@ function application(generatedCorrelationId = 'correlation-generated') {
 }
 
 describe('createFastifyApplication', () => {
+  it('propagates a verified bearer identity into the execution context', async () => {
+    const issuer = parseIdentityIssuer('https://identity.example.com');
+    const subject = parseIdentitySubject('user-123');
+    assert.equal(issuer.success, true);
+    assert.equal(subject.success, true);
+    if (!issuer.success || !subject.success) return;
+
+    const verifiedTokens: string[] = [];
+    const accessTokenVerifier: AccessTokenVerifier = {
+      async verify(accessToken) {
+        verifiedTokens.push(accessToken);
+        return success(createAuthenticatedActor({ issuer: issuer.value, subject: subject.value }));
+      },
+    };
+    const logger = new InMemoryLogger();
+    const app = createFastifyApplication({
+      accessTokenVerifier,
+      correlationIdGenerator: new SequenceIdGenerator([correlationId('correlation-generated')]),
+      logger,
+      messageTranslator: new InMemoryMessageTranslator(catalog),
+      requestIdGenerator: new SequenceIdGenerator([requestId(REQUEST_ID)]),
+    });
+    app.get('/actor', async (request) => request.executionContext?.actor);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/actor',
+      headers: { authorization: 'Bearer opaque-token' },
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(verifiedTokens, ['opaque-token']);
+    assert.deepEqual(response.json(), {
+      issuer: 'https://identity.example.com',
+      subject: 'user-123',
+    });
+  });
+
+  it('rejects a bearer token rejected by the verifier', async () => {
+    const accessTokenVerifier: AccessTokenVerifier = {
+      async verify() {
+        return failure({ code: AuthenticationErrorCodes.ExpiredAccessToken });
+      },
+    };
+    const logger = new InMemoryLogger();
+    const app = createFastifyApplication({
+      accessTokenVerifier,
+      correlationIdGenerator: new SequenceIdGenerator([correlationId('correlation-generated')]),
+      logger,
+      messageTranslator: new InMemoryMessageTranslator(catalog),
+      requestIdGenerator: new SequenceIdGenerator([requestId(REQUEST_ID)]),
+    });
+    app.get('/actor', async () => ({ accepted: true }));
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/actor',
+      headers: { authorization: 'Bearer expired-token' },
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 401);
+    assert.equal(response.headers['www-authenticate'], 'Bearer');
+  });
+
   it('creates context from the request and exposes effective IDs', async () => {
     const { app, logger } = application();
     app.get('/context', async (request) => ({

@@ -1,6 +1,8 @@
 export { createFastifyApplication } from './create-fastify-application';
 
 export { registerFastifyRequestContext } from './register-fastify-request-context';
+export { requireAuthenticatedActor } from './require-authenticated-actor';
+export { HttpAuthenticationError } from './http-authentication-error';
 
 export { registerFastifyErrorHandler } from './register-fastify-error-handler';
 
