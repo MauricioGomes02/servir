@@ -5,7 +5,19 @@
 }
 
 .activity-details-navigation {
-  justify-self: start;
+  display: flex;
+  justify-content: flex-start;
+  padding-bottom: var(--space-2);
+}
+
+.activity-details-navigation .activity-back-link {
+  text-decoration: none;
+}
+
+.activity-back-link svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 160ms ease;
 }
 
 .activity-details-header {
@@ -62,4 +74,20 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .activity-back-link:hover {
+    border-color: var(--color-action);
+  }
+
+  .activity-back-link:hover svg {
+    transform: translateX(-0.2rem);
+  }
+}
+
+@media (width < 45rem) {
+  .activity-back-link {
+    width: 100%;
+  }
 }

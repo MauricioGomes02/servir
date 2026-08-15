@@ -34,7 +34,7 @@ const { activity, load, loading, problem } = useActivityDetailsPage(
   <article v-else-if="activity" class="activity-details" aria-labelledby="activity-title">
     <nav class="activity-details-navigation" aria-label="Navegação da atividade">
       <RouterLink
-        class="app-button app-button-secondary"
+        class="activity-back-link app-button app-button-secondary"
         :to="{ name: 'organization-activities', params: { organizationId } }"
       >
         <AppIcon name="back" />
