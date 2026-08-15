@@ -203,6 +203,8 @@ Composables e requisições explícitas permanecem suficientes enquanto o volume
 
 Busca, filtros, paginação, ordenação e tabs compartilháveis pertencem à URL. Formulários permanecem locais à feature. Validação de formato oferece feedback imediato; erros estruturados do backend continuam associados aos campos.
 
+Rotas de lista e detalhe que pertencem à mesma área declaram o mesmo `meta.navigationArea`. O shell usa esse contexto semântico para manter o destino correspondente marcado durante toda a jornada; não infere a área por prefixos de URL, textos visíveis ou pela relação técnica entre componentes.
+
 ## Fluxos
 
 ```mermaid

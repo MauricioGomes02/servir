@@ -1,4 +1,4 @@
-import { render } from '@testing-library/vue';
+import { render, waitFor } from '@testing-library/vue';
 import { axe } from 'vitest-axe';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -30,22 +30,44 @@ describe('OrganizationLayout', () => {
             {
               path: '',
               name: 'organization-home',
+              meta: { navigationArea: 'home' },
               component: { template: '<p>Home</p>' },
             },
             {
               path: 'ministries',
               name: 'organization-ministries',
+              meta: { navigationArea: 'ministries' },
               component: { template: '<p>Ministries</p>' },
             },
             {
               path: 'members',
               name: 'organization-members',
+              meta: { navigationArea: 'members' },
               component: { template: '<p>Members</p>' },
             },
             {
               path: 'activities',
               name: 'organization-activities',
+              meta: { navigationArea: 'activities' },
               component: { template: '<p>Activities</p>' },
+            },
+            {
+              path: 'ministries/:ministryId',
+              name: 'ministry-details',
+              meta: { navigationArea: 'ministries' },
+              component: { template: '<p>Ministry details</p>' },
+            },
+            {
+              path: 'members/:memberId',
+              name: 'member-details',
+              meta: { navigationArea: 'members' },
+              component: { template: '<p>Member details</p>' },
+            },
+            {
+              path: 'activities/:activityId',
+              name: 'activity-details',
+              meta: { navigationArea: 'activities' },
+              component: { template: '<p>Activity details</p>' },
             },
           ],
         },
@@ -76,5 +98,19 @@ describe('OrganizationLayout', () => {
     });
     expect(navigation).toBeVisible();
     expect(accessibility.violations).toEqual([]);
+
+    for (const [routeName, parameterName, parameterValue, linkName] of [
+      ['ministry-details', 'ministryId', 'ministry-id', /^Minist/],
+      ['member-details', 'memberId', 'member-id', /^Membros$/],
+      ['activity-details', 'activityId', 'activity-id', /^Atividades$/],
+    ] as const) {
+      await router.push({
+        name: routeName,
+        params: { organizationId: 'organization-id', [parameterName]: parameterValue },
+      });
+      await waitFor(() => expect(router.currentRoute.value.name).toBe(routeName));
+      await waitFor(() => expect(getByRole('link', { name: linkName })).toHaveClass('is-active'));
+      expect(getByRole('link', { name: linkName })).toHaveAttribute('aria-current', 'page');
+    }
   });
 });

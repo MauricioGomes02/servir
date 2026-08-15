@@ -4,7 +4,7 @@ import { AppIcon, AppStatusBadge } from '@/shared/ui';
 import { useOrganizationLayout } from './use-organization-layout';
 
 const props = defineProps<{ organizationId: string }>();
-const { load, loading, organization, problem } = useOrganizationLayout(
+const { activeNavigationArea, load, loading, organization, problem } = useOrganizationLayout(
   toRef(props, 'organizationId'),
 );
 </script>
@@ -35,7 +35,8 @@ const { load, loading, organization, problem } = useOrganizationLayout(
             <li>
               <RouterLink
                 :to="{ name: 'organization-home', params: { organizationId } }"
-                exact-active-class="is-active"
+                :class="{ 'is-active': activeNavigationArea === 'home' }"
+                :aria-current="activeNavigationArea === 'home' ? 'page' : undefined"
               >
                 Início
               </RouterLink>
@@ -43,7 +44,8 @@ const { load, loading, organization, problem } = useOrganizationLayout(
             <li>
               <RouterLink
                 :to="{ name: 'organization-ministries', params: { organizationId } }"
-                active-class="is-active"
+                :class="{ 'is-active': activeNavigationArea === 'ministries' }"
+                :aria-current="activeNavigationArea === 'ministries' ? 'page' : undefined"
               >
                 Ministérios
               </RouterLink>
@@ -51,7 +53,8 @@ const { load, loading, organization, problem } = useOrganizationLayout(
             <li>
               <RouterLink
                 :to="{ name: 'organization-members', params: { organizationId } }"
-                active-class="is-active"
+                :class="{ 'is-active': activeNavigationArea === 'members' }"
+                :aria-current="activeNavigationArea === 'members' ? 'page' : undefined"
               >
                 Membros
               </RouterLink>
@@ -59,7 +62,8 @@ const { load, loading, organization, problem } = useOrganizationLayout(
             <li>
               <RouterLink
                 :to="{ name: 'organization-activities', params: { organizationId } }"
-                active-class="is-active"
+                :class="{ 'is-active': activeNavigationArea === 'activities' }"
+                :aria-current="activeNavigationArea === 'activities' ? 'page' : undefined"
               >
                 Atividades
               </RouterLink>

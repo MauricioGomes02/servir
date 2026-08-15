@@ -1,8 +1,10 @@
-import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { getOrganization, type Organization } from '@/entities/organization';
 import { HttpProblem } from '@/shared/api';
 
 export function useOrganizationLayout(organizationId: Ref<string>) {
+  const route = useRoute();
   const organization = ref<Organization>();
   const problem = ref<HttpProblem>();
   const loading = ref(true);
@@ -34,5 +36,7 @@ export function useOrganizationLayout(organizationId: Ref<string>) {
   onMounted(load);
   onBeforeUnmount(() => abortController?.abort());
 
-  return { load, loading, organization, problem };
+  const activeNavigationArea = computed(() => route.meta.navigationArea);
+
+  return { activeNavigationArea, load, loading, organization, problem };
 }
