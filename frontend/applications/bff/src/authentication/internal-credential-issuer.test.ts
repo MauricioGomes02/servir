@@ -69,7 +69,10 @@ describe('InternalCredentialIssuer', () => {
 
   it('issues a session restricted to the BFF audience', async () => {
     const { issuer, publicKey } = await fixture();
-    const token = await issuer.issueSessionToken('0198f334-6dc5-7c20-9af1-91d7e599e011');
+    const token = await issuer.issueSessionToken(
+      '0198f334-6dc5-7c20-9af1-91d7e599e011',
+      'csrf-token',
+    );
 
     const result = await jwtVerify(token, publicKey, {
       audience: 'servir-bff',
@@ -79,7 +82,12 @@ describe('InternalCredentialIssuer', () => {
     expect(result.payload).toMatchObject({
       exp: NOW + 28_800,
       purpose: 'session',
+      csrf: 'csrf-token',
       sub: '0198f334-6dc5-7c20-9af1-91d7e599e011',
+    });
+    await expect(issuer.verifySessionToken(token)).resolves.toEqual({
+      csrfToken: 'csrf-token',
+      userId: '0198f334-6dc5-7c20-9af1-91d7e599e011',
     });
   });
 });

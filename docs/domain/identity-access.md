@@ -90,7 +90,9 @@ Após validar o provedor, o BFF emite uma sessão stateless em cookie seguro e u
 
 O primeiro corte executável integra Google ao BFF por Authorization Code, `state`, `nonce` e PKCE. A transação temporária é criptografada em cookie `__Host-`; o callback valida o provedor, emite uma assertion interna curta, chama `POST /identity/users/provision` na API privada e cria uma sessão assinada contendo o `UserId` interno. O provisionamento é idempotente por `issuer + subject`, e a rota aceita exclusivamente credenciais com propósito `user-provisioning`.
 
-Consulta de sessão, logout, proteção CSRF das mutações e emissão/propagação do access token do BFF para as rotas privadas permanecem no próximo incremento. Portanto, a existência da sessão ainda não significa que todas as operações de negócio estejam protegidas por autorização.
+O BFF também expõe consulta de sessão e logout local. A sessão vincula um token CSRF aleatório; mutações autenticadas validam o valor enviado no header contra o cookie legível pelo cliente e contra a claim assinada, além de exigir origem confiável. O logout remove os cookies de sessão e CSRF, sem prometer revogação imediata de uma cópia previamente roubada da sessão stateless.
+
+A emissão e propagação do access token do BFF para as rotas privadas permanece no próximo incremento. Portanto, a existência da sessão ainda não significa que todas as operações de negócio estejam protegidas por autorização.
 
 Chaves privadas são carregadas uma vez pelo BFF no startup, preferencialmente de arquivo somente leitura materializado pelo ambiente. A API carrega da mesma forma apenas o JWKS público. Variáveis inline permanecem disponíveis para desenvolvimento, com menor precedência que os arquivos; integrações com secret stores não fazem chamadas por request.
 

@@ -72,13 +72,48 @@ describe('frontend BFF', () => {
       url: '/bff/auth/google/callback?code=provider-code&state=provider-state',
       headers: { cookie: loginCookie ?? '' },
     });
-    await app.close();
-
     expect(callback.statusCode).toBe(302);
     expect(callback.headers.location).toBe('/');
     expect(callback.headers['set-cookie']).toEqual(
       expect.arrayContaining([expect.stringContaining('__Host-servir-session=')]),
     );
+    const callbackCookies = callback.headers['set-cookie'];
+    const cookieHeader = (Array.isArray(callbackCookies) ? callbackCookies : [callbackCookies])
+      .filter((value): value is string => typeof value === 'string')
+      .filter(
+        (value) =>
+          value.startsWith('__Host-servir-session=') || value.startsWith('__Host-servir-csrf='),
+      )
+      .map((value) => value.split(';', 1)[0])
+      .join('; ');
+    const csrfToken = /__Host-servir-csrf=([^;]+)/.exec(cookieHeader)?.[1];
+
+    const session = await app.inject({
+      method: 'GET',
+      url: '/bff/auth/session',
+      headers: { cookie: cookieHeader },
+    });
+    const rejectedLogout = await app.inject({
+      method: 'POST',
+      url: '/bff/auth/logout',
+      headers: { cookie: cookieHeader, origin: 'https://attacker.test', 'x-csrf-token': csrfToken },
+    });
+    const logout = await app.inject({
+      method: 'POST',
+      url: '/bff/auth/logout',
+      headers: {
+        cookie: cookieHeader,
+        origin: 'https://servir.test',
+        'sec-fetch-site': 'same-origin',
+        'x-csrf-token': csrfToken,
+      },
+    });
+    await app.close();
+
+    expect(session.statusCode).toBe(200);
+    expect(session.json()).toEqual({ authenticated: true, userId: 'user-id' });
+    expect(rejectedLogout.statusCode).toBe(403);
+    expect(logout.statusCode).toBe(204);
   });
 
   it('exposes liveness with defensive browser headers', async () => {
