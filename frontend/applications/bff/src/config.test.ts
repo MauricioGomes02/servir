@@ -29,6 +29,7 @@ describe('readBffConfig', () => {
       readBffConfig({
         API_BASE_URL: 'http://api:3000',
         AUTH_AUDIENCE: 'servir-api',
+        AUTH_COOKIE_ENCRYPTION_KEY: 'cookie-key',
         AUTH_ISSUER: 'https://identity.servir.test',
         AUTH_KEY_ID: 'current-key',
         AUTH_PRIVATE_JWK: JSON.stringify({ kty: 'RSA', d: 'private-component' }),
@@ -46,6 +47,7 @@ describe('readBffConfig', () => {
       {
         API_BASE_URL: 'http://api:3000',
         AUTH_AUDIENCE: 'servir-api',
+        AUTH_COOKIE_ENCRYPTION_KEY: 'cookie-key',
         AUTH_ISSUER: 'https://identity.servir.test',
         AUTH_KEY_ID: 'current-key',
         AUTH_PRIVATE_JWK: 'invalid-inline-value',

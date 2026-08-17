@@ -9,6 +9,8 @@ export interface BffConfig {
     algorithm: 'RS256';
     audience: string;
     bootstrapAssertionTtlSeconds: number;
+    cookieEncryptionKey: string;
+    loginTransactionTtlSeconds: number;
     issuer: string;
     keyId: string;
     privateJwk: JWK;
@@ -60,13 +62,14 @@ function readAuthenticationConfig(
     environment.AUTH_ISSUER,
     environment.AUTH_AUDIENCE,
     environment.AUTH_KEY_ID,
+    environment.AUTH_COOKIE_ENCRYPTION_KEY,
     environment.AUTH_PRIVATE_JWK ?? environment.AUTH_PRIVATE_JWK_FILE,
   ];
   if (values.every((value) => value === undefined || value.trim() === '')) return undefined;
-  const [issuer, audience, keyId] = values.map((value) => value?.trim());
+  const [issuer, audience, keyId, cookieEncryptionKey] = values.map((value) => value?.trim());
   const privateJwkFile = environment.AUTH_PRIVATE_JWK_FILE?.trim();
   const inlinePrivateJwk = environment.AUTH_PRIVATE_JWK?.trim();
-  if (!issuer || !audience || !keyId || (!privateJwkFile && !inlinePrivateJwk)) {
+  if (!issuer || !audience || !keyId || !cookieEncryptionKey || (!privateJwkFile && !inlinePrivateJwk)) {
     throw new Error('authentication configuration must be complete');
   }
   let privateJwk: JWK;
@@ -91,8 +94,14 @@ function readAuthenticationConfig(
       60,
       'AUTH_BOOTSTRAP_TTL_SECONDS',
     ),
+    cookieEncryptionKey,
     issuer,
     keyId,
+    loginTransactionTtlSeconds: positiveInteger(
+      environment.AUTH_LOGIN_TRANSACTION_TTL_SECONDS,
+      300,
+      'AUTH_LOGIN_TRANSACTION_TTL_SECONDS',
+    ),
     privateJwk,
   });
 }
