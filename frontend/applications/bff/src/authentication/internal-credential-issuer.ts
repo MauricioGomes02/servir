@@ -8,6 +8,8 @@ export interface InternalCredentialIssuerConfig {
   readonly privateJwk: JWK;
   readonly accessTokenTtlSeconds: number;
   readonly bootstrapAssertionTtlSeconds: number;
+  readonly sessionAudience: string;
+  readonly sessionTtlSeconds: number;
 }
 
 export interface ExternalIdentityAssertionInput {
@@ -46,16 +48,26 @@ export class InternalCredentialIssuer {
     );
   }
 
+  issueSessionToken(userId: string): Promise<string> {
+    return this.sign(
+      { purpose: 'session' },
+      this.config.sessionTtlSeconds,
+      userId,
+      this.config.sessionAudience,
+    );
+  }
+
   private sign(
     claims: Readonly<Record<string, string>>,
     ttlSeconds: number,
     subject?: string,
+    audience: string = this.config.audience,
   ): Promise<string> {
     const issuedAt = this.now();
     let token = new SignJWT(claims)
       .setProtectedHeader({ alg: this.config.algorithm, kid: this.config.keyId, typ: 'JWT' })
       .setIssuer(this.config.issuer)
-      .setAudience(this.config.audience)
+      .setAudience(audience)
       .setIssuedAt(issuedAt)
       .setExpirationTime(issuedAt + ttlSeconds);
     if (subject !== undefined) token = token.setSubject(subject);

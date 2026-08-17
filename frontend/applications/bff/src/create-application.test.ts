@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { base64url } from 'jose';
+import { base64url, exportJWK, generateKeyPair } from 'jose';
 import { AuthenticationCookieCodec } from './authentication/authentication-cookie-codec.js';
 import type { OidcLoginTransaction, OidcProvider } from './authentication/oidc-provider.js';
+import { InternalCredentialIssuer } from './authentication/internal-credential-issuer.js';
 import { createApplication } from './create-application.js';
 
 const config = {
@@ -28,8 +29,27 @@ describe('frontend BFF', () => {
       issuer: 'https://identity.servir.test',
       loginTransactionTtlSeconds: 300,
     });
+    const pair = await generateKeyPair('RS256', { extractable: true });
+    const credentialIssuer = await InternalCredentialIssuer.create({
+      accessTokenTtlSeconds: 300,
+      algorithm: 'RS256',
+      audience: 'servir-api',
+      bootstrapAssertionTtlSeconds: 60,
+      issuer: 'https://identity.servir.test',
+      keyId: 'test-key',
+      privateJwk: await exportJWK(pair.privateKey),
+      sessionAudience: 'servir-bff',
+      sessionTtlSeconds: 28_800,
+    });
     const app = await createApplication(config, {
-      googleAuthentication: { cookieCodec, oidcProvider },
+      googleAuthentication: {
+        callbackUrl: new URL('https://servir.test/bff/auth/google/callback'),
+        cookieCodec,
+        credentialIssuer,
+        oidcProvider,
+        provisioningClient: { provision: async () => ({ userId: 'user-id' }) },
+        sessionTtlSeconds: 28_800,
+      },
       logger: false,
     });
 
@@ -37,8 +57,6 @@ describe('frontend BFF', () => {
       method: 'GET',
       url: '/bff/auth/google/login?returnPath=https://attacker.test',
     });
-    await app.close();
-
     expect(response.statusCode).toBe(302);
     expect(response.headers.location).toContain('https://accounts.google.test/authorize?state=');
     expect(receivedTransaction?.returnPath).toBe('/');
@@ -47,6 +65,20 @@ describe('frontend BFF', () => {
     expect(cookie).toContain('HttpOnly');
     expect(cookie).toContain('Secure');
     expect(cookie).toContain('SameSite=Lax');
+
+    const loginCookie = (Array.isArray(cookie) ? cookie[0] : cookie)?.split(';', 1)[0];
+    const callback = await app.inject({
+      method: 'GET',
+      url: '/bff/auth/google/callback?code=provider-code&state=provider-state',
+      headers: { cookie: loginCookie ?? '' },
+    });
+    await app.close();
+
+    expect(callback.statusCode).toBe(302);
+    expect(callback.headers.location).toBe('/');
+    expect(callback.headers['set-cookie']).toEqual(
+      expect.arrayContaining([expect.stringContaining('__Host-servir-session=')]),
+    );
   });
 
   it('exposes liveness with defensive browser headers', async () => {

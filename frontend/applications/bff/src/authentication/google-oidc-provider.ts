@@ -1,5 +1,9 @@
 import * as oidc from 'openid-client';
-import type { OidcLoginTransaction, OidcProvider, VerifiedExternalIdentity } from './oidc-provider.js';
+import type {
+  OidcLoginTransaction,
+  OidcProvider,
+  VerifiedExternalIdentity,
+} from './oidc-provider.js';
 
 export interface GoogleOidcProviderConfig {
   readonly clientId: string;

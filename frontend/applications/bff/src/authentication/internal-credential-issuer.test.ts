@@ -17,6 +17,8 @@ async function fixture() {
       issuer: 'https://identity.servir.test',
       keyId: 'current-key',
       privateJwk,
+      sessionAudience: 'servir-bff',
+      sessionTtlSeconds: 28_800,
     },
     () => NOW,
   );
@@ -63,5 +65,21 @@ describe('InternalCredentialIssuer', () => {
       purpose: 'user-provisioning',
     });
     expect(result.payload.sub).toBeUndefined();
+  });
+
+  it('issues a session restricted to the BFF audience', async () => {
+    const { issuer, publicKey } = await fixture();
+    const token = await issuer.issueSessionToken('0198f334-6dc5-7c20-9af1-91d7e599e011');
+
+    const result = await jwtVerify(token, publicKey, {
+      audience: 'servir-bff',
+      currentDate: new Date(NOW * 1000),
+      issuer: 'https://identity.servir.test',
+    });
+    expect(result.payload).toMatchObject({
+      exp: NOW + 28_800,
+      purpose: 'session',
+      sub: '0198f334-6dc5-7c20-9af1-91d7e599e011',
+    });
   });
 });

@@ -11,6 +11,8 @@ export interface BffConfig {
     bootstrapAssertionTtlSeconds: number;
     cookieEncryptionKey: string;
     loginTransactionTtlSeconds: number;
+    sessionAudience: string;
+    sessionTtlSeconds: number;
     issuer: string;
     keyId: string;
     privateJwk: JWK;
@@ -33,7 +35,8 @@ function requiredConfiguredValues<const Names extends readonly string[]>(
 ): { readonly [Index in keyof Names]: string } | undefined {
   const values = names.map((name) => environment[name]?.trim());
   if (values.every((value) => !value)) return undefined;
-  if (values.some((value) => !value)) throw new Error(`${configurationName} configuration must be complete`);
+  if (values.some((value) => !value))
+    throw new Error(`${configurationName} configuration must be complete`);
   return values as { readonly [Index in keyof Names]: string };
 }
 
@@ -69,7 +72,13 @@ function readAuthenticationConfig(
   const [issuer, audience, keyId, cookieEncryptionKey] = values.map((value) => value?.trim());
   const privateJwkFile = environment.AUTH_PRIVATE_JWK_FILE?.trim();
   const inlinePrivateJwk = environment.AUTH_PRIVATE_JWK?.trim();
-  if (!issuer || !audience || !keyId || !cookieEncryptionKey || (!privateJwkFile && !inlinePrivateJwk)) {
+  if (
+    !issuer ||
+    !audience ||
+    !keyId ||
+    !cookieEncryptionKey ||
+    (!privateJwkFile && !inlinePrivateJwk)
+  ) {
     throw new Error('authentication configuration must be complete');
   }
   let privateJwk: JWK;
@@ -101,6 +110,12 @@ function readAuthenticationConfig(
       environment.AUTH_LOGIN_TRANSACTION_TTL_SECONDS,
       300,
       'AUTH_LOGIN_TRANSACTION_TTL_SECONDS',
+    ),
+    sessionAudience: environment.AUTH_SESSION_AUDIENCE?.trim() || 'servir-bff',
+    sessionTtlSeconds: positiveInteger(
+      environment.AUTH_SESSION_TTL_SECONDS,
+      28_800,
+      'AUTH_SESSION_TTL_SECONDS',
     ),
     privateJwk,
   });

@@ -37,7 +37,7 @@ export function createApplication(options: CreateApplicationOptions): FastifyIns
     reply.status(200).send(Object.freeze({ status: 'ok' })),
   );
 
-  for (const module of applicationModules) module.registerRoutes(app, container);
+  for (const module of applicationModules) module.registerRoutes(app, container, options);
 
   return app;
 }

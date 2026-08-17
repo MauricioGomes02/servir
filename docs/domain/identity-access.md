@@ -88,6 +88,10 @@ Um User pode existir sem acesso organizacional. Solicitação espontânea de ent
 
 Após validar o provedor, o BFF emite uma sessão stateless em cookie seguro e um access JWT curto com audience exclusiva da API. No primeiro login, uma afirmação interna de bootstrap, restrita ao propósito de provisionamento, transporta `issuer + subject` até a API. Depois do provisionamento, credenciais normais usam `UserId`; a identidade externa deixa de representar o ator operacional. A decisão completa está no [ADR 067](../decisions/067-direct-oidc-and-servir-issued-credentials.md).
 
+O primeiro corte executável integra Google ao BFF por Authorization Code, `state`, `nonce` e PKCE. A transação temporária é criptografada em cookie `__Host-`; o callback valida o provedor, emite uma assertion interna curta, chama `POST /identity/users/provision` na API privada e cria uma sessão assinada contendo o `UserId` interno. O provisionamento é idempotente por `issuer + subject`, e a rota aceita exclusivamente credenciais com propósito `user-provisioning`.
+
+Consulta de sessão, logout, proteção CSRF das mutações e emissão/propagação do access token do BFF para as rotas privadas permanecem no próximo incremento. Portanto, a existência da sessão ainda não significa que todas as operações de negócio estejam protegidas por autorização.
+
 Chaves privadas são carregadas uma vez pelo BFF no startup, preferencialmente de arquivo somente leitura materializado pelo ambiente. A API carrega da mesma forma apenas o JWKS público. Variáveis inline permanecem disponíveis para desenvolvimento, com menor precedência que os arquivos; integrações com secret stores não fazem chamadas por request.
 
 Uma segunda identidade externa só pode ser vinculada por fluxo explícito iniciado por User autenticado e nova autenticação no provedor. Coincidência de e-mail ou nome nunca une contas.

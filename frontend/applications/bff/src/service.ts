@@ -2,6 +2,8 @@ import { createApplication } from './create-application.js';
 import { readBffConfig } from './config.js';
 import { AuthenticationCookieCodec } from './authentication/authentication-cookie-codec.js';
 import { GoogleOidcProvider } from './authentication/google-oidc-provider.js';
+import { InternalCredentialIssuer } from './authentication/internal-credential-issuer.js';
+import { ApiUserProvisioningClient } from './authentication/user-provisioning-client.js';
 
 export async function startService(): Promise<void> {
   const config = readBffConfig(process.env);
@@ -10,15 +12,24 @@ export async function startService(): Promise<void> {
       ? undefined
       : config.authentication !== undefined && config.googleOidc !== undefined
         ? {
+            callbackUrl: config.googleOidc.redirectUri,
             cookieCodec: new AuthenticationCookieCodec({
               encryptionKey: config.authentication.cookieEncryptionKey,
               issuer: config.authentication.issuer,
               loginTransactionTtlSeconds: config.authentication.loginTransactionTtlSeconds,
             }),
+            credentialIssuer: await InternalCredentialIssuer.create(config.authentication),
             oidcProvider: await GoogleOidcProvider.create(config.googleOidc),
+            provisioningClient: new ApiUserProvisioningClient(
+              config.apiBaseUrl,
+              config.apiTimeoutMs,
+            ),
+            sessionTtlSeconds: config.authentication.sessionTtlSeconds,
           }
         : (() => {
-            throw new Error('Google login requires authentication signing and Google OIDC configuration');
+            throw new Error(
+              'Google login requires authentication signing and Google OIDC configuration',
+            );
           })();
   const app = await createApplication(config, {
     ...(googleAuthentication === undefined ? {} : { googleAuthentication }),

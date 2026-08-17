@@ -18,7 +18,9 @@ export function registerFastifyAuthentication(
   app: FastifyInstance,
   accessTokenVerifier: AccessTokenVerifier,
 ): void {
-  app.addHook('onRequest', async (request) => {
+  app.addHook('preValidation', async (request) => {
+    const routeConfig = request.routeOptions.config as { authentication?: string };
+    if (routeConfig.authentication === 'bootstrap') return;
     const accessToken = bearerToken(request.headers.authorization);
 
     if (accessToken === undefined) return;

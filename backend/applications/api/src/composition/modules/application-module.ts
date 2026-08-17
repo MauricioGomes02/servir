@@ -4,5 +4,9 @@ import type { CreateApplicationOptions } from '../create-application-options';
 
 export interface ApplicationModule {
   register(container: ApplicationContainer, options: CreateApplicationOptions): void;
-  registerRoutes(app: FastifyInstance, container: ApplicationContainer): void;
+  registerRoutes(
+    app: FastifyInstance,
+    container: ApplicationContainer,
+    options: CreateApplicationOptions,
+  ): void;
 }
