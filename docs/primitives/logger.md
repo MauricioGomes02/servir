@@ -33,20 +33,22 @@ flowchart LR
 ## Exemplos
 
 ```ts
-logger.log(createLogRecord({
-  level: LogLevels.Info,
-  eventName: 'http.request.completed',
-  context: {
-    correlationId: context.correlationId,
-    requestId: context.requestId,
-  },
-  attributes: {
-    'http.request.method': 'POST',
-    'http.route': '/organizations',
-    'http.response.status_code': 201,
-    'duration.ms': 42,
-  },
-}));
+logger.log(
+  createLogRecord({
+    level: LogLevels.Info,
+    eventName: "http.request.completed",
+    context: {
+      correlationId: context.correlationId,
+      requestId: context.requestId,
+    },
+    attributes: {
+      "http.request.method": "POST",
+      "http.route": "/organizations",
+      "http.response.status_code": 201,
+      "duration.ms": 42,
+    },
+  }),
+);
 ```
 
 `LogContext` aceita apenas `CorrelationId`, `RequestId`, `MessageId` e `causationId` nesta etapa. O adapter JSON consulta o contexto ativo do OpenTelemetry e acrescenta `traceId` e `spanId` no momento da escrita, sem alterar o port nem exigir esses dados dos casos de uso. Resource attributes como serviço, versão e ambiente pertencem ao SDK e ao backend de observabilidade, não a cada chamada de log.
@@ -64,6 +66,8 @@ O adapter JSON para stdout limita tamanho, profundidade e quantidade de atributo
 Um incremento próprio alinhará o modelo interoperável ao OpenTelemetry Logs Data Model e às Semantic Conventions que estiverem estáveis, sem expor tipos do SDK no port. O contrato deverá distinguir timestamp do evento e de observação, severidade, nome do evento, trace/span, resource, instrumentation scope e atributos da ocorrência. Convenções ainda instáveis exigirão decisão e versão explícitas antes de adoção.
 
 JSON Lines e OTLP serão codificações de adapters. ECS, `@timestamp`, index templates, data streams, labels e mappings equivalentes pertencerão ao collector ou ao adapter de cada destino. Elasticsearch, Loki, Datadog, CloudWatch ou outro backend poderão ser substituídos sem alterar `Logger`, Application ou domínio. Retenção e políticas específicas de indexação permanecerão na infraestrutura escolhida.
+
+Uma revisão incremental verificará se os registros atuais respondem às perguntas técnicas e operacionais de API e relay e adicionará logging estruturado e tracing ao BFF. Elasticsearch/Kibana poderá fornecer busca de logs, e a experiência de traces poderá evoluir além do Jaeger atual, mas ambos permanecerão destinos atrás do pipeline vendor-neutral. Actor, executor, source, IP e user agent não serão adicionados automaticamente a todo log; cada uso exige pergunta observável, minimização e política de acesso.
 
 Falhas de adapters PostgreSQL são registradas na fronteira HTTP ou no worker que possui `ExecutionContext`, nunca simultaneamente no adapter que irá relançá-las. A instrumentação automática do driver produz spans técnicos separados com `db.query.text` parametrizado, sem valores dos parâmetros; logs preservam apenas o código estável e o contexto necessário, usando `traceId` para navegação até a query.
 

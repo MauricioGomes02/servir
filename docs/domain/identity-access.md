@@ -76,6 +76,7 @@ Um User pode existir sem acesso organizacional. Solicitação espontânea de ent
 
 ## Autenticação e sessão
 
+- Google será o primeiro provedor OIDC direto e Microsoft o segundo;
 - OIDC Authorization Code com PKCE, `state` e `nonce`;
 - issuer e audience configurados explicitamente;
 - assinatura, `exp`, `nbf` e claims obrigatórias validadas;
@@ -85,18 +86,25 @@ Um User pode existir sem acesso organizacional. Solicitação espontânea de ent
 - tokens e segredos redigidos de logs e telemetria;
 - API valida a identidade e aplica autorização independentemente do BFF.
 
+Após validar o provedor, o BFF emite uma sessão stateless em cookie seguro e um access JWT curto com audience exclusiva da API. No primeiro login, uma afirmação interna de bootstrap, restrita ao propósito de provisionamento, transporta `issuer + subject` até a API. Depois do provisionamento, credenciais normais usam `UserId`; a identidade externa deixa de representar o ator operacional. A decisão completa está no [ADR 067](../decisions/067-direct-oidc-and-servir-issued-credentials.md).
+
+Uma segunda identidade externa só pode ser vinculada por fluxo explícito iniciado por User autenticado e nova autenticação no provedor. Coincidência de e-mail ou nome nunca une contas.
+
 ## Sequência incremental
 
 1. ~~Definir ports OIDC, ator autenticado e extensão do `ExecutionContext`.~~
 2. ~~Implementar `User` e provisionamento idempotente por identidade externa.~~
-3. Validar access token na API e proteger rotas.
-4. Implementar login, callback, sessão e logout no BFF.
-5. Implementar `MemberAccessInvitation` e criação de convite.
-6. Implementar aceitação atômica e `OrganizationAccess` vinculado.
-7. Adicionar seleção segura de Organization e guards no frontend.
-8. Expor “Minha conta” e “Meu perfil”.
-9. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
-10. Avaliar solicitação espontânea, revogação, recuperação e RLS.
+3. Separar a afirmação externa de bootstrap do ator operacional identificado por UserId.
+4. Implementar assinatura, rotação e validação das credenciais próprias do Servir.
+5. Implementar login Google, callback, sessão, CSRF e logout no BFF.
+6. Validar o access token na API e proteger a primeira rota.
+7. Implementar Microsoft e vinculação explícita de identidades.
+8. Implementar `MemberAccessInvitation` e criação de convite.
+9. Implementar aceitação atômica e `OrganizationAccess` vinculado.
+10. Adicionar seleção segura de Organization e guards no frontend.
+11. Expor “Minha conta” e “Meu perfil”.
+12. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
+13. Avaliar solicitação espontânea, revogação, recuperação e RLS.
 
 ## Boas práticas
 

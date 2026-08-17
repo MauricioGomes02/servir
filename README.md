@@ -150,6 +150,8 @@ O modelo completo, invariantes e questões ainda abertas estão em [Domínio min
 | [API privada atrás do BFF](docs/decisions/058-private-api-behind-containerized-frontend-bff.md)    | Expõe somente a fronteira web e isola a API na rede de aplicação   |
 | [Frontend orientado a tarefas](docs/decisions/060-task-oriented-frontend-experience.md)            | Separa experiência, arquitetura de informação e estrutura interna  |
 | [Identity & Access](docs/decisions/066-identity-access-and-member-linking.md)                      | Separa conta, acesso organizacional e vínculo seguro com Member    |
+| [OIDC direto](docs/decisions/067-direct-oidc-and-servir-issued-credentials.md)                     | Usa Google/Microsoft sem reutilizar tokens externos na API         |
+| [Contexto causal e auditoria](docs/decisions/068-causal-execution-context-and-audit-boundary.md)   | Separa actor, executor, source, logs, traces e evidência durável   |
 
 Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 

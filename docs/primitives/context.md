@@ -10,7 +10,7 @@ Objetos de framework vazam transporte, estado global e detalhes de autenticaçã
 
 ## Responsabilidades
 
-- Conter somente os metadados exigidos pelos consumidores: `CorrelationId`, `RequestId` e, quando autenticado, `AuthenticatedActor`.
+- Conter somente os metadados exigidos pelos consumidores: correlação e, conforme consumidores forem implementados, actor, executor e source.
 - Ser imutável e explicitamente propagado.
 - Distinguir ausência de valor de valor inválido.
 
@@ -36,23 +36,27 @@ Um adapter HTTP valida ou cria `CorrelationId` e `RequestId` antes de construir 
 
 ```ts
 interface ExecutionContext {
-  readonly actor?: AuthenticatedActor;
+  readonly actor?: Actor;
+  readonly executor?: Executor;
+  readonly source?: ExecutionSource;
   readonly correlationId: CorrelationId;
   readonly requestId?: RequestId;
 }
 ```
 
-`AuthenticatedActor` transporta somente o par OIDC imutável `issuer` + `subject`, depois que um adapter valida o access token. Esses valores são opacos e não são normalizados, pois qualquer alteração poderia trocar a identidade reconhecida pelo provedor. O ator técnico não é `User`, `Member` nem autorização para uma `Organization`.
+Esse é o modelo alvo, ainda não a API completamente implementada. O código atual usa `AuthenticatedActor` com `issuer + subject`; a migração aprovada separará essa afirmação externa de bootstrap do actor operacional identificado por `UserId`.
 
-Rotas que aceitam acesso anônimo usam o contexto sem ator. Rotas protegidas exigem o ator explicitamente e, em etapas posteriores, resolvem `User` e `OrganizationAccess`. A presença de `organizationId` na URL nunca concede acesso.
+Actor representa quem causou a operação. Executor identifica o serviço responsável pela etapa atual. Source descreve opcionalmente a origem inicial, como web, API, mensagem ou job. Em processamento assíncrono, o actor causal é preservado e o executor muda. Rotas anônimas não inventam actor; a presença de `organizationId` na URL nunca concede acesso.
+
+IP e user agent não são identidades. Quando necessários, pertencem a uma source web criada pelo BFF a partir de proxies confiáveis, com tipos, limites, minimização e retenção explícitos. Objetos HTTP, headers livres, JWTs e dependências não entram no contexto.
 
 ## Relacionamento com outras primitivas
 
-Logger e `EventEnvelope` usam `CorrelationId`; adapters propagam tracing técnico conforme W3C Trace Context sem expor tipos do OpenTelemetry ao núcleo. A captura e a extração W3C são implementadas uma vez em `@servir/node-observability`, enquanto cada aplicação decide em quais fronteiras usá-las. Policies podem receber a identidade de domínio já resolvida quando semanticamente necessário; não recebem tokens nem claims do transporte.
+Logger e `EventEnvelope` usam `CorrelationId`; adapters propagam tracing técnico conforme W3C Trace Context sem expor tipos do OpenTelemetry ao núcleo. A captura e a extração W3C são implementadas uma vez em `@servir/node-observability`, enquanto cada aplicação decide em quais fronteiras usá-las. Policies podem receber a identidade de domínio já resolvida quando semanticamente necessário; não recebem tokens nem claims do transporte. `ExecutionContext` também não substitui um `AuditRecord`: ele fornece metadados para que um consumidor registre um fato auditável.
 
 ## Possíveis evoluções
 
-Adicionar causalidade, tenant e locale junto aos consumidores que definirem sua semântica. Baggage permanece desabilitado por padrão e exige allowlist explícita.
+Implementar incrementalmente actor por User/Service/System, executor por ServiceId e sources tipadas junto aos primeiros consumidores. Tenant e locale permanecem separados até demonstrarem semântica transversal. Baggage continua desabilitado por padrão e exige allowlist explícita.
 
 ## Boas práticas
 

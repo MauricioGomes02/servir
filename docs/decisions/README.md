@@ -68,5 +68,7 @@
 | [064](064-feature-oriented-frontend-architecture.md)                    | Arquitetura frontend orientada a features                    | Aceita |
 | [065](065-lightweight-responsive-navigation-shell.md)                   | Shell de navegação responsivo e visualmente leve             | Aceita |
 | [066](066-identity-access-and-member-linking.md)                        | Identity & Access e vínculo seguro com Member                | Aceita |
+| [067](067-direct-oidc-and-servir-issued-credentials.md)                 | OIDC direto e credenciais emitidas pelo Servir               | Aceita |
+| [068](068-causal-execution-context-and-audit-boundary.md)               | Contexto causal de execução e fronteira de auditoria         | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.
