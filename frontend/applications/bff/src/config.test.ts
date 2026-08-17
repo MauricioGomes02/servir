@@ -60,4 +60,23 @@ describe('readBffConfig', () => {
     expect(paths).toEqual(['/run/secrets/auth-private-jwk']);
     expect(result.authentication?.privateJwk.d).toBe('private-component');
   });
+
+  it('requires complete Google OIDC configuration when enabled', () => {
+    expect(() =>
+      readBffConfig({ API_BASE_URL: 'http://api:3000', GOOGLE_OIDC_CLIENT_ID: 'client' }),
+    ).toThrow('google oidc configuration must be complete');
+
+    expect(
+      readBffConfig({
+        API_BASE_URL: 'http://api:3000',
+        GOOGLE_OIDC_CLIENT_ID: 'client',
+        GOOGLE_OIDC_CLIENT_SECRET: 'secret',
+        GOOGLE_OIDC_REDIRECT_URI: 'https://servir.test/bff/auth/google/callback',
+      }).googleOidc,
+    ).toEqual({
+      clientId: 'client',
+      clientSecret: 'secret',
+      redirectUri: new URL('https://servir.test/bff/auth/google/callback'),
+    });
+  });
 });

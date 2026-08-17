@@ -13,10 +13,37 @@ export interface BffConfig {
     keyId: string;
     privateJwk: JWK;
   }>;
+  readonly googleOidc?: Readonly<{
+    clientId: string;
+    clientSecret: string;
+    redirectUri: URL;
+  }>;
   readonly apiBaseUrl: URL;
   readonly apiTimeoutMs: number;
   readonly host: string;
   readonly port: number;
+}
+
+function requiredConfiguredValues<const Names extends readonly string[]>(
+  environment: NodeJS.ProcessEnv,
+  names: Names,
+  configurationName: string,
+): { readonly [Index in keyof Names]: string } | undefined {
+  const values = names.map((name) => environment[name]?.trim());
+  if (values.every((value) => !value)) return undefined;
+  if (values.some((value) => !value)) throw new Error(`${configurationName} configuration must be complete`);
+  return values as { readonly [Index in keyof Names]: string };
+}
+
+function readGoogleOidcConfig(environment: NodeJS.ProcessEnv): BffConfig['googleOidc'] {
+  const values = requiredConfiguredValues(
+    environment,
+    ['GOOGLE_OIDC_CLIENT_ID', 'GOOGLE_OIDC_CLIENT_SECRET', 'GOOGLE_OIDC_REDIRECT_URI'] as const,
+    'google oidc',
+  );
+  if (values === undefined) return undefined;
+  const [clientId, clientSecret, redirectUri] = values;
+  return Object.freeze({ clientId, clientSecret, redirectUri: new URL(redirectUri) });
 }
 
 function positiveInteger(input: string | undefined, fallback: number, name: string): number {
@@ -75,6 +102,7 @@ export function readBffConfig(
   readTextFile: ReadTextFile = (path) => readFileSync(path, 'utf8'),
 ): BffConfig {
   const authentication = readAuthenticationConfig(environment, readTextFile);
+  const googleOidc = readGoogleOidcConfig(environment);
   const apiBaseUrl = environment.API_BASE_URL;
   if (!apiBaseUrl) throw new Error('API_BASE_URL is required');
   const port = Number(environment.PORT ?? '3001');
@@ -84,6 +112,7 @@ export function readBffConfig(
     throw new Error('API_TIMEOUT_MS must be a positive integer');
   return {
     ...(authentication === undefined ? {} : { authentication }),
+    ...(googleOidc === undefined ? {} : { googleOidc }),
     apiBaseUrl: new URL(apiBaseUrl),
     apiTimeoutMs,
     host: environment.HOST ?? '0.0.0.0',
