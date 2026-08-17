@@ -26,6 +26,10 @@ export class AuthenticationCookieCodec {
     }
   }
 
+  get loginTransactionTtlSeconds(): number {
+    return this.config.loginTransactionTtlSeconds;
+  }
+
   encryptLoginTransaction(transaction: LoginTransaction): Promise<string> {
     const issuedAt = this.now();
     return new EncryptJWT({ ...transaction, purpose: 'oidc-login' })

@@ -1,4 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { base64url } from 'jose';
+import { AuthenticationCookieCodec } from './authentication/authentication-cookie-codec.js';
+import type { OidcLoginTransaction, OidcProvider } from './authentication/oidc-provider.js';
 import { createApplication } from './create-application.js';
 
 const config = {
@@ -11,6 +14,41 @@ const config = {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('frontend BFF', () => {
+  it('starts Google login with an encrypted host cookie and a safe return path', async () => {
+    let receivedTransaction: OidcLoginTransaction | undefined;
+    const oidcProvider: OidcProvider = {
+      createAuthorizationUrl: async (transaction) => {
+        receivedTransaction = transaction;
+        return new URL(`https://accounts.google.test/authorize?state=${transaction.state}`);
+      },
+      verifyCallback: async () => ({ issuer: 'issuer', subject: 'subject' }),
+    };
+    const cookieCodec = new AuthenticationCookieCodec({
+      encryptionKey: base64url.encode(new Uint8Array(32).fill(3)),
+      issuer: 'https://identity.servir.test',
+      loginTransactionTtlSeconds: 300,
+    });
+    const app = await createApplication(config, {
+      googleAuthentication: { cookieCodec, oidcProvider },
+      logger: false,
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/bff/auth/google/login?returnPath=https://attacker.test',
+    });
+    await app.close();
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toContain('https://accounts.google.test/authorize?state=');
+    expect(receivedTransaction?.returnPath).toBe('/');
+    const cookie = response.headers['set-cookie'];
+    expect(cookie).toContain('__Host-servir-oidc-login=');
+    expect(cookie).toContain('HttpOnly');
+    expect(cookie).toContain('Secure');
+    expect(cookie).toContain('SameSite=Lax');
+  });
+
   it('exposes liveness with defensive browser headers', async () => {
     const app = await createApplication(config, { logger: false });
     const response = await app.inject({ method: 'GET', url: '/health/live' });

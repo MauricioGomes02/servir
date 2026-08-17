@@ -3,6 +3,10 @@ import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest }
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { BffConfig } from './config.js';
+import {
+  registerGoogleAuthenticationRoutes,
+  type GoogleAuthenticationRouteDependencies,
+} from './authentication/register-google-authentication-routes.js';
 
 interface OrganizationParameters {
   readonly organizationId: string;
@@ -72,7 +76,10 @@ async function sendToApi(
 
 export async function createApplication(
   config: BffConfig,
-  options: { readonly logger?: boolean } = {},
+  options: {
+    readonly googleAuthentication?: GoogleAuthenticationRouteDependencies;
+    readonly logger?: boolean;
+  } = {},
 ): Promise<FastifyInstance> {
   const app = Fastify({ logger: options.logger ?? true, bodyLimit: 32 * 1024 });
 
@@ -93,6 +100,10 @@ export async function createApplication(
   });
 
   app.get('/health/live', () => ({ status: 'ok' }));
+
+  if (options.googleAuthentication !== undefined) {
+    await registerGoogleAuthenticationRoutes(app, options.googleAuthentication);
+  }
 
   app.post('/bff/organizations', (request, reply) =>
     sendToApi(request, reply, config, '/organizations'),
