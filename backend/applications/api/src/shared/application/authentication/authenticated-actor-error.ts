@@ -1,7 +1,7 @@
 export const AuthenticatedActorErrorCodes = {
-  InvalidType: 'authentication.actor.invalid_type',
-  Empty: 'authentication.actor.empty',
-  TooLong: 'authentication.actor.too_long',
+  Empty: 'authentication.actor.user_id.empty',
+  InvalidFormat: 'authentication.actor.user_id.invalid_format',
+  InvalidType: 'authentication.actor.user_id.invalid_type',
 } as const;
 
 export type AuthenticatedActorErrorCode =
@@ -9,6 +9,5 @@ export type AuthenticatedActorErrorCode =
 
 export interface AuthenticatedActorError {
   readonly code: AuthenticatedActorErrorCode;
-  readonly field: 'issuer' | 'subject';
-  readonly params?: Readonly<Record<string, string | number>>;
+  readonly field: 'userId';
 }

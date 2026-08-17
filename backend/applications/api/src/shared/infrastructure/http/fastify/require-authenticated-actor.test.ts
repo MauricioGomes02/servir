@@ -4,8 +4,7 @@ import { describe, it } from 'node:test';
 import {
   AuthenticationErrorCodes,
   createAuthenticatedActor,
-  parseIdentityIssuer,
-  parseIdentitySubject,
+  parseAuthenticatedUserId,
 } from '@/shared/application/authentication';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 
@@ -21,10 +20,9 @@ function value<T>(
 
 describe('requireAuthenticatedActor', () => {
   it('returns the actor propagated by the entry adapter', () => {
-    const actor = createAuthenticatedActor({
-      issuer: value(parseIdentityIssuer('https://identity.example.com')),
-      subject: value(parseIdentitySubject('user-123')),
-    });
+    const actor = createAuthenticatedActor(
+      value(parseAuthenticatedUserId('0198f334-6dc5-7c20-9af1-91d7e599e011')),
+    );
     const context = createExecutionContext({
       actor,
       correlationId: value(parseCorrelationId('correlation-123')),

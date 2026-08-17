@@ -29,9 +29,11 @@ export function registerFastifyAuthentication(
 
     if (request.executionContext === null) return;
 
+    const { correlationId, requestId } = request.executionContext;
     request.executionContext = createExecutionContext({
-      ...request.executionContext,
       actor: result.value,
+      correlationId,
+      ...(requestId === undefined ? {} : { requestId }),
     });
   });
 }

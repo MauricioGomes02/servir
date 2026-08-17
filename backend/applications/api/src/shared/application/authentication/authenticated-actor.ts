@@ -1,63 +1,47 @@
 import { failure, success, type Result } from '@/shared/core/result';
+import { isCanonicalUuid } from '@/shared/core/uuid';
 
 import {
   AuthenticatedActorErrorCodes,
   type AuthenticatedActorError,
 } from './authenticated-actor-error';
 
-const MAX_ISSUER_LENGTH = 255;
-const MAX_SUBJECT_LENGTH = 255;
+declare const authenticatedUserIdBrand: unique symbol;
 
-declare const issuerBrand: unique symbol;
-declare const subjectBrand: unique symbol;
-
-export type IdentityIssuer = string & { readonly [issuerBrand]: 'IdentityIssuer' };
-export type IdentitySubject = string & { readonly [subjectBrand]: 'IdentitySubject' };
+export type AuthenticatedUserId = string & {
+  readonly [authenticatedUserIdBrand]: 'AuthenticatedUserId';
+};
 
 export interface AuthenticatedActor {
-  readonly issuer: IdentityIssuer;
-  readonly subject: IdentitySubject;
+  readonly userId: AuthenticatedUserId;
 }
 
-function parseIdentityValue<TValue extends string>(
+export function parseAuthenticatedUserId(
   input: unknown,
-  field: AuthenticatedActorError['field'],
-  maxLength: number,
-): Result<TValue, AuthenticatedActorError> {
+): Result<AuthenticatedUserId, AuthenticatedActorError> {
   if (typeof input !== 'string') {
-    return failure({ code: AuthenticatedActorErrorCodes.InvalidType, field });
-  }
-
-  if (input.length === 0) {
-    return failure({ code: AuthenticatedActorErrorCodes.Empty, field });
-  }
-
-  if (input.length > maxLength) {
     return failure({
-      code: AuthenticatedActorErrorCodes.TooLong,
-      field,
-      params: { maxLength, actualLength: input.length },
+      code: AuthenticatedActorErrorCodes.InvalidType,
+      field: 'userId',
     });
   }
 
-  return success(input as TValue);
+  const value = input.trim();
+
+  if (value.length === 0) {
+    return failure({ code: AuthenticatedActorErrorCodes.Empty, field: 'userId' });
+  }
+
+  if (!isCanonicalUuid(value)) {
+    return failure({
+      code: AuthenticatedActorErrorCodes.InvalidFormat,
+      field: 'userId',
+    });
+  }
+
+  return success(value.toLowerCase() as AuthenticatedUserId);
 }
 
-export function parseIdentityIssuer(
-  input: unknown,
-): Result<IdentityIssuer, AuthenticatedActorError> {
-  return parseIdentityValue(input, 'issuer', MAX_ISSUER_LENGTH);
-}
-
-export function parseIdentitySubject(
-  input: unknown,
-): Result<IdentitySubject, AuthenticatedActorError> {
-  return parseIdentityValue(input, 'subject', MAX_SUBJECT_LENGTH);
-}
-
-export function createAuthenticatedActor(input: {
-  readonly issuer: IdentityIssuer;
-  readonly subject: IdentitySubject;
-}): AuthenticatedActor {
-  return Object.freeze({ ...input });
+export function createAuthenticatedActor(userId: AuthenticatedUserId): AuthenticatedActor {
+  return Object.freeze({ userId });
 }

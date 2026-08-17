@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  createAuthenticatedActor,
+  createExternalIdentityAssertion,
   parseIdentityIssuer,
   parseIdentitySubject,
 } from '@/shared/application/authentication';
@@ -26,7 +26,7 @@ describe('PostgreSQL user provisioning', () => {
     const databaseUrl = requireTestDatabaseUrl();
     const pool = new Pool({ connectionString: databaseUrl });
     const persistence = createPostgresPersistence(databaseUrl);
-    const identity = createAuthenticatedActor({
+    const identity = createExternalIdentityAssertion({
       issuer: value(parseIdentityIssuer('https://identity.integration.example.com')),
       subject: value(parseIdentitySubject('concurrent-user')),
     });

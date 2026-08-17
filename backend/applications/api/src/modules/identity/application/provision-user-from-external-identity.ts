@@ -12,7 +12,8 @@ import {
 import type { UserProvisioner } from './user-provisioner';
 
 export const ProvisionUserErrorCodes = {
-  Unauthenticated: 'identity.user_provisioning.unauthenticated',
+  ExternalIdentityAssertionRequired:
+    'identity.user_provisioning.external_identity_assertion_required',
 } as const;
 
 export interface ProvisionUserError {
@@ -36,11 +37,11 @@ export class ProvisionUserFromExternalIdentityHandler {
   async handle(
     context: ExecutionContext,
   ): Promise<Result<ProvisionUserOutput, ProvisionUserError | ExternalIdentityValidationError>> {
-    if (context.actor === undefined) {
-      return failure({ code: ProvisionUserErrorCodes.Unauthenticated });
+    if (context.externalIdentityAssertion === undefined) {
+      return failure({ code: ProvisionUserErrorCodes.ExternalIdentityAssertionRequired });
     }
 
-    const externalIdentity = ExternalIdentity.create(context.actor);
+    const externalIdentity = ExternalIdentity.create(context.externalIdentityAssertion);
     if (!externalIdentity.success) return externalIdentity;
 
     const candidate = User.provision(

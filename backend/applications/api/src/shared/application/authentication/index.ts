@@ -1,15 +1,26 @@
+export { createAuthenticatedActor, parseAuthenticatedUserId } from './authenticated-actor';
 export {
-  createAuthenticatedActor,
+  createExternalIdentityAssertion,
   parseIdentityIssuer,
   parseIdentitySubject,
-} from './authenticated-actor';
+} from './external-identity-assertion';
 export { AuthenticatedActorErrorCodes } from './authenticated-actor-error';
+export { ExternalIdentityAssertionErrorCodes } from './external-identity-assertion-error';
 export { AuthenticationErrorCodes } from './authentication-error';
 
 export type { AccessTokenVerifier } from './access-token-verifier';
-export type { AuthenticatedActor, IdentityIssuer, IdentitySubject } from './authenticated-actor';
+export type { AuthenticatedActor, AuthenticatedUserId } from './authenticated-actor';
 export type {
   AuthenticatedActorError,
   AuthenticatedActorErrorCode,
 } from './authenticated-actor-error';
+export type {
+  ExternalIdentityAssertion,
+  IdentityIssuer,
+  IdentitySubject,
+} from './external-identity-assertion';
+export type {
+  ExternalIdentityAssertionError,
+  ExternalIdentityAssertionErrorCode,
+} from './external-identity-assertion-error';
 export type { AuthenticationError, AuthenticationErrorCode } from './authentication-error';

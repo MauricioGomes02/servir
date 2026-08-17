@@ -1,4 +1,5 @@
-import type { CorrelationId, RequestId } from '.';
+import type { AuthenticatedActor, ExternalIdentityAssertion } from '../authentication';
+import type { CorrelationId, ExecutionContext, RequestId } from '.';
 
 declare const correlationId: CorrelationId;
 
@@ -6,3 +7,15 @@ declare const correlationId: CorrelationId;
 const requestId: RequestId = correlationId;
 
 void requestId;
+
+declare const actor: AuthenticatedActor;
+declare const externalIdentityAssertion: ExternalIdentityAssertion;
+
+// @ts-expect-error Um contexto nao pode representar simultaneamente login normal e bootstrap.
+const ambiguousIdentity: ExecutionContext = {
+  actor,
+  correlationId,
+  externalIdentityAssertion,
+};
+
+void ambiguousIdentity;

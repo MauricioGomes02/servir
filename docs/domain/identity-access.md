@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo inicial aprovado. `AuthenticatedActor`, `User` global e provisionamento idempotente por identidade externa estão implementados; adapters OIDC, sessão, autorização organizacional e interfaces ainda estão planejados.
+Modelo inicial aprovado. `AuthenticatedActor` por `UserId`, `ExternalIdentityAssertion` de bootstrap, `User` global e provisionamento idempotente por identidade externa estão implementados; adapters OIDC, sessão, autorização organizacional e interfaces ainda estão planejados.
 
 ## Motivação
 
@@ -94,7 +94,7 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 
 1. ~~Definir ports OIDC, ator autenticado e extensão do `ExecutionContext`.~~
 2. ~~Implementar `User` e provisionamento idempotente por identidade externa.~~
-3. Separar a afirmação externa de bootstrap do ator operacional identificado por UserId.
+3. ~~Separar a afirmação externa de bootstrap do ator operacional identificado por UserId.~~
 4. Implementar assinatura, rotação e validação das credenciais próprias do Servir.
 5. Implementar login Google, callback, sessão, CSRF e logout no BFF.
 6. Validar o access token na API e proteger a primeira rota.

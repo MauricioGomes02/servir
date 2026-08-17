@@ -35,6 +35,15 @@ export interface Logger {
   log(record: LogRecord): void;
 }
 
+function createLogContext(context: LogContext): LogContext {
+  return Object.freeze({
+    correlationId: context.correlationId,
+    ...(context.requestId === undefined ? {} : { requestId: context.requestId }),
+    ...(context.messageId === undefined ? {} : { messageId: context.messageId }),
+    ...(context.causationId === undefined ? {} : { causationId: context.causationId }),
+  });
+}
+
 export function parseLogLevel(
   input: unknown,
   fallback: LogLevel = LogLevels.Info,
@@ -77,7 +86,7 @@ function freezeAttributeValue<TValue extends LogAttributeValue>(value: TValue): 
 export function createLogRecord(record: LogRecord): LogRecord {
   return Object.freeze({
     ...record,
-    context: record.context === undefined ? undefined : Object.freeze({ ...record.context }),
+    context: record.context === undefined ? undefined : createLogContext(record.context),
     attributes: freezeAttributeValue(record.attributes),
   });
 }

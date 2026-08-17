@@ -19,6 +19,26 @@ describe('LogRecord', () => {
     assert.equal(Object.isFrozen(record), true);
     assert.equal(Object.isFrozen(record.context), true);
   });
+
+  it('keeps authentication data outside the observable log context', () => {
+    const context = {
+      correlationId: 'correlation-123',
+      actor: { userId: 'user-123' },
+      externalIdentityAssertion: {
+        issuer: 'https://identity.example.com',
+        subject: 'provider-subject',
+      },
+    };
+
+    const record = createLogRecord({
+      level: LogLevels.Info,
+      eventName: 'identity.user.provisioned',
+      context,
+      attributes: {},
+    });
+
+    assert.deepEqual(record.context, { correlationId: 'correlation-123' });
+  });
 });
 
 describe('parseLogLevel', () => {

@@ -4,8 +4,7 @@ import { describe, it } from 'node:test';
 import {
   AuthenticationErrorCodes,
   createAuthenticatedActor,
-  parseIdentityIssuer,
-  parseIdentitySubject,
+  parseAuthenticatedUserId,
   type AccessTokenVerifier,
 } from '@/shared/application/authentication';
 import {
@@ -71,17 +70,15 @@ function application(generatedCorrelationId = 'correlation-generated') {
 
 describe('createFastifyApplication', () => {
   it('propagates a verified bearer identity into the execution context', async () => {
-    const issuer = parseIdentityIssuer('https://identity.example.com');
-    const subject = parseIdentitySubject('user-123');
-    assert.equal(issuer.success, true);
-    assert.equal(subject.success, true);
-    if (!issuer.success || !subject.success) return;
+    const userId = parseAuthenticatedUserId('0198f334-6dc5-7c20-9af1-91d7e599e011');
+    assert.equal(userId.success, true);
+    if (!userId.success) return;
 
     const verifiedTokens: string[] = [];
     const accessTokenVerifier: AccessTokenVerifier = {
       async verify(accessToken) {
         verifiedTokens.push(accessToken);
-        return success(createAuthenticatedActor({ issuer: issuer.value, subject: subject.value }));
+        return success(createAuthenticatedActor(userId.value));
       },
     };
     const logger = new InMemoryLogger();
@@ -104,8 +101,7 @@ describe('createFastifyApplication', () => {
     assert.equal(response.statusCode, 200);
     assert.deepEqual(verifiedTokens, ['opaque-token']);
     assert.deepEqual(response.json(), {
-      issuer: 'https://identity.example.com',
-      subject: 'user-123',
+      userId: '0198f334-6dc5-7c20-9af1-91d7e599e011',
     });
   });
 

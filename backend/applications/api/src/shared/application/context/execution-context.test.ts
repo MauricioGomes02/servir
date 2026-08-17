@@ -2,11 +2,21 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  createExternalIdentityAssertion,
+  parseIdentityIssuer,
+  parseIdentitySubject,
+} from '../authentication';
+import {
   createExecutionContext,
   ExecutionContextIdErrorCodes,
   parseCorrelationId,
   parseRequestId,
 } from '.';
+
+function value<T>(result: { success: true; value: T } | { success: false }): T {
+  if (!result.success) throw new Error('Invalid deterministic test fixture');
+  return result.value;
+}
 
 describe('ExecutionContext', () => {
   it('preserves validated identifiers in an immutable context', () => {
@@ -81,5 +91,20 @@ describe('ExecutionContext', () => {
         },
       },
     });
+  });
+
+  it('preserves an external assertion only for a bootstrap context', () => {
+    const assertion = createExternalIdentityAssertion({
+      issuer: value(parseIdentityIssuer('https://identity.example.com')),
+      subject: value(parseIdentitySubject('provider-subject')),
+    });
+    const context = createExecutionContext({
+      correlationId: value(parseCorrelationId('bootstrap-correlation')),
+      externalIdentityAssertion: assertion,
+    });
+
+    assert.equal(context.externalIdentityAssertion, assertion);
+    assert.equal(context.actor, undefined);
+    assert.equal(Object.isFrozen(context), true);
   });
 });
