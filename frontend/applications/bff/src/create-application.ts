@@ -7,6 +7,7 @@ import {
   registerGoogleAuthenticationRoutes,
   type GoogleAuthenticationRouteDependencies,
 } from './authentication/register-google-authentication-routes.js';
+import { verifyMutationCsrf, verifyRequestSession } from './authentication/session-guard.js';
 
 interface OrganizationParameters {
   readonly organizationId: string;
@@ -41,6 +42,7 @@ async function sendToApi(
   reply: FastifyReply,
   config: BffConfig,
   path: string,
+  accessToken?: string,
 ): Promise<FastifyReply> {
   try {
     const response = await fetch(new URL(path, config.apiBaseUrl), {
@@ -51,6 +53,7 @@ async function sendToApi(
         ...(request.headers['content-type']
           ? { 'content-type': request.headers['content-type'] }
           : {}),
+        ...(accessToken === undefined ? {} : { authorization: `Bearer ${accessToken}` }),
       },
       body:
         request.method === 'GET' || request.method === 'HEAD'
@@ -105,16 +108,52 @@ export async function createApplication(
     await registerGoogleAuthenticationRoutes(app, options.googleAuthentication);
   }
 
+  const accessTokens = new WeakMap<FastifyRequest, string>();
+  if (options.googleAuthentication !== undefined) {
+    app.addHook('preHandler', async (request, reply) => {
+      if (!request.url.startsWith('/bff/') || request.url.startsWith('/bff/auth/')) return;
+      let session;
+      try {
+        session = await verifyRequestSession(
+          request,
+          options.googleAuthentication!.credentialIssuer,
+        );
+      } catch {
+        return reply.status(401).send({ code: 'identity.session.invalid' });
+      }
+      if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
+        try {
+          verifyMutationCsrf(request, session, options.googleAuthentication!.callbackUrl.origin);
+        } catch {
+          return reply.status(403).send({ code: 'identity.csrf.invalid' });
+        }
+      }
+      try {
+        accessTokens.set(
+          request,
+          await options.googleAuthentication!.credentialIssuer.issueAccessToken(session.userId),
+        );
+      } catch {
+        return reply.status(500).send({ code: 'identity.access_token.issue_failed' });
+      }
+    });
+  }
+
+  const forwardToApi = (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    path: string,
+  ): Promise<FastifyReply> => sendToApi(request, reply, config, path, accessTokens.get(request));
+
   app.post('/bff/organizations', (request, reply) =>
-    sendToApi(request, reply, config, '/organizations'),
+    forwardToApi(request, reply, '/organizations'),
   );
   app.get<{ Params: OrganizationParameters }>(
     '/bff/organizations/:organizationId',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}`,
       ),
   );
@@ -127,10 +166,9 @@ export async function createApplication(
         if (value !== undefined) query.set(name, value);
       }
       const suffix = query.size > 0 ? `?${query.toString()}` : '';
-      return sendToApi(
+      return forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries${suffix}`,
       );
     },
@@ -138,30 +176,27 @@ export async function createApplication(
   app.post<{ Params: OrganizationParameters }>(
     '/bff/organizations/:organizationId/ministries',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries`,
       ),
   );
   app.get<{ Params: MinistryParameters }>(
     '/bff/organizations/:organizationId/ministries/:ministryId',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries/${encodeURIComponent(request.params.ministryId)}`,
       ),
   );
   app.post<{ Params: MinistryRoleParameters }>(
     '/bff/organizations/:organizationId/ministries/:ministryId/roles',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/ministries/${encodeURIComponent(request.params.ministryId)}/roles`,
       ),
   );
@@ -174,10 +209,9 @@ export async function createApplication(
         if (value !== undefined) query.set(name, value);
       }
       const suffix = query.size > 0 ? `?${query.toString()}` : '';
-      return sendToApi(
+      return forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/members${suffix}`,
       );
     },
@@ -185,20 +219,18 @@ export async function createApplication(
   app.post<{ Params: OrganizationParameters }>(
     '/bff/organizations/:organizationId/members',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/members`,
       ),
   );
   app.get<{ Params: MemberParameters }>(
     '/bff/organizations/:organizationId/members/:memberId',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/members/${encodeURIComponent(request.params.memberId)}`,
       ),
   );
@@ -211,10 +243,9 @@ export async function createApplication(
         if (value !== undefined) query.set(name, value);
       }
       const suffix = query.size > 0 ? `?${query.toString()}` : '';
-      return sendToApi(
+      return forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/activities${suffix}`,
       );
     },
@@ -222,20 +253,18 @@ export async function createApplication(
   app.post<{ Params: OrganizationParameters }>(
     '/bff/organizations/:organizationId/activities',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/activities`,
       ),
   );
   app.get<{ Params: ActivityParameters }>(
     '/bff/organizations/:organizationId/activities/:activityId',
     (request, reply) =>
-      sendToApi(
+      forwardToApi(
         request,
         reply,
-        config,
         `/organizations/${encodeURIComponent(request.params.organizationId)}/activities/${encodeURIComponent(request.params.activityId)}`,
       ),
   );

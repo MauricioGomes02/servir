@@ -92,7 +92,9 @@ O primeiro corte executável integra Google ao BFF por Authorization Code, `stat
 
 O BFF também expõe consulta de sessão e logout local. A sessão vincula um token CSRF aleatório; mutações autenticadas validam o valor enviado no header contra o cookie legível pelo cliente e contra a claim assinada, além de exigir origem confiável. O logout remove os cookies de sessão e CSRF, sem prometer revogação imediata de uma cópia previamente roubada da sessão stateless.
 
-A emissão e propagação do access token do BFF para as rotas privadas permanece no próximo incremento. Portanto, a existência da sessão ainda não significa que todas as operações de negócio estejam protegidas por autorização.
+Quando autenticação está configurada, o BFF exige uma sessão válida nas rotas de negócio, aplica CSRF às mutações, emite um access token curto para o `UserId` e o envia somente à API privada. O navegador continua sem acesso ao JWT. A API valida assinatura, issuer, audience, expiração e propósito antes de materializar o `AuthenticatedActor` no contexto.
+
+Esse mecanismo autentica o ator, mas ainda não concede acesso a uma organização. A autorização tenant-scoped por `OrganizationAccess` permanece como incremento separado; presença de sessão ou de `organizationId` na URL nunca deve ser interpretada como permissão.
 
 Chaves privadas são carregadas uma vez pelo BFF no startup, preferencialmente de arquivo somente leitura materializado pelo ambiente. A API carrega da mesma forma apenas o JWKS público. Variáveis inline permanecem disponíveis para desenvolvimento, com menor precedência que os arquivos; integrações com secret stores não fazem chamadas por request.
 

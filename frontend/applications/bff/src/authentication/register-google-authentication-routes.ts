@@ -1,15 +1,18 @@
 import cookie from '@fastify/cookie';
 import type { FastifyInstance } from 'fastify';
 import * as oidc from 'openid-client';
-import { timingSafeEqual } from 'node:crypto';
 import type { AuthenticationCookieCodec } from './authentication-cookie-codec.js';
 import type { OidcProvider } from './oidc-provider.js';
 import type { InternalCredentialIssuer } from './internal-credential-issuer.js';
 import type { UserProvisioningClient } from './user-provisioning-client.js';
+import {
+  CSRF_COOKIE,
+  SESSION_COOKIE,
+  verifyMutationCsrf,
+  verifyRequestSession,
+} from './session-guard.js';
 
 const LOGIN_TRANSACTION_COOKIE = '__Host-servir-oidc-login';
-const SESSION_COOKIE = '__Host-servir-session';
-const CSRF_COOKIE = '__Host-servir-csrf';
 
 interface LoginQuery {
   readonly returnPath?: string;
@@ -28,12 +31,6 @@ function safeReturnPath(value: string | undefined): string {
   if (value === undefined || value === '') return '/';
   if (!value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '/';
   return value;
-}
-
-function sameToken(left: string, right: string): boolean {
-  const leftBytes = Buffer.from(left);
-  const rightBytes = Buffer.from(right);
-  return leftBytes.byteLength === rightBytes.byteLength && timingSafeEqual(leftBytes, rightBytes);
 }
 
 export async function registerGoogleAuthenticationRoutes(
@@ -105,7 +102,7 @@ export async function registerGoogleAuthenticationRoutes(
     const session = request.cookies[SESSION_COOKIE];
     if (session === undefined) return reply.status(401).send({ authenticated: false });
     try {
-      const verified = await dependencies.credentialIssuer.verifySessionToken(session);
+      const verified = await verifyRequestSession(request, dependencies.credentialIssuer);
       return reply.send({ authenticated: true, userId: verified.userId });
     } catch {
       return reply.status(401).send({ authenticated: false });
@@ -113,25 +110,9 @@ export async function registerGoogleAuthenticationRoutes(
   });
 
   app.post('/bff/auth/logout', async (request, reply) => {
-    const session = request.cookies[SESSION_COOKIE];
-    const cookieToken = request.cookies[CSRF_COOKIE];
-    const headerToken = request.headers['x-csrf-token'];
-    const sameOrigin =
-      request.headers.origin === dependencies.callbackUrl.origin &&
-      (request.headers['sec-fetch-site'] === undefined ||
-        request.headers['sec-fetch-site'] === 'same-origin');
     try {
-      if (session === undefined || cookieToken === undefined || typeof headerToken !== 'string') {
-        throw new Error('csrf token required');
-      }
-      const verified = await dependencies.credentialIssuer.verifySessionToken(session);
-      if (
-        !sameOrigin ||
-        !sameToken(headerToken, cookieToken) ||
-        !sameToken(headerToken, verified.csrfToken)
-      ) {
-        throw new Error('csrf token mismatch');
-      }
+      const verified = await verifyRequestSession(request, dependencies.credentialIssuer);
+      verifyMutationCsrf(request, verified, dependencies.callbackUrl.origin);
     } catch {
       return reply.status(403).send({ code: 'identity.csrf.invalid' });
     }

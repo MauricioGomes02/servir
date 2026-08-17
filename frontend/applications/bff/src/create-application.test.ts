@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { base64url, exportJWK, generateKeyPair } from 'jose';
+import { base64url, exportJWK, generateKeyPair, jwtVerify } from 'jose';
 import { AuthenticationCookieCodec } from './authentication/authentication-cookie-codec.js';
 import type { OidcLoginTransaction, OidcProvider } from './authentication/oidc-provider.js';
 import { InternalCredentialIssuer } from './authentication/internal-credential-issuer.js';
@@ -93,6 +93,28 @@ describe('frontend BFF', () => {
       url: '/bff/auth/session',
       headers: { cookie: cookieHeader },
     });
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ id: 'organization-id' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const organization = await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id',
+      headers: { cookie: cookieHeader },
+    });
+    const anonymous = await app.inject({
+      method: 'GET',
+      url: '/bff/organizations/organization-id',
+    });
+    const mutationWithoutCsrf = await app.inject({
+      method: 'POST',
+      url: '/bff/organizations',
+      headers: { cookie: cookieHeader },
+      payload: { name: 'Comunidade Servir' },
+    });
     const rejectedLogout = await app.inject({
       method: 'POST',
       url: '/bff/auth/logout',
@@ -114,6 +136,17 @@ describe('frontend BFF', () => {
     expect(session.json()).toEqual({ authenticated: true, userId: 'user-id' });
     expect(rejectedLogout.statusCode).toBe(403);
     expect(logout.statusCode).toBe(204);
+    expect(organization.statusCode).toBe(200);
+    expect(anonymous.statusCode).toBe(401);
+    expect(mutationWithoutCsrf.statusCode).toBe(403);
+    const authorization = new Headers(fetch.mock.calls[0]?.[1]?.headers).get('authorization');
+    expect(authorization).toMatch(/^Bearer /);
+    const accessToken = authorization?.slice('Bearer '.length) ?? '';
+    const verifiedAccess = await jwtVerify(accessToken, pair.publicKey, {
+      audience: 'servir-api',
+      issuer: 'https://identity.servir.test',
+    });
+    expect(verifiedAccess.payload).toMatchObject({ purpose: 'access', sub: 'user-id' });
   });
 
   it('exposes liveness with defensive browser headers', async () => {
