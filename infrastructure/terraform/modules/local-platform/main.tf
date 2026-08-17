@@ -350,6 +350,15 @@ resource "docker_container" "api" {
 
   env = [for name, value in var.api_environment : "${name}=${value}"]
 
+  dynamic "volumes" {
+    for_each = var.api_jwks_file == null ? [] : [var.api_jwks_file]
+    content {
+      host_path      = abspath(volumes.value)
+      container_path = "/run/config/servir-auth-jwks"
+      read_only      = true
+    }
+  }
+
   dynamic "ports" {
     for_each = var.api_port == null ? [] : [var.api_port]
     content {
@@ -418,6 +427,15 @@ resource "docker_container" "frontend" {
   cpu_shares  = var.frontend_resources.cpu_shares
 
   env = [for name, value in var.frontend_environment : "${name}=${value}"]
+
+  dynamic "volumes" {
+    for_each = var.frontend_private_jwk_file == null ? [] : [var.frontend_private_jwk_file]
+    content {
+      host_path      = abspath(volumes.value)
+      container_path = "/run/secrets/servir-auth-private-jwk"
+      read_only      = true
+    }
+  }
 
   networks_advanced {
     name    = docker_network.platform["edge"].name

@@ -54,10 +54,10 @@ O primeiro `terraform init` gera `.terraform.lock.hcl`, que deve ser versionado 
 
 Os outputs distinguem endpoints por origem:
 
-| Consumidor           | PostgreSQL       | Kafka             | OTLP/HTTP                              | HTTP público                                       |
-| -------------------- | ---------------- | ----------------- | -------------------------------------- | -------------------------------------------------- |
+| Consumidor           | PostgreSQL       | Kafka             | OTLP/HTTP                              | HTTP público                                                                 |
+| -------------------- | ---------------- | ----------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
 | Processo no host/WSL | `localhost:5432` | `localhost:29092` | `http://localhost:4318/v1/traces`      | `http://localhost:3001` (BFF) / `http://localhost:3000` (API local opcional) |
-| Container autorizado | `postgres:5432`  | `kafka:9092`      | `http://otel-collector:4318/v1/traces` | BFF acessa `http://api:3000` na rede `application` |
+| Container autorizado | `postgres:5432`  | `kafka:9092`      | `http://otel-collector:4318/v1/traces` | BFF acessa `http://api:3000` na rede `application`                           |
 
 O bloco `172.28.0.0/24` é dividido por padrão em oito faixas `/27`; cinco formam as bridges `edge`, `application`, `data`, `messaging` e `observability`, enquanto três permanecem reservadas. Altere o bloco pai no `terraform.tfvars` antes do primeiro apply se houver sobreposição com VPN ou outra rede Docker. Gateways são derivados, containers usam DNS e IPs fixos não fazem parte do contrato.
 
@@ -104,6 +104,8 @@ docker compose run --rm liquibase status
 ## Executar as aplicações containerizadas
 
 Com os respectivos flags habilitados, `terraform apply` inicia containers independentes usando as imagens prontas indicadas por `frontend_image`, `api_image` e `outbox_relay_image`. CPU, memória e todo o ambiente de cada processo são fornecidos separadamente pelo `terraform.tfvars`; o módulo não possui configuração de runtime embutida. O limite total de memória mais swap é declarado como o dobro da memória de cada workload, tornando explícito o comportamento padrão do Docker e evitando drift recorrente no plano. Isso permite uma margem de swap igual à memória configurada sem reservá-la antecipadamente. As configurações locais de exemplo usam somente DNS das redes autorizadas:
+
+Autenticação permanece desabilitada enquanto as variáveis `AUTH_*` estiverem ausentes. Para habilitá-la, o frontend BFF recebe issuer, audience, `kid` e o caminho `AUTH_PRIVATE_JWK_FILE`; a API recebe o mesmo issuer e audience e o caminho `AUTH_JWKS_FILE`, contendo somente chaves públicas. No ambiente local, Terraform monta arquivos de `.secrets/` como volumes somente leitura. Chaves reais não pertencem ao arquivo de exemplo nem ao Git. Em produção, o fluxo de deploy deve materializá-las a partir do secret store no startup, sem consulta remota por request; durante rotação, publique as chaves públicas antiga e nova na API antes de alterar o `kid` ativo no BFF.
 
 ```text
 API: postgres:5432 e otel-collector:4318

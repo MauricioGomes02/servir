@@ -216,3 +216,18 @@ variable "frontend_environment" {
   type        = map(string)
   sensitive   = true
 }
+
+variable "api_jwks_file" {
+  description = "Optional local public JWKS file mounted read-only in the API."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "frontend_private_jwk_file" {
+  description = "Optional local private JWK file mounted read-only in the frontend BFF."
+  type        = string
+  default     = null
+  nullable    = true
+  sensitive   = true
+}

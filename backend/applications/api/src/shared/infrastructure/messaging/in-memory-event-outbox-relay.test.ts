@@ -124,7 +124,6 @@ describe('InMemoryEventOutboxRelay', () => {
     assert.deepEqual(logger.records[0]?.context, {
       correlationId: 'correlation-123',
       messageId: '0198f334-6dc5-7c20-9af1-91d7e599c7b3',
-      causationId: undefined,
     });
   });
 

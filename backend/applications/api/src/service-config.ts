@@ -1,5 +1,9 @@
 import { ServiceConfigError, ServiceConfigErrorCodes } from './service-config-error';
 import { parseLogLevel, type LogLevel } from '@/shared/application/logging';
+import type { JSONWebKeySet } from 'jose';
+import { readFileSync } from 'node:fs';
+
+type ReadTextFile = (path: string) => string;
 
 const DEFAULT_HOST = '0.0.0.0';
 const DEFAULT_PORT = 3000;
@@ -10,10 +14,48 @@ export type PersistenceConfig = Readonly<{
 }>;
 
 export interface ServiceConfig {
+  readonly authentication?: Readonly<{
+    algorithm: 'RS256';
+    audience: string;
+    issuer: string;
+    jwks: JSONWebKeySet;
+  }>;
   readonly host: string;
   readonly port: number;
   readonly persistence: PersistenceConfig;
   readonly logLevel: LogLevel;
+}
+
+function readAuthenticationConfig(
+  environment: NodeJS.ProcessEnv,
+  readTextFile: ReadTextFile,
+): ServiceConfig['authentication'] {
+  const values = [
+    environment.AUTH_ISSUER,
+    environment.AUTH_AUDIENCE,
+    environment.AUTH_JWKS ?? environment.AUTH_JWKS_FILE,
+  ];
+  if (values.every((value) => value === undefined || value.trim() === '')) return undefined;
+
+  const [issuer, audience] = values.map((value) => value?.trim());
+  const jwksFile = environment.AUTH_JWKS_FILE?.trim();
+  const inlineJwks = environment.AUTH_JWKS?.trim();
+  if (!issuer || !audience || (!jwksFile && !inlineJwks)) {
+    throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidAuthenticationConfiguration);
+  }
+
+  try {
+    const serializedJwks = jwksFile ? readTextFile(jwksFile) : inlineJwks;
+    if (serializedJwks === undefined) throw new Error('authentication configuration incomplete');
+    const jwks = JSON.parse(serializedJwks) as JSONWebKeySet;
+    if (!Array.isArray(jwks.keys) || jwks.keys.length === 0) throw new Error('empty jwks');
+    if (jwks.keys.some((key) => key.kid === undefined || key.kid.trim() === '')) {
+      throw new Error('missing kid');
+    }
+    return Object.freeze({ algorithm: 'RS256' as const, audience, issuer, jwks });
+  } catch {
+    throw new ServiceConfigError(ServiceConfigErrorCodes.InvalidAuthenticationConfiguration);
+  }
 }
 
 function readPersistenceConfig(environment: NodeJS.ProcessEnv): PersistenceConfig {
@@ -44,7 +86,11 @@ function readPersistenceConfig(environment: NodeJS.ProcessEnv): PersistenceConfi
   });
 }
 
-export function readServiceConfig(environment: NodeJS.ProcessEnv): ServiceConfig {
+export function readServiceConfig(
+  environment: NodeJS.ProcessEnv,
+  readTextFile: ReadTextFile = (path) => readFileSync(path, 'utf8'),
+): ServiceConfig {
+  const authentication = readAuthenticationConfig(environment, readTextFile);
   const host = environment.HOST?.trim() ?? DEFAULT_HOST;
 
   if (host.length === 0) {
@@ -65,6 +111,7 @@ export function readServiceConfig(environment: NodeJS.ProcessEnv): ServiceConfig
   }
 
   return Object.freeze({
+    ...(authentication === undefined ? {} : { authentication }),
     host,
     port,
     persistence: readPersistenceConfig(environment),

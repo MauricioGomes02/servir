@@ -29,7 +29,9 @@ module "platform" {
   frontend_port            = var.frontend_port
   frontend_enabled         = var.frontend_enabled
   frontend_resources       = var.frontend_resources
-  frontend_environment     = var.frontend_environment
+  frontend_environment      = var.frontend_environment
+  api_jwks_file             = var.api_jwks_file
+  frontend_private_jwk_file = var.frontend_private_jwk_file
   outbox_relay_image       = var.outbox_relay_image
   outbox_relay_enabled     = var.outbox_relay_enabled
   outbox_relay_resources   = var.outbox_relay_resources

@@ -74,4 +74,43 @@ describe('readServiceConfig', () => {
         error.code === ServiceConfigErrorCodes.InvalidLogLevel,
     );
   });
+  it('enables authentication only with a complete public key set', () => {
+    const authentication = config({
+      AUTH_AUDIENCE: 'servir-api',
+      AUTH_ISSUER: 'https://identity.servir.test',
+      AUTH_JWKS: JSON.stringify({ keys: [{ kty: 'RSA', kid: 'current-key', n: 'n', e: 'AQAB' }] }),
+    }).authentication;
+
+    assert.deepEqual(authentication, {
+      algorithm: 'RS256',
+      audience: 'servir-api',
+      issuer: 'https://identity.servir.test',
+      jwks: { keys: [{ kty: 'RSA', kid: 'current-key', n: 'n', e: 'AQAB' }] },
+    });
+    assert.throws(
+      () => config({ AUTH_ISSUER: 'https://identity.servir.test' }),
+      (error) =>
+        error instanceof ServiceConfigError &&
+        error.code === ServiceConfigErrorCodes.InvalidAuthenticationConfiguration,
+    );
+  });
+  it('loads a mounted public key set once with precedence over the inline value', () => {
+    const paths: string[] = [];
+    const result = readServiceConfig(
+      {
+        AUTH_AUDIENCE: 'servir-api',
+        AUTH_ISSUER: 'https://identity.servir.test',
+        AUTH_JWKS: 'invalid-inline-value',
+        AUTH_JWKS_FILE: '/run/config/auth-jwks',
+        DATABASE_URL: 'postgresql://runtime:secret@localhost:5432/servir',
+      },
+      (path) => {
+        paths.push(path);
+        return JSON.stringify({ keys: [{ kty: 'RSA', kid: 'current-key' }] });
+      },
+    );
+
+    assert.deepEqual(paths, ['/run/config/auth-jwks']);
+    assert.equal(result.authentication?.jwks.keys[0]?.kid, 'current-key');
+  });
 });

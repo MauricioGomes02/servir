@@ -1,4 +1,5 @@
 export const ServiceConfigErrorCodes = {
+  InvalidAuthenticationConfiguration: 'service.configuration.authentication.invalid',
   InvalidHost: 'service.configuration.host.invalid',
   InvalidPort: 'service.configuration.port.invalid',
   InvalidPersistenceMode: 'service.configuration.persistence_mode.invalid',

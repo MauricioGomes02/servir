@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo inicial aprovado. `AuthenticatedActor` por `UserId`, `ExternalIdentityAssertion` de bootstrap, `User` global e provisionamento idempotente por identidade externa estão implementados; adapters OIDC, sessão, autorização organizacional e interfaces ainda estão planejados.
+Modelo inicial aprovado. `AuthenticatedActor` por `UserId`, `ExternalIdentityAssertion` de bootstrap, `User` global, provisionamento idempotente e credenciais próprias RS256 com rotação por `kid` estão implementados; adapters OIDC, sessão, autorização organizacional e interfaces ainda estão planejados.
 
 ## Motivação
 
@@ -88,6 +88,8 @@ Um User pode existir sem acesso organizacional. Solicitação espontânea de ent
 
 Após validar o provedor, o BFF emite uma sessão stateless em cookie seguro e um access JWT curto com audience exclusiva da API. No primeiro login, uma afirmação interna de bootstrap, restrita ao propósito de provisionamento, transporta `issuer + subject` até a API. Depois do provisionamento, credenciais normais usam `UserId`; a identidade externa deixa de representar o ator operacional. A decisão completa está no [ADR 067](../decisions/067-direct-oidc-and-servir-issued-credentials.md).
 
+Chaves privadas são carregadas uma vez pelo BFF no startup, preferencialmente de arquivo somente leitura materializado pelo ambiente. A API carrega da mesma forma apenas o JWKS público. Variáveis inline permanecem disponíveis para desenvolvimento, com menor precedência que os arquivos; integrações com secret stores não fazem chamadas por request.
+
 Uma segunda identidade externa só pode ser vinculada por fluxo explícito iniciado por User autenticado e nova autenticação no provedor. Coincidência de e-mail ou nome nunca une contas.
 
 ## Sequência incremental
@@ -95,7 +97,7 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 1. ~~Definir ports OIDC, ator autenticado e extensão do `ExecutionContext`.~~
 2. ~~Implementar `User` e provisionamento idempotente por identidade externa.~~
 3. ~~Separar a afirmação externa de bootstrap do ator operacional identificado por UserId.~~
-4. Implementar assinatura, rotação e validação das credenciais próprias do Servir.
+4. ~~Implementar assinatura, rotação e validação das credenciais próprias do Servir.~~
 5. Implementar login Google, callback, sessão, CSRF e logout no BFF.
 6. Validar o access token na API e proteger a primeira rota.
 7. Implementar Microsoft e vinculação explícita de identidades.

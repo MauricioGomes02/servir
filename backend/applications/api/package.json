@@ -12,7 +12,7 @@
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "test": "npm run test:unit",
     "test:unit": "tsc --noEmit && node ../../scripts/run-tests.mjs unit src",
-    "test:integration": "tsc --noEmit && node ../../scripts/run-tests.mjs integration src",
+    "test:integration": "tsc --noEmit && node --env-file-if-exists=../../.env ../../scripts/run-tests.mjs integration src",
     "start": "node --env-file-if-exists=.env dist/index.js"
   },
   "keywords": [],
@@ -36,6 +36,7 @@
     "@servir/node-observability": "1.0.0",
     "awilix": "^13.0.5",
     "fastify": "^5.10.0",
+    "jose": "^6.2.9",
     "pg": "^8.22.0",
     "uuid": "^14.0.1"
   }

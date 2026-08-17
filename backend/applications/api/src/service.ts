@@ -1,6 +1,7 @@
 import { createLogRecord, LogLevels } from '@/shared/application/logging';
 import { createErrorLogAttributes, JsonStdoutLogger } from '@/shared/infrastructure/logging';
 import type { TelemetryLifecycle } from '@/shared/infrastructure/telemetry';
+import { JoseAccessTokenVerifier } from '@/shared/infrastructure/authentication';
 
 import {
   createApplication,
@@ -38,6 +39,9 @@ export async function startService(telemetry: TelemetryLifecycle): Promise<void>
     );
 
     const app = createApplication({
+      ...(config.authentication === undefined
+        ? {}
+        : { accessTokenVerifier: new JoseAccessTokenVerifier(config.authentication) }),
       logger,
       persistence: postgresPersistence,
     });

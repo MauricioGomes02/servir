@@ -9,6 +9,7 @@ export { ExternalIdentityAssertionErrorCodes } from './external-identity-asserti
 export { AuthenticationErrorCodes } from './authentication-error';
 
 export type { AccessTokenVerifier } from './access-token-verifier';
+export type { BootstrapAssertionVerifier } from './bootstrap-assertion-verifier';
 export type { AuthenticatedActor, AuthenticatedUserId } from './authenticated-actor';
 export type {
   AuthenticatedActorError,

@@ -50,7 +50,10 @@ api_environment = {
   OTEL_SERVICE_NAME                  = "servir-api"
   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "http://otel-collector:4318/v1/traces"
   OTEL_SDK_DISABLED                  = "false"
+  # AUTH_ISSUER, AUTH_AUDIENCE e AUTH_JWKS habilitam validação com chaves públicas.
 }
+
+# api_jwks_file = "../../../../.secrets/auth-jwks.json"
 
 frontend_environment = {
   NODE_ENV      = "production"
@@ -58,7 +61,11 @@ frontend_environment = {
   PORT          = "3001"
   API_BASE_URL  = "http://api:3000"
   API_TIMEOUT_MS = "10000"
+  # AUTH_ISSUER, AUTH_AUDIENCE, AUTH_KEY_ID e AUTH_PRIVATE_JWK habilitam a assinatura.
+  # Nunca versione uma JWK privada real; forneça-a somente no terraform.tfvars local ignorado.
 }
+
+# frontend_private_jwk_file = "../../../../.secrets/auth-private-jwk.json"
 
 outbox_relay_environment = {
   NODE_ENV                           = "production"

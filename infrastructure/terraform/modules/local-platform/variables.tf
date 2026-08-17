@@ -157,3 +157,18 @@ variable "frontend_environment" {
   type        = map(string)
   sensitive   = true
 }
+
+variable "api_jwks_file" {
+  description = "Optional host path mounted read-only with the API public JWKS."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "frontend_private_jwk_file" {
+  description = "Optional host path mounted read-only with the frontend BFF private JWK."
+  type        = string
+  default     = null
+  nullable    = true
+  sensitive   = true
+}

@@ -11,6 +11,7 @@ export function createApplication(options: CreateApplicationOptions): FastifyIns
   const container = createApplicationContainer(options);
   const dependencies = container.cradle;
   const app = createFastifyApplication({
+    accessTokenVerifier: options.accessTokenVerifier,
     correlationIdGenerator: dependencies.correlationIdGenerator,
     logger: dependencies.logger,
     messageTranslator: dependencies.translator,

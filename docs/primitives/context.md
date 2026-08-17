@@ -44,7 +44,7 @@ interface ExecutionContext {
 }
 ```
 
-Esse é o modelo alvo, ainda não a API completamente implementada. O código atual já separa `ExternalIdentityAssertion`, restrita ao bootstrap, de `AuthenticatedActor`, identificado pelo `UserId` interno. Executor e source entram somente com consumidores concretos.
+Esse é o modelo alvo, ainda não a API completamente implementada. O código atual já separa `ExternalIdentityAssertion`, restrita a uma credencial curta com purpose de bootstrap, de `AuthenticatedActor`, identificado pelo `UserId` interno de um access token. Executor e source entram somente com consumidores concretos.
 
 Actor representa quem causou a operação. Executor identifica o serviço responsável pela etapa atual. Source descreve opcionalmente a origem inicial, como web, API, mensagem ou job. Em processamento assíncrono, o actor causal é preservado e o executor muda. Rotas anônimas não inventam actor; a presença de `organizationId` na URL nunca concede acesso.
 
