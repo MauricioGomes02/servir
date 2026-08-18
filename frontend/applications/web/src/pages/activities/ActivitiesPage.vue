@@ -3,6 +3,7 @@ import { toRef } from 'vue';
 import {
   AppButton,
   AppField,
+  AppFormSection,
   AppIcon,
   AppResourceList,
   AppResourceListItem,
@@ -41,6 +42,7 @@ const { t } = useLocalizedMessages(activitiesMessages);
         <p>{{ t('description') }}</p>
       </div>
       <AppButton
+        id="activity-creation-trigger"
         :variant="creationOpen ? 'secondary' : 'primary'"
         :aria-expanded="creationOpen"
         aria-controls="activity-creation"
@@ -50,66 +52,65 @@ const { t } = useLocalizedMessages(activitiesMessages);
       </AppButton>
     </header>
 
-    <form
-      v-if="creationOpen"
+    <AppFormSection
       id="activity-creation"
-      class="activity-creation"
-      aria-labelledby="activity-creation-title"
-      novalidate
-      @submit.prevent="creation.create"
+      trigger-id="activity-creation-trigger"
+      :open="creationOpen"
+      :title="t('plan')"
+      :description="t('createDescription')"
+      :busy="creation.creating.value"
+      @submit="creation.create"
     >
-      <fieldset :disabled="creation.creating.value">
-        <legend id="activity-creation-title">{{ t('plan') }}</legend>
-        <p>{{ t('createDescription') }}</p>
-        <AppField
-          id="activity-name"
-          v-model="creation.name.value"
-          :label="t('name')"
-          :errors="creation.nameErrors.value"
-          :maxlength="120"
-        />
-        <fieldset
-          class="activity-ministries"
-          :aria-describedby="
-            creation.ministryErrors.value.length ? 'activity-ministries-error' : undefined
-          "
-        >
-          <legend>{{ t('participantMinistries') }}</legend>
-          <p v-if="ministries.length === 0">
-            {{ t('ministryRequired') }}
-          </p>
-          <label
-            v-for="ministry in ministries"
-            :key="ministry.id"
-            :for="`activity-ministry-${ministry.id}`"
-          >
-            <input
-              :id="`activity-ministry-${ministry.id}`"
-              v-model="creation.ministryIds.value"
-              type="checkbox"
-              :value="ministry.id"
-            />
-            <span>{{ ministry.name }}</span>
-          </label>
-          <ul
-            v-if="creation.ministryErrors.value.length"
-            id="activity-ministries-error"
-            class="field-errors"
-          >
-            <li v-for="error in creation.ministryErrors.value" :key="error">{{ error }}</li>
-          </ul>
-        </fieldset>
-        <p
-          v-if="
-            creation.problem.value &&
-            creation.nameErrors.value.length === 0 &&
-            creation.ministryErrors.value.length === 0
-          "
-          class="form-error"
-          role="alert"
-        >
-          {{ creation.problem.value.problem.title }}
+      <AppField
+        id="activity-name"
+        v-model="creation.name.value"
+        :label="t('name')"
+        :errors="creation.nameErrors.value"
+        :maxlength="120"
+      />
+      <fieldset
+        class="activity-ministries"
+        :aria-describedby="
+          creation.ministryErrors.value.length ? 'activity-ministries-error' : undefined
+        "
+      >
+        <legend>{{ t('participantMinistries') }}</legend>
+        <p v-if="ministries.length === 0">
+          {{ t('ministryRequired') }}
         </p>
+        <label
+          v-for="ministry in ministries"
+          :key="ministry.id"
+          :for="`activity-ministry-${ministry.id}`"
+        >
+          <input
+            :id="`activity-ministry-${ministry.id}`"
+            v-model="creation.ministryIds.value"
+            type="checkbox"
+            :value="ministry.id"
+          />
+          <span>{{ ministry.name }}</span>
+        </label>
+        <ul
+          v-if="creation.ministryErrors.value.length"
+          id="activity-ministries-error"
+          class="field-errors"
+        >
+          <li v-for="error in creation.ministryErrors.value" :key="error">{{ error }}</li>
+        </ul>
+      </fieldset>
+      <p
+        v-if="
+          creation.problem.value &&
+          creation.nameErrors.value.length === 0 &&
+          creation.ministryErrors.value.length === 0
+        "
+        class="form-error"
+        role="alert"
+      >
+        {{ creation.problem.value.problem.title }}
+      </p>
+      <template #actions>
         <AppButton
           type="submit"
           :loading="creation.creating.value"
@@ -117,8 +118,8 @@ const { t } = useLocalizedMessages(activitiesMessages);
         >
           {{ t('create') }}
         </AppButton>
-      </fieldset>
-    </form>
+      </template>
+    </AppFormSection>
 
     <AppResourceSection title-id="activity-list-title">
       <template #title>{{ t('collectionTitle') }}</template>

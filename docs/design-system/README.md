@@ -40,3 +40,5 @@ Buscas de coleções usam `AppSearchField`: label programática, ícone familiar
 Controles usam `--control-radius` para um arredondamento sutil e consistente. A linguagem visual é formal com proximidade humana: campos, botões e buscas não usam formato de cápsula; `--radius-full` fica reservado a ícones circulares, avatares e indicadores cuja forma tenha significado. Controles de busca ocultam a decoração nativa do navegador quando oferecem uma ação de limpeza própria, evitando affordances duplicadas.
 
 Telas de detalhe usam `AppBackLink`, `AppDetailHeader`, `AppRouteState` e `AppContentSection` para manter retorno, título, status, falhas e agrupamentos previsíveis. Esses componentes organizam apresentação e semântica; pages continuam responsáveis pelos dados, ações e linguagem da experiência.
+
+Formulários expansíveis usam `AppFormSection`, que preserva `form`, `fieldset`, `legend`, descrição, campos e ações como regiões próprias. Ao abrir, o foco segue para o primeiro controle; ao fechar ou concluir, retorna ao acionador. A page continua responsável por validação, submissão, mensagens e estado do caso de uso.

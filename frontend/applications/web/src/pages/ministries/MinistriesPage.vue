@@ -3,6 +3,7 @@ import { toRef } from 'vue';
 import {
   AppButton,
   AppField,
+  AppFormSection,
   AppIcon,
   AppResourceList,
   AppResourceListItem,
@@ -43,6 +44,7 @@ const { t } = useLocalizedMessages(ministriesMessages);
         <p>{{ t('description') }}</p>
       </div>
       <AppButton
+        id="ministry-creation-trigger"
         :variant="showCreation ? 'secondary' : 'primary'"
         :aria-expanded="showCreation"
         aria-controls="ministry-creation"
@@ -52,31 +54,30 @@ const { t } = useLocalizedMessages(ministriesMessages);
       </AppButton>
     </header>
 
-    <form
-      v-if="showCreation"
+    <AppFormSection
       id="ministry-creation"
-      class="inline-form"
-      aria-labelledby="ministry-creation-title"
-      novalidate
-      @submit.prevent="createMinistry"
+      trigger-id="ministry-creation-trigger"
+      :open="showCreation"
+      :title="t('createTitle')"
+      :description="t('createDescription')"
+      :busy="creating"
+      @submit="createMinistry"
     >
-      <fieldset :disabled="creating">
-        <legend id="ministry-creation-title">{{ t('createTitle') }}</legend>
-        <p>{{ t('createDescription') }}</p>
-        <AppField
-          id="ministry-name"
-          v-model="name"
-          :label="t('name')"
-          :errors="nameErrors"
-          :maxlength="120"
-        />
-        <p v-if="creationProblem && nameErrors.length === 0" class="form-error" role="alert">
-          {{ creationProblem.problem.title }}
-        </p>
+      <AppField
+        id="ministry-name"
+        v-model="name"
+        :label="t('name')"
+        :errors="nameErrors"
+        :maxlength="120"
+      />
+      <p v-if="creationProblem && nameErrors.length === 0" class="form-error" role="alert">
+        {{ creationProblem.problem.title }}
+      </p>
+      <template #actions>
         <AppButton type="submit" :loading="creating">{{ t('create') }}</AppButton>
         <p class="status" aria-live="polite">{{ creating ? t('creating') : '' }}</p>
-      </fieldset>
-    </form>
+      </template>
+    </AppFormSection>
 
     <AppResourceSection title-id="ministry-list-title">
       <template #title>{{ t('collectionTitle') }}</template>

@@ -1,0 +1,46 @@
+.app-form-section {
+  margin-bottom: var(--page-block-gap);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.app-form-section fieldset {
+  max-width: 40rem;
+  gap: var(--space-4);
+}
+
+.app-form-section legend {
+  padding: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.app-form-description {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--color-text-subtle);
+}
+
+.app-form-fields {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.app-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.app-form-actions .status {
+  min-height: 0;
+}
+
+@media (width < 36rem) {
+  .app-form-actions .app-button {
+    width: 100%;
+  }
+}

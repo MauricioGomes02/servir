@@ -3,6 +3,7 @@ import { toRef } from 'vue';
 import {
   AppButton,
   AppField,
+  AppFormSection,
   AppIcon,
   AppResourceList,
   AppResourceListItem,
@@ -40,6 +41,7 @@ const { t } = useLocalizedMessages(membersMessages);
         <p>{{ t('description') }}</p>
       </div>
       <AppButton
+        id="member-registration-trigger"
         :variant="registrationOpen ? 'secondary' : 'primary'"
         :aria-expanded="registrationOpen"
         aria-controls="member-registration"
@@ -49,41 +51,38 @@ const { t } = useLocalizedMessages(membersMessages);
       </AppButton>
     </header>
 
-    <form
-      v-if="registrationOpen"
+    <AppFormSection
       id="member-registration"
-      class="member-registration"
-      aria-labelledby="member-registration-title"
-      novalidate
-      @submit.prevent="registration.register"
+      trigger-id="member-registration-trigger"
+      :open="registrationOpen"
+      :title="t('newMember')"
+      :description="t('registrationDescription')"
+      :busy="registration.registering.value"
+      @submit="registration.register"
     >
-      <fieldset :disabled="registration.registering.value">
-        <legend id="member-registration-title">{{ t('newMember') }}</legend>
-        <p class="member-registration-description">
-          {{ t('registrationDescription') }}
-        </p>
-        <AppField
-          id="member-name"
-          v-model="registration.name.value"
-          :label="t('name')"
-          :errors="registration.nameErrors.value"
-          :maxlength="120"
-        />
-        <p
-          v-if="registration.problem.value && registration.nameErrors.value.length === 0"
-          class="form-error"
-          role="alert"
-        >
-          {{ registration.problem.value.problem.title }}
-        </p>
+      <AppField
+        id="member-name"
+        v-model="registration.name.value"
+        :label="t('name')"
+        :errors="registration.nameErrors.value"
+        :maxlength="120"
+      />
+      <p
+        v-if="registration.problem.value && registration.nameErrors.value.length === 0"
+        class="form-error"
+        role="alert"
+      >
+        {{ registration.problem.value.problem.title }}
+      </p>
+      <template #actions>
         <AppButton type="submit" :loading="registration.registering.value">
           {{ t('register') }}
         </AppButton>
         <p class="status" aria-live="polite">
           {{ registration.registering.value ? t('registering') : '' }}
         </p>
-      </fieldset>
-    </form>
+      </template>
+    </AppFormSection>
 
     <AppResourceSection title-id="member-list-title">
       <template #title>{{ t('collectionTitle') }}</template>

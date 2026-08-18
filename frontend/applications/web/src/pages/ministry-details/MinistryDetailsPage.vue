@@ -6,6 +6,7 @@ import {
   AppContentSection,
   AppDetailHeader,
   AppField,
+  AppFormSection,
   AppRouteState,
   AppStatusBadge,
 } from '@/shared/ui';
@@ -65,6 +66,7 @@ const { t } = useLocalizedMessages(ministryDetailsMessages);
           {{ ministry.roles.length === 1 ? t('roleSingular') : t('rolePlural') }}
         </span>
         <AppButton
+          id="ministry-role-form-trigger"
           :variant="roleFormOpen ? 'secondary' : 'primary'"
           :aria-expanded="roleFormOpen"
           aria-controls="ministry-role-form"
@@ -73,41 +75,38 @@ const { t } = useLocalizedMessages(ministryDetailsMessages);
           {{ roleFormOpen ? t('closeForm') : t('addRole') }}
         </AppButton>
       </template>
-      <form
-        v-if="roleFormOpen"
+      <AppFormSection
         id="ministry-role-form"
-        class="ministry-role-form"
-        aria-labelledby="ministry-role-form-title"
-        novalidate
-        @submit.prevent="roleDefinition.defineRole"
+        trigger-id="ministry-role-form-trigger"
+        :open="roleFormOpen"
+        :title="t('createRole')"
+        :description="t('roleDescription')"
+        :busy="roleDefinition.defining.value"
+        @submit="roleDefinition.defineRole"
       >
-        <fieldset :disabled="roleDefinition.defining.value">
-          <legend id="ministry-role-form-title">{{ t('createRole') }}</legend>
-          <p class="ministry-role-form-description">
-            {{ t('roleDescription') }}
-          </p>
-          <AppField
-            id="ministry-role-name"
-            v-model="roleDefinition.name.value"
-            :label="t('roleName')"
-            :errors="roleDefinition.nameErrors.value"
-            :maxlength="120"
-          />
-          <p
-            v-if="roleDefinition.problem.value && roleDefinition.nameErrors.value.length === 0"
-            class="form-error"
-            role="alert"
-          >
-            {{ roleDefinition.problem.value.problem.title }}
-          </p>
+        <AppField
+          id="ministry-role-name"
+          v-model="roleDefinition.name.value"
+          :label="t('roleName')"
+          :errors="roleDefinition.nameErrors.value"
+          :maxlength="120"
+        />
+        <p
+          v-if="roleDefinition.problem.value && roleDefinition.nameErrors.value.length === 0"
+          class="form-error"
+          role="alert"
+        >
+          {{ roleDefinition.problem.value.problem.title }}
+        </p>
+        <template #actions>
           <AppButton type="submit" :loading="roleDefinition.defining.value">
             {{ t('createRole') }}
           </AppButton>
           <p class="status" aria-live="polite">
             {{ roleDefinition.defining.value ? t('creatingRole') : '' }}
           </p>
-        </fieldset>
-      </form>
+        </template>
+      </AppFormSection>
       <p v-if="ministry.roles.length === 0" class="ministry-roles-empty">
         {{ t('noRoles') }}
       </p>

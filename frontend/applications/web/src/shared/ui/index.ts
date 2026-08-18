@@ -3,6 +3,7 @@ export { default as AppBackLink } from './AppBackLink.vue';
 export { default as AppContentSection } from './AppContentSection.vue';
 export { default as AppDetailHeader } from './AppDetailHeader.vue';
 export { default as AppField } from './AppField.vue';
+export { default as AppFormSection } from './AppFormSection.vue';
 export { default as AppIcon } from './AppIcon.vue';
 export { default as AppResourceList } from './AppResourceList.vue';
 export { default as AppResourceListItem } from './AppResourceListItem.vue';

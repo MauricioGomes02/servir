@@ -8,25 +8,6 @@
   font-weight: 750;
 }
 
-.ministry-role-form {
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border-subtle);
-  background: var(--color-surface-muted);
-}
-
-.ministry-role-form fieldset {
-  max-width: 34rem;
-}
-
-.ministry-role-form legend {
-  font-size: 1.125rem;
-}
-
-.ministry-role-form-description {
-  max-width: 60ch;
-  color: var(--color-text-subtle);
-}
-
 .ministry-details .app-content-section ul {
   margin: 0;
   padding: 0;
