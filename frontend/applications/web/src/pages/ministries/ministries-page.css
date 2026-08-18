@@ -1,10 +1,11 @@
 .inline-form {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
   align-items: center;
-  margin-bottom: var(--space-8);
-  padding: clamp(1.5rem, 4vw, 2.5rem);
-  border-radius: var(--radius-lg);
+  margin-bottom: var(--page-block-gap);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
   background: var(--color-surface-muted);
 }
 
@@ -17,174 +18,8 @@
   color: var(--color-text-subtle);
 }
 
-.search-bar {
-  display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-8);
-}
-
-.search-bar > label {
-  font-size: 0.9rem;
-  font-weight: 750;
-}
-
-.search-bar > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
-.search-bar input {
-  flex: 1 1 16rem;
-  min-height: 3.25rem;
-  padding-inline: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-  background: var(--color-surface);
-}
-
-.list-heading {
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.list-heading h2 {
+.collection-status {
   margin: 0;
-  font-size: 1rem;
-}
-
-.ministry-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ministry-list li {
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.ministry-list-link {
-  display: grid;
-  gap: var(--space-4);
-  min-height: 5.5rem;
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-  text-decoration: none;
-  transition:
-    transform 160ms ease,
-    background-color 160ms ease;
-}
-
-.ministry-summary {
-  display: grid;
-  gap: var(--space-1);
-  min-width: 0;
-}
-
-.ministry-summary strong {
-  overflow-wrap: anywhere;
-  font-weight: 750;
-  transition: color 160ms ease;
-}
-
-.ministry-summary span {
+  padding: var(--space-6) var(--space-4);
   color: var(--color-text-subtle);
-  font-size: 0.9rem;
-}
-
-.ministry-list-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.ministry-list-action {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--button-height-small);
-  padding-inline: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--button-radius);
-  color: var(--color-action);
-  background: var(--color-surface);
-  font-size: 0.9rem;
-  font-weight: 750;
-  transition:
-    color 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease;
-}
-
-.ministry-list-action svg {
-  width: 1.1rem;
-  height: 1.1rem;
-  transition: transform 160ms ease;
-}
-
-.ministry-list-link:focus-visible {
-  background: var(--color-surface-muted);
-}
-
-.ministry-list-link:focus-visible .ministry-summary strong {
-  color: var(--color-action);
-}
-
-.ministry-list-link:focus-visible .ministry-list-action {
-  border-color: var(--color-action);
-  color: var(--color-on-action);
-  background: var(--color-action);
-}
-
-.ministry-list-link:focus-visible .ministry-list-action svg {
-  transform: translateX(0.2rem);
-}
-
-.ministry-list-link:active {
-  transform: translateY(0.0625rem) scale(0.995);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .ministry-list-link:hover {
-    background: var(--color-surface-muted);
-  }
-
-  .ministry-list-link:hover .ministry-summary strong {
-    color: var(--color-action);
-  }
-
-  .ministry-list-link:hover .ministry-list-action {
-    border-color: var(--color-action);
-    color: var(--color-on-action);
-    background: var(--color-action);
-  }
-
-  .ministry-list-link:hover .ministry-list-action svg {
-    transform: translateX(0.2rem);
-  }
-}
-
-@media (width >= 36rem) {
-  .ministry-list-link {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-
-  .ministry-list-meta {
-    justify-content: end;
-  }
-}
-
-@media (prefers-contrast: more) {
-  .search-bar input {
-    border-width: 2px;
-  }
-
-  .ministry-list-link {
-    outline: 1px solid transparent;
-  }
 }

@@ -57,13 +57,18 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+  --page-block-gap: var(--space-6);
+  --section-block-gap: var(--space-5);
+  --control-height: 2.75rem;
+  --list-row-min-height: 4.5rem;
   --radius-sm: 0.625rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-full: 999px;
+  --control-radius: 0.5rem;
   --shadow-sm: 0 0.25rem 1rem rgb(17 24 39 / 5%);
   --shadow-md: 0 1rem 2.5rem rgb(17 24 39 / 9%);
-  --content-width: 75rem;
+  --content-width: 80rem;
   --button-height-small: 2.25rem;
   --button-height-medium: 2.75rem;
   --button-height-large: 3rem;
@@ -71,7 +76,7 @@
   --button-padding-inline: 1.25rem;
   --button-padding-inline-large: 1.5rem;
   --button-gap: 0.5rem;
-  --button-radius: var(--radius-sm);
+  --button-radius: var(--control-radius);
   --button-motion-duration: 160ms;
 }
 

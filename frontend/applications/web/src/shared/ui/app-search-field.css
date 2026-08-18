@@ -1,0 +1,69 @@
+.app-search {
+  position: relative;
+  width: min(100%, 24rem);
+}
+
+.app-search input {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--control-radius);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.app-search input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.app-search input::-webkit-search-cancel-button,
+.app-search input::-webkit-search-decoration {
+  appearance: none;
+}
+
+.app-search-icon,
+.app-search-clear {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.app-search-icon {
+  left: var(--space-4);
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
+.app-search-icon svg,
+.app-search-clear svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.app-search-clear {
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  color: var(--color-text-subtle);
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-search-clear:hover {
+    color: var(--color-text);
+    background: var(--color-surface-muted);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .app-search input {
+    border-width: 2px;
+  }
+}

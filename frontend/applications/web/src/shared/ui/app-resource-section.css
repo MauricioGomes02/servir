@@ -1,0 +1,69 @@
+.app-resource-section {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.app-resource-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.app-resource-heading {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.app-resource-heading h2,
+.app-resource-heading p {
+  margin: 0;
+}
+
+.app-resource-heading h2 {
+  font-size: 1rem;
+}
+
+.app-resource-heading p {
+  color: var(--color-text-subtle);
+  font-size: 0.875rem;
+}
+
+.app-resource-controls {
+  flex: 1 1 18rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-resource-content > .app-resource-list {
+  border-top: 0;
+}
+
+.app-resource-content > .empty-state {
+  border: 0;
+  border-radius: 0;
+}
+
+@media (width < 36rem) {
+  .app-resource-toolbar {
+    align-items: stretch;
+  }
+
+  .app-resource-controls,
+  .app-resource-controls .app-search {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .app-resource-section {
+    border-width: 2px;
+  }
+}

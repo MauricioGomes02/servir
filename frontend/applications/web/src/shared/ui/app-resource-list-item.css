@@ -1,0 +1,110 @@
+.app-resource-list-item {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.app-resource-list-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'primary meta'
+    'primary action';
+  gap: var(--space-1) var(--space-4);
+  align-items: center;
+  min-height: var(--list-row-min-height);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.app-resource-list-primary {
+  grid-area: primary;
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.app-resource-list-primary :where(strong) {
+  overflow-wrap: anywhere;
+  font-weight: 750;
+  transition: color 160ms ease;
+}
+
+.app-resource-list-primary :where(span) {
+  color: var(--color-text-subtle);
+  font-size: 0.875rem;
+}
+
+.app-resource-list-meta {
+  grid-area: meta;
+  justify-self: end;
+}
+
+.app-resource-list-action {
+  grid-area: action;
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: var(--space-1);
+  color: var(--color-action);
+  font-size: 0.875rem;
+  font-weight: 750;
+}
+
+.app-resource-list-action svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 160ms ease;
+}
+
+.app-resource-list-link:focus-visible {
+  background: var(--color-surface-muted);
+}
+
+.app-resource-list-link:focus-visible .app-resource-list-primary :where(strong) {
+  color: var(--color-action);
+}
+
+.app-resource-list-link:focus-visible .app-resource-list-action svg {
+  transform: translateX(0.2rem);
+}
+
+.app-resource-list-link:active {
+  transform: translateY(0.0625rem) scale(0.995);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-resource-list-link:hover {
+    background: var(--color-surface-muted);
+  }
+
+  .app-resource-list-link:hover .app-resource-list-primary :where(strong) {
+    color: var(--color-action);
+  }
+
+  .app-resource-list-link:hover .app-resource-list-action svg {
+    transform: translateX(0.2rem);
+  }
+}
+
+@media (width < 36rem) {
+  .app-resource-list-link {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'primary meta'
+      'action action';
+  }
+
+  .app-resource-list-action {
+    justify-self: start;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .app-resource-list-link {
+    outline: 1px solid transparent;
+  }
+}

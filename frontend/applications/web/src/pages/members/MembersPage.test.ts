@@ -106,7 +106,7 @@ describe('MembersPage', () => {
     );
 
     await fireEvent.update(getByLabelText('Buscar membros'), 'Ana');
-    await fireEvent.click(getByRole('button', { name: 'Buscar membros' }));
+    await fireEvent.submit(getByRole('search'));
     await waitFor(() => expect(router.currentRoute.value.query.search).toBe('Ana'));
     expect(router.currentRoute.value.query.page).toBeUndefined();
     expect(requests.get).toHaveBeenLastCalledWith(

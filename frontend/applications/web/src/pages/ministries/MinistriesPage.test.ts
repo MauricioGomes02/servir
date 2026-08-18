@@ -66,11 +66,17 @@ describe('MinistriesPage', () => {
   });
 
   it('stores an applied search in the URL', async () => {
+    requests.get
+      .mockResolvedValueOnce({
+        items: [{ id: 'music-ministry-id', name: 'Música', status: 'active' }],
+        pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
+      })
+      .mockResolvedValueOnce(emptyPage);
     const { findByRole, getByLabelText, getByRole, router } = await renderPage();
-    await findByRole('heading', { name: 'Sua estrutura ministerial começa aqui' });
+    await findByRole('link', { name: 'Ver detalhes do ministério Música' });
 
     await fireEvent.update(getByLabelText('Buscar ministérios'), 'Música');
-    await fireEvent.click(getByRole('button', { name: 'Buscar' }));
+    await fireEvent.submit(getByRole('search'));
 
     expect(await findByRole('heading', { name: 'Nenhum ministério encontrado' })).toBeVisible();
     expect(getByRole('button', { name: 'Limpar busca' })).toBeVisible();
@@ -105,14 +111,12 @@ describe('MinistriesPage', () => {
       name: 'Ver detalhes do ministério Música',
     });
 
-    expect(detailsLink).toHaveClass('ministry-list-link');
     expect(detailsLink).toHaveAttribute(
       'href',
       '/organizations/organization-id/ministries/music-ministry-id',
     );
     expect(detailsLink).toHaveTextContent('Música');
     expect(detailsLink).toHaveTextContent('Ver detalhes');
-    expect(detailsLink.querySelector('.ministry-list-action')).toHaveTextContent('Ver detalhes');
     expect(container.querySelector('.ministry-details')).not.toBeInTheDocument();
     detailsLink.focus();
     expect(detailsLink).toHaveFocus();
@@ -139,7 +143,8 @@ describe('MinistriesPage', () => {
     await fireEvent.update(getByLabelText('Nome do ministério'), 'Música');
     await fireEvent.click(getByRole('button', { name: 'Criar ministério' }));
 
-    expect(await findByRole('heading', { name: '1 ministério ativo' })).toBeVisible();
+    expect(await findByRole('heading', { name: 'Ministérios ativos' })).toBeVisible();
+    expect(getByText('1 cadastrado')).toBeVisible();
     expect(getByText('Música')).toBeVisible();
     expect(requests.post).toHaveBeenCalledWith(
       '/bff/organizations/organization-id/ministries',

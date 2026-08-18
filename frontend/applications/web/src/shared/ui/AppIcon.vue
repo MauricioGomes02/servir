@@ -4,12 +4,23 @@ import {
   ArrowRight,
   CalendarDays,
   Church,
+  Search,
   HandHeart,
   Settings,
   Users,
+  X,
 } from '@lucide/vue';
 
-type AppIconName = 'settings' | 'community' | 'people' | 'ministry' | 'calendar' | 'back' | 'arrow';
+type AppIconName =
+  | 'settings'
+  | 'community'
+  | 'people'
+  | 'ministry'
+  | 'calendar'
+  | 'back'
+  | 'arrow'
+  | 'search'
+  | 'close';
 
 const icons = {
   settings: Settings,
@@ -19,6 +30,8 @@ const icons = {
   calendar: CalendarDays,
   back: ArrowLeft,
   arrow: ArrowRight,
+  search: Search,
+  close: X,
 };
 
 const props = defineProps<{ name: AppIconName }>();

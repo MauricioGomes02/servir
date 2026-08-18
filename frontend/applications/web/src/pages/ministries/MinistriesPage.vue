@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppButton, AppField, AppIcon, AppStatusBadge } from '@/shared/ui';
+import {
+  AppButton,
+  AppField,
+  AppIcon,
+  AppResourceList,
+  AppResourceListItem,
+  AppResourceSection,
+  AppSearchField,
+  AppStatusBadge,
+} from '@/shared/ui';
 import { useLocalizedMessages } from '@/shared/i18n';
 import { ministriesMessages } from './ministries.messages';
 import { useMinistriesPage } from './use-ministries-page';
@@ -69,70 +78,71 @@ const { t } = useLocalizedMessages(ministriesMessages);
       </fieldset>
     </form>
 
-    <form class="search-bar" role="search" @submit.prevent="applySearch">
-      <label for="ministry-search">{{ t('searchLabel') }}</label>
-      <div>
-        <input id="ministry-search" v-model="search" type="search" maxlength="120" />
-        <AppButton type="submit" variant="secondary">{{ t('search') }}</AppButton>
-      </div>
-    </form>
+    <AppResourceSection title-id="ministry-list-title">
+      <template #title>{{ t('collectionTitle') }}</template>
+      <template v-if="page" #summary>
+        {{ page.pagination.totalItems }}
+        {{ page.pagination.totalItems === 1 ? t('registeredSingular') : t('registeredPlural') }}
+      </template>
+      <template v-if="page && (page.items.length > 0 || appliedSearch)" #controls>
+        <AppSearchField
+          id="ministry-search"
+          v-model="search"
+          :label="t('searchLabel')"
+          :clear-label="t('clearSearch')"
+          :maxlength="120"
+          @search="applySearch"
+          @clear="clearSearch"
+        />
+      </template>
 
-    <p v-if="loading" class="route-status" role="status">{{ t('loading') }}</p>
-    <section v-else-if="problem" class="empty-state" aria-labelledby="ministries-error-title">
-      <h2 id="ministries-error-title">{{ problem.problem.title }}</h2>
-      <p>{{ t('retryDescription') }}</p>
-      <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
-    </section>
-    <section
-      v-else-if="page && page.items.length === 0 && appliedSearch"
-      class="empty-state"
-      aria-labelledby="search-empty-title"
-    >
-      <h2 id="search-empty-title">{{ t('noResult') }}</h2>
-      <p>{{ t('noResultDescription') }}</p>
-      <AppButton variant="secondary" @click="clearSearch">{{ t('clearSearch') }}</AppButton>
-    </section>
-    <section
-      v-else-if="page && page.items.length === 0"
-      class="empty-state"
-      aria-labelledby="ministries-empty-title"
-    >
-      <h2 id="ministries-empty-title">{{ t('emptyTitle') }}</h2>
-      <p>{{ t('emptyDescription') }}</p>
-      <AppButton @click="showCreation = true">{{ t('createFirst') }}</AppButton>
-    </section>
-    <section v-else-if="page" aria-labelledby="ministry-list-title">
-      <div class="list-heading">
-        <h2 id="ministry-list-title">
-          {{ page.pagination.totalItems }}
-          {{ page.pagination.totalItems === 1 ? t('activeSingular') : t('activePlural') }}
-        </h2>
-      </div>
-      <ul class="ministry-list">
-        <li v-for="ministry in page.items" :key="ministry.id">
-          <RouterLink
-            class="ministry-list-link"
-            :aria-label="`${t('detailsPrefix')} ${ministry.name}`"
-            :to="{
-              name: 'ministry-details',
-              params: { organizationId, ministryId: ministry.id },
-            }"
-          >
-            <div class="ministry-summary">
-              <strong>{{ ministry.name }}</strong>
-              <span>{{ t('summary') }}</span>
-            </div>
-            <div class="ministry-list-meta">
-              <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
-              <span class="ministry-list-action">
-                {{ t('details') }}
-                <AppIcon name="arrow" />
-              </span>
-            </div>
-          </RouterLink>
-        </li>
-      </ul>
-    </section>
+      <p v-if="loading" class="collection-status" role="status">{{ t('loading') }}</p>
+      <section v-else-if="problem" class="empty-state" aria-labelledby="ministries-error-title">
+        <h3 id="ministries-error-title">{{ problem.problem.title }}</h3>
+        <p>{{ t('retryDescription') }}</p>
+        <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
+      </section>
+      <section
+        v-else-if="page && page.items.length === 0 && appliedSearch"
+        class="empty-state"
+        aria-labelledby="search-empty-title"
+      >
+        <h3 id="search-empty-title">{{ t('noResult') }}</h3>
+        <p>{{ t('noResultDescription') }}</p>
+      </section>
+      <section
+        v-else-if="page && page.items.length === 0"
+        class="empty-state"
+        aria-labelledby="ministries-empty-title"
+      >
+        <h3 id="ministries-empty-title">{{ t('emptyTitle') }}</h3>
+        <p>{{ t('emptyDescription') }}</p>
+        <AppButton @click="showCreation = true">{{ t('createFirst') }}</AppButton>
+      </section>
+      <AppResourceList>
+        <AppResourceListItem
+          v-for="ministry in page?.items ?? []"
+          :key="ministry.id"
+          :accessible-label="`${t('detailsPrefix')} ${ministry.name}`"
+          :to="{
+            name: 'ministry-details',
+            params: { organizationId, ministryId: ministry.id },
+          }"
+        >
+          <template #primary>
+            <strong>{{ ministry.name }}</strong>
+            <span>{{ t('summary') }}</span>
+          </template>
+          <template #meta>
+            <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
+          </template>
+          <template #action>
+            {{ t('details') }}
+            <AppIcon name="arrow" />
+          </template>
+        </AppResourceListItem>
+      </AppResourceList>
+    </AppResourceSection>
   </section>
 </template>
 

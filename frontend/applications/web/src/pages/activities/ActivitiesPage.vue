@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppButton, AppField, AppIcon, AppStatusBadge } from '@/shared/ui';
+import {
+  AppButton,
+  AppField,
+  AppIcon,
+  AppResourceList,
+  AppResourceListItem,
+  AppResourceSection,
+  AppSearchField,
+  AppStatusBadge,
+} from '@/shared/ui';
 import { useLocalizedMessages } from '@/shared/i18n';
 import { activitiesMessages } from './activities.messages';
 import { useActivitiesPage } from './use-activities-page';
@@ -111,72 +120,73 @@ const { t } = useLocalizedMessages(activitiesMessages);
       </fieldset>
     </form>
 
-    <form class="activity-search" role="search" @submit.prevent="applySearch">
-      <label for="activity-search">{{ t('search') }}</label>
-      <div>
-        <input id="activity-search" v-model="search" type="search" maxlength="120" />
-        <AppButton type="submit" variant="secondary">{{ t('search') }}</AppButton>
-      </div>
-    </form>
+    <AppResourceSection title-id="activity-list-title">
+      <template #title>{{ t('collectionTitle') }}</template>
+      <template v-if="activities" #summary>
+        {{ activities.pagination.totalItems }}
+        {{
+          activities.pagination.totalItems === 1 ? t('registeredSingular') : t('registeredPlural')
+        }}
+      </template>
+      <template v-if="activities && (activities.items.length > 0 || appliedSearch)" #controls>
+        <AppSearchField
+          id="activity-search"
+          v-model="search"
+          :label="t('search')"
+          :clear-label="t('clearSearch')"
+          :maxlength="120"
+          @search="applySearch"
+          @clear="clearSearch"
+        />
+      </template>
 
-    <p v-if="loading" class="route-status" role="status">{{ t('loading') }}</p>
-    <section v-else-if="problem" class="empty-state" aria-labelledby="activities-error-title">
-      <h2 id="activities-error-title">{{ problem.problem.title }}</h2>
-      <p>{{ t('retryDescription') }}</p>
-      <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
-    </section>
-    <section
-      v-else-if="activities && activities.items.length === 0 && appliedSearch"
-      class="empty-state"
-      aria-labelledby="activity-search-empty-title"
-    >
-      <h2 id="activity-search-empty-title">{{ t('noResult') }}</h2>
-      <p>{{ t('noResultDescription') }}</p>
-      <AppButton variant="secondary" @click="clearSearch">{{ t('clearSearch') }}</AppButton>
-    </section>
-    <section
-      v-else-if="activities && activities.items.length === 0"
-      class="empty-state"
-      aria-labelledby="activities-empty-title"
-    >
-      <h2 id="activities-empty-title">{{ t('emptyTitle') }}</h2>
-      <p>{{ t('emptyDescription') }}</p>
-      <AppButton :disabled="ministries.length === 0" @click="creationOpen = true">{{
-        t('first')
-      }}</AppButton>
-    </section>
-    <section v-else-if="activities" aria-labelledby="activity-list-title">
-      <div class="activity-list-heading">
-        <h2 id="activity-list-title">
-          {{ activities.pagination.totalItems }}
-          {{ activities.pagination.totalItems === 1 ? t('activeSingular') : t('activePlural') }}
-        </h2>
-      </div>
-      <ul class="activity-list">
-        <li v-for="activity in activities.items" :key="activity.id">
-          <RouterLink
-            class="activity-list-link"
-            :aria-label="`${t('detailsPrefix')} ${activity.name}`"
-            :to="{ name: 'activity-details', params: { organizationId, activityId: activity.id } }"
-          >
-            <div class="activity-summary">
-              <strong>{{ activity.name }}</strong>
-              <span
-                >{{ activity.ministryCount }}
-                {{
-                  activity.ministryCount === 1 ? t('ministrySingular') : t('ministryPlural')
-                }}</span
-              >
-            </div>
-            <div class="activity-list-meta">
-              <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
-              <span class="activity-list-action">{{ t('details') }} <AppIcon name="arrow" /></span>
-            </div>
-          </RouterLink>
-        </li>
-      </ul>
+      <p v-if="loading" class="collection-status" role="status">{{ t('loading') }}</p>
+      <section v-else-if="problem" class="empty-state" aria-labelledby="activities-error-title">
+        <h3 id="activities-error-title">{{ problem.problem.title }}</h3>
+        <p>{{ t('retryDescription') }}</p>
+        <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
+      </section>
+      <section
+        v-else-if="activities && activities.items.length === 0 && appliedSearch"
+        class="empty-state"
+        aria-labelledby="activity-search-empty-title"
+      >
+        <h3 id="activity-search-empty-title">{{ t('noResult') }}</h3>
+        <p>{{ t('noResultDescription') }}</p>
+      </section>
+      <section
+        v-else-if="activities && activities.items.length === 0"
+        class="empty-state"
+        aria-labelledby="activities-empty-title"
+      >
+        <h3 id="activities-empty-title">{{ t('emptyTitle') }}</h3>
+        <p>{{ t('emptyDescription') }}</p>
+        <AppButton :disabled="ministries.length === 0" @click="creationOpen = true">{{
+          t('first')
+        }}</AppButton>
+      </section>
+      <AppResourceList>
+        <AppResourceListItem
+          v-for="activity in activities?.items ?? []"
+          :key="activity.id"
+          :accessible-label="`${t('detailsPrefix')} ${activity.name}`"
+          :to="{ name: 'activity-details', params: { organizationId, activityId: activity.id } }"
+        >
+          <template #primary>
+            <strong>{{ activity.name }}</strong>
+            <span
+              >{{ activity.ministryCount }}
+              {{ activity.ministryCount === 1 ? t('ministrySingular') : t('ministryPlural') }}</span
+            >
+          </template>
+          <template #meta>
+            <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
+          </template>
+          <template #action>{{ t('details') }} <AppIcon name="arrow" /></template>
+        </AppResourceListItem>
+      </AppResourceList>
       <nav
-        v-if="activities.pagination.totalPages > 1"
+        v-if="activities && activities.pagination.totalPages > 1"
         class="activity-pagination"
         :aria-label="t('pagination')"
       >
@@ -197,7 +207,7 @@ const { t } = useLocalizedMessages(activitiesMessages);
           >{{ t('next') }}</AppButton
         >
       </nav>
-    </section>
+    </AppResourceSection>
   </section>
 </template>
 

@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppButton, AppField, AppIcon, AppStatusBadge } from '@/shared/ui';
+import {
+  AppButton,
+  AppField,
+  AppIcon,
+  AppResourceList,
+  AppResourceListItem,
+  AppResourceSection,
+  AppSearchField,
+  AppStatusBadge,
+} from '@/shared/ui';
 import { useLocalizedMessages } from '@/shared/i18n';
 import { membersMessages } from './members.messages';
 import { useMembersPage } from './use-members-page';
@@ -76,71 +85,69 @@ const { t } = useLocalizedMessages(membersMessages);
       </fieldset>
     </form>
 
-    <form class="member-search" role="search" @submit.prevent="applySearch">
-      <label for="member-search">{{ t('search') }}</label>
-      <div>
-        <input id="member-search" v-model="search" type="search" maxlength="120" />
-        <AppButton type="submit" variant="secondary">{{ t('search') }}</AppButton>
-      </div>
-    </form>
+    <AppResourceSection title-id="member-list-title">
+      <template #title>{{ t('collectionTitle') }}</template>
+      <template v-if="members" #summary>
+        {{ members.pagination.totalItems }}
+        {{ members.pagination.totalItems === 1 ? t('registeredSingular') : t('registeredPlural') }}
+      </template>
+      <template v-if="members && (members.items.length > 0 || appliedSearch)" #controls>
+        <AppSearchField
+          id="member-search"
+          v-model="search"
+          :label="t('search')"
+          :clear-label="t('clearSearch')"
+          :maxlength="120"
+          @search="applySearch"
+          @clear="clearSearch"
+        />
+      </template>
 
-    <p v-if="loading" class="route-status" role="status">{{ t('loading') }}</p>
-    <section v-else-if="problem" class="empty-state" aria-labelledby="members-error-title">
-      <h2 id="members-error-title">{{ problem.problem.title }}</h2>
-      <p>{{ t('retryDescription') }}</p>
-      <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
-    </section>
-    <section
-      v-else-if="members && members.items.length === 0 && appliedSearch"
-      class="empty-state"
-      aria-labelledby="member-search-empty-title"
-    >
-      <h2 id="member-search-empty-title">{{ t('noResult') }}</h2>
-      <p>{{ t('noResultDescription') }}</p>
-      <AppButton variant="secondary" @click="clearSearch">{{ t('clearSearch') }}</AppButton>
-    </section>
-    <section
-      v-else-if="members && members.items.length === 0"
-      class="empty-state"
-      aria-labelledby="members-empty-title"
-    >
-      <h2 id="members-empty-title">{{ t('emptyTitle') }}</h2>
-      <p>{{ t('emptyDescription') }}</p>
-      <AppButton @click="registrationOpen = true">{{ t('firstMember') }}</AppButton>
-    </section>
-    <section v-else-if="members" aria-labelledby="member-list-title">
-      <div class="member-list-heading">
-        <h2 id="member-list-title">
-          {{ members.pagination.totalItems }}
-          {{ members.pagination.totalItems === 1 ? t('activeSingular') : t('activePlural') }}
-        </h2>
-      </div>
-      <ul class="member-list">
-        <li v-for="member in members.items" :key="member.id">
-          <RouterLink
-            class="member-list-link"
-            :aria-label="`${t('profilePrefix')} ${member.name}`"
-            :to="{
-              name: 'member-details',
-              params: { organizationId, memberId: member.id },
-            }"
-          >
-            <div class="member-summary">
-              <strong>{{ member.name }}</strong>
-              <span>{{ t('memberSummary') }}</span>
-            </div>
-            <div class="member-list-meta">
-              <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
-              <span class="member-list-action">
-                {{ t('profile') }}
-                <AppIcon name="arrow" />
-              </span>
-            </div>
-          </RouterLink>
-        </li>
-      </ul>
+      <p v-if="loading" class="collection-status" role="status">{{ t('loading') }}</p>
+      <section v-else-if="problem" class="empty-state" aria-labelledby="members-error-title">
+        <h3 id="members-error-title">{{ problem.problem.title }}</h3>
+        <p>{{ t('retryDescription') }}</p>
+        <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
+      </section>
+      <section
+        v-else-if="members && members.items.length === 0 && appliedSearch"
+        class="empty-state"
+        aria-labelledby="member-search-empty-title"
+      >
+        <h3 id="member-search-empty-title">{{ t('noResult') }}</h3>
+        <p>{{ t('noResultDescription') }}</p>
+      </section>
+      <section
+        v-else-if="members && members.items.length === 0"
+        class="empty-state"
+        aria-labelledby="members-empty-title"
+      >
+        <h3 id="members-empty-title">{{ t('emptyTitle') }}</h3>
+        <p>{{ t('emptyDescription') }}</p>
+        <AppButton @click="registrationOpen = true">{{ t('firstMember') }}</AppButton>
+      </section>
+      <AppResourceList>
+        <AppResourceListItem
+          v-for="member in members?.items ?? []"
+          :key="member.id"
+          :accessible-label="`${t('profilePrefix')} ${member.name}`"
+          :to="{
+            name: 'member-details',
+            params: { organizationId, memberId: member.id },
+          }"
+        >
+          <template #primary>
+            <strong>{{ member.name }}</strong>
+            <span>{{ t('memberSummary') }}</span>
+          </template>
+          <template #meta>
+            <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
+          </template>
+          <template #action>{{ t('profile') }} <AppIcon name="arrow" /></template>
+        </AppResourceListItem>
+      </AppResourceList>
       <nav
-        v-if="members.pagination.totalPages > 1"
+        v-if="members && members.pagination.totalPages > 1"
         class="member-pagination"
         :aria-label="t('pagination')"
       >
@@ -163,7 +170,7 @@ const { t } = useLocalizedMessages(membersMessages);
           {{ t('next') }}
         </AppButton>
       </nav>
-    </section>
+    </AppResourceSection>
   </section>
 </template>
 

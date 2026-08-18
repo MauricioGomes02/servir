@@ -19,7 +19,7 @@ body {
   margin: 0;
   min-width: 20rem;
   min-height: 100dvh;
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 button,
@@ -41,7 +41,7 @@ svg {
 h1 {
   max-width: 24ch;
   margin-block: var(--space-2) var(--space-3);
-  font-size: clamp(2rem, 5vw, 2.25rem);
+  font-size: clamp(1.75rem, 4vw, 2rem);
   line-height: 1.12;
   letter-spacing: -0.035em;
 }
@@ -147,14 +147,14 @@ legend {
 }
 
 .page-heading {
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--page-block-gap);
 }
 
 .page-heading h1,
 .route-state h1 {
   max-width: 24ch;
   margin-block: var(--space-2) var(--space-3);
-  font-size: clamp(2rem, 5vw, 2.25rem);
+  font-size: clamp(1.75rem, 4vw, 2rem);
 }
 
 .page-heading p:last-child,
@@ -168,11 +168,11 @@ legend {
   flex-wrap: wrap;
   align-items: end;
   justify-content: space-between;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .empty-state {
-  padding: var(--space-8);
+  padding: var(--space-6);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -180,14 +180,14 @@ legend {
 
 .empty-state h2 {
   margin-block: var(--space-2);
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
 }
 
 .route-state,
 .route-status {
   width: min(100% - 2rem, var(--content-width));
   margin-inline: auto;
-  padding-block: var(--space-12);
+  padding-block: var(--space-8);
 }
 
 .route-state {
