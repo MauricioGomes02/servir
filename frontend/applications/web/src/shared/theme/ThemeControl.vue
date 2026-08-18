@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AppIcon } from '@/shared/ui';
+import { AppButton, AppIcon } from '@/shared/ui';
 import { supportedLocales, useI18n, type SupportedLocale } from '@/shared/i18n';
 import { useThemeControl } from './use-theme-control';
 
@@ -59,9 +59,9 @@ const {
           <p class="eyebrow">{{ t('settings.preferences') }}</p>
           <h2>{{ t('settings.title') }}</h2>
         </div>
-        <button class="text-button" type="button" @click="closeMenu(true)">
+        <AppButton size="small" variant="tertiary" @click="closeMenu(true)">
           {{ t('settings.close') }}
-        </button>
+        </AppButton>
       </header>
       <p id="theme-shortcut" class="theme-shortcut">
         {{ t('settings.shortcut') }}: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>

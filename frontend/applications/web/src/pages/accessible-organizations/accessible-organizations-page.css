@@ -122,6 +122,13 @@
   width: 1rem;
 }
 
+.organization-option:focus-visible {
+  border-color: var(--color-focus);
+  color: var(--color-action);
+  background: var(--color-surface-muted);
+  box-shadow: var(--shadow-md);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .organization-option:hover {
     border-color: var(--color-action);

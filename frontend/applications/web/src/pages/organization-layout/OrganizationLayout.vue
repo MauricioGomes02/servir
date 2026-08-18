@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppIcon, AppStatusBadge } from '@/shared/ui';
+import { AppButton, AppIcon, AppStatusBadge } from '@/shared/ui';
 import { useLocalizedMessages } from '@/shared/i18n';
 import { organizationLayoutMessages } from './organization-layout.messages';
 import { useOrganizationLayout } from './use-organization-layout';
@@ -19,8 +19,14 @@ const { t } = useLocalizedMessages(organizationLayoutMessages);
   <section v-else-if="problem" class="route-state" aria-labelledby="organization-error-title">
     <p class="eyebrow">{{ t('cannotContinue') }}</p>
     <h1 id="organization-error-title">{{ problem.problem.title }}</h1>
-    <button class="text-button" type="button" @click="load">{{ t('retry') }}</button>
-    <RouterLink :to="{ name: 'accessible-organizations' }">{{ t('back') }}</RouterLink>
+    <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
+    <RouterLink
+      class="app-button app-button-tertiary organization-error-back"
+      :to="{ name: 'accessible-organizations' }"
+    >
+      <AppIcon name="back" />
+      <span>{{ t('back') }}</span>
+    </RouterLink>
   </section>
   <div v-else-if="organization" class="organization-shell">
     <header class="organization-context">

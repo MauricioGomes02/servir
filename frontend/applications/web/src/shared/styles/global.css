@@ -61,7 +61,13 @@ legend {
   letter-spacing: -0.025em;
 }
 
-:focus-visible {
+:where(
+  a[href],
+  button:not(:disabled),
+  input:not(:disabled),
+  select:not(:disabled),
+  textarea:not(:disabled)
+):focus-visible {
   outline: 0.2rem solid var(--color-focus);
   outline-offset: 0.2rem;
 }

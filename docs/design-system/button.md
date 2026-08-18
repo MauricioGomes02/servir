@@ -20,6 +20,8 @@ Clareza, previsibilidade, acessibilidade e feedback têm prioridade sobre decora
 
 A aparência não muda a semântica. Um `RouterLink` pode compartilhar tokens visuais de ação, mas não se torna Button. `div` e `span` clicáveis não substituem `<button>` sem necessidade técnica real.
 
+Links editoriais dentro de texto podem manter a convenção sublinhada. Quando um link representa uma ação da jornada — voltar, abrir detalhes, trocar contexto, cadastrar ou avançar — ele recebe container, área de toque, hierarquia e estados equivalentes aos de uma ação, preservando `<a>` ou `RouterLink` como elemento semântico. Texto sublinhado isolado não é affordance suficiente para essas ações.
+
 ## Anatomia
 
 - **Hit area:** região clicável ou tocável, potencialmente maior que a forma visual.
@@ -75,6 +77,8 @@ A ação fica próxima do conteúdo que modifica ou confirma. Ações críticas 
 | Loading | Confirma recebimento e impede duplicação quando apropriado. |
 
 O ciclo esperado é intenção, ação, feedback e resultado. Operações lentas mostram progresso. Operações não idempotentes impedem duplicação quando necessário. Loading preserva o label visível, evita mudança brusca de largura e expõe `aria-busy`. Success e error são comunicados pelo fluxo consumidor, que também oferece recuperação.
+
+O foco visível indica onde o teclado está, mas não deve adicionar camadas visuais indiscriminadamente. Controles cuja forma, semântica e contexto já comunicam interação recebem um halo consistente. Mudança adicional de container, como borda, fundo, texto ou ícone, fica restrita a superfícies cujo clique seria ambíguo — por exemplo, uma linha ou card navegável. Elementos focados apenas programaticamente para posicionar leitura, como o destino de um skip link, não recebem aparência de controle.
 
 Operações reversíveis devem considerar “Desfazer” em vez de confirmação excessiva. Animação comunica estado, não decoração.
 

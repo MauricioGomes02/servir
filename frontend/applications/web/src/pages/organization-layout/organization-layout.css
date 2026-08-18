@@ -6,6 +6,11 @@
   padding-block: var(--space-5) var(--space-12);
 }
 
+.organization-error-back {
+  width: fit-content;
+  text-decoration: none;
+}
+
 .organization-context {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
