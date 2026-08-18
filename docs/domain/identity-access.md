@@ -80,7 +80,10 @@ Um User pode existir sem acesso organizacional. Solicitação espontânea de ent
 
 ## Autenticação e sessão
 
-- Google será o primeiro provedor OIDC direto e Microsoft o segundo;
+O fluxo técnico completo entre Web, BFF, IdP e API, incluindo credenciais, duração da
+sessão e roteiro para novos provedores, está no guia de [Autenticação](../authentication.md).
+
+- Google é o primeiro provedor OIDC direto implementado; Microsoft permanece como o segundo planejado;
 - OIDC Authorization Code com PKCE, `state` e `nonce`;
 - issuer e audience configurados explicitamente;
 - assinatura, `exp`, `nbf` e claims obrigatórias validadas;

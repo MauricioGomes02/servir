@@ -261,6 +261,7 @@ servir/
 - [Validação e normalização](docs/input-validation-and-normalization.md)
 - [Estratégia evolutiva de busca](docs/search-strategy.md)
 - [Estratégia de autorização](docs/authorization.md)
+- [Autenticação: fluxos, credenciais e novos provedores](docs/authentication.md)
 - [Relay durável de outbox](docs/outbox-relay.md)
 - [Infraestrutura e migrations](infrastructure/README.md)
 - [Roadmap](docs/roadmap.md)

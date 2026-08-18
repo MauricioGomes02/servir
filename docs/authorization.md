@@ -117,6 +117,7 @@ Capabilities futuras devem usar vocabulário estável, como `member:invite`, `mi
 
 ## Relações
 
+- [Autenticação](authentication.md)
 - [Identity & Access](domain/identity-access.md)
 - [Arquitetura](architecture.md)
 - [ADR 066 — Identity & Access](decisions/066-identity-access-and-member-linking.md)
