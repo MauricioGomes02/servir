@@ -1,5 +1,7 @@
-import type { CreateOrganizationOutput } from '@/modules/organizations/application';
-import type { OrganizationNameError } from '@/modules/organizations/domain';
+import type {
+  CreateOrganizationError,
+  CreateOrganizationOutput,
+} from '@/modules/organizations/application';
 import type { ExecutionContext } from '@/shared/application/context';
 import type { Result } from '@/shared/core/result';
 import {
@@ -28,7 +30,7 @@ export class CreateOrganizationPresenter {
   constructor(private readonly translator: MessageTranslator) {}
 
   present(
-    result: Result<CreateOrganizationOutput, OrganizationNameError>,
+    result: Result<CreateOrganizationOutput, CreateOrganizationError>,
     context: ExecutionContext,
     locale: SupportedLocale,
   ): CreateOrganizationView {

@@ -5,6 +5,7 @@ import {
   GetOrganizationDetailsMessage,
 } from '@/modules/organizations/application';
 import { OrganizationId } from '@/modules/organizations/domain';
+import { OrganizationAccessId } from '@/modules/identity/domain';
 import {
   registerCreateOrganizationRoute,
   registerGetOrganizationDetailsRoute,
@@ -26,6 +27,10 @@ export const organizationsModule: ApplicationModule = {
     const handler = new CreateOrganizationHandler({
       clock: dependencies.clock,
       organizationIdGenerator: new UuidV7Generator(OrganizationId.create, options.uuidSource),
+      organizationAccessIdGenerator: new UuidV7Generator(
+        OrganizationAccessId.create,
+        options.uuidSource,
+      ),
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
       unitOfWork: options.persistence.services.get(organizationUnitOfWork),

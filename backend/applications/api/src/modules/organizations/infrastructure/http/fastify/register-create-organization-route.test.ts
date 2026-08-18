@@ -23,6 +23,12 @@ import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { registerCreateOrganizationRoute } from './register-create-organization-route';
+import {
+  createAuthenticatedActor,
+  parseAuthenticatedUserId,
+} from '@/shared/application/authentication';
+import { success } from '@/shared/core/result';
+import { OrganizationAccessId } from '@/modules/identity/domain';
 
 function fixture() {
   const correlationId = parseCorrelationId('correlation-123');
@@ -31,6 +37,8 @@ function fixture() {
   const domainEventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
   const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
   const instant = Instant.create('2026-07-28T12:00:00.000Z');
+  const accessId = OrganizationAccessId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b4');
+  const userId = parseAuthenticatedUserId('0198f334-6dc5-7c20-9af1-91d7e599c7b5');
 
   assert.equal(correlationId.success, true);
   assert.equal(requestId.success, true);
@@ -38,6 +46,8 @@ function fixture() {
   assert.equal(domainEventId.success, true);
   assert.equal(messageId.success, true);
   assert.equal(instant.success, true);
+  assert.equal(accessId.success, true);
+  assert.equal(userId.success, true);
 
   if (
     !correlationId.success ||
@@ -45,7 +55,9 @@ function fixture() {
     !organizationId.success ||
     !domainEventId.success ||
     !messageId.success ||
-    !instant.success
+    !instant.success ||
+    !accessId.success ||
+    !userId.success
   ) {
     throw new Error('Invalid deterministic test fixture');
   }
@@ -69,6 +81,7 @@ function fixture() {
         organizations.push(organization);
       },
     },
+    organizationAccesses: { async add() {} },
     outbox: {
       async add(received: readonly EventEnvelope[]) {
         envelopes.push(...received);
@@ -83,6 +96,7 @@ function fixture() {
   const handler = new CreateOrganizationHandler({
     clock: new FixedClock(instant.value),
     organizationIdGenerator: new SequenceIdGenerator([organizationId.value]),
+    organizationAccessIdGenerator: new SequenceIdGenerator([accessId.value]),
     domainEventIdGenerator: new SequenceIdGenerator([domainEventId.value]),
     messageIdGenerator: new SequenceIdGenerator([messageId.value]),
     unitOfWork,
@@ -92,6 +106,11 @@ function fixture() {
   const mediator = new Mediator();
   mediator.register(CreateOrganizationMessage, handler.handle.bind(handler));
   const app = createFastifyApplication({
+    accessTokenVerifier: {
+      async verify() {
+        return success(createAuthenticatedActor(userId.value));
+      },
+    },
     correlationIdGenerator: new SequenceIdGenerator([correlationId.value]),
     logger,
     messageTranslator: translator,
@@ -114,6 +133,7 @@ describe('registerCreateOrganizationRoute', () => {
     const response = await app.inject({
       method: 'POST',
       url: '/organizations',
+      headers: { authorization: 'Bearer access-token' },
       payload: {
         name: 'Comunidade Servir',
       },
@@ -140,6 +160,7 @@ describe('registerCreateOrganizationRoute', () => {
       url: '/organizations',
       headers: {
         'accept-language': 'en-US',
+        authorization: 'Bearer access-token',
       },
       payload: {},
     });

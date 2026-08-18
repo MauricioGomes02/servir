@@ -2,6 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { CreateOrganizationHandler } from '@/modules/organizations/application';
+import { OrganizationAccessId } from '@/modules/identity/domain';
+import {
+  createAuthenticatedActor,
+  parseAuthenticatedUserId,
+} from '@/shared/application/authentication';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 import { parseMessageId, type MessageId } from '@/shared/application/messaging';
@@ -30,6 +35,9 @@ const ROLLED_BACK_ORGANIZATION_ID = '0198f334-6dc5-7c20-9af1-91d7e599d002';
 const EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599d003';
 const ROLLED_BACK_EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599d004';
 const MESSAGE_ID = '0198f334-6dc5-7c20-9af1-91d7e599d005';
+const USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599d006';
+const ACCESS_ID = '0198f334-6dc5-7c20-9af1-91d7e599d007';
+const ROLLED_BACK_ACCESS_ID = '0198f334-6dc5-7c20-9af1-91d7e599d008';
 
 function requireValue<TValue>(
   result: Readonly<{ success: true; value: TValue } | { success: false }>,
@@ -56,25 +64,35 @@ describe('PostgreSQL organization persistence', () => {
     const eventId = requireValue(parseDomainEventId(EVENT_ID));
     const rolledBackEventId = requireValue(parseDomainEventId(ROLLED_BACK_EVENT_ID));
     const messageId = requireValue(parseMessageId(MESSAGE_ID));
+    const userId = requireValue(parseAuthenticatedUserId(USER_ID));
+    const accessId = requireValue(OrganizationAccessId.create(ACCESS_ID));
+    const rolledBackAccessId = requireValue(OrganizationAccessId.create(ROLLED_BACK_ACCESS_ID));
 
     async function cleanup(): Promise<void> {
+      await inspectionPool.query('DELETE FROM organization_accesses WHERE user_id = $1', [USER_ID]);
       await inspectionPool.query('DELETE FROM outbox_messages WHERE message_id = $1', [MESSAGE_ID]);
       await inspectionPool.query('DELETE FROM organizations WHERE id = ANY($1::uuid[])', [
         [ORGANIZATION_ID, ROLLED_BACK_ORGANIZATION_ID],
       ]);
+      await inspectionPool.query('DELETE FROM users WHERE id = $1', [USER_ID]);
     }
 
     await cleanup();
+    await inspectionPool.query('INSERT INTO users (id, status) VALUES ($1, 1)', [USER_ID]);
     testContext.after(async () => {
       await cleanup();
       await persistence.close();
       await inspectionPool.end();
     });
 
-    const context = createExecutionContext({ correlationId });
+    const context = createExecutionContext({
+      actor: createAuthenticatedActor(userId),
+      correlationId,
+    });
     const committedHandler = new CreateOrganizationHandler({
       clock: new FixedClock(occurredAt),
       organizationIdGenerator: new SequenceIdGenerator([organizationId]),
+      organizationAccessIdGenerator: new SequenceIdGenerator([accessId]),
       domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([eventId]),
       messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
       unitOfWork: persistence.services.get(organizationUnitOfWork),
@@ -85,6 +103,9 @@ describe('PostgreSQL organization persistence', () => {
 
     const committed = await inspectionPool.query(
       `SELECT o.name,
+              a.user_id,
+              a.role,
+              a.status,
               m.event_name,
               m.publication_channel,
               m.event_source,
@@ -97,12 +118,17 @@ describe('PostgreSQL organization persistence', () => {
        FROM organizations o
        JOIN outbox_messages m
          ON m.payload->>'organizationId' = o.id::text
+       JOIN organization_accesses a
+         ON a.organization_id = o.id
        WHERE o.id = $1`,
       [ORGANIZATION_ID],
     );
 
     assert.equal(committed.rowCount, 1);
     assert.equal(committed.rows[0]?.name, 'Committed organization');
+    assert.equal(committed.rows[0]?.user_id, USER_ID);
+    assert.equal(committed.rows[0]?.role, 'owner');
+    assert.equal(committed.rows[0]?.status, 'active');
     assert.equal(committed.rows[0]?.event_name, 'organization.created');
     assert.equal(committed.rows[0]?.publication_channel, 'servir.organizations.events');
     assert.equal(committed.rows[0]?.event_source, 'urn:servir:organizations');
@@ -129,6 +155,7 @@ describe('PostgreSQL organization persistence', () => {
     const failingHandler = new CreateOrganizationHandler({
       clock: new FixedClock(occurredAt),
       organizationIdGenerator: new SequenceIdGenerator([rolledBackOrganizationId]),
+      organizationAccessIdGenerator: new SequenceIdGenerator([rolledBackAccessId]),
       domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([rolledBackEventId]),
       messageIdGenerator: new SequenceIdGenerator<MessageId>([messageId]),
       unitOfWork: persistence.services.get(organizationUnitOfWork),

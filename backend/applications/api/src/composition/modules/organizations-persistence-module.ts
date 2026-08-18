@@ -8,6 +8,7 @@ import {
   PostgresOrganizationRepository,
   PostgresOrganizationDetailsReader,
 } from '@/modules/organizations/infrastructure';
+import { PostgresOrganizationAccessRepository } from '@/modules/identity/infrastructure';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import { defineService } from '../services';
 import type { PostgresPersistenceBuilder } from '../persistence';
@@ -25,6 +26,7 @@ export function registerOrganizationsPersistence(builder: PostgresPersistenceBui
   );
   builder.addWriteScope(organizationUnitOfWork, (client) => ({
     organizations: new PostgresOrganizationRepository(client),
+    organizationAccesses: new PostgresOrganizationAccessRepository(client),
   }));
   builder.addValue(
     organizationDetailsReader,

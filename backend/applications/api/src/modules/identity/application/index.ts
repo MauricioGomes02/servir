@@ -9,3 +9,4 @@ export type {
   ProvisionUserOutput,
 } from './provision-user-from-external-identity';
 export type { UserProvisioner, UserProvisioningResult } from './user-provisioner';
+export type { OrganizationAccessRepository } from './organization-access-repository';

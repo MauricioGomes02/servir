@@ -12,6 +12,7 @@ import { createEventEnvelope, type MessageId } from '@/shared/application/messag
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import { success, type Result } from '@/shared/core/result';
 import type { DomainEventId } from '@/shared/domain/domain-event';
+import { OrganizationAccess, type OrganizationAccessId, UserId } from '@/modules/identity/domain';
 
 import { Organization, type OrganizationId, type OrganizationNameError } from '../../../domain';
 import type { OrganizationWriteScope } from '../../ports';
@@ -22,9 +23,15 @@ export interface CreateOrganizationOutput {
   readonly name: string;
 }
 
+export interface CreateOrganizationAuthenticationError {
+  readonly code: 'organization.creation.authenticated_actor_required';
+}
+export type CreateOrganizationError = OrganizationNameError | CreateOrganizationAuthenticationError;
+
 export interface CreateOrganizationDependencies {
   readonly clock: Clock;
   readonly organizationIdGenerator: IdGenerator<OrganizationId>;
+  readonly organizationAccessIdGenerator: IdGenerator<OrganizationAccessId>;
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
   readonly unitOfWork: UnitOfWork<OrganizationWriteScope>;
@@ -37,8 +44,16 @@ export class CreateOrganizationHandler {
   async handle(
     command: CreateOrganizationCommand,
     context: ExecutionContext,
-  ): Promise<Result<CreateOrganizationOutput, OrganizationNameError>> {
+  ): Promise<Result<CreateOrganizationOutput, CreateOrganizationError>> {
     this.log(LogLevels.Debug, 'organization.creation.started', context, {});
+
+    const userId = UserId.create(context.actor?.userId);
+    if (!userId.success) {
+      return {
+        success: false,
+        error: { code: 'organization.creation.authenticated_actor_required' },
+      };
+    }
 
     const organization = Organization.create({
       id: this.dependencies.organizationIdGenerator.generate(),
@@ -56,6 +71,11 @@ export class CreateOrganizationHandler {
     }
 
     const pendingEvents = organization.value.pendingDomainEvents;
+    const ownerAccess = OrganizationAccess.grantOwner({
+      id: this.dependencies.organizationAccessIdGenerator.generate(),
+      organizationId: organization.value.id,
+      userId: userId.value,
+    });
     this.log(LogLevels.Debug, 'organization.creation.validated', context, {
       'organization.id': organization.value.id.value,
       'domain_event.count': pendingEvents.length,
@@ -70,6 +90,7 @@ export class CreateOrganizationHandler {
 
     await this.dependencies.unitOfWork.execute(async (scope) => {
       await scope.organizations.save(organization.value);
+      await scope.organizationAccesses.add(ownerAccess);
       await scope.outbox.add(envelopes);
     });
 

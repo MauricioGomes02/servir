@@ -14,6 +14,11 @@ import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
+import {
+  createAuthenticatedActor,
+  parseAuthenticatedUserId,
+} from '@/shared/application/authentication';
+import { OrganizationAccessId, type OrganizationAccess } from '@/modules/identity/domain';
 
 import { OrganizationId, OrganizationNameErrorCodes, type Organization } from '../../../domain';
 import type { OrganizationWriteScope } from '../../ports';
@@ -21,6 +26,8 @@ import { CreateOrganizationHandler } from '.';
 
 function fixtureIds() {
   const organizationId = OrganizationId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b1');
+  const organizationAccessId = OrganizationAccessId.create('0198f334-6dc5-7c20-9af1-91d7e599c7b4');
+  const userId = parseAuthenticatedUserId('0198f334-6dc5-7c20-9af1-91d7e599c7b5');
   const eventId = parseDomainEventId('0198f334-6dc5-7c20-9af1-91d7e599c7b2');
   const messageId = parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599c7b3');
   const correlationId = parseCorrelationId('correlation-123');
@@ -31,19 +38,25 @@ function fixtureIds() {
   assert.equal(messageId.success, true);
   assert.equal(correlationId.success, true);
   assert.equal(occurredAt.success, true);
+  assert.equal(organizationAccessId.success, true);
+  assert.equal(userId.success, true);
 
   if (
     !organizationId.success ||
     !eventId.success ||
     !messageId.success ||
     !correlationId.success ||
-    !occurredAt.success
+    !occurredAt.success ||
+    !organizationAccessId.success ||
+    !userId.success
   ) {
     throw new Error('Invalid deterministic test fixture');
   }
 
   return {
     organizationId: organizationId.value,
+    organizationAccessId: organizationAccessId.value,
+    userId: userId.value,
     eventId: eventId.value,
     messageId: messageId.value,
     correlationId: correlationId.value,
@@ -54,6 +67,7 @@ function fixtureIds() {
 function createFixture(outbox?: EventOutbox) {
   const ids = fixtureIds();
   const storedOrganizations: Organization[] = [];
+  const storedAccesses: OrganizationAccess[] = [];
   const organizations = {
     async save(organization: Organization) {
       storedOrganizations.push(organization);
@@ -67,6 +81,11 @@ function createFixture(outbox?: EventOutbox) {
   };
   const scope: OrganizationWriteScope = {
     organizations,
+    organizationAccesses: {
+      async add(access) {
+        storedAccesses.push(access);
+      },
+    },
     outbox: recordingOutbox,
   };
   const unitOfWork: UnitOfWork<OrganizationWriteScope> = {
@@ -78,12 +97,14 @@ function createFixture(outbox?: EventOutbox) {
   const handler = new CreateOrganizationHandler({
     clock: new FixedClock(ids.occurredAt),
     organizationIdGenerator: new SequenceIdGenerator([ids.organizationId]),
+    organizationAccessIdGenerator: new SequenceIdGenerator([ids.organizationAccessId]),
     domainEventIdGenerator: new SequenceIdGenerator<DomainEventId>([ids.eventId]),
     messageIdGenerator: new SequenceIdGenerator<MessageId>([ids.messageId]),
     unitOfWork,
     logger,
   });
   const context = createExecutionContext({
+    actor: createAuthenticatedActor(ids.userId),
     correlationId: ids.correlationId,
   });
 
@@ -94,12 +115,29 @@ function createFixture(outbox?: EventOutbox) {
     organizations,
     outbox: recordingOutbox,
     storedOrganizations,
+    storedAccesses,
     storedEnvelopes,
     logger,
   };
 }
 
 describe('CreateOrganizationHandler', () => {
+  it('requires an authenticated creator before persisting', async () => {
+    const fixture = createFixture();
+    const result = await fixture.handler.handle(
+      { name: 'Comunidade Servir' },
+      createExecutionContext({ correlationId: fixture.ids.correlationId }),
+    );
+
+    assert.deepEqual(result, {
+      success: false,
+      error: { code: 'organization.creation.authenticated_actor_required' },
+    });
+    assert.deepEqual(fixture.storedOrganizations, []);
+    assert.deepEqual(fixture.storedAccesses, []);
+    assert.deepEqual(fixture.storedEnvelopes, []);
+  });
+
   it('persists the organization and envelope in the same scope', async () => {
     const fixture = createFixture();
 
@@ -119,6 +157,9 @@ describe('CreateOrganizationHandler', () => {
     assert.equal(result.value.organizationId, fixture.ids.organizationId);
     assert.equal(result.value.name, 'Comunidade Servir');
     assert.equal(fixture.storedOrganizations.length, 1);
+    assert.equal(fixture.storedAccesses.length, 1);
+    assert.equal(fixture.storedAccesses[0]?.role, 'owner');
+    assert.equal(fixture.storedAccesses[0]?.userId.toString(), fixture.ids.userId);
     assert.deepEqual(fixture.storedOrganizations[0]?.pendingDomainEvents, []);
     assert.equal(fixture.storedEnvelopes.length, 1);
     assert.equal(fixture.storedEnvelopes[0]?.correlationId, fixture.ids.correlationId);

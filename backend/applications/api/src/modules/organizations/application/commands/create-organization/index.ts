@@ -8,6 +8,10 @@ export const CreateOrganizationMessage = defineMessage<
 >('organizations.create-organization', 'CreateOrganization');
 
 export { CreateOrganizationHandler } from './create-organization-handler';
+export type {
+  CreateOrganizationAuthenticationError,
+  CreateOrganizationError,
+} from './create-organization-handler';
 
 export type { CreateOrganizationCommand } from './create-organization-command';
 

@@ -7,6 +7,7 @@ import {
 } from '@/shared/infrastructure/http/problem-details';
 import {
   requireHttpExecutionContext,
+  requireAuthenticatedActor,
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
 import type { MessageTranslator } from '@/shared/presentation';
@@ -32,6 +33,7 @@ export function registerCreateOrganizationRoute(
 ): void {
   app.post('/organizations', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
+    requireAuthenticatedActor(context);
 
     const result = await dependencies.mediator.send(
       CreateOrganizationMessage,

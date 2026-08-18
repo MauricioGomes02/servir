@@ -70,5 +70,6 @@
 | [066](066-identity-access-and-member-linking.md)                        | Identity & Access e vínculo seguro com Member                | Aceita |
 | [067](067-direct-oidc-and-servir-issued-credentials.md)                 | OIDC direto e credenciais emitidas pelo Servir               | Aceita |
 | [068](068-causal-execution-context-and-audit-boundary.md)               | Contexto causal de execução e fronteira de auditoria         | Aceita |
+| [069](069-organization-creator-access-bootstrap.md)                     | Bootstrap do acesso do criador da Organization               | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

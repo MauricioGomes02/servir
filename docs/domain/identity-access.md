@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo inicial aprovado. `AuthenticatedActor` por `UserId`, `ExternalIdentityAssertion` de bootstrap, `User` global, provisionamento idempotente e credenciais próprias RS256 com rotação por `kid` estão implementados; adapters OIDC, sessão, autorização organizacional e interfaces ainda estão planejados.
+Modelo inicial em implementação. Login Google, sessão segura, `User` global, provisionamento idempotente, credenciais próprias e criação atômica do primeiro `OrganizationAccess` como `owner` estão implementados; autorização de todas as operações tenant-scoped, convites, vínculo com Member e interfaces ainda estão planejados.
 
 ## Motivação
 
@@ -74,6 +74,10 @@ O caso de uso recebe a identidade exclusivamente pelo `ExecutionContext`; `issue
 
 Um User pode existir sem acesso organizacional. Solicitação espontânea de entrada e aprovação administrativa permanecem posteriores; o usuário não recebe uma busca de Members para escolher quem representar.
 
+### Bootstrap da Organization
+
+`CreateOrganization` exige ator autenticado e cria no mesmo commit a Organization, o `OrganizationAccess` ativo do criador como `owner` e a outbox. O acesso não recebe `MemberId`, pois criar a Organization não comprova identidade ministerial. A decisão está registrada no [ADR 069](../decisions/069-organization-creator-access-bootstrap.md).
+
 ## Autenticação e sessão
 
 - Google será o primeiro provedor OIDC direto e Microsoft o segundo;
@@ -106,8 +110,8 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 2. ~~Implementar `User` e provisionamento idempotente por identidade externa.~~
 3. ~~Separar a afirmação externa de bootstrap do ator operacional identificado por UserId.~~
 4. ~~Implementar assinatura, rotação e validação das credenciais próprias do Servir.~~
-5. Implementar login Google, callback, sessão, CSRF e logout no BFF.
-6. Validar o access token na API e proteger a primeira rota.
+5. ~~Implementar login Google, callback, sessão, CSRF e logout no BFF.~~
+6. ~~Validar o access token na API e proteger a primeira rota.~~
 7. Implementar Microsoft e vinculação explícita de identidades.
 8. Implementar `MemberAccessInvitation` e criação de convite.
 9. Implementar aceitação atômica e `OrganizationAccess` vinculado.
