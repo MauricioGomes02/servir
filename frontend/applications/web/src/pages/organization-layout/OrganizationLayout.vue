@@ -20,7 +20,7 @@ const { t } = useLocalizedMessages(organizationLayoutMessages);
     <p class="eyebrow">{{ t('cannotContinue') }}</p>
     <h1 id="organization-error-title">{{ problem.problem.title }}</h1>
     <button class="text-button" type="button" @click="load">{{ t('retry') }}</button>
-    <RouterLink :to="{ name: 'create-organization' }">{{ t('back') }}</RouterLink>
+    <RouterLink :to="{ name: 'accessible-organizations' }">{{ t('back') }}</RouterLink>
   </section>
   <div v-else-if="organization" class="organization-shell">
     <header class="organization-context">
@@ -28,6 +28,10 @@ const { t } = useLocalizedMessages(organizationLayoutMessages);
       <div>
         <small>{{ t('organization') }}</small>
         <strong>{{ organization.name }}</strong>
+        <RouterLink class="organization-switch" :to="{ name: 'accessible-organizations' }">
+          <AppIcon name="community" />
+          <span>{{ t('switchOrganization') }}</span>
+        </RouterLink>
       </div>
       <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
     </header>

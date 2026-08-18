@@ -62,6 +62,7 @@ const { t } = useLocalizedMessages(accessibleOrganizationsMessages);
       :to="{ name: 'create-organization' }"
     >
       {{ t('another') }}
+      <AppIcon name="arrow" />
     </RouterLink>
   </section>
 </template>

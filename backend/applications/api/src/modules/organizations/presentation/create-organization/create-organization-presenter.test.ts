@@ -69,7 +69,7 @@ describe('CreateOrganizationPresenter', () => {
       kind: 'failure',
       error: {
         code: 'organization.name.empty',
-        message: 'Informe o nome da organizacao.',
+        message: 'Informe o nome da igreja.',
         field: 'name',
         parameters: undefined,
         correlationId: executionContext.correlationId,
@@ -96,7 +96,7 @@ describe('CreateOrganizationPresenter', () => {
       kind: 'failure',
       error: {
         code: 'organization.name.too_long',
-        message: 'The organization name must have at most 120 characters.',
+        message: 'The church name must have at most 120 characters.',
         field: 'name',
         parameters: {
           maxLength: 120,

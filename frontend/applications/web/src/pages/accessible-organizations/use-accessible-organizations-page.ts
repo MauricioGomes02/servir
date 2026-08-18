@@ -1,5 +1,4 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { listAccessibleOrganizations, type Organization } from '@/entities/organization';
 import { HttpProblem } from '@/shared/api';
 import { useLocalizedMessages } from '@/shared/i18n';
@@ -7,7 +6,6 @@ import { accessibleOrganizationsMessages } from './accessible-organizations.mess
 
 export function useAccessibleOrganizationsPage() {
   const { t } = useLocalizedMessages(accessibleOrganizationsMessages);
-  const router = useRouter();
   const organizations = ref<readonly Organization[]>([]);
   const loading = ref(true);
   const problem = ref<HttpProblem>();
@@ -19,12 +17,6 @@ export function useAccessibleOrganizationsPage() {
     try {
       const result = await listAccessibleOrganizations(abortController.signal);
       organizations.value = result.items;
-      if (result.items.length === 1) {
-        await router.replace({
-          name: 'organization-home',
-          params: { organizationId: result.items[0]!.id },
-        });
-      }
     } catch (error) {
       if (!abortController.signal.aborted) {
         problem.value =

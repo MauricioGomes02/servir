@@ -1,7 +1,7 @@
 export const messages = {
   'pt-BR': {
     'app.skip_to_content': 'Ir para o conteúdo principal',
-    'app.organization_home': 'Ir para o início da organização',
+    'app.home': 'Ir para minhas igrejas',
     'app.tagline': 'Comunidades que cuidam',
     'settings.open': 'Abrir configurações',
     'settings.title': 'Configurações',
@@ -28,7 +28,7 @@ export const messages = {
   },
   'en-US': {
     'app.skip_to_content': 'Skip to main content',
-    'app.organization_home': 'Go to the organization home',
+    'app.home': 'Go to my churches',
     'app.tagline': 'Communities that care',
     'settings.open': 'Open settings',
     'settings.title': 'Settings',

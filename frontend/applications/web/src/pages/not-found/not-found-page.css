@@ -1,0 +1,25 @@
+.not-found-page {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+  width: min(100% - 2rem, 42rem);
+  margin-inline: auto;
+  padding-block: clamp(3rem, 10vw, 8rem);
+}
+
+.not-found-page > p:not(.eyebrow) {
+  max-width: 58ch;
+  color: var(--color-text-subtle);
+}
+
+.not-found-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--button-height-medium);
+  padding-inline: var(--button-padding-inline);
+  border-radius: var(--button-radius);
+  color: var(--color-on-action);
+  background: var(--color-action);
+  font-weight: 800;
+  text-decoration: none;
+}

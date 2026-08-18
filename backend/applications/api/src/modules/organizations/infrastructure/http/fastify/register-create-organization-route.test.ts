@@ -178,7 +178,7 @@ describe('registerCreateOrganizationRoute', () => {
       errors: [
         {
           code: 'organization.name.invalid_type',
-          detail: 'The organization name must be text.',
+          detail: 'The church name must be text.',
           pointer: '#/name',
         },
       ],

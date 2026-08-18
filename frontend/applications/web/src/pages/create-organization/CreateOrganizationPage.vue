@@ -10,6 +10,10 @@ const { t } = useLocalizedMessages(createOrganizationPageMessages);
 
 <template>
   <section class="hero" aria-labelledby="page-title">
+    <RouterLink class="create-organization-back" :to="{ name: 'accessible-organizations' }">
+      <AppIcon name="back" />
+      <span>{{ t('back') }}</span>
+    </RouterLink>
     <div class="hero-copy">
       <span class="hero-symbol" aria-hidden="true"><AppIcon name="community" /></span>
       <p class="eyebrow">{{ t('eyebrow') }}</p>

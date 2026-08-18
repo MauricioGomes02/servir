@@ -38,6 +38,24 @@
   cursor: default;
 }
 
+.public-layout {
+  display: grid;
+  align-content: center;
+  min-height: 100dvh;
+  padding-block: var(--space-8);
+}
+
+.public-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: var(--space-3);
+}
+
+.public-brand strong {
+  font-size: 1.25rem;
+}
+
 .brand > span:last-child {
   display: grid;
   line-height: 1.1;

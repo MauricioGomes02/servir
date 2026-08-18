@@ -49,6 +49,8 @@ Uma capacidade existente no backend não justifica, isoladamente, uma página, i
 
 A separação técnica entre componentes, serviços e gateways permanece. Esses limites evitam acoplamento com transporte, mas não devem copiar nomes ou camadas do backend por simetria. Componentes Vue não dependem de `fetch`, rotas do BFF, DTOs da API privada ou conceitos técnicos que não sejam úteis ao usuário.
 
+`Organization` é o nome técnico e ubíquo preservado no domínio, nos contratos e no código. Na experiência apresentada ao usuário, esse conceito é sempre chamado de **igreja** (`church` em inglês). Textos visíveis, mensagens de recuperação e ações não alternam entre os dois vocabulários.
+
 ## Arquitetura de informação
 
 A navegação principal representa o trabalho:

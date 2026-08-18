@@ -246,6 +246,10 @@ Busca, filtros, paginação, ordenação e tabs compartilháveis pertencem à UR
 
 Rotas de lista e detalhe que pertencem à mesma área declaram o mesmo `meta.navigationArea`. O shell usa esse contexto semântico para manter o destino correspondente marcado durante toda a jornada; não infere a área por prefixos de URL, textos visíveis ou pela relação técnica entre componentes.
 
+Layouts de rota separam ciclos de experiência: `PublicLayout` recebe autenticação e outras superfícies públicas sem reutilizar o cabeçalho da aplicação; `AuthenticatedLayout` concentra conta, preferências e acesso às Organizations; `OrganizationLayout` adiciona somente o contexto e a navegação do tenant selecionado. `App.vue` permanece apenas como raiz do router. Toda navegação desconhecida possui uma página de recuperação explícita, e elementos transitórios do shell, como dialogs, são encerrados quando a rota muda.
+
+A seleção de Organization nunca redireciona implicitamente por existir apenas uma opção. A pessoa mantém acesso visível à lista e à criação de outra igreja; otimizar um clique não pode esconder mudança de contexto ou uma capacidade autorizada.
+
 ## Fluxos
 
 ```mermaid

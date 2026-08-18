@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/vue';
+import { render } from '@testing-library/vue';
 import { axe } from 'vitest-axe';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -78,7 +78,7 @@ describe('AccessibleOrganizationsPage', () => {
     );
   });
 
-  it('enters directly when only one church is accessible', async () => {
+  it('keeps creation and organization choice available when only one church is accessible', async () => {
     requests.get.mockResolvedValue({
       items: [{ id: 'only-id', name: 'Comunidade Servir' }],
     });
@@ -86,8 +86,13 @@ describe('AccessibleOrganizationsPage', () => {
     await router.push('/');
     await router.isReady();
 
-    render(AccessibleOrganizationsPage, { global: { plugins: [router] } });
+    const view = render(AccessibleOrganizationsPage, { global: { plugins: [router] } });
 
-    await waitFor(() => expect(router.currentRoute.value.fullPath).toBe('/organizations/only-id'));
+    expect(await view.findByRole('link', { name: /Comunidade Servir/ })).toBeVisible();
+    expect(view.getByRole('link', { name: 'Cadastrar outra igreja' })).toHaveAttribute(
+      'href',
+      '/organizations/new',
+    );
+    expect(router.currentRoute.value.name).toBe('accessible-organizations');
   });
 });

@@ -23,6 +23,11 @@ describe('OrganizationLayout', () => {
       history: createMemoryHistory(),
       routes: [
         {
+          path: '/',
+          name: 'accessible-organizations',
+          component: { template: '<p>Organizations</p>' },
+        },
+        {
           path: '/organizations/:organizationId',
           component: OrganizationLayout,
           props: true,
@@ -84,7 +89,8 @@ describe('OrganizationLayout', () => {
     expect(
       await findByText('Comunidade Evangélica Servir e Transformar do Bairro Primavera'),
     ).toBeVisible();
-    const navigation = getByRole('navigation', { name: 'Navegação da organização' });
+    expect(getByRole('link', { name: 'Trocar de igreja' })).toHaveAttribute('href', '/');
+    const navigation = getByRole('navigation', { name: 'Navegação da igreja' });
     expect(getByRole('link', { name: 'Início' })).toHaveClass('is-active');
     expect(getByRole('link', { name: 'Ministérios' })).not.toHaveClass('is-active');
     expect(getByRole('link', { name: 'Membros' })).not.toHaveClass('is-active');
