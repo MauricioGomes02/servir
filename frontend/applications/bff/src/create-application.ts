@@ -27,6 +27,11 @@ export async function createApplication(
 
   if (options.googleAuthentication !== undefined) {
     await registerGoogleAuthenticationRoutes(app, options.googleAuthentication);
+  } else {
+    app.get('/bff/auth/session', () => ({
+      authenticationEnabled: false,
+      authenticated: false,
+    }));
   }
 
   const accessTokenFor = registerSessionGuard(app, options.googleAuthentication);

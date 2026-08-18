@@ -15,6 +15,19 @@ const config = {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('frontend BFF', () => {
+  it('exposes a stable anonymous session when authentication is disabled', async () => {
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({ method: 'GET', url: '/bff/auth/session' });
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      authenticationEnabled: false,
+      authenticated: false,
+    });
+  });
+
   it('starts Google login with an encrypted host cookie and a safe return path', async () => {
     let receivedTransaction: OidcLoginTransaction | undefined;
     const oidcProvider: OidcProvider = {
@@ -133,7 +146,11 @@ describe('frontend BFF', () => {
     await app.close();
 
     expect(session.statusCode).toBe(200);
-    expect(session.json()).toEqual({ authenticated: true, userId: 'user-id' });
+    expect(session.json()).toEqual({
+      authenticationEnabled: true,
+      authenticated: true,
+      userId: 'user-id',
+    });
     expect(rejectedLogout.statusCode).toBe(403);
     expect(logout.statusCode).toBe(204);
     expect(organization.statusCode).toBe(200);

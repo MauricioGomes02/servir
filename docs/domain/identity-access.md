@@ -96,6 +96,8 @@ O primeiro corte executável integra Google ao BFF por Authorization Code, `stat
 
 O BFF também expõe consulta de sessão e logout local. A sessão vincula um token CSRF aleatório; mutações autenticadas validam o valor enviado no header contra o cookie legível pelo cliente e contra a claim assinada, além de exigir origem confiável. O logout remove os cookies de sessão e CSRF, sem prometer revogação imediata de uma cópia previamente roubada da sessão stateless.
 
+A aplicação web consulta apenas o estado opaco da sessão, protege rotas por um guard global e inicia o login Google por navegação na mesma origem. O retorno preserva somente paths locais. O cliente HTTP envia cookies com `credentials: same-origin`, propaga o locale selecionado e acrescenta o token CSRF às mutações; credenciais internas nunca são expostas ao JavaScript. Sem configuração OIDC, o BFF mantém o endpoint de sessão estável com autenticação explicitamente desabilitada para não bloquear o ambiente local.
+
 Quando autenticação está configurada, o BFF exige uma sessão válida nas rotas de negócio, aplica CSRF às mutações, emite um access token curto para o `UserId` e o envia somente à API privada. O navegador continua sem acesso ao JWT. A API valida assinatura, issuer, audience, expiração e propósito antes de materializar o `AuthenticatedActor` no contexto.
 
 Esse mecanismo autentica o ator, mas não concede acesso automaticamente a uma organização. Nas rotas autenticadas com `organizationId`, a API exige um `OrganizationAccess` ativo para o `UserId` e o tenant solicitados. Presença de sessão ou de `organizationId` na URL nunca é interpretada como permissão.
@@ -114,12 +116,13 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 6. ~~Validar o access token na API e proteger a primeira rota.~~
 7. ~~Verificar `OrganizationAccess` ativo nas rotas HTTP tenant-scoped.~~
 8. ~~Adicionar descoberta e seleção segura de Organizations acessíveis.~~
-9. Implementar Microsoft e vinculação explícita de identidades.
-10. Implementar `MemberAccessInvitation` e criação de convite.
-11. Implementar aceitação atômica e `OrganizationAccess` vinculado.
-12. Expor “Minha conta” e “Meu perfil”.
-13. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
-14. Avaliar solicitação espontânea, revogação, recuperação e RLS.
+9. ~~Integrar sessão, login Google e logout à navegação da aplicação web.~~
+10. Implementar Microsoft e vinculação explícita de identidades.
+11. Implementar `MemberAccessInvitation` e criação de convite.
+12. Implementar aceitação atômica e `OrganizationAccess` vinculado.
+13. Expor “Minha conta” e “Meu perfil”.
+14. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
+15. Avaliar solicitação espontânea, revogação, recuperação e RLS.
 
 ## Boas práticas
 

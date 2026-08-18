@@ -1,6 +1,11 @@
 import { fireEvent, render } from '@testing-library/vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ThemeControl from './ThemeControl.vue';
+import { createI18n } from '@/shared/i18n';
+
+function renderThemeControl() {
+  return render(ThemeControl, { global: { plugins: [createI18n('pt-BR')] } });
+}
 
 beforeEach(() => {
   localStorage.clear();
@@ -12,7 +17,7 @@ beforeEach(() => {
 
 describe('ThemeControl', () => {
   it('keeps appearance settings behind a compact configuration button', async () => {
-    const view = render(ThemeControl);
+    const view = renderThemeControl();
     expect(view.queryByRole('dialog', { name: 'Configurações' })).not.toBeInTheDocument();
 
     await fireEvent.click(view.getByRole('button', { name: 'Abrir configurações' }));
@@ -31,7 +36,7 @@ describe('ThemeControl', () => {
   });
 
   it('opens through the shortcut and supports arrow navigation', async () => {
-    const view = render(ThemeControl);
+    const view = renderThemeControl();
     const trigger = view.getByRole('button', { name: 'Abrir configurações' });
 
     await fireEvent.keyDown(document, { key: 'T', altKey: true, shiftKey: true });
@@ -50,7 +55,7 @@ describe('ThemeControl', () => {
   });
 
   it('persists an explicit dark theme and closes with Escape', async () => {
-    const view = render(ThemeControl);
+    const view = renderThemeControl();
     const trigger = view.getByRole('button', { name: 'Abrir configurações' });
     await fireEvent.click(trigger);
     await fireEvent.click(view.getByRole('radio', { name: 'Tema escuro' }));

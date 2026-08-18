@@ -1,4 +1,5 @@
 import { HttpProblem, type ProblemDetails } from './problem-details';
+import { currentLocale } from '@/shared/i18n';
 
 export interface HttpClient {
   get<TResponse>(path: string, signal?: AbortSignal): Promise<TResponse>;
@@ -6,6 +7,16 @@ export interface HttpClient {
 }
 
 export function createFetchHttpClient(): HttpClient {
+  function csrfToken(): string | undefined {
+    const cookie = document.cookie
+      .split(';')
+      .map((value) => value.trim())
+      .find((value) => value.startsWith('__Host-servir-csrf='));
+    return cookie === undefined
+      ? undefined
+      : decodeURIComponent(cookie.slice(cookie.indexOf('=') + 1));
+  }
+
   async function request<TResponse>(
     path: string,
     init: RequestInit,
@@ -13,7 +24,15 @@ export function createFetchHttpClient(): HttpClient {
   ): Promise<TResponse> {
     const response = await fetch(path, {
       ...init,
-      headers: { Accept: 'application/json', 'Accept-Language': 'pt-BR', ...init.headers },
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Accept-Language': currentLocale(),
+        ...(init.method === 'GET' || init.method === 'HEAD' || csrfToken() === undefined
+          ? {}
+          : { 'x-csrf-token': csrfToken() }),
+        ...init.headers,
+      },
       signal,
     });
     if (!response.ok) throw new HttpProblem((await response.json()) as ProblemDetails);

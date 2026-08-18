@@ -100,12 +100,17 @@ export async function registerGoogleAuthenticationRoutes(
 
   app.get('/bff/auth/session', async (request, reply) => {
     const session = request.cookies[SESSION_COOKIE];
-    if (session === undefined) return reply.status(401).send({ authenticated: false });
+    if (session === undefined)
+      return reply.send({ authenticationEnabled: true, authenticated: false });
     try {
       const verified = await verifyRequestSession(request, dependencies.credentialIssuer);
-      return reply.send({ authenticated: true, userId: verified.userId });
+      return reply.send({
+        authenticationEnabled: true,
+        authenticated: true,
+        userId: verified.userId,
+      });
     } catch {
-      return reply.status(401).send({ authenticated: false });
+      return reply.send({ authenticationEnabled: true, authenticated: false });
     }
   });
 

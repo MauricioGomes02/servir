@@ -181,6 +181,8 @@ Contém somente código transversal sem conhecimento de Organization, Ministry, 
 ```text
 shared/
 ├── api/
+├── auth/
+├── i18n/
 ├── ui/
 ├── theme/
 ├── styles/
@@ -197,6 +199,20 @@ Centraliza requisições relativas ao BFF, headers, serialização, cancelamento
 ### `shared/ui`
 
 Contém contratos visuais sem domínio, como Button, Field e Dialog. `MinistryStatusBadge` pertence à entity ou experiência que conhece Ministry. Componentes compartilhados preservam HTML nativo, teclado, foco, nomes acessíveis e tokens do design system.
+
+### Localidade e internacionalização
+
+`shared/i18n` é o mecanismo transversal para resolver locale, persistir a preferência explícita e manter o atributo `lang` do documento. `pt-BR` é o fallback do produto e `en-US` é a primeira alternativa suportada. O cliente HTTP envia o locale corrente em `Accept-Language`; não usa o idioma do navegador diretamente em cada request.
+
+Catálogos compartilhados contêm apenas textos globais, como shell, autenticação e configurações. Textos específicos de uma jornada permanecem próximos da page, feature ou entity proprietária e usam o mesmo contrato tipado de tradução. Uma opção de idioma só deve ser apresentada como completa quando todas as superfícies alcançáveis naquela experiência possuírem catálogo correspondente; misturar idiomas na mesma jornada é falha de UX, não fallback aceitável.
+
+Datas, horários, números e nomes de locale são formatados pelas APIs `Intl` com o locale corrente. Traduzir texto não altera valores de domínio, identificadores, códigos de erro ou instantes transportados pela API.
+
+### Sessão no navegador
+
+`shared/auth` contém o contrato de consulta da sessão opaca e seu store, pois não conhece uma página específica. `app/providers` instala a instância e o guard global coordena navegação. Features possuem ações concretas como entrar e sair; pages apenas compõem a jornada.
+
+O navegador recebe cookies de sessão, mas nunca lê o JWT `HttpOnly`. O cookie CSRF legível é ecoado no header das mutações de mesma origem. Quando autenticação não está configurada no BFF, o contrato de sessão informa isso explicitamente e o guard mantém o desenvolvimento local disponível.
 
 ## API pública dos módulos
 

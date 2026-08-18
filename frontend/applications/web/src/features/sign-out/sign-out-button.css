@@ -1,0 +1,16 @@
+.sign-out-button {
+  width: 100%;
+  min-height: var(--button-height-medium);
+  padding-inline: var(--button-padding-inline);
+  border: 1px solid var(--color-border);
+  border-radius: var(--button-radius);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.sign-out-button:hover:not(:disabled) {
+  border-color: var(--color-action);
+  color: var(--color-action);
+}

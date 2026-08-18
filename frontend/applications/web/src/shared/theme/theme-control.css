@@ -96,6 +96,13 @@
   accent-color: var(--color-action);
 }
 
+.locale-options,
+.account-settings {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
 @media (prefers-contrast: more) {
   .settings-panel {
     border-width: 2px;

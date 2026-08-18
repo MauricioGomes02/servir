@@ -1,6 +1,22 @@
 <script setup lang="ts">
 import { AppIcon } from '@/shared/ui';
+import { supportedLocales, useI18n, type SupportedLocale } from '@/shared/i18n';
 import { useThemeControl } from './use-theme-control';
+
+const { locale, setLocale, t } = useI18n();
+
+function themeLabel(option: 'system' | 'light' | 'dark'): string {
+  return {
+    system: t('settings.theme.system'),
+    light: t('settings.theme.light'),
+    dark: t('settings.theme.dark'),
+  }[option];
+}
+
+function chooseLocale(event: Event): void {
+  const input = event.currentTarget as HTMLInputElement;
+  setLocale(input.value as SupportedLocale);
+}
 
 const {
   chooseTheme,
@@ -21,7 +37,7 @@ const {
       :ref="setTrigger"
       class="icon-button"
       type="button"
-      aria-label="Abrir configurações"
+      :aria-label="t('settings.open')"
       aria-haspopup="dialog"
       :aria-expanded="open"
       aria-controls="appearance-settings"
@@ -36,20 +52,22 @@ const {
       :ref="setPanel"
       class="settings-panel"
       role="dialog"
-      aria-label="Configurações"
+      :aria-label="t('settings.title')"
     >
       <header>
         <div>
-          <p class="eyebrow">Preferências</p>
-          <h2>Configurações</h2>
+          <p class="eyebrow">{{ t('settings.preferences') }}</p>
+          <h2>{{ t('settings.title') }}</h2>
         </div>
-        <button class="text-button" type="button" @click="closeMenu(true)">Fechar</button>
+        <button class="text-button" type="button" @click="closeMenu(true)">
+          {{ t('settings.close') }}
+        </button>
       </header>
       <p id="theme-shortcut" class="theme-shortcut">
-        Atalho: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>
+        {{ t('settings.shortcut') }}: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>
       </p>
       <fieldset class="theme-options" aria-describedby="theme-shortcut">
-        <legend>Aparência</legend>
+        <legend>{{ t('settings.appearance') }}</legend>
         <label v-for="option in themeOptions" :key="option" :for="`theme-${option}`">
           <input
             :id="`theme-${option}`"
@@ -60,11 +78,26 @@ const {
             @change="chooseTheme(option)"
             @keydown="onThemeKeydown"
           />
-          <span>{{
-            { system: 'Usar tema do sistema', light: 'Tema claro', dark: 'Tema escuro' }[option]
-          }}</span>
+          <span>{{ themeLabel(option) }}</span>
         </label>
       </fieldset>
+      <fieldset class="theme-options locale-options">
+        <legend>{{ t('settings.language') }}</legend>
+        <label v-for="option in supportedLocales" :key="option" :for="`locale-${option}`">
+          <input
+            :id="`locale-${option}`"
+            type="radio"
+            name="locale"
+            :value="option"
+            :checked="locale === option"
+            @change="chooseLocale"
+          />
+          <span>{{ t(`settings.language.${option}`) }}</span>
+        </label>
+      </fieldset>
+      <div v-if="$slots.account" class="account-settings">
+        <slot name="account" />
+      </div>
     </section>
   </div>
 </template>

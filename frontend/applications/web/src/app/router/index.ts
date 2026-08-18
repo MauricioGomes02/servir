@@ -4,6 +4,11 @@ export const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/sign-in',
+      name: 'sign-in',
+      component: () => import('@/pages/sign-in').then((module) => module.SignInPage),
+    },
+    {
       path: '/',
       name: 'accessible-organizations',
       component: () =>
