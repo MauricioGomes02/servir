@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+import type { OrganizationAccessReader } from '../application';
+import {
+  createAuthenticatedActor,
+  parseAuthenticatedUserId,
+} from '@/shared/application/authentication';
+import { parseCorrelationId, parseRequestId } from '@/shared/application/context';
+import { success } from '@/shared/core/result';
+import { createFastifyApplication, httpProblemMessageCatalog } from '@/shared/infrastructure/http';
+import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
+import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
+import { InMemoryLogger } from '@/shared/infrastructure/logging';
+import { registerOrganizationAccessGuard } from './register-organization-access-guard';
+
+function requireValue<T>(result: { success: true; value: T } | { success: false }): T {
+  assert.equal(result.success, true);
+  if (!result.success) throw new Error('invalid deterministic fixture');
+  return result.value;
+}
+
+function createApp(accessReader: OrganizationAccessReader) {
+  const actor = createAuthenticatedActor(
+    requireValue(parseAuthenticatedUserId('0198f334-6dc5-7c20-9af1-91d7e599c703')),
+  );
+  const translator = new InMemoryMessageTranslator(httpProblemMessageCatalog);
+  const app = createFastifyApplication({
+    accessTokenVerifier: {
+      async verify() {
+        return success(actor);
+      },
+    },
+    correlationIdGenerator: new SequenceIdGenerator([
+      requireValue(parseCorrelationId('authorization-test')),
+    ]),
+    logger: new InMemoryLogger(),
+    messageTranslator: translator,
+    requestIdGenerator: new SequenceIdGenerator([
+      requireValue(parseRequestId('authorization-request')),
+    ]),
+  });
+  registerOrganizationAccessGuard(app, accessReader);
+  app.get('/organizations/:organizationId/resource', async () => ({ allowed: true }));
+  return app;
+}
+
+describe('registerOrganizationAccessGuard', () => {
+  it('allows an authenticated user with active tenant access', async () => {
+    const app = createApp({
+      async hasActiveAccess() {
+        return true;
+      },
+    });
+    const response = await app.inject({
+      method: 'GET',
+      url: '/organizations/0198f334-6dc5-7c20-9af1-91d7e599c702/resource',
+      headers: { authorization: 'Bearer access-token' },
+    });
+    await app.close();
+    assert.equal(response.statusCode, 200);
+  });
+
+  it('forbids an authenticated user without active tenant access', async () => {
+    const app = createApp({
+      async hasActiveAccess() {
+        return false;
+      },
+    });
+    const response = await app.inject({
+      method: 'GET',
+      url: '/organizations/0198f334-6dc5-7c20-9af1-91d7e599c702/resource',
+      headers: { authorization: 'Bearer access-token' },
+    });
+    await app.close();
+    assert.equal(response.statusCode, 403);
+  });
+
+  it('requires authentication before checking tenant access', async () => {
+    let reads = 0;
+    const app = createApp({
+      async hasActiveAccess() {
+        reads += 1;
+        return true;
+      },
+    });
+    const response = await app.inject({
+      method: 'GET',
+      url: '/organizations/0198f334-6dc5-7c20-9af1-91d7e599c702/resource',
+    });
+    await app.close();
+    assert.equal(response.statusCode, 401);
+    assert.equal(reads, 0);
+  });
+});

@@ -6,9 +6,9 @@ Definir como o Servir decide quem pode executar uma operação sem misturar aute
 
 ## Estado atual
 
-Estão implementados autenticação Google pelo BFF, `User` interno, sessão segura, access token próprio, `AuthenticatedActor` na API e o bootstrap atômico do `OrganizationAccess` `owner` ao criar uma Organization.
+Estão implementados autenticação Google pelo BFF, `User` interno, sessão segura, access token próprio, `AuthenticatedActor` na API, o bootstrap atômico do `OrganizationAccess` `owner` ao criar uma Organization e o primeiro guard HTTP tenant-scoped baseado em acesso ativo.
 
-A verificação tenant-scoped nas demais operações, o catálogo de capabilities, papéis administrativos adicionais, convites e vínculo com Member permanecem incrementais. Exemplos marcados como planejados não representam APIs disponíveis.
+Rotas autenticadas que recebem `organizationId` agora exigem um `OrganizationAccess` ativo para o par `UserId + OrganizationId`; ausência de identidade produz `401` e ausência de acesso produz `403`. Capabilities, policies específicas, papéis administrativos adicionais, convites e vínculo com Member permanecem incrementais. Exemplos marcados como planejados não representam APIs disponíveis.
 
 ## Perguntas separadas
 
@@ -94,7 +94,7 @@ Capabilities futuras devem usar vocabulário estável, como `member:invite`, `mi
 
 ## Evolução
 
-1. Verificar `OrganizationAccess` ativo nas primeiras operações tenant-scoped.
+1. ~~Verificar `OrganizationAccess` ativo nas primeiras operações tenant-scoped.~~
 2. Centralizar o contrato mínimo de decisão demonstrado por esses consumidores.
 3. Introduzir capabilities para operações administrativas concretas.
 4. Adicionar novos papéis sistêmicos somente quando suas diferenças forem especificadas.

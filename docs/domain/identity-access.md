@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo inicial em implementação. Login Google, sessão segura, `User` global, provisionamento idempotente, credenciais próprias e criação atômica do primeiro `OrganizationAccess` como `owner` estão implementados; autorização de todas as operações tenant-scoped, convites, vínculo com Member e interfaces ainda estão planejados.
+Modelo inicial em implementação. Login Google, sessão segura, `User` global, provisionamento idempotente, credenciais próprias, criação atômica do primeiro `OrganizationAccess` como `owner` e verificação HTTP de acesso ativo nas rotas tenant-scoped estão implementados; capabilities específicas, convites, vínculo com Member e interfaces ainda estão planejados.
 
 ## Motivação
 
@@ -98,7 +98,7 @@ O BFF também expõe consulta de sessão e logout local. A sessão vincula um to
 
 Quando autenticação está configurada, o BFF exige uma sessão válida nas rotas de negócio, aplica CSRF às mutações, emite um access token curto para o `UserId` e o envia somente à API privada. O navegador continua sem acesso ao JWT. A API valida assinatura, issuer, audience, expiração e propósito antes de materializar o `AuthenticatedActor` no contexto.
 
-Esse mecanismo autentica o ator, mas ainda não concede acesso a uma organização. A autorização tenant-scoped por `OrganizationAccess` permanece como incremento separado; presença de sessão ou de `organizationId` na URL nunca deve ser interpretada como permissão.
+Esse mecanismo autentica o ator, mas não concede acesso automaticamente a uma organização. Nas rotas autenticadas com `organizationId`, a API exige um `OrganizationAccess` ativo para o `UserId` e o tenant solicitados. Presença de sessão ou de `organizationId` na URL nunca é interpretada como permissão.
 
 Chaves privadas são carregadas uma vez pelo BFF no startup, preferencialmente de arquivo somente leitura materializado pelo ambiente. A API carrega da mesma forma apenas o JWKS público. Variáveis inline permanecem disponíveis para desenvolvimento, com menor precedência que os arquivos; integrações com secret stores não fazem chamadas por request.
 
@@ -112,13 +112,14 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 4. ~~Implementar assinatura, rotação e validação das credenciais próprias do Servir.~~
 5. ~~Implementar login Google, callback, sessão, CSRF e logout no BFF.~~
 6. ~~Validar o access token na API e proteger a primeira rota.~~
-7. Implementar Microsoft e vinculação explícita de identidades.
-8. Implementar `MemberAccessInvitation` e criação de convite.
-9. Implementar aceitação atômica e `OrganizationAccess` vinculado.
-10. Adicionar seleção segura de Organization e guards no frontend.
-11. Expor “Minha conta” e “Meu perfil”.
-12. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
-13. Avaliar solicitação espontânea, revogação, recuperação e RLS.
+7. ~~Verificar `OrganizationAccess` ativo nas rotas HTTP tenant-scoped.~~
+8. Implementar Microsoft e vinculação explícita de identidades.
+9. Implementar `MemberAccessInvitation` e criação de convite.
+10. Implementar aceitação atômica e `OrganizationAccess` vinculado.
+11. Adicionar seleção segura de Organization e guards no frontend.
+12. Expor “Minha conta” e “Meu perfil”.
+13. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
+14. Avaliar solicitação espontânea, revogação, recuperação e RLS.
 
 ## Boas práticas
 

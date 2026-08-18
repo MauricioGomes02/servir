@@ -7,14 +7,20 @@ import {
   parseIdentitySubject,
 } from '@/shared/application/authentication';
 import { ExternalIdentity, User, UserId } from '@/modules/identity/domain';
+import { OrganizationId } from '@/modules/organizations/domain';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 import { Pool } from 'pg';
 
 import { createPostgresPersistence } from './create-postgres-persistence';
-import { userProvisioner } from './modules/identity-persistence-module';
+import { organizationAccessReader, userProvisioner } from './modules/identity-persistence-module';
 
 const FIRST_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e101';
 const SECOND_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e102';
+const ACCESS_ORGANIZATION_ID = '0198f334-6dc5-7c20-9af1-91d7e599e111';
+const ACTIVE_ACCESS_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e112';
+const REVOKED_ACCESS_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e113';
+const ACTIVE_ACCESS_ID = '0198f334-6dc5-7c20-9af1-91d7e599e114';
+const REVOKED_ACCESS_ID = '0198f334-6dc5-7c20-9af1-91d7e599e115';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {
   if (!result.success) throw new Error('Invalid deterministic integration fixture');
@@ -76,5 +82,58 @@ describe('PostgreSQL user provisioning', () => {
       [[FIRST_USER_ID, SECOND_USER_ID]],
     );
     assert.equal(orphan.rowCount, 0);
+  });
+});
+
+describe('PostgreSQL organization access reader', () => {
+  it('allows only the user with active access to the requested organization', async (testContext) => {
+    const databaseUrl = requireTestDatabaseUrl();
+    const pool = new Pool({ connectionString: databaseUrl });
+    const persistence = createPostgresPersistence(databaseUrl);
+
+    async function cleanup(): Promise<void> {
+      await pool.query('DELETE FROM organization_accesses WHERE organization_id = $1', [
+        ACCESS_ORGANIZATION_ID,
+      ]);
+      await pool.query('DELETE FROM users WHERE id = ANY($1::uuid[])', [
+        [ACTIVE_ACCESS_USER_ID, REVOKED_ACCESS_USER_ID],
+      ]);
+      await pool.query('DELETE FROM organizations WHERE id = $1', [ACCESS_ORGANIZATION_ID]);
+    }
+
+    await cleanup();
+    testContext.after(async () => {
+      await cleanup();
+      await persistence.close();
+      await pool.end();
+    });
+
+    await pool.query('INSERT INTO organizations (id, name) VALUES ($1, $2)', [
+      ACCESS_ORGANIZATION_ID,
+      'Organization access integration fixture',
+    ]);
+    await pool.query('INSERT INTO users (id, status) VALUES ($1, 1), ($2, 1)', [
+      ACTIVE_ACCESS_USER_ID,
+      REVOKED_ACCESS_USER_ID,
+    ]);
+    await pool.query(
+      `INSERT INTO organization_accesses (id, organization_id, user_id, role, status)
+       VALUES ($1, $2, $3, 'owner', 'active'), ($4, $2, $5, 'owner', 'revoked')`,
+      [
+        ACTIVE_ACCESS_ID,
+        ACCESS_ORGANIZATION_ID,
+        ACTIVE_ACCESS_USER_ID,
+        REVOKED_ACCESS_ID,
+        REVOKED_ACCESS_USER_ID,
+      ],
+    );
+
+    const reader = persistence.services.get(organizationAccessReader);
+    const organizationId = value(OrganizationId.create(ACCESS_ORGANIZATION_ID));
+    const activeUserId = value(UserId.create(ACTIVE_ACCESS_USER_ID));
+    const revokedUserId = value(UserId.create(REVOKED_ACCESS_USER_ID));
+
+    assert.equal(await reader.hasActiveAccess(organizationId, activeUserId), true);
+    assert.equal(await reader.hasActiveAccess(organizationId, revokedUserId), false);
   });
 });

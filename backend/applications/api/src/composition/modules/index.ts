@@ -7,8 +7,8 @@ import { organizationsModule } from './register-organizations-module';
 import { identityModule } from './register-identity-module';
 
 export const applicationModules: readonly ApplicationModule[] = Object.freeze([
-  organizationsModule,
   identityModule,
+  organizationsModule,
   membershipModule,
   ministriesModule,
   activitiesModule,
