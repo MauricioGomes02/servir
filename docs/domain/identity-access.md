@@ -128,6 +128,7 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 - exigir e-mail verificado quando ele restringir o destinatário;
 - registrar fatos auditáveis sem registrar credenciais;
 - autorizar na API mesmo quando a interface oculta uma ação.
+- evoluir roles, capabilities e policies conforme a [estratégia de autorização](../authorization.md).
 
 ## Anti-patterns
 
