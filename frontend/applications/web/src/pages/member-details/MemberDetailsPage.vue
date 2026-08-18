@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
-import { AppButton, AppIcon, AppStatusBadge } from '@/shared/ui';
+import {
+  AppBackLink,
+  AppButton,
+  AppDetailHeader,
+  AppRouteState,
+  AppStatusBadge,
+} from '@/shared/ui';
 import { useLocalizedMessages } from '@/shared/i18n';
 import { memberDetailsMessages } from './member-details.messages';
 import { useMemberDetailsPage } from './use-member-details-page';
@@ -14,18 +20,14 @@ const { t } = useLocalizedMessages(memberDetailsMessages);
 </script>
 
 <template>
-  <section v-if="loading" class="member-details-state" aria-live="polite">
-    <p role="status">{{ t('loading') }}</p>
-  </section>
-  <section
-    v-else-if="problem"
-    class="member-details-state"
-    aria-labelledby="member-details-error-title"
-  >
-    <p class="eyebrow">{{ t('cannotContinue') }}</p>
-    <h1 id="member-details-error-title">{{ problem.problem.title }}</h1>
-    <p>{{ t('errorDescription') }}</p>
-    <div class="member-details-actions">
+  <AppRouteState v-if="loading" loading>
+    <template #status>{{ t('loading') }}</template>
+  </AppRouteState>
+  <AppRouteState v-else-if="problem" title-id="member-details-error-title">
+    <template #eyebrow>{{ t('cannotContinue') }}</template>
+    <template #title>{{ problem.problem.title }}</template>
+    <template #description>{{ t('errorDescription') }}</template>
+    <template #actions>
       <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
       <RouterLink
         :to="{ name: 'organization-members', params: { organizationId } }"
@@ -33,28 +35,24 @@ const { t } = useLocalizedMessages(memberDetailsMessages);
       >
         {{ t('back') }}
       </RouterLink>
-    </div>
-  </section>
+    </template>
+  </AppRouteState>
   <article v-else-if="member" class="member-details" aria-labelledby="member-title">
-    <nav class="member-details-navigation" :aria-label="t('navigation')">
-      <RouterLink
-        class="member-back-link app-button app-button-secondary"
-        :to="{ name: 'organization-members', params: { organizationId } }"
-      >
-        <AppIcon name="back" />
-        <span>{{ t('back') }}</span>
-      </RouterLink>
+    <nav class="app-back-navigation" :aria-label="t('navigation')">
+      <AppBackLink :to="{ name: 'organization-members', params: { organizationId } }">
+        {{ t('back') }}
+      </AppBackLink>
     </nav>
-    <header class="member-details-header">
-      <div>
-        <p class="eyebrow">{{ t('eyebrow') }}</p>
-        <h1 id="member-title">{{ member.name }}</h1>
-        <p>{{ t('description') }}</p>
-      </div>
-      <AppStatusBadge :tone="member.status === 'active' ? 'success' : 'neutral'">
-        {{ member.status === 'active' ? t('active') : t('inactive') }}
-      </AppStatusBadge>
-    </header>
+    <AppDetailHeader title-id="member-title">
+      <template #eyebrow>{{ t('eyebrow') }}</template>
+      <template #title>{{ member.name }}</template>
+      <template #description>{{ t('description') }}</template>
+      <template #aside>
+        <AppStatusBadge :tone="member.status === 'active' ? 'success' : 'neutral'">
+          {{ member.status === 'active' ? t('active') : t('inactive') }}
+        </AppStatusBadge>
+      </template>
+    </AppDetailHeader>
   </article>
 </template>
 

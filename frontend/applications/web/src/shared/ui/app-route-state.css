@@ -1,0 +1,24 @@
+.app-route-state {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.app-route-state > p {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--color-text-subtle);
+}
+
+.app-route-state h1 {
+  margin: 0;
+}
+
+.app-route-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.app-route-state-actions .app-button {
+  text-decoration: none;
+}

@@ -38,3 +38,5 @@ Buscas de coleções usam `AppSearchField`: label programática, ícone familiar
 `AppResourceSection` reúne cabeçalho, quantidade, controles, estados e conteúdo de uma coleção em uma região semântica única. A busca pertence à toolbar da coleção, não fica solta entre o cabeçalho da página e a lista. A região usa borda e divisores discretos, sem sombra decorativa; na ausência total de registros, controles sem efeito podem ser omitidos.
 
 Controles usam `--control-radius` para um arredondamento sutil e consistente. A linguagem visual é formal com proximidade humana: campos, botões e buscas não usam formato de cápsula; `--radius-full` fica reservado a ícones circulares, avatares e indicadores cuja forma tenha significado. Controles de busca ocultam a decoração nativa do navegador quando oferecem uma ação de limpeza própria, evitando affordances duplicadas.
+
+Telas de detalhe usam `AppBackLink`, `AppDetailHeader`, `AppRouteState` e `AppContentSection` para manter retorno, título, status, falhas e agrupamentos previsíveis. Esses componentes organizam apresentação e semântica; pages continuam responsáveis pelos dados, ações e linguagem da experiência.

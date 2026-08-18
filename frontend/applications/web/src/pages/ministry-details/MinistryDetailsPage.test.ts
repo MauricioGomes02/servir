@@ -54,7 +54,7 @@ describe('MinistryDetailsPage', () => {
     expect(await findByRole('heading', { name: 'Louvor' })).toBeVisible();
     const backLink = getByRole('link', { name: 'Voltar para a lista de ministérios' });
     expect(getByRole('navigation', { name: 'Navegação do ministério' })).toContainElement(backLink);
-    expect(backLink).toHaveClass('ministry-back-link', 'app-button-secondary');
+    expect(backLink).toHaveClass('app-back-link', 'app-button-secondary');
     expect(backLink).toHaveAttribute('href', '/organizations/organization-id/ministries');
     expect(backLink.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
     expect(getByText('Guitarra')).toBeVisible();

@@ -1,51 +1,16 @@
-.activity-details,
-.activity-details-state {
+.activity-details {
   display: grid;
-  gap: var(--space-8);
-}
-
-.activity-details-navigation {
-  display: flex;
-  justify-content: flex-start;
-  padding-bottom: var(--space-2);
-}
-
-.activity-details-navigation .activity-back-link {
-  text-decoration: none;
-}
-
-.activity-back-link svg {
-  width: 1.1rem;
-  height: 1.1rem;
-  transition: transform 160ms ease;
-}
-
-.activity-details-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: start;
-  justify-content: space-between;
-  gap: var(--space-6);
-  padding-bottom: var(--space-8);
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.activity-details-header h1,
-.activity-participants h2 {
-  margin-block: var(--space-1) var(--space-2);
+  gap: var(--page-block-gap);
 }
 
 .activity-participants {
-  display: grid;
-  gap: var(--space-5);
-}
-
-.activity-participants ul {
-  display: grid;
-  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.activity-participants li + li {
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .activity-participants a {
@@ -53,41 +18,27 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 3.5rem;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  min-height: var(--list-row-min-height);
+  padding: var(--space-3) var(--space-4);
   color: var(--color-text);
-  background: var(--color-surface);
   font-weight: 750;
   text-decoration: none;
 }
 
-.activity-participants a:focus-visible,
-.activity-participants a:hover {
-  border-color: var(--color-action);
+.activity-participants a:focus-visible {
   color: var(--color-action);
   background: var(--color-surface-muted);
 }
 
-.activity-details-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
 @media (hover: hover) and (pointer: fine) {
-  .activity-back-link:hover {
-    border-color: var(--color-action);
-  }
-
-  .activity-back-link:hover svg {
-    transform: translateX(-0.2rem);
+  .activity-participants a:hover {
+    color: var(--color-action);
+    background: var(--color-surface-muted);
   }
 }
 
-@media (width < 45rem) {
-  .activity-back-link {
+@media (width < 36rem) {
+  .activity-details .app-back-link {
     width: 100%;
   }
 }

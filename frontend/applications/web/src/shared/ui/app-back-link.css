@@ -1,0 +1,21 @@
+.app-back-navigation {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.app-back-link {
+  width: fit-content;
+  text-decoration: none;
+}
+
+.app-back-link svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-back-link:hover svg {
+    transform: translateX(-0.2rem);
+  }
+}
