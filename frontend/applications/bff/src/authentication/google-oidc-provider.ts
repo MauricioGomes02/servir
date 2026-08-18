@@ -4,6 +4,7 @@ import type {
   OidcProvider,
   VerifiedExternalIdentity,
 } from './oidc-provider.js';
+import { BffAuthenticationError, BffAuthenticationErrorCodes } from './authentication-error.js';
 
 export interface GoogleOidcProviderConfig {
   readonly clientId: string;
@@ -43,13 +44,22 @@ export class GoogleOidcProvider implements OidcProvider {
     callbackUrl: URL,
     transaction: OidcLoginTransaction,
   ): Promise<VerifiedExternalIdentity> {
-    const tokens = await oidc.authorizationCodeGrant(this.client, callbackUrl, {
-      expectedNonce: transaction.nonce,
-      expectedState: transaction.state,
-      pkceCodeVerifier: transaction.codeVerifier,
-    });
+    let tokens;
+    try {
+      tokens = await oidc.authorizationCodeGrant(this.client, callbackUrl, {
+        expectedNonce: transaction.nonce,
+        expectedState: transaction.state,
+        pkceCodeVerifier: transaction.codeVerifier,
+      });
+    } catch (error) {
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.CallbackInvalid, {
+        cause: error,
+      });
+    }
     const claims = tokens.claims();
-    if (claims === undefined) throw new Error('google oidc response did not contain an id token');
+    if (claims === undefined) {
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.ProviderResponseInvalid);
+    }
     return Object.freeze({ issuer: claims.iss, subject: claims.sub });
   }
 }

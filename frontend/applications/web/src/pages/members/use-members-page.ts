@@ -3,6 +3,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { listMembers, type MemberPage } from '@/entities/member';
 import { useRegisterMember } from '@/features/register-member';
 import { HttpProblem } from '@/shared/api';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { membersMessages } from './members.messages';
 
 function pageNumber(value: unknown): number {
   if (typeof value !== 'string') return 1;
@@ -11,6 +13,7 @@ function pageNumber(value: unknown): number {
 }
 
 export function useMembersPage(organizationId: Ref<string>) {
+  const { t } = useLocalizedMessages(membersMessages);
   const route = useRoute();
   const router = useRouter();
   const initialSearch = typeof route.query.search === 'string' ? route.query.search.trim() : '';
@@ -46,7 +49,7 @@ export function useMembersPage(organizationId: Ref<string>) {
             ? error
             : new HttpProblem({
                 type: 'about:blank',
-                title: 'Não foi possível carregar os membros.',
+                title: t('fallbackError'),
                 status: 0,
               });
       }

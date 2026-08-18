@@ -1,6 +1,7 @@
 import type { FastifyRequest } from 'fastify';
 import { timingSafeEqual } from 'node:crypto';
 import type { InternalCredentialIssuer } from './internal-credential-issuer.js';
+import { BffAuthenticationError, BffAuthenticationErrorCodes } from './authentication-error.js';
 
 export const SESSION_COOKIE = '__Host-servir-session';
 export const CSRF_COOKIE = '__Host-servir-csrf';
@@ -21,7 +22,9 @@ export async function verifyRequestSession(
   credentialIssuer: InternalCredentialIssuer,
 ): Promise<VerifiedSession> {
   const session = request.cookies[SESSION_COOKIE];
-  if (session === undefined) throw new Error('session required');
+  if (session === undefined) {
+    throw new BffAuthenticationError(BffAuthenticationErrorCodes.SessionRequired);
+  }
   return credentialIssuer.verifySessionToken(session);
 }
 
@@ -43,6 +46,6 @@ export function verifyMutationCsrf(
     !sameToken(headerToken, cookieToken) ||
     !sameToken(headerToken, session.csrfToken)
   ) {
-    throw new Error('csrf token invalid');
+    throw new BffAuthenticationError(BffAuthenticationErrorCodes.CsrfInvalid);
   }
 }

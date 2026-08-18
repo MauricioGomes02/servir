@@ -1,5 +1,6 @@
 import type { JWK } from 'jose';
 import { readFileSync } from 'node:fs';
+import { BffConfigError, BffConfigErrorCodes } from './config-error.js';
 
 type ReadTextFile = (path: string) => string;
 
@@ -35,8 +36,13 @@ function requiredConfiguredValues<const Names extends readonly string[]>(
 ): { readonly [Index in keyof Names]: string } | undefined {
   const values = names.map((name) => environment[name]?.trim());
   if (values.every((value) => !value)) return undefined;
-  if (values.some((value) => !value))
-    throw new Error(`${configurationName} configuration must be complete`);
+  if (values.some((value) => !value)) {
+    throw new BffConfigError(
+      configurationName === 'google oidc'
+        ? BffConfigErrorCodes.GoogleOidcIncomplete
+        : BffConfigErrorCodes.AuthenticationIncomplete,
+    );
+  }
   return values as { readonly [Index in keyof Names]: string };
 }
 
@@ -53,7 +59,11 @@ function readGoogleOidcConfig(environment: NodeJS.ProcessEnv): BffConfig['google
 
 function positiveInteger(input: string | undefined, fallback: number, name: string): number {
   const value = Number(input ?? String(fallback));
-  if (!Number.isInteger(value) || value < 1) throw new Error(`${name} must be a positive integer`);
+  if (!Number.isInteger(value) || value < 1) {
+    throw new BffConfigError(BffConfigErrorCodes.InvalidPositiveInteger, {
+      cause: Object.freeze({ name }),
+    });
+  }
   return value;
 }
 
@@ -79,17 +89,24 @@ function readAuthenticationConfig(
     !cookieEncryptionKey ||
     (!privateJwkFile && !inlinePrivateJwk)
   ) {
-    throw new Error('authentication configuration must be complete');
+    throw new BffConfigError(BffConfigErrorCodes.AuthenticationIncomplete);
   }
   let privateJwk: JWK;
   try {
     const serializedJwk = privateJwkFile ? readTextFile(privateJwkFile) : inlinePrivateJwk;
-    if (serializedJwk === undefined) throw new Error('authentication configuration incomplete');
+    if (serializedJwk === undefined) {
+      throw new BffConfigError(BffConfigErrorCodes.AuthenticationIncomplete);
+    }
     privateJwk = JSON.parse(serializedJwk) as JWK;
-  } catch {
-    throw new Error('AUTH_PRIVATE_JWK must be valid JSON');
+  } catch (error) {
+    if (error instanceof BffConfigError) throw error;
+    throw new BffConfigError(BffConfigErrorCodes.InvalidAuthenticationPrivateKeyFormat, {
+      cause: error,
+    });
   }
-  if (privateJwk.d === undefined) throw new Error('AUTH_PRIVATE_JWK must contain a private key');
+  if (privateJwk.d === undefined) {
+    throw new BffConfigError(BffConfigErrorCodes.InvalidAuthenticationPrivateKey);
+  }
   return Object.freeze({
     accessTokenTtlSeconds: positiveInteger(
       environment.AUTH_ACCESS_TOKEN_TTL_SECONDS,
@@ -128,12 +145,14 @@ export function readBffConfig(
   const authentication = readAuthenticationConfig(environment, readTextFile);
   const googleOidc = readGoogleOidcConfig(environment);
   const apiBaseUrl = environment.API_BASE_URL;
-  if (!apiBaseUrl) throw new Error('API_BASE_URL is required');
+  if (!apiBaseUrl) throw new BffConfigError(BffConfigErrorCodes.InvalidApiBaseUrl);
   const port = Number(environment.PORT ?? '3001');
-  if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error('PORT must be valid');
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
+    throw new BffConfigError(BffConfigErrorCodes.InvalidPort);
+  }
   const apiTimeoutMs = Number(environment.API_TIMEOUT_MS ?? '10000');
   if (!Number.isInteger(apiTimeoutMs) || apiTimeoutMs < 1)
-    throw new Error('API_TIMEOUT_MS must be a positive integer');
+    throw new BffConfigError(BffConfigErrorCodes.InvalidApiTimeout);
   return {
     ...(authentication === undefined ? {} : { authentication }),
     ...(googleOidc === undefined ? {} : { googleOidc }),

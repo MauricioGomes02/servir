@@ -1,13 +1,13 @@
 import Fastify from 'fastify';
 import { describe, expect, it } from 'vitest';
-import { bffMessages, resolveBffLocale } from './localization.js';
+import { BffMessageKeys, resolveBffLocale, translateBffMessage } from './localization.js';
 
 describe('BFF localization', () => {
   it('uses Brazilian Portuguese by default', async () => {
     const app = Fastify();
     app.get('/', (request) => ({
       locale: resolveBffLocale(request),
-      title: bffMessages(request).upstreamUnavailable,
+      title: translateBffMessage(request, BffMessageKeys.UpstreamUnavailable),
     }));
 
     const response = await app.inject({ method: 'GET', url: '/' });
@@ -23,7 +23,7 @@ describe('BFF localization', () => {
     const app = Fastify();
     app.get('/', (request) => ({
       locale: resolveBffLocale(request),
-      title: bffMessages(request).resourceNotFound,
+      title: translateBffMessage(request, BffMessageKeys.ResourceNotFound),
     }));
 
     const response = await app.inject({

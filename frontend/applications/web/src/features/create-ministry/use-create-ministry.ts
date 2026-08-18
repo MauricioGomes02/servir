@@ -1,8 +1,11 @@
 import { computed, ref, type Ref } from 'vue';
 import { fieldErrors, HttpProblem } from '@/shared/api';
 import { createMinistry } from './create-ministry';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { createMinistryMessages } from './create-ministry.messages';
 
 export function useCreateMinistry(organizationId: Ref<string>, afterCreated: () => Promise<void>) {
+  const { t } = useLocalizedMessages(createMinistryMessages);
   const name = ref('');
   const creating = ref(false);
   const problem = ref<HttpProblem>();
@@ -23,7 +26,7 @@ export function useCreateMinistry(organizationId: Ref<string>, afterCreated: () 
           ? error
           : new HttpProblem({
               type: 'about:blank',
-              title: 'Não foi possível criar o ministério.',
+              title: t('fallbackError'),
               status: 0,
             });
     } finally {

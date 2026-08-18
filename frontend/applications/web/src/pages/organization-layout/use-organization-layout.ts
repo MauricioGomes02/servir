@@ -2,8 +2,11 @@ import { computed, onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getOrganization, type Organization } from '@/entities/organization';
 import { HttpProblem } from '@/shared/api';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { organizationLayoutMessages } from './organization-layout.messages';
 
 export function useOrganizationLayout(organizationId: Ref<string>) {
+  const { t } = useLocalizedMessages(organizationLayoutMessages);
   const route = useRoute();
   const organization = ref<Organization>();
   const problem = ref<HttpProblem>();
@@ -24,7 +27,7 @@ export function useOrganizationLayout(organizationId: Ref<string>) {
             ? error
             : new HttpProblem({
                 type: 'about:blank',
-                title: 'Não foi possível carregar a organização.',
+                title: t('fallbackError'),
                 status: 0,
               });
       }

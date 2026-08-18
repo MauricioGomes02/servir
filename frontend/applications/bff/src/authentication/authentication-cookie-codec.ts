@@ -1,4 +1,5 @@
 import { base64url, EncryptJWT, jwtDecrypt } from 'jose';
+import { BffAuthenticationError, BffAuthenticationErrorCodes } from './authentication-error.js';
 
 export interface LoginTransaction {
   readonly codeVerifier: string;
@@ -22,7 +23,7 @@ export class AuthenticationCookieCodec {
   ) {
     this.encryptionKey = base64url.decode(config.encryptionKey);
     if (this.encryptionKey.byteLength !== 32) {
-      throw new Error('authentication cookie encryption key must contain 32 bytes');
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.CookieEncryptionKeyInvalid);
     }
   }
 
@@ -42,13 +43,20 @@ export class AuthenticationCookieCodec {
   }
 
   async decryptLoginTransaction(token: string): Promise<LoginTransaction> {
-    const { payload } = await jwtDecrypt(token, this.encryptionKey, {
-      audience: 'servir-bff-login',
-      contentEncryptionAlgorithms: ['A256GCM'],
-      currentDate: new Date(this.now() * 1_000),
-      issuer: this.config.issuer,
-      keyManagementAlgorithms: ['dir'],
-    });
+    let payload;
+    try {
+      ({ payload } = await jwtDecrypt(token, this.encryptionKey, {
+        audience: 'servir-bff-login',
+        contentEncryptionAlgorithms: ['A256GCM'],
+        currentDate: new Date(this.now() * 1_000),
+        issuer: this.config.issuer,
+        keyManagementAlgorithms: ['dir'],
+      }));
+    } catch (error) {
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.LoginTransactionInvalid, {
+        cause: error,
+      });
+    }
     const { codeVerifier, nonce, purpose, returnPath, state } = payload;
     if (
       purpose !== 'oidc-login' ||
@@ -57,7 +65,7 @@ export class AuthenticationCookieCodec {
       typeof returnPath !== 'string' ||
       typeof state !== 'string'
     ) {
-      throw new Error('invalid oidc login transaction');
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.LoginTransactionInvalid);
     }
     return Object.freeze({ codeVerifier, nonce, returnPath, state });
   }

@@ -1,36 +1,39 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { AppIcon, AppStatusBadge } from '@/shared/ui';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { organizationLayoutMessages } from './organization-layout.messages';
 import { useOrganizationLayout } from './use-organization-layout';
 
 const props = defineProps<{ organizationId: string }>();
 const { activeNavigationArea, load, loading, organization, problem } = useOrganizationLayout(
   toRef(props, 'organizationId'),
 );
+const { t } = useLocalizedMessages(organizationLayoutMessages);
 </script>
 
 <template>
   <section v-if="loading" class="route-state" aria-live="polite">
-    <p role="status">Carregando sua organização…</p>
+    <p role="status">{{ t('loading') }}</p>
   </section>
   <section v-else-if="problem" class="route-state" aria-labelledby="organization-error-title">
-    <p class="eyebrow">Não foi possível continuar</p>
+    <p class="eyebrow">{{ t('cannotContinue') }}</p>
     <h1 id="organization-error-title">{{ problem.problem.title }}</h1>
-    <button class="text-button" type="button" @click="load">Tentar novamente</button>
-    <RouterLink :to="{ name: 'create-organization' }">Voltar ao início</RouterLink>
+    <button class="text-button" type="button" @click="load">{{ t('retry') }}</button>
+    <RouterLink :to="{ name: 'create-organization' }">{{ t('back') }}</RouterLink>
   </section>
   <div v-else-if="organization" class="organization-shell">
     <header class="organization-context">
       <span class="workspace-symbol" aria-hidden="true"><AppIcon name="community" /></span>
       <div>
-        <small>Organização</small>
+        <small>{{ t('organization') }}</small>
         <strong>{{ organization.name }}</strong>
       </div>
-      <AppStatusBadge tone="success">Ativa</AppStatusBadge>
+      <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
     </header>
     <div class="organization-workspace">
       <aside class="organization-sidebar">
-        <nav aria-label="Navegação da organização">
+        <nav :aria-label="t('navigation')">
           <ul class="organization-navigation">
             <li>
               <RouterLink
@@ -38,7 +41,7 @@ const { activeNavigationArea, load, loading, organization, problem } = useOrgani
                 :class="{ 'is-active': activeNavigationArea === 'home' }"
                 :aria-current="activeNavigationArea === 'home' ? 'page' : undefined"
               >
-                Início
+                {{ t('home') }}
               </RouterLink>
             </li>
             <li>
@@ -47,7 +50,7 @@ const { activeNavigationArea, load, loading, organization, problem } = useOrgani
                 :class="{ 'is-active': activeNavigationArea === 'ministries' }"
                 :aria-current="activeNavigationArea === 'ministries' ? 'page' : undefined"
               >
-                Ministérios
+                {{ t('ministries') }}
               </RouterLink>
             </li>
             <li>
@@ -56,7 +59,7 @@ const { activeNavigationArea, load, loading, organization, problem } = useOrgani
                 :class="{ 'is-active': activeNavigationArea === 'members' }"
                 :aria-current="activeNavigationArea === 'members' ? 'page' : undefined"
               >
-                Membros
+                {{ t('members') }}
               </RouterLink>
             </li>
             <li>
@@ -65,7 +68,7 @@ const { activeNavigationArea, load, loading, organization, problem } = useOrgani
                 :class="{ 'is-active': activeNavigationArea === 'activities' }"
                 :aria-current="activeNavigationArea === 'activities' ? 'page' : undefined"
               >
-                Atividades
+                {{ t('activities') }}
               </RouterLink>
             </li>
           </ul>

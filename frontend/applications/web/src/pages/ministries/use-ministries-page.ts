@@ -3,8 +3,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { listMinistries, type MinistryPage } from '@/entities/ministry';
 import { useCreateMinistry } from '@/features/create-ministry';
 import { HttpProblem } from '@/shared/api';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { ministriesMessages } from './ministries.messages';
 
 export function useMinistriesPage(organizationId: Ref<string>) {
+  const { t } = useLocalizedMessages(ministriesMessages);
   const route = useRoute();
   const router = useRouter();
   const initialSearch = typeof route.query.search === 'string' ? route.query.search.trim() : '';
@@ -34,7 +37,7 @@ export function useMinistriesPage(organizationId: Ref<string>) {
             ? error
             : new HttpProblem({
                 type: 'about:blank',
-                title: 'Não foi possível carregar os ministérios.',
+                title: t('fallbackError'),
                 status: 0,
               });
       }

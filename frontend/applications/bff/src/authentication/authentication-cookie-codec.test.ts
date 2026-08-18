@@ -1,6 +1,7 @@
 import { base64url } from 'jose';
 import { describe, expect, it } from 'vitest';
 import { AuthenticationCookieCodec } from './authentication-cookie-codec.js';
+import { BffAuthenticationErrorCodes } from './authentication-error.js';
 
 const encryptionKey = base64url.encode(new Uint8Array(32).fill(7));
 const transaction = {
@@ -43,6 +44,6 @@ describe('AuthenticationCookieCodec', () => {
           issuer: 'https://identity.servir.test',
           loginTransactionTtlSeconds: 300,
         }),
-    ).toThrow('authentication cookie encryption key must contain 32 bytes');
+    ).toThrow(BffAuthenticationErrorCodes.CookieEncryptionKeyInvalid);
   });
 });

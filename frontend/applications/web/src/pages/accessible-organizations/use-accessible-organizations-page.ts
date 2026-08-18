@@ -2,8 +2,11 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { listAccessibleOrganizations, type Organization } from '@/entities/organization';
 import { HttpProblem } from '@/shared/api';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { accessibleOrganizationsMessages } from './accessible-organizations.messages';
 
 export function useAccessibleOrganizationsPage() {
+  const { t } = useLocalizedMessages(accessibleOrganizationsMessages);
   const router = useRouter();
   const organizations = ref<readonly Organization[]>([]);
   const loading = ref(true);
@@ -29,7 +32,7 @@ export function useAccessibleOrganizationsPage() {
             ? error
             : new HttpProblem({
                 type: 'about:blank',
-                title: 'Não foi possível carregar suas igrejas.',
+                title: t('fallbackError'),
                 status: 0,
               });
       }

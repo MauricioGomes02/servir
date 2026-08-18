@@ -1,6 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { BffConfig } from '../config.js';
-import { bffMessages } from './localization.js';
+import { BffProblemCodes } from './bff-problem-code.js';
+import { BffMessageKeys } from './localization.js';
+import { sendBffProblem } from './problem-details.js';
 
 export type ApiForwarder = (
   request: FastifyRequest,
@@ -39,14 +41,12 @@ export function createApiForwarder(
       return reply.send(await response.text());
     } catch (error) {
       request.log.error({ err: error }, 'api upstream request failed');
-      return reply
-        .status(502)
-        .type('application/problem+json')
-        .send({
-          type: '/problems/upstream-unavailable',
-          title: bffMessages(request).upstreamUnavailable,
-          status: 502,
-        });
+      return sendBffProblem(request, reply, {
+        code: BffProblemCodes.UpstreamUnavailable,
+        messageKey: BffMessageKeys.UpstreamUnavailable,
+        status: 502,
+        type: '/problems/upstream-unavailable',
+      });
     }
   };
 }

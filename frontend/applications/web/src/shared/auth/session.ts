@@ -1,18 +1,15 @@
-import { currentLocale } from '@/shared/i18n';
+import { httpClient, type HttpClient } from '@/shared/api';
 
 export type SessionSnapshot =
   | Readonly<{ authenticationEnabled: false; authenticated: false }>
   | Readonly<{ authenticationEnabled: true; authenticated: false }>
   | Readonly<{ authenticationEnabled: true; authenticated: true; userId: string }>;
 
-export async function getSession(signal?: AbortSignal): Promise<SessionSnapshot> {
-  const response = await fetch('/bff/auth/session', {
-    method: 'GET',
-    headers: { Accept: 'application/json', 'Accept-Language': currentLocale() },
-    signal,
-  });
-  if (!response.ok) throw new Error('auth.session.unavailable');
-  return (await response.json()) as SessionSnapshot;
+export function getSession(
+  signal?: AbortSignal,
+  client: HttpClient = httpClient,
+): Promise<SessionSnapshot> {
+  return client.get<SessionSnapshot>('/bff/auth/session', signal);
 }
 
 export function googleLoginUrl(returnPath: string): string {

@@ -14,3 +14,9 @@
   border-color: var(--color-action);
   color: var(--color-action);
 }
+
+.sign-out-error {
+  margin: var(--space-2) 0 0;
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}

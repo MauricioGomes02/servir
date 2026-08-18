@@ -1,0 +1,33 @@
+import { defineLocalizedMessages } from '@/shared/i18n';
+export const activityDetailsMessages = defineLocalizedMessages({
+  'pt-BR': {
+    loading: 'Carregando atividade…',
+    cannotContinue: 'Não foi possível continuar',
+    errorDescription: 'Você pode tentar novamente ou voltar para a lista de atividades.',
+    retry: 'Tentar novamente',
+    back: 'Voltar para a lista de atividades',
+    navigation: 'Navegação da atividade',
+    eyebrow: 'Atividade da comunidade',
+    description: 'Contexto para organizar ocorrências e, posteriormente, as pessoas que servirão.',
+    active: 'Ativa',
+    inactive: 'Inativa',
+    participation: 'Participação',
+    ministries: 'Ministérios envolvidos',
+    fallbackError: 'Não foi possível carregar a atividade.',
+  },
+  'en-US': {
+    loading: 'Loading activity…',
+    cannotContinue: 'Could not continue',
+    errorDescription: 'You can try again or return to the activity list.',
+    retry: 'Try again',
+    back: 'Back to the activity list',
+    navigation: 'Activity navigation',
+    eyebrow: 'Community activity',
+    description: 'Context for organizing occurrences and, later, the people who will serve.',
+    active: 'Active',
+    inactive: 'Inactive',
+    participation: 'Participation',
+    ministries: 'Ministries involved',
+    fallbackError: 'The activity could not be loaded.',
+  },
+});

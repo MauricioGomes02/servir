@@ -3,6 +3,8 @@ import { listActivities, type ActivityPage } from '@/entities/activity';
 import { listMinistries, type MinistrySummary } from '@/entities/ministry';
 import { useCreateActivity } from '@/features/create-activity';
 import { HttpProblem } from '@/shared/api';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { activitiesMessages } from './activities.messages';
 import { useRoute, useRouter } from 'vue-router';
 
 function pageNumber(value: unknown): number {
@@ -12,6 +14,7 @@ function pageNumber(value: unknown): number {
 }
 
 export function useActivitiesPage(organizationId: Ref<string>) {
+  const { t } = useLocalizedMessages(activitiesMessages);
   const route = useRoute();
   const router = useRouter();
   const initialSearch = typeof route.query.search === 'string' ? route.query.search.trim() : '';
@@ -57,7 +60,7 @@ export function useActivitiesPage(organizationId: Ref<string>) {
             ? error
             : new HttpProblem({
                 type: 'about:blank',
-                title: 'Não foi possível carregar as atividades.',
+                title: t('fallbackError'),
                 status: 0,
               });
     } finally {

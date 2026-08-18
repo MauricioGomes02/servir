@@ -1,6 +1,9 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { GoogleAuthenticationRouteDependencies } from '../authentication/register-google-authentication-routes.js';
+import { BffAuthenticationErrorCodes } from '../authentication/authentication-error.js';
 import { verifyMutationCsrf, verifyRequestSession } from '../authentication/session-guard.js';
+import { BffMessageKeys } from '../shared/localization.js';
+import { sendBffProblem } from '../shared/problem-details.js';
 
 export function registerSessionGuard(
   app: FastifyInstance,
@@ -15,13 +18,23 @@ export function registerSessionGuard(
     try {
       session = await verifyRequestSession(request, authentication.credentialIssuer);
     } catch {
-      return reply.status(401).send({ code: 'identity.session.invalid' });
+      return sendBffProblem(request, reply, {
+        code: BffAuthenticationErrorCodes.SessionInvalid,
+        messageKey: BffMessageKeys.SessionInvalid,
+        status: 401,
+        type: '/problems/authentication-required',
+      });
     }
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
       try {
         verifyMutationCsrf(request, session, authentication.callbackUrl.origin);
       } catch {
-        return reply.status(403).send({ code: 'identity.csrf.invalid' });
+        return sendBffProblem(request, reply, {
+          code: BffAuthenticationErrorCodes.CsrfInvalid,
+          messageKey: BffMessageKeys.CsrfInvalid,
+          status: 403,
+          type: '/problems/request-forbidden',
+        });
       }
     }
     try {
@@ -29,8 +42,14 @@ export function registerSessionGuard(
         request,
         await authentication.credentialIssuer.issueAccessToken(session.userId),
       );
-    } catch {
-      return reply.status(500).send({ code: 'identity.access_token.issue_failed' });
+    } catch (error) {
+      request.log.error({ err: error }, 'internal access token issue failed');
+      return sendBffProblem(request, reply, {
+        code: BffAuthenticationErrorCodes.AccessTokenIssueFailed,
+        messageKey: BffMessageKeys.AccessTokenIssueFailed,
+        status: 500,
+        type: '/problems/internal-error',
+      });
     }
   });
   return (request) => accessTokens.get(request);

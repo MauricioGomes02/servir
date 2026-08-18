@@ -152,10 +152,19 @@ describe('frontend BFF', () => {
       userId: 'user-id',
     });
     expect(rejectedLogout.statusCode).toBe(403);
+    expect(rejectedLogout.json().errors[0].code).toBe('identity.csrf.invalid');
     expect(logout.statusCode).toBe(204);
+    expect(logout.headers['set-cookie']).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^__Host-servir-session=;.*Path=\/.*HttpOnly.*Secure/),
+        expect.stringMatching(/^__Host-servir-csrf=;.*Path=\/.*Secure/),
+      ]),
+    );
     expect(organization.statusCode).toBe(200);
     expect(anonymous.statusCode).toBe(401);
+    expect(anonymous.json().errors[0].code).toBe('identity.session.invalid');
     expect(mutationWithoutCsrf.statusCode).toBe(403);
+    expect(mutationWithoutCsrf.json().errors[0].code).toBe('identity.csrf.invalid');
     const authorization = new Headers(fetch.mock.calls[0]?.[1]?.headers).get('authorization');
     expect(authorization).toMatch(/^Bearer /);
     const accessToken = authorization?.slice('Bearer '.length) ?? '';
@@ -243,6 +252,12 @@ describe('frontend BFF', () => {
       type: '/problems/upstream-unavailable',
       title: 'O serviço está temporariamente indisponível.',
       status: 502,
+      errors: [
+        {
+          code: 'bff.upstream.unavailable',
+          detail: 'O serviço está temporariamente indisponível.',
+        },
+      ],
     });
   });
 

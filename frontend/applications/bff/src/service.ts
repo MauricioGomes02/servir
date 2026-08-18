@@ -4,6 +4,7 @@ import { AuthenticationCookieCodec } from './authentication/authentication-cooki
 import { GoogleOidcProvider } from './authentication/google-oidc-provider.js';
 import { InternalCredentialIssuer } from './authentication/internal-credential-issuer.js';
 import { ApiUserProvisioningClient } from './authentication/user-provisioning-client.js';
+import { BffConfigError, BffConfigErrorCodes } from './config-error.js';
 
 export async function startService(): Promise<void> {
   const config = readBffConfig(process.env);
@@ -27,9 +28,7 @@ export async function startService(): Promise<void> {
             sessionTtlSeconds: config.authentication.sessionTtlSeconds,
           }
         : (() => {
-            throw new Error(
-              'Google login requires authentication signing and Google OIDC configuration',
-            );
+            throw new BffConfigError(BffConfigErrorCodes.GoogleAuthenticationIncomplete);
           })();
   const app = await createApplication(config, {
     ...(googleAuthentication === undefined ? {} : { googleAuthentication }),

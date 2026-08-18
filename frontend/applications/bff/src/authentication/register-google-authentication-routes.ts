@@ -11,8 +11,32 @@ import {
   verifyMutationCsrf,
   verifyRequestSession,
 } from './session-guard.js';
+import { BffMessageKeys } from '../shared/localization.js';
+import { sendBffProblem } from '../shared/problem-details.js';
+import { BffAuthenticationErrorCodes } from './authentication-error.js';
 
 const LOGIN_TRANSACTION_COOKIE = '__Host-servir-oidc-login';
+
+const loginTransactionCookieOptions = Object.freeze({
+  httpOnly: true,
+  path: '/',
+  sameSite: 'lax' as const,
+  secure: true,
+});
+
+const sessionCookieOptions = Object.freeze({
+  httpOnly: true,
+  path: '/',
+  sameSite: 'lax' as const,
+  secure: true,
+});
+
+const csrfCookieOptions = Object.freeze({
+  httpOnly: false,
+  path: '/',
+  sameSite: 'strict' as const,
+  secure: true,
+});
 
 interface LoginQuery {
   readonly returnPath?: string;
@@ -52,20 +76,22 @@ export async function registerGoogleAuthenticationRoutes(
     ]);
 
     reply.setCookie(LOGIN_TRANSACTION_COOKIE, encryptedTransaction, {
-      httpOnly: true,
+      ...loginTransactionCookieOptions,
       maxAge: dependencies.cookieCodec.loginTransactionTtlSeconds,
-      path: '/',
-      sameSite: 'lax',
-      secure: true,
     });
     return reply.redirect(authorizationUrl.href);
   });
 
   app.get('/bff/auth/google/callback', async (request, reply) => {
     const encryptedTransaction = request.cookies[LOGIN_TRANSACTION_COOKIE];
-    reply.clearCookie(LOGIN_TRANSACTION_COOKIE, { path: '/' });
+    reply.clearCookie(LOGIN_TRANSACTION_COOKIE, loginTransactionCookieOptions);
     if (encryptedTransaction === undefined) {
-      return reply.status(400).send({ code: 'identity.oidc.login_transaction_required' });
+      return sendBffProblem(request, reply, {
+        code: BffAuthenticationErrorCodes.LoginTransactionRequired,
+        messageKey: BffMessageKeys.LoginTransactionRequired,
+        status: 400,
+        type: '/problems/invalid-request',
+      });
     }
     try {
       const transaction =
@@ -78,23 +104,22 @@ export async function registerGoogleAuthenticationRoutes(
       const csrfToken = oidc.randomState();
       const session = await dependencies.credentialIssuer.issueSessionToken(userId, csrfToken);
       reply.setCookie(SESSION_COOKIE, session, {
-        httpOnly: true,
+        ...sessionCookieOptions,
         maxAge: dependencies.sessionTtlSeconds,
-        path: '/',
-        sameSite: 'lax',
-        secure: true,
       });
       reply.setCookie(CSRF_COOKIE, csrfToken, {
-        httpOnly: false,
+        ...csrfCookieOptions,
         maxAge: dependencies.sessionTtlSeconds,
-        path: '/',
-        sameSite: 'strict',
-        secure: true,
       });
       return reply.redirect(transaction.returnPath);
     } catch (error) {
       request.log.warn({ err: error }, 'google oidc callback rejected');
-      return reply.status(401).send({ code: 'identity.oidc.callback_invalid' });
+      return sendBffProblem(request, reply, {
+        code: BffAuthenticationErrorCodes.CallbackInvalid,
+        messageKey: BffMessageKeys.CallbackInvalid,
+        status: 401,
+        type: '/problems/authentication-failed',
+      });
     }
   });
 
@@ -119,10 +144,15 @@ export async function registerGoogleAuthenticationRoutes(
       const verified = await verifyRequestSession(request, dependencies.credentialIssuer);
       verifyMutationCsrf(request, verified, dependencies.callbackUrl.origin);
     } catch {
-      return reply.status(403).send({ code: 'identity.csrf.invalid' });
+      return sendBffProblem(request, reply, {
+        code: BffAuthenticationErrorCodes.CsrfInvalid,
+        messageKey: BffMessageKeys.CsrfInvalid,
+        status: 403,
+        type: '/problems/request-forbidden',
+      });
     }
-    reply.clearCookie(SESSION_COOKIE, { path: '/' });
-    reply.clearCookie(CSRF_COOKIE, { path: '/' });
+    reply.clearCookie(SESSION_COOKIE, sessionCookieOptions);
+    reply.clearCookie(CSRF_COOKIE, csrfCookieOptions);
     return reply.status(204).send();
   });
 }

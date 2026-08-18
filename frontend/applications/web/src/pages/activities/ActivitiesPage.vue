@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { AppButton, AppField, AppIcon, AppStatusBadge } from '@/shared/ui';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { activitiesMessages } from './activities.messages';
 import { useActivitiesPage } from './use-activities-page';
 
 const props = defineProps<{ organizationId: string }>();
@@ -18,15 +20,16 @@ const {
   problem,
   search,
 } = useActivitiesPage(toRef(props, 'organizationId'));
+const { t } = useLocalizedMessages(activitiesMessages);
 </script>
 
 <template>
   <section class="page" aria-labelledby="activities-title">
     <header class="page-heading page-heading-with-action">
       <div>
-        <p class="eyebrow">Operação</p>
-        <h1 id="activities-title">Atividades</h1>
-        <p>Organize os encontros e ações que precisarão de pessoas servindo.</p>
+        <p class="eyebrow">{{ t('eyebrow') }}</p>
+        <h1 id="activities-title">{{ t('title') }}</h1>
+        <p>{{ t('description') }}</p>
       </div>
       <AppButton
         :variant="creationOpen ? 'secondary' : 'primary'"
@@ -34,7 +37,7 @@ const {
         aria-controls="activity-creation"
         @click="creationOpen = !creationOpen"
       >
-        {{ creationOpen ? 'Fechar formulário' : 'Planejar nova atividade' }}
+        {{ creationOpen ? t('closeForm') : t('plan') }}
       </AppButton>
     </header>
 
@@ -47,12 +50,12 @@ const {
       @submit.prevent="creation.create"
     >
       <fieldset :disabled="creation.creating.value">
-        <legend id="activity-creation-title">Planejar nova atividade</legend>
-        <p>Informe como a comunidade reconhece a atividade e quais ministérios participam dela.</p>
+        <legend id="activity-creation-title">{{ t('plan') }}</legend>
+        <p>{{ t('createDescription') }}</p>
         <AppField
           id="activity-name"
           v-model="creation.name.value"
-          label="Nome da atividade"
+          :label="t('name')"
           :errors="creation.nameErrors.value"
           :maxlength="120"
         />
@@ -62,9 +65,9 @@ const {
             creation.ministryErrors.value.length ? 'activity-ministries-error' : undefined
           "
         >
-          <legend>Ministérios participantes</legend>
+          <legend>{{ t('participantMinistries') }}</legend>
           <p v-if="ministries.length === 0">
-            Crie um ministério ativo antes de planejar uma atividade.
+            {{ t('ministryRequired') }}
           </p>
           <label
             v-for="ministry in ministries"
@@ -103,57 +106,57 @@ const {
           :loading="creation.creating.value"
           :disabled="ministries.length === 0"
         >
-          Criar atividade
+          {{ t('create') }}
         </AppButton>
       </fieldset>
     </form>
 
     <form class="activity-search" role="search" @submit.prevent="applySearch">
-      <label for="activity-search">Buscar atividades</label>
+      <label for="activity-search">{{ t('search') }}</label>
       <div>
         <input id="activity-search" v-model="search" type="search" maxlength="120" />
-        <AppButton type="submit" variant="secondary">Buscar atividades</AppButton>
+        <AppButton type="submit" variant="secondary">{{ t('search') }}</AppButton>
       </div>
     </form>
 
-    <p v-if="loading" class="route-status" role="status">Carregando atividades…</p>
+    <p v-if="loading" class="route-status" role="status">{{ t('loading') }}</p>
     <section v-else-if="problem" class="empty-state" aria-labelledby="activities-error-title">
       <h2 id="activities-error-title">{{ problem.problem.title }}</h2>
-      <p>Você pode tentar carregar novamente sem perder o contexto desta página.</p>
-      <AppButton variant="secondary" @click="load">Tentar novamente</AppButton>
+      <p>{{ t('retryDescription') }}</p>
+      <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
     </section>
     <section
       v-else-if="activities && activities.items.length === 0 && appliedSearch"
       class="empty-state"
       aria-labelledby="activity-search-empty-title"
     >
-      <h2 id="activity-search-empty-title">Nenhuma atividade encontrada</h2>
-      <p>Revise o nome informado ou volte a visualizar todas as atividades ativas.</p>
-      <AppButton variant="secondary" @click="clearSearch">Limpar busca de atividades</AppButton>
+      <h2 id="activity-search-empty-title">{{ t('noResult') }}</h2>
+      <p>{{ t('noResultDescription') }}</p>
+      <AppButton variant="secondary" @click="clearSearch">{{ t('clearSearch') }}</AppButton>
     </section>
     <section
       v-else-if="activities && activities.items.length === 0"
       class="empty-state"
       aria-labelledby="activities-empty-title"
     >
-      <h2 id="activities-empty-title">Comece pela próxima atividade da comunidade</h2>
-      <p>Planeje um encontro ou ação para depois organizar suas ocorrências e escalas.</p>
-      <AppButton :disabled="ministries.length === 0" @click="creationOpen = true"
-        >Planejar primeira atividade</AppButton
-      >
+      <h2 id="activities-empty-title">{{ t('emptyTitle') }}</h2>
+      <p>{{ t('emptyDescription') }}</p>
+      <AppButton :disabled="ministries.length === 0" @click="creationOpen = true">{{
+        t('first')
+      }}</AppButton>
     </section>
     <section v-else-if="activities" aria-labelledby="activity-list-title">
       <div class="activity-list-heading">
         <h2 id="activity-list-title">
           {{ activities.pagination.totalItems }}
-          {{ activities.pagination.totalItems === 1 ? 'atividade ativa' : 'atividades ativas' }}
+          {{ activities.pagination.totalItems === 1 ? t('activeSingular') : t('activePlural') }}
         </h2>
       </div>
       <ul class="activity-list">
         <li v-for="activity in activities.items" :key="activity.id">
           <RouterLink
             class="activity-list-link"
-            :aria-label="`Ver detalhes da atividade ${activity.name}`"
+            :aria-label="`${t('detailsPrefix')} ${activity.name}`"
             :to="{ name: 'activity-details', params: { organizationId, activityId: activity.id } }"
           >
             <div class="activity-summary">
@@ -161,15 +164,13 @@ const {
               <span
                 >{{ activity.ministryCount }}
                 {{
-                  activity.ministryCount === 1
-                    ? 'ministério participante'
-                    : 'ministérios participantes'
+                  activity.ministryCount === 1 ? t('ministrySingular') : t('ministryPlural')
                 }}</span
               >
             </div>
             <div class="activity-list-meta">
-              <AppStatusBadge tone="success">Ativa</AppStatusBadge>
-              <span class="activity-list-action">Ver detalhes <AppIcon name="arrow" /></span>
+              <AppStatusBadge tone="success">{{ t('active') }}</AppStatusBadge>
+              <span class="activity-list-action">{{ t('details') }} <AppIcon name="arrow" /></span>
             </div>
           </RouterLink>
         </li>
@@ -177,22 +178,23 @@ const {
       <nav
         v-if="activities.pagination.totalPages > 1"
         class="activity-pagination"
-        aria-label="Paginação de atividades"
+        :aria-label="t('pagination')"
       >
         <AppButton
           variant="secondary"
           :disabled="activities.pagination.page <= 1"
           @click="goToPage(activities.pagination.page - 1)"
-          >Página anterior</AppButton
+          >{{ t('previous') }}</AppButton
         >
         <p aria-live="polite">
-          Página {{ activities.pagination.page }} de {{ activities.pagination.totalPages }}
+          {{ t('page') }} {{ activities.pagination.page }} {{ t('of') }}
+          {{ activities.pagination.totalPages }}
         </p>
         <AppButton
           variant="secondary"
           :disabled="activities.pagination.page >= activities.pagination.totalPages"
           @click="goToPage(activities.pagination.page + 1)"
-          >Próxima página</AppButton
+          >{{ t('next') }}</AppButton
         >
       </nav>
     </section>

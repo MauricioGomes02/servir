@@ -1,11 +1,14 @@
 import { computed, ref, type Ref } from 'vue';
 import { fieldErrors, HttpProblem } from '@/shared/api';
 import { registerMember, type RegisteredMember } from './register-member';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { registerMemberMessages } from './register-member.messages';
 
 export function useRegisterMember(
   organizationId: Ref<string>,
   afterRegistered: (member: RegisteredMember) => Promise<void>,
 ) {
+  const { t } = useLocalizedMessages(registerMemberMessages);
   const name = ref('');
   const registering = ref(false);
   const problem = ref<HttpProblem>();
@@ -26,7 +29,7 @@ export function useRegisterMember(
           ? error
           : new HttpProblem({
               type: 'about:blank',
-              title: 'Não foi possível cadastrar o membro.',
+              title: t('fallbackError'),
               status: 0,
             });
     } finally {

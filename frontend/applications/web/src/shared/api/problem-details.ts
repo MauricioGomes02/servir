@@ -14,9 +14,13 @@ export interface ProblemDetails {
 }
 
 export class HttpProblem extends Error {
+  readonly code: string;
+
   public constructor(public readonly problem: ProblemDetails) {
-    super(problem.title);
+    const code = problem.errors?.[0]?.code ?? problem.type;
+    super(code);
     this.name = 'HttpProblem';
+    this.code = code;
   }
 }
 

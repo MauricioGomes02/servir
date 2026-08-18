@@ -1,32 +1,30 @@
 <script setup lang="ts">
+import { useLocalizedMessages } from '@/shared/i18n';
+import { organizationHomeMessages } from './organization-home.messages';
+
 defineProps<{ organizationId: string }>();
+const { t } = useLocalizedMessages(organizationHomeMessages);
 </script>
 
 <template>
   <section class="page" aria-labelledby="home-title">
     <header class="page-heading">
-      <p class="eyebrow">Início</p>
-      <h1 id="home-title">O que precisa da sua atenção?</h1>
-      <p>
-        Conforme atividades, disponibilidade e escalas entrarem na rotina, suas próximas ações
-        aparecerão aqui.
-      </p>
+      <p class="eyebrow">{{ t('eyebrow') }}</p>
+      <h1 id="home-title">{{ t('title') }}</h1>
+      <p>{{ t('description') }}</p>
     </header>
 
     <section class="next-step" aria-labelledby="next-step-title">
       <div>
-        <p class="eyebrow">Prepare sua estrutura</p>
-        <h2 id="next-step-title">Organize primeiro os ministérios</h2>
-        <p>
-          Ministérios reúnem as funções, equipes e pessoas que depois participarão das atividades e
-          escalas.
-        </p>
+        <p class="eyebrow">{{ t('prepare') }}</p>
+        <h2 id="next-step-title">{{ t('nextTitle') }}</h2>
+        <p>{{ t('nextDescription') }}</p>
       </div>
       <RouterLink
         class="app-button app-button-primary app-button-large"
         :to="{ name: 'organization-ministries', params: { organizationId } }"
       >
-        Ver ministérios
+        {{ t('action') }}
       </RouterLink>
     </section>
   </section>

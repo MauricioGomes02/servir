@@ -1,12 +1,13 @@
 import type { App, InjectionKey, Ref } from 'vue';
 import { inject, readonly, ref } from 'vue';
 import { messages, type MessageKey } from './messages';
+import { WebRuntimeError, WebRuntimeErrorCodes } from '@/shared/errors';
 
 export const supportedLocales = ['pt-BR', 'en-US'] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 const LOCALE_STORAGE_KEY = 'servir.locale';
-let activeLocale: SupportedLocale = 'pt-BR';
+export const localeState = ref<SupportedLocale>('pt-BR');
 
 function isSupportedLocale(value: unknown): value is SupportedLocale {
   return supportedLocales.includes(value as SupportedLocale);
@@ -28,12 +29,12 @@ const i18nKey: InjectionKey<I18n> = Symbol('servir.i18n');
 
 export function createI18n(locale = initialLocale()) {
   const selectedLocale = ref(locale);
-  activeLocale = locale;
+  localeState.value = locale;
   const i18n: I18n = {
     locale: readonly(selectedLocale),
     setLocale(nextLocale) {
       selectedLocale.value = nextLocale;
-      activeLocale = nextLocale;
+      localeState.value = nextLocale;
       document.documentElement.lang = nextLocale;
       localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
     },
@@ -52,10 +53,12 @@ export function createI18n(locale = initialLocale()) {
 
 export function useI18n(): I18n {
   const i18n = inject(i18nKey);
-  if (i18n === undefined) throw new Error('i18n provider is unavailable');
+  if (i18n === undefined) {
+    throw new WebRuntimeError(WebRuntimeErrorCodes.I18nProviderUnavailable);
+  }
   return i18n;
 }
 
 export function currentLocale(): SupportedLocale {
-  return activeLocale;
+  return localeState.value;
 }

@@ -2,8 +2,11 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { fieldErrors, HttpProblem } from '@/shared/api';
 import { createOrganization } from './create-organization';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { createOrganizationMessages } from './create-organization.messages';
 
 export function useCreateOrganization() {
+  const { t } = useLocalizedMessages(createOrganizationMessages);
   const router = useRouter();
   const name = ref('');
   const submitting = ref(false);
@@ -27,7 +30,7 @@ export function useCreateOrganization() {
           ? error
           : new HttpProblem({
               type: 'about:blank',
-              title: 'Não foi possível conectar à API.',
+              title: t('fallbackError'),
               status: 0,
             });
     } finally {

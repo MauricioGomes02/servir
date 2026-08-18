@@ -1,6 +1,37 @@
 import { HttpProblem, type ProblemDetails } from './problem-details';
 import { currentLocale } from '@/shared/i18n';
 
+export const HttpClientErrorCodes = {
+  InvalidProblemResponse: 'web.http.problem_response.invalid',
+  InvalidSuccessResponse: 'web.http.success_response.invalid',
+  RequestFailed: 'web.http.request.failed',
+} as const;
+
+export type HttpClientErrorCode = (typeof HttpClientErrorCodes)[keyof typeof HttpClientErrorCodes];
+
+export class HttpClientError extends Error {
+  constructor(
+    readonly code: HttpClientErrorCode,
+    options?: ErrorOptions,
+  ) {
+    super(code, options);
+    this.name = 'HttpClientError';
+  }
+}
+
+function isProblemDetails(value: unknown): value is ProblemDetails {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    typeof value.type === 'string' &&
+    'title' in value &&
+    typeof value.title === 'string' &&
+    'status' in value &&
+    typeof value.status === 'number'
+  );
+}
+
 export interface HttpClient {
   get<TResponse>(path: string, signal?: AbortSignal): Promise<TResponse>;
   post<TResponse, TBody>(path: string, body: TBody, signal?: AbortSignal): Promise<TResponse>;
@@ -22,21 +53,42 @@ export function createFetchHttpClient(): HttpClient {
     init: RequestInit,
     signal?: AbortSignal,
   ): Promise<TResponse> {
-    const response = await fetch(path, {
-      ...init,
-      credentials: 'same-origin',
-      headers: {
-        Accept: 'application/json',
-        'Accept-Language': currentLocale(),
-        ...(init.method === 'GET' || init.method === 'HEAD' || csrfToken() === undefined
-          ? {}
-          : { 'x-csrf-token': csrfToken() }),
-        ...init.headers,
-      },
-      signal,
-    });
-    if (!response.ok) throw new HttpProblem((await response.json()) as ProblemDetails);
-    return (await response.json()) as TResponse;
+    let response: Response;
+    try {
+      response = await fetch(path, {
+        ...init,
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+          'Accept-Language': currentLocale(),
+          ...(init.method === 'GET' || init.method === 'HEAD' || csrfToken() === undefined
+            ? {}
+            : { 'x-csrf-token': csrfToken() }),
+          ...init.headers,
+        },
+        signal,
+      });
+    } catch (error) {
+      throw new HttpClientError(HttpClientErrorCodes.RequestFailed, { cause: error });
+    }
+    if (!response.ok) {
+      let problem: unknown;
+      try {
+        problem = await response.json();
+      } catch (error) {
+        throw new HttpClientError(HttpClientErrorCodes.InvalidProblemResponse, { cause: error });
+      }
+      if (!isProblemDetails(problem)) {
+        throw new HttpClientError(HttpClientErrorCodes.InvalidProblemResponse);
+      }
+      throw new HttpProblem(problem);
+    }
+    if (response.status === 204) return undefined as TResponse;
+    try {
+      return (await response.json()) as TResponse;
+    } catch (error) {
+      throw new HttpClientError(HttpClientErrorCodes.InvalidSuccessResponse, { cause: error });
+    }
   }
 
   return {

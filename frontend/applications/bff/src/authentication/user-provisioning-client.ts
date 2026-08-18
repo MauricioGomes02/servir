@@ -9,12 +9,23 @@ export class ApiUserProvisioningClient implements UserProvisioningClient {
   ) {}
 
   async provision(bootstrapAssertion: string): Promise<{ readonly userId: string }> {
-    const response = await fetch(new URL('/identity/users/provision', this.apiBaseUrl), {
-      method: 'POST',
-      headers: { authorization: `Bearer ${bootstrapAssertion}` },
-      signal: AbortSignal.timeout(this.timeoutMs),
-    });
-    if (!response.ok) throw new Error(`user provisioning failed with status ${response.status}`);
+    let response: Response;
+    try {
+      response = await fetch(new URL('/identity/users/provision', this.apiBaseUrl), {
+        method: 'POST',
+        headers: { authorization: `Bearer ${bootstrapAssertion}` },
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (error) {
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.ProvisioningFailed, {
+        cause: error,
+      });
+    }
+    if (!response.ok) {
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.ProvisioningFailed, {
+        cause: Object.freeze({ status: response.status }),
+      });
+    }
     const body: unknown = await response.json();
     if (
       typeof body !== 'object' ||
@@ -22,8 +33,9 @@ export class ApiUserProvisioningClient implements UserProvisioningClient {
       !('userId' in body) ||
       typeof body.userId !== 'string'
     ) {
-      throw new Error('user provisioning returned an invalid response');
+      throw new BffAuthenticationError(BffAuthenticationErrorCodes.ProvisioningResponseInvalid);
     }
     return Object.freeze({ userId: body.userId });
   }
 }
+import { BffAuthenticationError, BffAuthenticationErrorCodes } from './authentication-error.js';

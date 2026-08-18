@@ -1,8 +1,11 @@
 import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
 import { getActivity, type ActivityDetails } from '@/entities/activity';
 import { HttpProblem } from '@/shared/api';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { activityDetailsMessages } from './activity-details.messages';
 
 export function useActivityDetailsPage(organizationId: Ref<string>, activityId: Ref<string>) {
+  const { t } = useLocalizedMessages(activityDetailsMessages);
   const activity = ref<ActivityDetails>();
   const loading = ref(true);
   const problem = ref<HttpProblem>();
@@ -26,7 +29,7 @@ export function useActivityDetailsPage(organizationId: Ref<string>, activityId: 
             ? error
             : new HttpProblem({
                 type: 'about:blank',
-                title: 'Não foi possível carregar a atividade.',
+                title: t('fallbackError'),
                 status: 0,
               });
     } finally {

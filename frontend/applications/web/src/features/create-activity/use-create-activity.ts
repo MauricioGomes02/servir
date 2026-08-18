@@ -1,11 +1,14 @@
 import { computed, ref, type Ref } from 'vue';
 import { fieldErrors, HttpProblem } from '@/shared/api';
 import { createActivity } from './create-activity';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { createActivityMessages } from './create-activity.messages';
 
 export function useCreateActivity(
   organizationId: Ref<string>,
   afterCreated: (activityId: string) => Promise<void>,
 ) {
+  const { t } = useLocalizedMessages(createActivityMessages);
   const name = ref('');
   const ministryIds = ref<string[]>([]);
   const creating = ref(false);
@@ -37,7 +40,7 @@ export function useCreateActivity(
           ? error
           : new HttpProblem({
               type: 'about:blank',
-              title: 'Não foi possível criar a atividade.',
+              title: t('fallbackError'),
               status: 0,
             });
     } finally {

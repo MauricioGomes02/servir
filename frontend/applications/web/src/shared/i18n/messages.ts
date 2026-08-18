@@ -24,6 +24,7 @@ export const messages = {
     'auth.sign_in.unavailable': 'Não foi possível verificar sua sessão.',
     'auth.sign_out.action': 'Sair da minha conta',
     'auth.sign_out.loading': 'Encerrando sua sessão...',
+    'auth.sign_out.unavailable': 'Não foi possível sair. Tente novamente.',
   },
   'en-US': {
     'app.skip_to_content': 'Skip to main content',
@@ -50,6 +51,7 @@ export const messages = {
     'auth.sign_in.unavailable': 'Your session could not be checked.',
     'auth.sign_out.action': 'Sign out of my account',
     'auth.sign_out.loading': 'Signing you out...',
+    'auth.sign_out.unavailable': 'Could not sign out. Please try again.',
   },
 } as const;
 

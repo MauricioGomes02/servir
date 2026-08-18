@@ -1,6 +1,7 @@
 import type { App, InjectionKey, Ref } from 'vue';
 import { inject, readonly, ref } from 'vue';
 import { getSession, type SessionSnapshot } from './session';
+import { WebRuntimeError, WebRuntimeErrorCodes } from '@/shared/errors';
 
 export interface SessionStore {
   readonly loading: Readonly<Ref<boolean>>;
@@ -56,6 +57,8 @@ export function provideSessionStore(app: App, store: SessionStore): void {
 
 export function useSessionStore(): SessionStore {
   const store = inject(sessionStoreKey);
-  if (store === undefined) throw new Error('session store provider is unavailable');
+  if (store === undefined) {
+    throw new WebRuntimeError(WebRuntimeErrorCodes.SessionProviderUnavailable);
+  }
   return store;
 }

@@ -206,6 +206,8 @@ Contém contratos visuais sem domínio, como Button, Field e Dialog. `MinistrySt
 
 Catálogos compartilhados contêm apenas textos globais, como shell, autenticação e configurações. Textos específicos de uma jornada permanecem próximos da page, feature ou entity proprietária e usam o mesmo contrato tipado de tradução. Uma opção de idioma só deve ser apresentada como completa quando todas as superfícies alcançáveis naquela experiência possuírem catálogo correspondente; misturar idiomas na mesma jornada é falha de UX, não fallback aceitável.
 
+Pages e features definem arquivos `*.messages.ts` em colocation. `defineLocalizedMessages` exige que `pt-BR` e `en-US` possuam as mesmas chaves, enquanto `useLocalizedMessages` observa o locale global sem tornar `shared` dependente dos módulos consumidores. Templates, fallbacks de composables, estados, plurais e nomes acessíveis usam o catálogo proprietário; texto literal fica restrito a marcas, valores técnicos e conteúdo não linguístico.
+
 Datas, horários, números e nomes de locale são formatados pelas APIs `Intl` com o locale corrente. Traduzir texto não altera valores de domínio, identificadores, códigos de erro ou instantes transportados pela API.
 
 ### Sessão no navegador
@@ -213,6 +215,8 @@ Datas, horários, números e nomes de locale são formatados pelas APIs `Intl` c
 `shared/auth` contém o contrato de consulta da sessão opaca e seu store, pois não conhece uma página específica. `app/providers` instala a instância e o guard global coordena navegação. Features possuem ações concretas como entrar e sair; pages apenas compõem a jornada.
 
 O navegador recebe cookies de sessão, mas nunca lê o JWT `HttpOnly`. O cookie CSRF legível é ecoado no header das mutações de mesma origem. Quando autenticação não está configurada no BFF, o contrato de sessão informa isso explicitamente e o guard mantém o desenvolvimento local disponível.
+
+Cookies com prefixo `__Host-` são criados e removidos pelo BFF com os mesmos atributos de escopo e segurança (`Path=/`, `Secure`, `SameSite` e `HttpOnly` quando aplicável). O frontend só limpa a sessão local e redireciona após o BFF confirmar o logout; em caso de falha, preserva o estado e apresenta uma mensagem traduzida para que o usuário possa tentar novamente.
 
 ## API pública dos módulos
 
@@ -260,6 +264,18 @@ Numa mutation, o composable expõe o resultado e o orquestrador da experiência 
 Contratos HTTP ficam próximos à operação proprietária, não num `types.ts` global. Criar mapper somente quando houver transformação, proteção de contrato ou clareza real.
 
 O cliente compartilhado normaliza falhas HTTP. A UI decide comportamento por códigos e estrutura de Problem Details, nunca comparando mensagens textuais. O servidor pode fornecer mensagens localizadas como parte do contrato de apresentação, mas não controla navegação ou componentes.
+
+O padrão vale nas três aplicações:
+
+- a API preserva códigos de domínio e application em `errors[].code`;
+- o BFF preserva Problem Details recebidos da API e representa problemas próprios pelo mesmo media type, com código estável e detalhe localizado;
+- a web usa `HttpProblem.code` para decisões e mantém `title` e `detail` exclusivamente para apresentação;
+- falhas técnicas não recuperáveis localmente permanecem exceções tipadas, com `code` estável e `cause` preservada;
+- falhas esperadas são estado discriminado, Result ou Problem Details, nunca exceções identificadas pela mensagem.
+
+O texto passado ao construtor de uma exceção tipada é o próprio código, não uma mensagem humana. Isso mantém logs pesquisáveis e impede que tradução altere controle de fluxo. Mensagens próprias do BFF e da web pertencem aos respectivos catálogos; mensagem técnica, stack e causa ficam na observabilidade.
+
+Respostas `204 No Content` não são desserializadas. Corpo ausente ou Problem Details malformado em outro status é falha técnica codificada do cliente HTTP, distinta da rejeição esperada representada por `HttpProblem`.
 
 ## Configuração, autenticação e autorização
 

@@ -1,9 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { readBffConfig } from './config.js';
+import { BffConfigError, BffConfigErrorCodes, type BffConfigErrorCode } from './config-error.js';
+
+function expectConfigError(environment: NodeJS.ProcessEnv, code: BffConfigErrorCode): void {
+  try {
+    readBffConfig(environment);
+    throw new Error('expected configuration to fail');
+  } catch (error) {
+    expect(error).toBeInstanceOf(BffConfigError);
+    expect((error as BffConfigError).code).toBe(code);
+  }
+}
 
 describe('readBffConfig', () => {
   it('requires the private api endpoint', () => {
-    expect(() => readBffConfig({})).toThrow('API_BASE_URL is required');
+    expectConfigError({}, BffConfigErrorCodes.InvalidApiBaseUrl);
   });
 
   it('applies safe listener defaults', () => {
@@ -15,15 +26,17 @@ describe('readBffConfig', () => {
   });
 
   it('rejects a non-positive upstream timeout', () => {
-    expect(() => readBffConfig({ API_BASE_URL: 'http://api:3000', API_TIMEOUT_MS: '0' })).toThrow(
-      'API_TIMEOUT_MS must be a positive integer',
+    expectConfigError(
+      { API_BASE_URL: 'http://api:3000', API_TIMEOUT_MS: '0' },
+      BffConfigErrorCodes.InvalidApiTimeout,
     );
   });
 
   it('requires a complete signing configuration without a private-key default', () => {
-    expect(() =>
-      readBffConfig({ API_BASE_URL: 'http://api:3000', AUTH_KEY_ID: 'current-key' }),
-    ).toThrow('authentication configuration must be complete');
+    expectConfigError(
+      { API_BASE_URL: 'http://api:3000', AUTH_KEY_ID: 'current-key' },
+      BffConfigErrorCodes.AuthenticationIncomplete,
+    );
 
     expect(
       readBffConfig({
@@ -64,9 +77,10 @@ describe('readBffConfig', () => {
   });
 
   it('requires complete Google OIDC configuration when enabled', () => {
-    expect(() =>
-      readBffConfig({ API_BASE_URL: 'http://api:3000', GOOGLE_OIDC_CLIENT_ID: 'client' }),
-    ).toThrow('google oidc configuration must be complete');
+    expectConfigError(
+      { API_BASE_URL: 'http://api:3000', GOOGLE_OIDC_CLIENT_ID: 'client' },
+      BffConfigErrorCodes.GoogleOidcIncomplete,
+    );
 
     expect(
       readBffConfig({

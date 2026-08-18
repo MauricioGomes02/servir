@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { AppButton, AppField, AppIcon, AppStatusBadge } from '@/shared/ui';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { ministryDetailsMessages } from './ministry-details.messages';
 import { useMinistryDetailsPage } from './use-ministry-details-page';
 
 const props = defineProps<{ organizationId: string; ministryId: string }>();
@@ -8,61 +10,62 @@ const { load, loading, ministry, problem, roleDefinition, roleFormOpen } = useMi
   toRef(props, 'organizationId'),
   toRef(props, 'ministryId'),
 );
+const { t } = useLocalizedMessages(ministryDetailsMessages);
 </script>
 
 <template>
   <section v-if="loading" class="ministry-details-state" aria-live="polite">
-    <p role="status">Carregando ministério…</p>
+    <p role="status">{{ t('loading') }}</p>
   </section>
   <section
     v-else-if="problem"
     class="ministry-details-state"
     aria-labelledby="ministry-details-error-title"
   >
-    <p class="eyebrow">Não foi possível continuar</p>
+    <p class="eyebrow">{{ t('cannotContinue') }}</p>
     <h1 id="ministry-details-error-title">{{ problem.problem.title }}</h1>
-    <p>Você pode tentar novamente ou voltar à lista de ministérios.</p>
+    <p>{{ t('errorDescription') }}</p>
     <div class="ministry-details-actions">
-      <AppButton variant="secondary" @click="load">Tentar novamente</AppButton>
+      <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
       <RouterLink
         :to="{ name: 'organization-ministries', params: { organizationId } }"
         class="app-button app-button-tertiary"
       >
-        Voltar para a lista de ministérios
+        {{ t('back') }}
       </RouterLink>
     </div>
   </section>
   <article v-else-if="ministry" class="ministry-details" aria-labelledby="ministry-title">
-    <nav class="ministry-details-navigation" aria-label="Navegação do ministério">
+    <nav class="ministry-details-navigation" :aria-label="t('navigation')">
       <RouterLink
         class="ministry-back-link app-button app-button-secondary"
         :to="{ name: 'organization-ministries', params: { organizationId } }"
       >
         <AppIcon name="back" />
-        <span>Voltar para a lista de ministérios</span>
+        <span>{{ t('back') }}</span>
       </RouterLink>
     </nav>
     <header class="ministry-details-header">
       <div>
-        <p class="eyebrow">Estrutura ministerial</p>
+        <p class="eyebrow">{{ t('eyebrow') }}</p>
         <h1 id="ministry-title">{{ ministry.name }}</h1>
-        <p>Funções que organizam como as pessoas podem servir neste ministério.</p>
+        <p>{{ t('description') }}</p>
       </div>
       <AppStatusBadge :tone="ministry.status === 'active' ? 'success' : 'neutral'">
-        {{ ministry.status === 'active' ? 'Ativo' : 'Inativo' }}
+        {{ ministry.status === 'active' ? t('active') : t('inactive') }}
       </AppStatusBadge>
     </header>
 
     <section class="ministry-roles" aria-labelledby="ministry-roles-title">
       <header>
         <div>
-          <p class="eyebrow">Organização do serviço</p>
-          <h2 id="ministry-roles-title">Funções ministeriais</h2>
+          <p class="eyebrow">{{ t('serviceOrganization') }}</p>
+          <h2 id="ministry-roles-title">{{ t('roles') }}</h2>
         </div>
         <div class="ministry-role-actions">
           <span>
             {{ ministry.roles.length }}
-            {{ ministry.roles.length === 1 ? 'função' : 'funções' }}
+            {{ ministry.roles.length === 1 ? t('roleSingular') : t('rolePlural') }}
           </span>
           <AppButton
             :variant="roleFormOpen ? 'secondary' : 'primary'"
@@ -70,7 +73,7 @@ const { load, loading, ministry, problem, roleDefinition, roleFormOpen } = useMi
             aria-controls="ministry-role-form"
             @click="roleFormOpen = !roleFormOpen"
           >
-            {{ roleFormOpen ? 'Fechar formulário' : 'Adicionar função ministerial' }}
+            {{ roleFormOpen ? t('closeForm') : t('addRole') }}
           </AppButton>
         </div>
       </header>
@@ -83,14 +86,14 @@ const { load, loading, ministry, problem, roleDefinition, roleFormOpen } = useMi
         @submit.prevent="roleDefinition.defineRole"
       >
         <fieldset :disabled="roleDefinition.defining.value">
-          <legend id="ministry-role-form-title">Criar função ministerial</legend>
+          <legend id="ministry-role-form-title">{{ t('createRole') }}</legend>
           <p class="ministry-role-form-description">
-            Informe como essa responsabilidade é reconhecida pelas pessoas do ministério.
+            {{ t('roleDescription') }}
           </p>
           <AppField
             id="ministry-role-name"
             v-model="roleDefinition.name.value"
-            label="Nome da função ministerial"
+            :label="t('roleName')"
             :errors="roleDefinition.nameErrors.value"
             :maxlength="120"
           />
@@ -102,21 +105,21 @@ const { load, loading, ministry, problem, roleDefinition, roleFormOpen } = useMi
             {{ roleDefinition.problem.value.problem.title }}
           </p>
           <AppButton type="submit" :loading="roleDefinition.defining.value">
-            Criar função ministerial
+            {{ t('createRole') }}
           </AppButton>
           <p class="status" aria-live="polite">
-            {{ roleDefinition.defining.value ? 'Criando função ministerial.' : '' }}
+            {{ roleDefinition.defining.value ? t('creatingRole') : '' }}
           </p>
         </fieldset>
       </form>
       <p v-if="ministry.roles.length === 0" class="ministry-roles-empty">
-        Nenhuma função ministerial foi definida ainda.
+        {{ t('noRoles') }}
       </p>
       <ul v-else>
         <li v-for="role in ministry.roles" :key="role.id">
           <strong>{{ role.name }}</strong>
           <AppStatusBadge :tone="role.status === 'active' ? 'success' : 'neutral'">
-            {{ role.status === 'active' ? 'Ativa' : 'Inativa' }}
+            {{ role.status === 'active' ? t('roleActive') : t('roleInactive') }}
           </AppStatusBadge>
         </li>
       </ul>

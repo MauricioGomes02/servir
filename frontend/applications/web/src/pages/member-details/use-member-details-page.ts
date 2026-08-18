@@ -1,8 +1,11 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
 import { getMember, type MemberDetails } from '@/entities/member';
 import { HttpProblem } from '@/shared/api';
+import { useLocalizedMessages } from '@/shared/i18n';
+import { memberDetailsMessages } from './member-details.messages';
 
 export function useMemberDetailsPage(organizationId: Ref<string>, memberId: Ref<string>) {
+  const { t } = useLocalizedMessages(memberDetailsMessages);
   const member = ref<MemberDetails>();
   const loading = ref(true);
   const problem = ref<HttpProblem>();
@@ -26,7 +29,7 @@ export function useMemberDetailsPage(organizationId: Ref<string>, memberId: Ref<
             ? error
             : new HttpProblem({
                 type: 'about:blank',
-                title: 'Não foi possível carregar o membro.',
+                title: t('fallbackError'),
                 status: 0,
               });
       }
