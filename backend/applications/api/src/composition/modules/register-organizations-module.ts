@@ -3,20 +3,25 @@ import {
   CreateOrganizationMessage,
   GetOrganizationDetailsHandler,
   GetOrganizationDetailsMessage,
+  ListAccessibleOrganizationsHandler,
+  ListAccessibleOrganizationsMessage,
 } from '@/modules/organizations/application';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { OrganizationAccessId } from '@/modules/identity/domain';
 import {
   registerCreateOrganizationRoute,
   registerGetOrganizationDetailsRoute,
+  registerListAccessibleOrganizationsRoute,
 } from '@/modules/organizations/infrastructure';
 import {
   CreateOrganizationPresenter,
   GetOrganizationDetailsPresenter,
+  ListAccessibleOrganizationsPresenter,
 } from '@/modules/organizations/presentation';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
 import {
+  accessibleOrganizationListReader,
   organizationDetailsReader,
   organizationUnitOfWork,
 } from './organizations-persistence-module';
@@ -43,6 +48,12 @@ export const organizationsModule: ApplicationModule = {
         options.persistence.services.get(organizationDetailsReader),
       ),
     );
+    dependencies.mediator.registerHandler(
+      ListAccessibleOrganizationsMessage,
+      new ListAccessibleOrganizationsHandler(
+        options.persistence.services.get(accessibleOrganizationListReader),
+      ),
+    );
   },
   registerRoutes(app, container) {
     const dependencies = container.cradle;
@@ -55,6 +66,11 @@ export const organizationsModule: ApplicationModule = {
       mediator: dependencies.mediator,
       messageTranslator: dependencies.translator,
       presenter: new GetOrganizationDetailsPresenter(dependencies.translator),
+    });
+    registerListAccessibleOrganizationsRoute(app, {
+      mediator: dependencies.mediator,
+      messageTranslator: dependencies.translator,
+      presenter: new ListAccessibleOrganizationsPresenter(dependencies.translator),
     });
   },
 };

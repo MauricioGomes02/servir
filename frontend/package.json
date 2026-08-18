@@ -14,7 +14,8 @@
     "dev:bff": "npm run dev --workspace @servir/bff",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "lint": "eslint . && stylelint \"applications/web/src/**/*.css\" \"applications/web/src/**/*.vue\"",
+    "lint": "npm run lint:encoding && eslint . && stylelint \"applications/web/src/**/*.css\" \"applications/web/src/**/*.vue\"",
+    "lint:encoding": "node scripts/check-text-encoding.mjs",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "check": "npm run format:check && npm run lint && npm run test && npm run build"

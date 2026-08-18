@@ -23,7 +23,7 @@ export function useCreateMinistry(organizationId: Ref<string>, afterCreated: () 
           ? error
           : new HttpProblem({
               type: 'about:blank',
-              title: 'NÃ£o foi possÃ­vel criar o ministÃ©rio.',
+              title: 'Não foi possível criar o ministério.',
               status: 0,
             });
     } finally {

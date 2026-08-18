@@ -195,6 +195,25 @@ describe('frontend BFF', () => {
     expect(response.headers['x-correlation-id']).toBe('correlation-123');
   });
 
+  it('forwards the accessible organization collection to the private api', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ items: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const app = await createApplication(config, { logger: false });
+
+    const response = await app.inject({ method: 'GET', url: '/bff/organizations' });
+    await app.close();
+
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(fetch.mock.calls[0]?.[0].toString()).toBe('http://private-api:3000/organizations');
+    expect(fetch.mock.calls[0]?.[1]).toMatchObject({ method: 'GET' });
+    expect(response.statusCode).toBe(200);
+  });
+
   it('returns a safe problem when the private api is unavailable', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('private address')));
     const app = await createApplication(config, { logger: false });

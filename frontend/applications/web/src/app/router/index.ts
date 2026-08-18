@@ -3,7 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router';
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: { name: 'create-organization' } },
+    {
+      path: '/',
+      name: 'accessible-organizations',
+      component: () =>
+        import('@/pages/accessible-organizations').then(
+          (module) => module.AccessibleOrganizationsPage,
+        ),
+    },
     {
       path: '/organizations/new',
       name: 'create-organization',

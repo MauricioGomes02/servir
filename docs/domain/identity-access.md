@@ -113,10 +113,10 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 5. ~~Implementar login Google, callback, sessão, CSRF e logout no BFF.~~
 6. ~~Validar o access token na API e proteger a primeira rota.~~
 7. ~~Verificar `OrganizationAccess` ativo nas rotas HTTP tenant-scoped.~~
-8. Implementar Microsoft e vinculação explícita de identidades.
-9. Implementar `MemberAccessInvitation` e criação de convite.
-10. Implementar aceitação atômica e `OrganizationAccess` vinculado.
-11. Adicionar seleção segura de Organization e guards no frontend.
+8. ~~Adicionar descoberta e seleção segura de Organizations acessíveis.~~
+9. Implementar Microsoft e vinculação explícita de identidades.
+10. Implementar `MemberAccessInvitation` e criação de convite.
+11. Implementar aceitação atômica e `OrganizationAccess` vinculado.
 12. Expor “Minha conta” e “Meu perfil”.
 13. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
 14. Avaliar solicitação espontânea, revogação, recuperação e RLS.

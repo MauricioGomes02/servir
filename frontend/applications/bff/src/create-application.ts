@@ -148,6 +148,7 @@ export async function createApplication(
   app.post('/bff/organizations', (request, reply) =>
     forwardToApi(request, reply, '/organizations'),
   );
+  app.get('/bff/organizations', (request, reply) => forwardToApi(request, reply, '/organizations'));
   app.get<{ Params: OrganizationParameters }>(
     '/bff/organizations/:organizationId',
     (request, reply) =>

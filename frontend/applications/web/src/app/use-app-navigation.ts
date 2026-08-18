@@ -10,7 +10,7 @@ export function useAppNavigation() {
     const organizationId = route.params.organizationId;
     return typeof organizationId === 'string'
       ? { name: 'organization-home', params: { organizationId } }
-      : { name: 'create-organization' };
+      : { name: 'accessible-organizations' };
   });
 
   return { brandCanNavigate, homeRoute };

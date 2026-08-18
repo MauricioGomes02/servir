@@ -2,6 +2,7 @@ import type { CorrelationId, RequestId } from '@/shared/application/context';
 import type { PresentedError } from '@/shared/presentation';
 
 export const HttpProblemTypes = {
+  AuthenticationRequired: '/problems/authentication-required',
   InternalError: '/problems/internal-error',
   InvalidRequest: '/problems/invalid-request',
   ResourceConflict: '/problems/resource-conflict',

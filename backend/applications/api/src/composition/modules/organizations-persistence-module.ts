@@ -1,10 +1,12 @@
 import type {
+  AccessibleOrganizationListReader,
   OrganizationDetailsReader,
   OrganizationWriteScope,
 } from '@/modules/organizations/application';
 import type { OrganizationCreated } from '@/modules/organizations/domain';
 import {
   mapOrganizationCreatedIntegrationEvent,
+  PostgresAccessibleOrganizationListReader,
   PostgresOrganizationRepository,
   PostgresOrganizationDetailsReader,
 } from '@/modules/organizations/infrastructure';
@@ -19,6 +21,9 @@ export const organizationUnitOfWork = defineService<UnitOfWork<OrganizationWrite
 export const organizationDetailsReader = defineService<OrganizationDetailsReader>(
   'organizations.details-reader',
 );
+export const accessibleOrganizationListReader = defineService<AccessibleOrganizationListReader>(
+  'organizations.accessible-list-reader',
+);
 export function registerOrganizationsPersistence(builder: PostgresPersistenceBuilder): void {
   builder.integrationEvents.register<OrganizationCreated>(
     'organization.created',
@@ -31,5 +36,9 @@ export function registerOrganizationsPersistence(builder: PostgresPersistenceBui
   builder.addValue(
     organizationDetailsReader,
     (pool) => new PostgresOrganizationDetailsReader(pool),
+  );
+  builder.addValue(
+    accessibleOrganizationListReader,
+    (pool) => new PostgresAccessibleOrganizationListReader(pool),
   );
 }

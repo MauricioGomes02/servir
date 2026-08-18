@@ -13,6 +13,7 @@ import { Pool } from 'pg';
 
 import { createPostgresPersistence } from './create-postgres-persistence';
 import { organizationAccessReader, userProvisioner } from './modules/identity-persistence-module';
+import { accessibleOrganizationListReader } from './modules/organizations-persistence-module';
 
 const FIRST_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e101';
 const SECOND_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e102';
@@ -135,5 +136,22 @@ describe('PostgreSQL organization access reader', () => {
 
     assert.equal(await reader.hasActiveAccess(organizationId, activeUserId), true);
     assert.equal(await reader.hasActiveAccess(organizationId, revokedUserId), false);
+
+    const organizationReader = persistence.services.get(accessibleOrganizationListReader);
+    const activeOrganizations = await organizationReader.listByUserId(activeUserId);
+    const revokedOrganizations = await organizationReader.listByUserId(revokedUserId);
+    assert.deepEqual(
+      activeOrganizations.map((organization) => ({
+        id: organization.id.toString(),
+        name: organization.name,
+      })),
+      [
+        {
+          id: ACCESS_ORGANIZATION_ID,
+          name: 'Organization access integration fixture',
+        },
+      ],
+    );
+    assert.deepEqual(revokedOrganizations, []);
   });
 });
