@@ -28,6 +28,25 @@ flowchart LR
 
 O navegador não conhece `API_BASE_URL`, endereços internos ou endpoints privados. O BFF pode agregar respostas para uma tarefa, mas não implementa invariantes, autorização ou isolamento de tenant. Estar atrás do BFF também não dispensa a API dessas proteções.
 
+## Estrutura do BFF
+
+O BFF aplica o mesmo princípio de localidade sem reproduzir a arquitetura hexagonal da API:
+
+```text
+src/
+├── authentication/  protocolo OIDC, cookies e credenciais
+├── http/            segurança, sessão e entrega da aplicação web
+├── modules/         rotas agrupadas pela experiência proprietária
+├── shared/          proxy da API e localização sem conhecimento de produto
+└── create-application.ts  composition root
+```
+
+`create-application.ts` apenas instala mecanismos e módulos. Cada diretório em `modules` mantém juntos parâmetros, filtros, paths e registro das suas rotas. Módulos não implementam autorização ou regra de negócio: eles traduzem o contrato público da experiência para a API privada.
+
+O proxy compartilhado preserva método, idioma, conteúdo, credencial interna e correlação, mas não conhece endpoints. A allowlist de filtros permanece no módulo dono da rota. Segurança HTTP, verificação de sessão e entrega da SPA são mecanismos transversais explícitos, não hooks escondidos dentro de módulos de produto.
+
+Mensagens produzidas pelo próprio BFF, como indisponibilidade do upstream e recurso público ausente, usam catálogo com `pt-BR` como padrão e `en-US` como alternativa. Mensagens de domínio continuam pertencendo à API; textos da experiência continuam próximos das páginas e features Vue que os apresentam.
+
 ## Princípios
 
 ### Responsabilidade explícita
@@ -37,6 +56,8 @@ Cada módulo deve possuir uma razão principal para mudar. Uma view não deve si
 ### Alta coesão e colocation
 
 Arquivos que implementam o mesmo comportamento e mudam juntos permanecem próximos. Template Vue, composable, CSS e teste de uma experiência podem compartilhar o mesmo diretório.
+
+No BFF, o mesmo princípio mantém uma rota junto dos parâmetros e filtros que formam seu contrato. Composition root, proxy e hooks transversais não acumulam detalhes de Organizations, Ministries, Members ou Activities.
 
 ### Dependências pequenas e direcionadas
 

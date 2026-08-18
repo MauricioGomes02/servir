@@ -105,5 +105,51 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['applications/bff/src/modules/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../activities/**',
+                '../members/**',
+                '../ministries/**',
+                '../organizations/**',
+                '../../authentication/**',
+                '../../http/**',
+                '../../create-application*',
+              ],
+              message:
+                'BFF route modules can depend on shared mechanisms, not sibling modules or composition.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['applications/bff/src/shared/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../modules/**',
+                '../authentication/**',
+                '../http/**',
+                '../create-application*',
+              ],
+              message: 'BFF shared mechanisms cannot depend on product routes or entry adapters.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   prettier,
 );
