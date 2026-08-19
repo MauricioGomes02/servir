@@ -9,7 +9,7 @@ const { t } = useLocalizedMessages(accessibleOrganizationsMessages);
 </script>
 
 <template>
-  <section class="organization-selector" aria-labelledby="page-title">
+  <main id="main-content" class="organization-selector" tabindex="-1" aria-labelledby="page-title">
     <header class="selector-heading">
       <p class="eyebrow">{{ t('eyebrow') }}</p>
       <h1 id="page-title">{{ t('title') }}</h1>
@@ -64,7 +64,7 @@ const { t } = useLocalizedMessages(accessibleOrganizationsMessages);
       {{ t('another') }}
       <AppIcon name="arrow" />
     </RouterLink>
-  </section>
+  </main>
 </template>
 
 <style src="./accessible-organizations-page.css"></style>

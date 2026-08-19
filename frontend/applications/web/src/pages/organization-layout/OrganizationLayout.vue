@@ -13,10 +13,16 @@ const { t } = useLocalizedMessages(organizationLayoutMessages);
 </script>
 
 <template>
-  <section v-if="loading" class="route-state" aria-live="polite">
+  <main v-if="loading" id="main-content" class="route-state" tabindex="-1" aria-live="polite">
     <p role="status">{{ t('loading') }}</p>
-  </section>
-  <section v-else-if="problem" class="route-state" aria-labelledby="organization-error-title">
+  </main>
+  <main
+    v-else-if="problem"
+    id="main-content"
+    class="route-state"
+    tabindex="-1"
+    aria-labelledby="organization-error-title"
+  >
     <p class="eyebrow">{{ t('cannotContinue') }}</p>
     <h1 id="organization-error-title">{{ problem.problem.title }}</h1>
     <AppButton variant="secondary" @click="load">{{ t('retry') }}</AppButton>
@@ -27,7 +33,7 @@ const { t } = useLocalizedMessages(organizationLayoutMessages);
       <AppIcon name="back" />
       <span>{{ t('back') }}</span>
     </RouterLink>
-  </section>
+  </main>
   <div v-else-if="organization" class="organization-shell">
     <header class="organization-context">
       <span class="workspace-symbol" aria-hidden="true"><AppIcon name="community" /></span>
@@ -43,7 +49,7 @@ const { t } = useLocalizedMessages(organizationLayoutMessages);
     </header>
     <div class="organization-workspace">
       <aside class="organization-sidebar">
-        <nav :aria-label="t('navigation')">
+        <nav id="organization-navigation" tabindex="-1" :aria-label="t('navigation')">
           <ul class="organization-navigation">
             <li>
               <RouterLink
@@ -84,9 +90,9 @@ const { t } = useLocalizedMessages(organizationLayoutMessages);
           </ul>
         </nav>
       </aside>
-      <div class="organization-content">
+      <main id="main-content" class="organization-content" tabindex="-1">
         <RouterView />
-      </div>
+      </main>
     </div>
   </div>
 </template>

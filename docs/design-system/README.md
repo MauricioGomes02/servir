@@ -15,7 +15,13 @@ O frontend usa uma única família de ícones outline, `@lucide/vue`, sempre por
 - não desenhar SVGs isolados nem misturar famílias para resolver uma tela local;
 - não usar ícone como único canal para estado, significado ou ação ambígua.
 
-Atalhos de teclado precisam ser opcionais, visíveis perto do recurso, ignorados durante edição de texto e acompanhados por um fluxo normal de foco. Configurações de aparência usam `Alt+Shift+T`; ao abrir, o foco vai para a opção selecionada, setas e `Home`/`End` percorrem as opções e `Escape` fecha restaurando o foco no acionador.
+Atalhos de teclado precisam ser opcionais, documentados na ajuda, ignorados durante edição de texto e acompanhados por um fluxo normal de foco. `?` abre exclusivamente a ajuda de teclado. Links de salto aparecem no primeiro `Tab` e levam ao conteúdo, à navegação disponível e ao botão de ajuda. Chegar ao botão não abre o diálogo automaticamente: a pessoa mantém o controle e o ativa com `Enter` ou `Espaço`. Portanto, atalhos nunca são a única forma de chegar a uma região ou descobrir o auxílio.
+
+Navegação estrutural não usa combinações globais próprias: modificadores podem ser interceptados por navegador, sistema operacional ou tecnologia assistiva antes de chegarem à aplicação. Landmarks e links de salto cumprem essa responsabilidade sem competir com NVDA, JAWS, Narrator ou VoiceOver. Atalhos futuros ficam reservados a ações frequentes e contextuais, com alternativa visível, ausência de conflito conhecida, possibilidade de descoberta e validação com tecnologia assistiva; a heurística de flexibilidade e eficiência não justifica duplicar indiscriminadamente toda ação.
+
+Ajuda e configurações são responsabilidades distintas. A ajuda explica como operar a interface; configurações alteram aparência, idioma e conta. Seus acionadores e diálogos são independentes, abrir um fecha o outro e nenhuma preferência recebe um segundo atalho com a mesma finalidade. Em particular, configurações não usam `Alt+Shift+T`.
+
+Uma mudança real de rota move o foco programático para o `main` da página ativa, permitindo que teclado e leitor de tela continuem a jornada sem atravessar novamente o cabeçalho e a navegação. O menu da igreja permanece em um `nav` fora do `main`; assim, conteúdo e navegação são regiões irmãs e específicas. Mudanças apenas de query, como busca e paginação, preservam o foco atual. Regiões usam landmarks e nomes acessíveis; não se criam atalhos locais por tela nem se sobrescrevem comandos usuais do navegador ou do leitor de tela.
 
 Os [mockups de referência](assets/) comunicam direção visual e hierarquia, não o estado implementado. Domínio, contratos disponíveis e o guia de experiência continuam soberanos; nenhum dado ou destino conceitual deve ser criado apenas para reproduzir uma imagem.
 

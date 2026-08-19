@@ -4,6 +4,7 @@ import { supportedLocales, useI18n, type SupportedLocale } from '@/shared/i18n';
 import { useThemeControl } from './use-theme-control';
 
 const { locale, setLocale, t } = useI18n();
+const emit = defineEmits<{ opened: [] }>();
 
 function themeLabel(option: 'system' | 'light' | 'dark'): string {
   return {
@@ -28,7 +29,9 @@ const {
   setTrigger,
   themeOptions,
   toggleMenu,
-} = useThemeControl();
+} = useThemeControl(() => emit('opened'));
+
+defineExpose({ close: () => closeMenu(false) });
 </script>
 
 <template>
@@ -41,7 +44,6 @@ const {
       aria-haspopup="dialog"
       :aria-expanded="open"
       aria-controls="appearance-settings"
-      aria-keyshortcuts="Alt+Shift+T"
       @click="toggleMenu"
     >
       <AppIcon name="settings" />
@@ -63,10 +65,7 @@ const {
           {{ t('settings.close') }}
         </AppButton>
       </header>
-      <p id="theme-shortcut" class="theme-shortcut">
-        {{ t('settings.shortcut') }}: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>
-      </p>
-      <fieldset class="theme-options" aria-describedby="theme-shortcut">
+      <fieldset class="theme-options">
         <legend>{{ t('settings.appearance') }}</legend>
         <label v-for="option in themeOptions" :key="option" :for="`theme-${option}`">
           <input

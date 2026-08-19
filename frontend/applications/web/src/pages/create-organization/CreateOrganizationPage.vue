@@ -9,7 +9,7 @@ const { t } = useLocalizedMessages(createOrganizationPageMessages);
 </script>
 
 <template>
-  <section class="hero" aria-labelledby="page-title">
+  <main id="main-content" class="hero" tabindex="-1" aria-labelledby="page-title">
     <RouterLink class="create-organization-back" :to="{ name: 'accessible-organizations' }">
       <AppIcon name="back" />
       <span>{{ t('back') }}</span>
@@ -53,7 +53,7 @@ const { t } = useLocalizedMessages(createOrganizationPageMessages);
         </p>
       </fieldset>
     </form>
-  </section>
+  </main>
 </template>
 
 <style src="./create-organization-page.css"></style>

@@ -91,6 +91,11 @@ describe('OrganizationLayout', () => {
     ).toBeVisible();
     expect(getByRole('link', { name: 'Trocar de igreja' })).toHaveAttribute('href', '/');
     const navigation = getByRole('navigation', { name: 'Navegação da igreja' });
+    expect(navigation).toHaveAttribute('id', 'organization-navigation');
+    expect(navigation).not.toHaveAttribute('aria-keyshortcuts');
+    expect(getByRole('main')).toHaveAttribute('id', 'main-content');
+    expect(getByRole('main')).not.toHaveAttribute('aria-keyshortcuts');
+    expect(navigation.closest('main')).toBeNull();
     expect(getByRole('link', { name: 'Início' })).toHaveClass('is-active');
     expect(getByRole('link', { name: 'Ministérios' })).not.toHaveClass('is-active');
     expect(getByRole('link', { name: 'Membros' })).not.toHaveClass('is-active');

@@ -35,11 +35,20 @@ describe('ThemeControl', () => {
     expect(view.getByRole('radio', { name: 'Usar tema do sistema' })).toHaveFocus();
   });
 
-  it('opens through the shortcut and supports arrow navigation', async () => {
+  it('does not duplicate its explicit control with a keyboard shortcut', async () => {
+    const view = renderThemeControl();
+
+    await fireEvent.keyDown(document, { key: 'T', altKey: true, shiftKey: true });
+    await fireEvent.keyDown(document, { key: '?' });
+
+    expect(view.queryByRole('dialog', { name: 'Configurações' })).not.toBeInTheDocument();
+  });
+
+  it('supports arrow navigation after opening through its explicit control', async () => {
     const view = renderThemeControl();
     const trigger = view.getByRole('button', { name: 'Abrir configurações' });
 
-    await fireEvent.keyDown(document, { key: 'T', altKey: true, shiftKey: true });
+    await fireEvent.click(trigger);
 
     const systemTheme = view.getByRole('radio', { name: 'Usar tema do sistema' });
     expect(systemTheme).toHaveFocus();

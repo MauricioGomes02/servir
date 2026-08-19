@@ -3,16 +3,7 @@ import { readThemePreference, setThemePreference, type ThemePreference } from '.
 
 export const themeOptions: readonly ThemePreference[] = ['system', 'light', 'dark'];
 
-function isEditableTarget(target: EventTarget | null): boolean {
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target instanceof HTMLSelectElement ||
-    (target instanceof HTMLElement && target.isContentEditable)
-  );
-}
-
-export function useThemeControl() {
+export function useThemeControl(onOpen: () => void = () => undefined) {
   const preference = ref(readThemePreference());
   const open = ref(false);
   let panel: HTMLElement | undefined;
@@ -36,6 +27,7 @@ export function useThemeControl() {
   }
 
   async function openMenu(): Promise<void> {
+    onOpen();
     open.value = true;
     await nextTick();
     focusTheme();
@@ -77,16 +69,6 @@ export function useThemeControl() {
     if (event.key === 'Escape' && open.value) {
       closeMenu(true);
       return;
-    }
-
-    if (
-      event.altKey &&
-      event.shiftKey &&
-      event.key.toLowerCase() === 't' &&
-      !isEditableTarget(event.target)
-    ) {
-      event.preventDefault();
-      toggleMenu();
     }
   }
 

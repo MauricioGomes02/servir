@@ -32,9 +32,17 @@ describe('AuthenticatedLayout', () => {
             {
               path: '',
               name: 'accessible-organizations',
-              component: { template: '<RouterLink to="/next">Continue</RouterLink>' },
+              component: {
+                template:
+                  '<main id="main-content" tabindex="-1"><RouterLink to="/next">Continue</RouterLink></main>',
+              },
             },
-            { path: 'next', component: { template: '<p>Next page</p>' } },
+            {
+              path: 'next',
+              component: {
+                template: '<main id="main-content" tabindex="-1"><p>Next page</p></main>',
+              },
+            },
           ],
         },
       ],
@@ -55,6 +63,31 @@ describe('AuthenticatedLayout', () => {
     );
 
     expect(view.getByRole('link', { name: 'Ir para minhas igrejas' })).toHaveAttribute('href', '/');
+    expect(view.getByRole('link', { name: 'Ir para o conteúdo principal' })).toHaveAttribute(
+      'href',
+      '#main-content',
+    );
+    expect(view.getByRole('link', { name: 'Ir para a ajuda de teclado' })).toHaveAttribute(
+      'href',
+      '#keyboard-help-trigger',
+    );
+    expect(view.getByRole('button', { name: 'Abrir ajuda de teclado' })).toHaveAttribute(
+      'id',
+      'keyboard-help-trigger',
+    );
+    expect(view.getByRole('main')).toHaveAttribute('id', 'main-content');
+    await fireEvent.click(view.getByRole('button', { name: 'Abrir configurações' }));
+    expect(view.getByRole('dialog', { name: 'Configurações' })).toBeVisible();
+
+    await fireEvent.click(view.getByRole('button', { name: 'Abrir ajuda de teclado' }));
+    expect(view.getByRole('dialog', { name: 'Navegação por teclado' })).toBeVisible();
+    expect(view.queryByRole('dialog', { name: 'Configurações' })).not.toBeInTheDocument();
+
+    await fireEvent.click(view.getByRole('button', { name: 'Abrir configurações' }));
+    expect(view.getByRole('dialog', { name: 'Configurações' })).toBeVisible();
+    expect(view.queryByRole('dialog', { name: 'Navegação por teclado' })).not.toBeInTheDocument();
+
+    await fireEvent.click(view.getByRole('button', { name: 'Fechar configurações' }));
     await fireEvent.click(view.getByRole('button', { name: 'Abrir configurações' }));
     expect(view.getByRole('dialog', { name: 'Configurações' })).toBeVisible();
 

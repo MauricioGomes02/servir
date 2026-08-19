@@ -6,6 +6,7 @@ import {
   Church,
   Search,
   HandHeart,
+  Keyboard,
   Settings,
   Users,
   X,
@@ -20,7 +21,8 @@ type AppIconName =
   | 'back'
   | 'arrow'
   | 'search'
-  | 'close';
+  | 'close'
+  | 'keyboard';
 
 const icons = {
   settings: Settings,
@@ -32,6 +34,7 @@ const icons = {
   arrow: ArrowRight,
   search: Search,
   close: X,
+  keyboard: Keyboard,
 };
 
 const props = defineProps<{ name: AppIconName }>();
