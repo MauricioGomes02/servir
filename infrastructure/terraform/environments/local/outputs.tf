@@ -43,6 +43,11 @@ output "jaeger_ui_url" {
   value       = module.platform.jaeger_ui_url
 }
 
+output "grafana_ui_url" {
+  description = "Grafana observability exploration UI available on the host."
+  value       = module.platform.grafana_ui_url
+}
+
 output "frontend_url" {
   description = "Containerized frontend BFF URL available on the host."
   value       = module.platform.frontend_url

@@ -116,6 +116,23 @@ variable "jaeger_ui_port" {
   }
 }
 
+variable "grafana_image" {
+  description = "Pinned Grafana image used for local observability exploration."
+  type        = string
+  default     = "grafana/grafana:13.1.1"
+}
+
+variable "grafana_ui_port" {
+  description = "Grafana UI port published only on host loopback."
+  type        = number
+  default     = 3002
+
+  validation {
+    condition     = var.grafana_ui_port >= 1 && var.grafana_ui_port <= 65535
+    error_message = "grafana_ui_port must be between 1 and 65535."
+  }
+}
+
 variable "api_image" {
   description = "Pre-built API image available to the local Docker daemon."
   type        = string

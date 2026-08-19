@@ -15,6 +15,8 @@ otel_collector_image = "otel/opentelemetry-collector-contrib:0.157.0"
 otel_http_port       = 4318
 jaeger_image         = "cr.jaegertracing.io/jaegertracing/jaeger:2.20.0"
 jaeger_ui_port       = 16686
+grafana_image        = "grafana/grafana:13.1.1"
+grafana_ui_port      = 3002
 
 api_image               = "servir-api:local"
 api_port                = 3000

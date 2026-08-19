@@ -72,5 +72,6 @@
 | [068](068-causal-execution-context-and-audit-boundary.md)               | Contexto causal de execução e fronteira de auditoria         | Aceita |
 | [069](069-organization-creator-access-bootstrap.md)                     | Bootstrap do acesso do criador da Organization               | Aceita |
 | [070](070-incremental-hybrid-authorization.md)                          | Estratégia incremental e híbrida de autorização              | Aceita |
+| [071](071-grafana-over-existing-jaeger-traces.md)                       | Grafana sobre os traces existentes no Jaeger                 | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

@@ -4,14 +4,14 @@ Esta pasta concentra recursos operacionais externos às aplicações. Terraform 
 
 ## Responsabilidades
 
-| Responsável                 | Recursos                                                                                                                         |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Terraform `local`           | Redes segmentadas, IPAM, volumes protegidos e infraestrutura de execução de PostgreSQL/Kafka/Collector/Jaeger/frontend/API/relay |
-| Terraform `local-messaging` | Tópicos e suas configurações persistentes                                                                                        |
-| Compose                     | Execuções sob demanda de Liquibase                                                                                               |
-| Dockerfiles das aplicações  | Builds multi-stage independentes e reproduzíveis do frontend, da API e do relay                                                  |
-| Pipeline de entrega         | Build, análise, publicação e promoção das referências de imagem                                                                  |
-| Aplicações                  | Consumo dos endpoints e contratos já provisionados                                                                               |
+| Responsável                 | Recursos                                                                                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Terraform `local`           | Redes segmentadas, IPAM, volumes protegidos e infraestrutura de execução de PostgreSQL/Kafka/Collector/Jaeger/Grafana/frontend/API/relay |
+| Terraform `local-messaging` | Tópicos e suas configurações persistentes                                                                                                |
+| Compose                     | Execuções sob demanda de Liquibase                                                                                                       |
+| Dockerfiles das aplicações  | Builds multi-stage independentes e reproduzíveis do frontend, da API e do relay                                                          |
+| Pipeline de entrega         | Build, análise, publicação e promoção das referências de imagem                                                                          |
+| Aplicações                  | Consumo dos endpoints e contratos já provisionados                                                                                       |
 
 Terraform e Compose nunca devem declarar ownership sobre o mesmo container, volume ou rede.
 
@@ -125,15 +125,23 @@ O Terraform aguarda o health check do Kafka, que consulta o broker com `kafka-to
 
 Mapas de ambiente marcados como sensíveis ainda são armazenados no state. As credenciais simplificadas existem apenas para desenvolvimento local. Ambientes compartilhados exigem imagens publicadas por CI, identidades separadas, permissões mínimas e integração com um gerenciador de segredos.
 
-## Visualizar traces
+## Investigar traces
 
-Collector e Jaeger são provisionados pelo mesmo stack `local`. O Collector recebe OTLP/HTTP em `127.0.0.1:4318`, processa os spans com proteção de memória e batch e os encaminha ao Jaeger pela rede interna. Acesse:
+Collector, Jaeger e Grafana são provisionados pelo mesmo stack `local`. O Collector recebe OTLP/HTTP em `127.0.0.1:4318`, processa os spans com proteção de memória e batch e os encaminha ao Jaeger pela rede interna. Grafana consulta o Jaeger por um datasource provisionado e é a entrada principal para exploração:
+
+```text
+http://localhost:3002
+```
+
+O Jaeger continua disponível diretamente para comparação e diagnóstico:
 
 ```text
 http://localhost:16686
 ```
 
-Reinicie API e relay após habilitar `OTEL_SDK_DISABLED=false`. Gere uma requisição, selecione `servir-api` ou `servir-outbox-relay` no campo **Service** do Jaeger e execute **Find Traces**. O armazenamento é efêmero e será perdido quando o container do Jaeger for recriado.
+Reinicie API e relay após habilitar `OTEL_SDK_DISABLED=false`. Gere uma requisição e, no **Explore** do Grafana, selecione `Servir traces`. Comece por `servir-api` ou `servir-outbox-relay`, restrinja o período e pesquise pelos nomes estáveis dos spans. Casos de uso da API carregam `servir.use_case.name`; o relay usa `outbox.relay.batch` e `outbox.message.process`, com atributos de messaging, tipo do evento e tentativa.
+
+Consultas úteis devem começar por uma pergunta e estreitar progressivamente serviço, operação, resultado e duração. IDs podem ajudar a investigar uma execução nos traces, mas não devem virar dimensões de métricas futuras. O armazenamento do Jaeger é efêmero e será perdido quando seu container for recriado.
 
 Esse incremento transporta somente traces. Logs continuam estruturados no stdout; métricas e exportação OTLP de logs não fazem parte deste pipeline.
 
@@ -145,7 +153,7 @@ Esse incremento transporta somente traces. Logs continuam estruturados no stdout
 - O relay participa de `data`, `messaging` e `observability`; não publica portas.
 - PostgreSQL participa somente de `data`, e Kafka somente de `messaging`.
 - PostgreSQL e Kafka publicam portas apenas em `127.0.0.1`.
-- Collector e Jaeger publicam OTLP/HTTP e UI apenas em `127.0.0.1`.
+- Collector, Jaeger e Grafana publicam OTLP/HTTP e UIs apenas em `127.0.0.1`.
 - O listener `INTERNAL` do Kafka anuncia `kafka:9092`; o listener `EXTERNAL` anuncia `localhost:29092`.
 - Frontend BFF, API e relay executam como usuário não-root, com root filesystem somente leitura, capabilities removidas e `no-new-privileges`.
 - PLAINTEXT é aceito somente neste ambiente local; produção requer autenticação e criptografia definidas pela IaC do ambiente.
@@ -172,7 +180,8 @@ infrastructure/
 
 ```text
 infrastructure/observability/
-└── otel-collector.yaml                  # pipeline local de traces
+├── otel-collector.yaml                  # pipeline local de traces
+└── grafana/provisioning/                # datasource Jaeger versionado
 ```
 
 Novas migrations são novos changesets imutáveis. Mudanças incompatíveis seguem expand/contract. Novos recursos persistentes entram no Terraform; operações repetíveis e descartáveis permanecem fora do state. O stack de plataforma deve ser aplicado antes do stack de mensageria.

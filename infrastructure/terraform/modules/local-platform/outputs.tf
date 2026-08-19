@@ -43,6 +43,11 @@ output "jaeger_ui_url" {
   value       = "http://localhost:${var.jaeger_ui_port}"
 }
 
+output "grafana_ui_url" {
+  description = "Grafana observability exploration UI available on the host."
+  value       = "http://localhost:${var.grafana_ui_port}"
+}
+
 output "frontend_url" {
   description = "Frontend BFF URL available on the host loopback interface."
   value       = "http://localhost:${var.frontend_port}"

@@ -83,6 +83,7 @@ flowchart LR
     API -. OTLP .-> OTEL[OpenTelemetry Collector]
     RELAY -. OTLP .-> OTEL
     OTEL --> JAEGER[Jaeger]
+    JAEGER --> GRAFANA[Grafana Explore]
 ```
 
 As dependências de código apontam para o núcleo. A Application define ports conforme as necessidades dos casos de uso; adapters traduzem HTTP, persistência, mensageria, identidade, tempo e telemetria.
@@ -157,17 +158,17 @@ Todos os registros estão no [índice de ADRs](docs/decisions/README.md).
 
 ## Tecnologias e responsabilidades
 
-| Tecnologia             | Responsabilidade                                            |
-| ---------------------- | ----------------------------------------------------------- |
-| TypeScript e Node.js   | Domínio tipado, aplicações e adapters                       |
-| Fastify                | Adapter HTTP e ciclo de requisição                          |
-| Awilix                 | Composition root e lifetimes explícitos                     |
-| PostgreSQL             | Estado transacional, isolamento tenant e outbox             |
-| Kafka e CloudEvents    | Transporte e envelope dos Integration Events                |
-| OpenTelemetry e Jaeger | Propagação, coleta e visualização de traces                 |
-| Liquibase              | Evolução externa e versionada do schema                     |
-| Terraform              | Infraestrutura, redes, capacidade e serviços locais         |
-| Docker                 | Artefatos isolados da API, relay e ferramentas operacionais |
+| Tecnologia                      | Responsabilidade                                            |
+| ------------------------------- | ----------------------------------------------------------- |
+| TypeScript e Node.js            | Domínio tipado, aplicações e adapters                       |
+| Fastify                         | Adapter HTTP e ciclo de requisição                          |
+| Awilix                          | Composition root e lifetimes explícitos                     |
+| PostgreSQL                      | Estado transacional, isolamento tenant e outbox             |
+| Kafka e CloudEvents             | Transporte e envelope dos Integration Events                |
+| OpenTelemetry, Jaeger e Grafana | Propagação, coleta e investigação de traces                 |
+| Liquibase                       | Evolução externa e versionada do schema                     |
+| Terraform                       | Infraestrutura, redes, capacidade e serviços locais         |
+| Docker                          | Artefatos isolados da API, relay e ferramentas operacionais |
 
 ## Executar localmente
 
@@ -262,6 +263,7 @@ servir/
 - [Estratégia evolutiva de busca](docs/search-strategy.md)
 - [Estratégia de autorização](docs/authorization.md)
 - [Autenticação: fluxos, credenciais e novos provedores](docs/authentication.md)
+- [Observabilidade: sinais, convenções e investigação](docs/observability.md)
 - [Relay durável de outbox](docs/outbox-relay.md)
 - [Infraestrutura e migrations](infrastructure/README.md)
 - [Roadmap](docs/roadmap.md)

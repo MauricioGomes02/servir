@@ -74,6 +74,16 @@ variable "jaeger_ui_port" {
   type        = number
 }
 
+variable "grafana_image" {
+  description = "Pinned Grafana image used for local observability exploration."
+  type        = string
+}
+
+variable "grafana_ui_port" {
+  description = "Grafana UI port published on the host loopback interface."
+  type        = number
+}
+
 variable "api_image" {
   description = "Pre-built API image reference supplied by the delivery flow."
   type        = string

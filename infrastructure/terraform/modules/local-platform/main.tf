@@ -93,6 +93,11 @@ resource "docker_image" "jaeger" {
   keep_locally = true
 }
 
+resource "docker_image" "grafana" {
+  name         = var.grafana_image
+  keep_locally = true
+}
+
 resource "docker_container" "postgres" {
   name           = "servir-postgres"
   hostname       = "postgres"
@@ -315,6 +320,60 @@ resource "docker_container" "otel_collector" {
   labels {
     label = "servir.configuration"
     value = filesha256("${path.module}/../../../observability/otel-collector.yaml")
+  }
+
+  depends_on = [docker_container.jaeger]
+}
+
+resource "docker_container" "grafana" {
+  name     = "servir-grafana"
+  hostname = "grafana"
+  image    = docker_image.grafana.image_id
+  restart  = "unless-stopped"
+  must_run = true
+
+  env = [
+    "GF_AUTH_ANONYMOUS_ENABLED=true",
+    "GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer",
+    "GF_AUTH_DISABLE_LOGIN_FORM=true",
+    "GF_USERS_ALLOW_SIGN_UP=false",
+  ]
+
+  networks_advanced {
+    name    = docker_network.platform["observability"].name
+    aliases = ["grafana"]
+  }
+
+  ports {
+    internal = 3000
+    external = var.grafana_ui_port
+    ip       = "127.0.0.1"
+  }
+
+  volumes {
+    host_path      = abspath("${path.module}/../../../observability/grafana/provisioning")
+    container_path = "/etc/grafana/provisioning"
+    read_only      = true
+  }
+
+  labels {
+    label = "servir.environment"
+    value = "local"
+  }
+
+  labels {
+    label = "servir.owner"
+    value = "terraform"
+  }
+
+  labels {
+    label = "servir.role"
+    value = "observability-explorer"
+  }
+
+  labels {
+    label = "servir.configuration"
+    value = filesha256("${path.module}/../../../observability/grafana/provisioning/datasources/jaeger.yaml")
   }
 
   depends_on = [docker_container.jaeger]
