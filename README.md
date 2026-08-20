@@ -245,7 +245,8 @@ servir/
 │   ├── decisions/                # Architecture Decision Records
 │   ├── domain/                   # Descoberta e regras do negócio
 │   └── primitives/               # Contratos arquiteturais
-└── .codex/skills/                # Guardrails locais de desenvolvimento
+├── .codex/skills/                # Skills especializadas acionadas por domínio
+└── AGENTS.md                     # Regras operacionais para trabalho no repositório
 ```
 
 ## Documentação
@@ -264,6 +265,7 @@ servir/
 - [Estratégia de autorização](docs/authorization.md)
 - [Autenticação: fluxos, credenciais e novos provedores](docs/authentication.md)
 - [Observabilidade: sinais, convenções e investigação](docs/observability.md)
+- [Uso eficiente do Codex](docs/codex.md)
 - [Relay durável de outbox](docs/outbox-relay.md)
 - [Infraestrutura e migrations](infrastructure/README.md)
 - [Roadmap](docs/roadmap.md)
