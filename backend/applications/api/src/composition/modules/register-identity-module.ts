@@ -6,7 +6,10 @@ import {
 } from '@/modules/identity/infrastructure';
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
-import { organizationAccessReader, userProvisioner } from './identity-persistence-module';
+import {
+  organizationAccessReader,
+  userProvisioner,
+} from '../persistence/identity-persistence-module';
 
 export const identityModule: ApplicationModule = {
   register() {},

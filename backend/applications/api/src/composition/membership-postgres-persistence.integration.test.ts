@@ -16,13 +16,13 @@ import { assertMemberDetailsReaderContract } from '@/modules/membership/infrastr
 import { Pool } from 'pg';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
-import { createPostgresPersistence } from './create-postgres-persistence';
+import { createPostgresPersistence } from './persistence/create-postgres-persistence';
 import {
   memberDetailsReader,
   memberListReader,
   memberUnitOfWork,
   organizationRegistrationFacts,
-} from './modules/membership-persistence-module';
+} from './persistence/membership-persistence-module';
 
 const databaseUrl = requireTestDatabaseUrl();
 

@@ -4,7 +4,7 @@ import {
   PostgresUserProvisioner,
 } from '@/modules/identity/infrastructure';
 
-import type { PostgresPersistenceBuilder } from '../persistence';
+import type { PostgresPersistenceBuilder } from './postgres-persistence-builder';
 import { defineService } from '../services';
 
 export const userProvisioner = defineService<UserProvisioner>('identity.user-provisioner');

@@ -6,7 +6,7 @@ import { Pool } from 'pg';
 import { cleanupOrganizations, requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
 import { createApplication } from './create-application';
-import { createPostgresPersistence } from './create-postgres-persistence';
+import { createPostgresPersistence } from './persistence/create-postgres-persistence';
 
 const databaseUrl = requireTestDatabaseUrl();
 

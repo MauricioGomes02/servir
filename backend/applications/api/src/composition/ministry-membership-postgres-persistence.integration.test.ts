@@ -12,11 +12,11 @@ import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
 import { Pool } from 'pg';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
-import { createPostgresPersistence } from './create-postgres-persistence';
+import { createPostgresPersistence } from './persistence/create-postgres-persistence';
 import {
   ministryMembershipRequestFacts,
   ministryMembershipUnitOfWork,
-} from './modules/ministries-persistence-module';
+} from './persistence/ministries-persistence-module';
 
 const databaseUrl = requireTestDatabaseUrl();
 const ids = {

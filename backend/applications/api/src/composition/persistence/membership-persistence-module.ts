@@ -13,7 +13,7 @@ import {
   PostgresOrganizationRegistrationFactsReader,
 } from '@/modules/membership/infrastructure';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
-import type { PostgresPersistenceBuilder } from '../persistence';
+import type { PostgresPersistenceBuilder } from './postgres-persistence-builder';
 import { defineService } from '../services';
 
 export const memberUnitOfWork =

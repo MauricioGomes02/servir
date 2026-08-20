@@ -13,7 +13,7 @@ import {
 import { PostgresOrganizationAccessRepository } from '@/modules/identity/infrastructure';
 import type { UnitOfWork } from '@/shared/application/unit-of-work';
 import { defineService } from '../services';
-import type { PostgresPersistenceBuilder } from '../persistence';
+import type { PostgresPersistenceBuilder } from './postgres-persistence-builder';
 
 export const organizationUnitOfWork = defineService<UnitOfWork<OrganizationWriteScope>>(
   'organizations.unit-of-work',

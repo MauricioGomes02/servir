@@ -13,13 +13,13 @@ import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
 import { Pool } from 'pg';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
-import { createPostgresPersistence } from './create-postgres-persistence';
+import { createPostgresPersistence } from './persistence/create-postgres-persistence';
 import {
   activityCreationFacts,
   activityDetailsReader,
   activityListReader,
   activityUnitOfWork,
-} from './modules/activities-persistence-module';
+} from './persistence/activities-persistence-module';
 
 const databaseUrl = requireTestDatabaseUrl();
 const ORGANIZATION_ID = '0198f334-6dc5-7c20-9af1-91d7e599d100';

@@ -11,9 +11,12 @@ import { OrganizationId } from '@/modules/organizations/domain';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 import { Pool } from 'pg';
 
-import { createPostgresPersistence } from './create-postgres-persistence';
-import { organizationAccessReader, userProvisioner } from './modules/identity-persistence-module';
-import { accessibleOrganizationListReader } from './modules/organizations-persistence-module';
+import { createPostgresPersistence } from './persistence/create-postgres-persistence';
+import {
+  organizationAccessReader,
+  userProvisioner,
+} from './persistence/identity-persistence-module';
+import { accessibleOrganizationListReader } from './persistence/organizations-persistence-module';
 
 const FIRST_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e101';
 const SECOND_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599e102';

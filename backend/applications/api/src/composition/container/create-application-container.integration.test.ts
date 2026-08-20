@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { createApplicationContainer } from './create-application-container';
-import { createPostgresPersistence } from '../create-postgres-persistence';
+import { createPostgresPersistence } from '../persistence/create-postgres-persistence';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
 describe('createApplicationContainer', () => {

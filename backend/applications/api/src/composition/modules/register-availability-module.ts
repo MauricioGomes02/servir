@@ -13,7 +13,7 @@ import type { ApplicationModule } from './application-module';
 import {
   availabilityRequestOpeningFacts,
   availabilityRequestUnitOfWork,
-} from './availability-persistence-module';
+} from '../persistence/availability-persistence-module';
 
 export const availabilityModule: ApplicationModule = {
   register(container, options) {

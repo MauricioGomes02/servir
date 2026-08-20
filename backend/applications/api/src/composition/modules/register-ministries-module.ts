@@ -74,7 +74,7 @@ import {
   teamLeadershipUnitOfWork,
   ministryListReader,
   ministryDetailsReader,
-} from './ministries-persistence-module';
+} from '../persistence/ministries-persistence-module';
 
 export const ministriesModule: ApplicationModule = {
   register(container, options) {

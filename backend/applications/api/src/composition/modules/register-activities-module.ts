@@ -36,7 +36,7 @@ import {
   activityOccurrenceSchedulingFacts,
   activityOccurrenceUnitOfWork,
   activityUnitOfWork,
-} from './activities-persistence-module';
+} from '../persistence/activities-persistence-module';
 
 export const activitiesModule: ApplicationModule = {
   register(container, options) {

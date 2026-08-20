@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { it } from 'node:test';
 import { createApplication } from '@/composition/create-application';
-import { createPostgresPersistence } from '@/composition/create-postgres-persistence';
+import { createPostgresPersistence } from '@/composition/persistence/create-postgres-persistence';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { cleanupOrganizations, requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 import { Pool } from 'pg';

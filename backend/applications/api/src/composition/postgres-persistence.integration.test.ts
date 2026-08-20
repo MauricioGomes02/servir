@@ -22,11 +22,11 @@ import {
 import { Pool } from 'pg';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 
-import { createPostgresPersistence } from './create-postgres-persistence';
+import { createPostgresPersistence } from './persistence/create-postgres-persistence';
 import {
   organizationDetailsReader,
   organizationUnitOfWork,
-} from './modules/organizations-persistence-module';
+} from './persistence/organizations-persistence-module';
 
 const databaseUrl = requireTestDatabaseUrl();
 

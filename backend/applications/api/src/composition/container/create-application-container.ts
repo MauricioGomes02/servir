@@ -2,7 +2,7 @@ import { createContainer, InjectionMode } from 'awilix';
 
 import type { CreateApplicationOptions } from '../create-application-options';
 import type { ApplicationContainer, ApplicationCradle } from './application-container';
-import { registerCoreDependencies } from '../modules/register-core-dependencies';
+import { registerCoreDependencies } from '../bootstrap/register-core-dependencies';
 import { applicationModules } from '../modules';
 
 export function createApplicationContainer(

@@ -24,7 +24,7 @@ import {
   accessibleOrganizationListReader,
   organizationDetailsReader,
   organizationUnitOfWork,
-} from './organizations-persistence-module';
+} from '../persistence/organizations-persistence-module';
 
 export const organizationsModule: ApplicationModule = {
   register(container, options) {

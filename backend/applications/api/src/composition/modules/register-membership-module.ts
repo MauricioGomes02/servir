@@ -24,7 +24,7 @@ import {
   memberListReader,
   memberUnitOfWork,
   organizationRegistrationFacts,
-} from './membership-persistence-module';
+} from '../persistence/membership-persistence-module';
 
 export const membershipModule: ApplicationModule = {
   register(container, options) {
