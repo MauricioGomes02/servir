@@ -65,10 +65,10 @@ export class KafkaIntegrationEventPublisher implements IntegrationEventPublisher
 
         try {
           value = JSON.stringify(mapToStructuredCloudEvent(message));
-        } catch {
+        } catch (cause) {
           throw new IntegrationEventPublicationError(
             KafkaPublicationErrorCodes.SerializationFailed,
-            { retryable: false },
+            { cause, retryable: false },
           );
         }
 
@@ -107,7 +107,7 @@ export class KafkaIntegrationEventPublisher implements IntegrationEventPublisher
           isExplicitlyNonRetryable(cause)
             ? KafkaPublicationErrorCodes.PublishRejected
             : KafkaPublicationErrorCodes.PublishFailed,
-          { retryable: !isExplicitlyNonRetryable(cause) },
+          { cause, retryable: !isExplicitlyNonRetryable(cause) },
         );
       } finally {
         span.end();

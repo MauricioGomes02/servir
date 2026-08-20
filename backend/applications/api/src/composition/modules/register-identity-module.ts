@@ -18,12 +18,14 @@ export const identityModule: ApplicationModule = {
       registerOrganizationAccessGuard(
         app,
         options.persistence.services.get(organizationAccessReader),
+        container.cradle.translator,
       );
     }
     if (options.bootstrapAssertionVerifier === undefined) return;
     const dependencies = container.cradle;
     registerProvisionUserRoute(app, {
       bootstrapAssertionVerifier: options.bootstrapAssertionVerifier,
+      messageTranslator: dependencies.translator,
       handler: new ProvisionUserFromExternalIdentityHandler({
         logger: dependencies.logger,
         userIdGenerator: new UuidV7Generator(UserId.create, options.uuidSource),

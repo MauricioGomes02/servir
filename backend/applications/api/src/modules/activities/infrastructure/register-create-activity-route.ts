@@ -5,10 +5,7 @@ import {
   sendPresentedProblem,
   type PresentedHttpProblem,
 } from '@/shared/infrastructure/http/fastify';
-import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
-} from '@/shared/infrastructure/http/problem-details';
+import { presentedHttpProblemForCode } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
@@ -24,29 +21,11 @@ function property(source: unknown, key: string): unknown {
 
 const organizationIdErrors = new Set<string>(Object.values(OrganizationIdErrorCodes));
 function problemMetadata(error: PresentedError): PresentedHttpProblem {
-  if (organizationIdErrors.has(error.code))
-    return {
-      status: 400,
-      type: HttpProblemTypes.InvalidRequest,
-      titleCode: HttpProblemMessageCodes.InvalidRequestTitle,
-    };
-  if (error.code === ActivityCreationErrorCodes.OrganizationNotFound)
-    return {
-      status: 404,
-      type: HttpProblemTypes.ResourceNotFound,
-      titleCode: HttpProblemMessageCodes.ResourceNotFoundTitle,
-    };
-  if (error.code === ActivityCreationErrorCodes.ActiveNameAlreadyExists)
-    return {
-      status: 409,
-      type: HttpProblemTypes.ResourceConflict,
-      titleCode: HttpProblemMessageCodes.ResourceConflictTitle,
-    };
-  return {
-    status: 422,
-    type: HttpProblemTypes.ValidationError,
-    titleCode: HttpProblemMessageCodes.ValidationErrorTitle,
-  };
+  return presentedHttpProblemForCode(error.code, {
+    invalidRequest: [...organizationIdErrors],
+    resourceNotFound: [ActivityCreationErrorCodes.OrganizationNotFound],
+    resourceConflict: [ActivityCreationErrorCodes.ActiveNameAlreadyExists],
+  });
 }
 
 export function registerCreateActivityRoute(

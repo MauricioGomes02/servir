@@ -22,6 +22,10 @@ import {
   PostgresEventOutboxErrorCode,
 } from '@/shared/infrastructure/messaging';
 import type { MessageCatalog } from '@/shared/presentation';
+import {
+  PresentedErrorGroupEmptyError,
+  PresentedErrorGroupEmptyErrorCode,
+} from '@/shared/presentation';
 
 import { createFastifyApplication } from '.';
 
@@ -130,6 +134,34 @@ describe('createFastifyApplication', () => {
 
     assert.equal(response.statusCode, 401);
     assert.equal(response.headers['www-authenticate'], 'Bearer');
+    assert.match(response.headers['content-type'] ?? '', /^application\/problem\+json/);
+    assert.equal(response.json().errors[0].code, AuthenticationErrorCodes.ExpiredAccessToken);
+  });
+
+  it('rejects a malformed bearer credential as an expected coded failure', async () => {
+    const accessTokenVerifier: AccessTokenVerifier = {
+      async verify() {
+        throw new Error('verifier must not be called');
+      },
+    };
+    const app = createFastifyApplication({
+      accessTokenVerifier,
+      correlationIdGenerator: new SequenceIdGenerator([correlationId('correlation-generated')]),
+      logger: new InMemoryLogger(),
+      messageTranslator: new InMemoryMessageTranslator(catalog),
+      requestIdGenerator: new SequenceIdGenerator([requestId(REQUEST_ID)]),
+    });
+    app.get('/actor', async () => ({ accepted: true }));
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/actor',
+      headers: { authorization: 'Basic opaque-token' },
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 401);
+    assert.equal(response.json().errors[0].code, AuthenticationErrorCodes.MissingAccessToken);
   });
 
   it('creates context from the request and exposes effective IDs', async () => {
@@ -255,6 +287,7 @@ describe('createFastifyApplication', () => {
         'http.response.status_code': 500,
         'duration.ms': 25,
         'error.type': 'Error',
+        'error.code': 'http.request.unexpected_failure',
       },
     });
     assert.equal(JSON.stringify(record).includes('secret technical detail'), false);
@@ -313,6 +346,24 @@ describe('createFastifyApplication', () => {
     assert.equal(logger.records.length, 1);
     assert.equal(logger.records[0]?.attributes['error.code'], PostgresEventOutboxErrorCode);
     assert.equal(JSON.stringify(logger.records).includes('secret database detail'), false);
+  });
+
+  it('keeps an unexpected presentation code in observability only', async () => {
+    const { app, logger } = application();
+    app.get('/presentation-failure', async () => {
+      throw new PresentedErrorGroupEmptyError();
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/presentation-failure',
+    });
+    await app.close();
+
+    assert.equal(response.statusCode, 500);
+    assert.equal(response.json().type, '/problems/internal-error');
+    assert.equal(response.body.includes(PresentedErrorGroupEmptyErrorCode), false);
+    assert.equal(logger.records[0]?.attributes['error.code'], PresentedErrorGroupEmptyErrorCode);
   });
 
   it('presents malformed JSON as Problem Details', async () => {

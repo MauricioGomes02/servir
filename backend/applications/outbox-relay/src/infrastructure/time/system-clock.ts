@@ -4,6 +4,7 @@ export const SystemClockErrorCode = 'clock.system.failed' as const;
 
 export class SystemClockError extends Error {
   override readonly name = 'SystemClockError';
+  readonly code = SystemClockErrorCode;
 
   constructor(options?: ErrorOptions) {
     super(SystemClockErrorCode, options);

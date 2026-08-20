@@ -3,10 +3,7 @@ import type { Mediator } from '@/shared/application/mediator';
 import { MemberRegistrationPolicyErrorCodes } from '@/modules/membership/domain';
 import type { RegisterMemberPresenter } from '@/modules/membership/presentation';
 import { OrganizationIdErrorCodes } from '@/modules/organizations/domain';
-import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
-} from '@/shared/infrastructure/http/problem-details';
+import { presentedHttpProblemForCode } from '@/shared/infrastructure/http/problem-details';
 import {
   requireHttpExecutionContext,
   sendPresentedProblem,
@@ -34,27 +31,10 @@ function memberName(body: unknown): unknown {
 const organizationIdErrorCodes = new Set<string>(Object.values(OrganizationIdErrorCodes));
 
 function problemMetadata(error: PresentedError): PresentedHttpProblem {
-  if (organizationIdErrorCodes.has(error.code)) {
-    return {
-      status: 400,
-      type: HttpProblemTypes.InvalidRequest,
-      titleCode: HttpProblemMessageCodes.InvalidRequestTitle,
-    };
-  }
-
-  if (error.code === MemberRegistrationPolicyErrorCodes.OrganizationNotFound) {
-    return {
-      status: 404,
-      type: HttpProblemTypes.ResourceNotFound,
-      titleCode: HttpProblemMessageCodes.ResourceNotFoundTitle,
-    };
-  }
-
-  return {
-    status: 422,
-    type: HttpProblemTypes.ValidationError,
-    titleCode: HttpProblemMessageCodes.ValidationErrorTitle,
-  };
+  return presentedHttpProblemForCode(error.code, {
+    invalidRequest: [...organizationIdErrorCodes],
+    resourceNotFound: [MemberRegistrationPolicyErrorCodes.OrganizationNotFound],
+  });
 }
 
 export function registerMemberRoute(

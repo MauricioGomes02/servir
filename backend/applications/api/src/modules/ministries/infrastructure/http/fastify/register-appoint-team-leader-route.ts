@@ -3,10 +3,7 @@ import {
   requireHttpExecutionContext,
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
-import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
-} from '@/shared/infrastructure/http/problem-details';
+import { presentedHttpProblemForCode } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 import { AppointTeamLeaderMessage } from '../../../application';
@@ -43,29 +40,18 @@ export function registerAppointTeamLeaderRoute(
       );
       const view = dependencies.presenter.present(result, context, request.locale);
       if (view.kind === 'failure') {
-        const missing =
-          view.error.code === TeamLeaderAppointmentPolicyErrorCodes.TeamMembershipNotActive ||
-          view.error.code === TeamLeaderAppointmentPolicyErrorCodes.TeamNotActive;
-        const conflict =
-          view.error.code === TeamLeaderAppointmentPolicyErrorCodes.ActiveLeadershipAlreadyExists;
         return sendPresentedProblem(reply, {
           context,
           error: view.error,
           errors: view.errors,
           locale: request.locale,
-          problem: {
-            status: missing ? 404 : conflict ? 409 : 422,
-            type: missing
-              ? HttpProblemTypes.ResourceNotFound
-              : conflict
-                ? HttpProblemTypes.ResourceConflict
-                : HttpProblemTypes.ValidationError,
-            titleCode: missing
-              ? HttpProblemMessageCodes.ResourceNotFoundTitle
-              : conflict
-                ? HttpProblemMessageCodes.ResourceConflictTitle
-                : HttpProblemMessageCodes.ValidationErrorTitle,
-          },
+          problem: presentedHttpProblemForCode(view.error.code, {
+            resourceNotFound: [
+              TeamLeaderAppointmentPolicyErrorCodes.TeamMembershipNotActive,
+              TeamLeaderAppointmentPolicyErrorCodes.TeamNotActive,
+            ],
+            resourceConflict: [TeamLeaderAppointmentPolicyErrorCodes.ActiveLeadershipAlreadyExists],
+          }),
           translator: dependencies.messageTranslator,
         });
       }

@@ -106,7 +106,7 @@ describe('OutboxRelayWorker', () => {
         level: 'error',
         eventName: 'outbox.relay.cycle.failed',
         context: undefined,
-        attributes: { 'error.code': 'outbox.claim_failed' },
+        attributes: { 'error.type': 'Error', 'error.code': 'outbox.claim_failed' },
       },
     ]);
     assert.equal(JSON.stringify(records).includes('sensitive details'), false);

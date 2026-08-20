@@ -5,8 +5,8 @@ import {
   type PresentedHttpProblem,
 } from '@/shared/infrastructure/http/fastify';
 import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
+  presentedHttpProblemForCode,
+  PresentedHttpProblemKinds,
 } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
@@ -23,23 +23,11 @@ function parameter(params: unknown, key: string): unknown {
     : undefined;
 }
 function problemMetadata(error: PresentedError): PresentedHttpProblem {
-  if (error.code === ApproveMinistryMembershipErrorCodes.MembershipNotFound)
-    return {
-      status: 404,
-      type: HttpProblemTypes.ResourceNotFound,
-      titleCode: HttpProblemMessageCodes.ResourceNotFoundTitle,
-    };
-  if (error.code === MinistryMembershipApprovalErrorCodes.NotRequested)
-    return {
-      status: 409,
-      type: HttpProblemTypes.ResourceConflict,
-      titleCode: HttpProblemMessageCodes.ResourceConflictTitle,
-    };
-  return {
-    status: 400,
-    type: HttpProblemTypes.InvalidRequest,
-    titleCode: HttpProblemMessageCodes.InvalidRequestTitle,
-  };
+  return presentedHttpProblemForCode(error.code, {
+    resourceNotFound: [ApproveMinistryMembershipErrorCodes.MembershipNotFound],
+    resourceConflict: [MinistryMembershipApprovalErrorCodes.NotRequested],
+    fallback: PresentedHttpProblemKinds.InvalidRequest,
+  });
 }
 export function registerApproveMinistryMembershipRoute(
   app: FastifyInstance,

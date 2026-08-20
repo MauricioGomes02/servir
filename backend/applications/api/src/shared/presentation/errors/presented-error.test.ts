@@ -5,7 +5,12 @@ import { createExecutionContext, parseCorrelationId } from '@/shared/application
 import type { MessageTranslator } from '@/shared/presentation/localization';
 import { SupportedLocales } from '@/shared/presentation/localization';
 
-import { presentError } from '.';
+import {
+  presentError,
+  PresentedErrorGroupEmptyError,
+  PresentedErrorGroupEmptyErrorCode,
+  presentErrorGroup,
+} from '.';
 
 describe('presentError', () => {
   it('presents a localized error with parameters and correlation', () => {
@@ -39,5 +44,36 @@ describe('presentError', () => {
     });
     assert.equal(Object.isFrozen(presented), true);
     assert.equal(Object.isFrozen(presented.parameters), true);
+  });
+
+  it('rejects an empty error group with a stable code', () => {
+    const correlationId = parseCorrelationId('correlation-123');
+    assert.equal(correlationId.success, true);
+
+    if (!correlationId.success) {
+      throw new Error('Invalid deterministic test fixture');
+    }
+
+    const translator: MessageTranslator = {
+      translate: ({ code }) => code,
+    };
+
+    assert.throws(
+      () =>
+        presentErrorGroup(
+          { code: 'validation.failed', errors: [] },
+          createExecutionContext({ correlationId: correlationId.value }),
+          SupportedLocales.PortugueseBrazil,
+          translator,
+        ),
+      (error: unknown) => {
+        assert.equal(error instanceof PresentedErrorGroupEmptyError, true);
+        assert.equal(
+          (error as PresentedErrorGroupEmptyError).code,
+          PresentedErrorGroupEmptyErrorCode,
+        );
+        return true;
+      },
+    );
   });
 });

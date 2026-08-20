@@ -12,8 +12,8 @@ import {
   type PresentedHttpProblem,
 } from '@/shared/infrastructure/http/fastify';
 import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
+  presentedHttpProblemForCode,
+  PresentedHttpProblemKinds,
 } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
@@ -36,24 +36,11 @@ const invalidIdCodes = new Set<string>([
 ]);
 
 function problemMetadata(error: PresentedError): PresentedHttpProblem {
-  if (invalidIdCodes.has(error.code)) {
-    return {
-      status: 400,
-      type: HttpProblemTypes.InvalidRequest,
-      titleCode: HttpProblemMessageCodes.InvalidRequestTitle,
-    };
-  }
-
-  if (error.code === GetMemberDetailsErrorCodes.NotFound) {
-    return {
-      status: 404,
-      type: HttpProblemTypes.ResourceNotFound,
-      titleCode: HttpProblemMessageCodes.ResourceNotFoundTitle,
-    };
-  }
-
-  const unsupportedCode: never = error.code as never;
-  return unsupportedCode;
+  return presentedHttpProblemForCode(error.code, {
+    invalidRequest: [...invalidIdCodes],
+    resourceNotFound: [GetMemberDetailsErrorCodes.NotFound],
+    fallback: PresentedHttpProblemKinds.InvalidRequest,
+  });
 }
 
 export function registerGetMemberDetailsRoute(

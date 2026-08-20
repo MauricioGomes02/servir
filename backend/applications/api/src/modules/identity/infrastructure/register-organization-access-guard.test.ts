@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { OrganizationAccessReader } from '../application';
 import {
+  AuthenticationErrorCodes,
   createAuthenticatedActor,
   parseAuthenticatedUserId,
 } from '@/shared/application/authentication';
@@ -12,6 +13,7 @@ import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryMessageTranslator } from '@/shared/infrastructure/localization';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { registerOrganizationAccessGuard } from './register-organization-access-guard';
+import { identityMessageCatalog } from '../presentation';
 
 function requireValue<T>(result: { success: true; value: T } | { success: false }): T {
   assert.equal(result.success, true);
@@ -23,7 +25,10 @@ function createApp(accessReader: OrganizationAccessReader) {
   const actor = createAuthenticatedActor(
     requireValue(parseAuthenticatedUserId('0198f334-6dc5-7c20-9af1-91d7e599c703')),
   );
-  const translator = new InMemoryMessageTranslator(httpProblemMessageCatalog);
+  const translator = new InMemoryMessageTranslator({
+    'pt-BR': { ...httpProblemMessageCatalog['pt-BR'], ...identityMessageCatalog['pt-BR'] },
+    'en-US': { ...httpProblemMessageCatalog['en-US'], ...identityMessageCatalog['en-US'] },
+  });
   const app = createFastifyApplication({
     accessTokenVerifier: {
       async verify() {
@@ -39,7 +44,7 @@ function createApp(accessReader: OrganizationAccessReader) {
       requireValue(parseRequestId('authorization-request')),
     ]),
   });
-  registerOrganizationAccessGuard(app, accessReader);
+  registerOrganizationAccessGuard(app, accessReader, translator);
   app.get('/organizations/:organizationId/resource', async () => ({ allowed: true }));
   return app;
 }
@@ -73,6 +78,20 @@ describe('registerOrganizationAccessGuard', () => {
     });
     await app.close();
     assert.equal(response.statusCode, 403);
+    assert.match(response.headers['content-type'] ?? '', /^application\/problem\+json/);
+    assert.deepEqual(response.json(), {
+      type: '/problems/authorization-denied',
+      title: 'Voc\u00ea n\u00e3o possui permiss\u00e3o para realizar esta opera\u00e7\u00e3o.',
+      status: 403,
+      instance: 'urn:servir:request:authorization-request',
+      correlationId: 'authorization-test',
+      errors: [
+        {
+          code: 'identity.organization_access.forbidden',
+          detail: 'Voc\u00ea n\u00e3o possui acesso a esta organiza\u00e7\u00e3o.',
+        },
+      ],
+    });
   });
 
   it('requires authentication before checking tenant access', async () => {
@@ -90,5 +109,7 @@ describe('registerOrganizationAccessGuard', () => {
     await app.close();
     assert.equal(response.statusCode, 401);
     assert.equal(reads, 0);
+    assert.equal(response.headers['www-authenticate'], 'Bearer');
+    assert.equal(response.json().errors[0].code, AuthenticationErrorCodes.MissingAccessToken);
   });
 });

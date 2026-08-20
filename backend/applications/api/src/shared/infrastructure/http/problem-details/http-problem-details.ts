@@ -3,6 +3,7 @@ import type { PresentedError } from '@/shared/presentation';
 
 export const HttpProblemTypes = {
   AuthenticationRequired: '/problems/authentication-required',
+  AuthorizationDenied: '/problems/authorization-denied',
   InternalError: '/problems/internal-error',
   InvalidRequest: '/problems/invalid-request',
   ResourceConflict: '/problems/resource-conflict',

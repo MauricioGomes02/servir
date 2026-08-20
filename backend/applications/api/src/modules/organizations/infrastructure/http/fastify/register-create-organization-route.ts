@@ -1,13 +1,9 @@
 import { CreateOrganizationMessage } from '@/modules/organizations/application';
 import type { Mediator } from '@/shared/application/mediator';
 import type { CreateOrganizationPresenter } from '@/modules/organizations/presentation';
-import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
-} from '@/shared/infrastructure/http/problem-details';
+import { presentedHttpProblemForCode } from '@/shared/infrastructure/http/problem-details';
 import {
   requireHttpExecutionContext,
-  requireAuthenticatedActor,
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
 import type { MessageTranslator } from '@/shared/presentation';
@@ -33,7 +29,6 @@ export function registerCreateOrganizationRoute(
 ): void {
   app.post('/organizations', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
-    requireAuthenticatedActor(context);
 
     const result = await dependencies.mediator.send(
       CreateOrganizationMessage,
@@ -47,11 +42,9 @@ export function registerCreateOrganizationRoute(
         context,
         error: view.error,
         locale: request.locale,
-        problem: {
-          status: 422,
-          type: HttpProblemTypes.ValidationError,
-          titleCode: HttpProblemMessageCodes.ValidationErrorTitle,
-        },
+        problem: presentedHttpProblemForCode(view.error.code, {
+          authenticationRequired: ['organization.creation.authenticated_actor_required'],
+        }),
         translator: dependencies.messageTranslator,
       });
     }

@@ -7,6 +7,7 @@ import {
   type LogAttributes,
   type LogLevel,
 } from '@servir/application-foundation';
+import { createErrorLogAttributes } from '@servir/node-observability';
 
 export interface OutboxBatchProcessor {
   execute(): Promise<ProcessOutboxBatchResult>;
@@ -44,19 +45,6 @@ export function waitForDelay(milliseconds: number, signal: AbortSignal): Promise
   });
 }
 
-function errorCode(error: unknown): string {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    typeof error.code === 'string'
-  ) {
-    return error.code;
-  }
-
-  return RelayWorkerErrorCode;
-}
-
 export class OutboxRelayWorker {
   private readonly delay: RelayDelay;
 
@@ -71,9 +59,11 @@ export class OutboxRelayWorker {
       try {
         result = await this.dependencies.batchProcessor.execute();
       } catch (error) {
-        this.log(LogLevels.Error, 'outbox.relay.cycle.failed', {
-          'error.code': errorCode(error),
-        });
+        this.log(
+          LogLevels.Error,
+          'outbox.relay.cycle.failed',
+          createErrorLogAttributes(error, { fallbackCode: RelayWorkerErrorCode }),
+        );
         await this.delay(this.dependencies.pollIntervalMilliseconds, signal);
         continue;
       }

@@ -1,9 +1,6 @@
 export { createFastifyApplication } from './create-fastify-application';
 
 export { registerFastifyRequestContext } from './register-fastify-request-context';
-export { requireAuthenticatedActor } from './require-authenticated-actor';
-export { HttpAuthenticationError } from './http-authentication-error';
-
 export { registerFastifyErrorHandler } from './register-fastify-error-handler';
 
 export { FastifyRequestContextError } from './fastify-request-context-error';
@@ -17,9 +14,10 @@ export {
 
 export { requireHttpExecutionContext } from './require-http-execution-context';
 
-export { sendPresentedProblem } from './send-presented-problem';
+export { sendExpectedProblem, sendPresentedProblem } from './send-presented-problem';
 
-export type { PresentedHttpProblem, SendPresentedProblemInput } from './send-presented-problem';
+export type { SendExpectedProblemInput, SendPresentedProblemInput } from './send-presented-problem';
+export type { PresentedHttpProblem } from '../problem-details';
 
 export type { MonotonicNow } from './fastify-request-logger';
 

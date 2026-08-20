@@ -2,13 +2,12 @@ import { ListAccessibleOrganizationsMessage } from '@/modules/organizations/appl
 import type { ListAccessibleOrganizationsPresenter } from '@/modules/organizations/presentation';
 import type { Mediator } from '@/shared/application/mediator';
 import {
-  requireAuthenticatedActor,
   requireHttpExecutionContext,
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
 import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
+  presentedHttpProblem,
+  PresentedHttpProblemKinds,
 } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
@@ -23,7 +22,6 @@ export function registerListAccessibleOrganizationsRoute(
 ): void {
   app.get('/organizations', async (request, reply) => {
     const context = requireHttpExecutionContext(request.executionContext);
-    requireAuthenticatedActor(context);
     const result = await dependencies.mediator.send(
       ListAccessibleOrganizationsMessage,
       {},
@@ -36,11 +34,7 @@ export function registerListAccessibleOrganizationsRoute(
       error: view.error,
       locale: request.locale,
       translator: dependencies.messageTranslator,
-      problem: {
-        status: 401,
-        type: HttpProblemTypes.AuthenticationRequired,
-        titleCode: HttpProblemMessageCodes.AuthenticationRequiredTitle,
-      },
+      problem: presentedHttpProblem(PresentedHttpProblemKinds.AuthenticationRequired),
     });
   });
 }

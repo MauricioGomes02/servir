@@ -2,6 +2,7 @@ import type { MessageCatalog } from '@/shared/presentation';
 
 export const HttpProblemMessageCodes = {
   AuthenticationRequiredTitle: 'http.problem.authentication_required.title',
+  AuthorizationDeniedTitle: 'http.problem.authorization_denied.title',
   InternalErrorTitle: 'http.problem.internal_error.title',
   InvalidRequestTitle: 'http.problem.invalid_request.title',
   ResourceConflictTitle: 'http.problem.resource_conflict.title',
@@ -12,6 +13,8 @@ export const HttpProblemMessageCodes = {
 export const httpProblemMessageCatalog: MessageCatalog = Object.freeze({
   'pt-BR': Object.freeze({
     [HttpProblemMessageCodes.AuthenticationRequiredTitle]: 'Entre na sua conta para continuar.',
+    [HttpProblemMessageCodes.AuthorizationDeniedTitle]:
+      'Você não possui permissão para realizar esta operação.',
     [HttpProblemMessageCodes.ResourceConflictTitle]:
       'A requisição conflita com o estado atual do recurso.',
     [HttpProblemMessageCodes.ResourceNotFoundTitle]: 'O recurso solicitado não foi encontrado.',
@@ -21,6 +24,8 @@ export const httpProblemMessageCatalog: MessageCatalog = Object.freeze({
   }),
   'en-US': Object.freeze({
     [HttpProblemMessageCodes.AuthenticationRequiredTitle]: 'Sign in to continue.',
+    [HttpProblemMessageCodes.AuthorizationDeniedTitle]:
+      'You do not have permission to perform this operation.',
     [HttpProblemMessageCodes.ResourceConflictTitle]:
       'The request conflicts with the current resource state.',
     [HttpProblemMessageCodes.ResourceNotFoundTitle]: 'The requested resource was not found.',

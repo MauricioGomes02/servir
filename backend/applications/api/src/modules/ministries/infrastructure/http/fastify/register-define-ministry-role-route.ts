@@ -8,10 +8,7 @@ import {
   sendPresentedProblem,
   type PresentedHttpProblem,
 } from '@/shared/infrastructure/http/fastify';
-import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
-} from '@/shared/infrastructure/http/problem-details';
+import { presentedHttpProblemForCode } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator, PresentedError } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
@@ -25,29 +22,11 @@ const invalidIdCodes = new Set<string>([
   ...Object.values(MinistryIdErrorCodes),
 ]);
 function metadata(error: PresentedError): PresentedHttpProblem {
-  if (invalidIdCodes.has(error.code))
-    return {
-      status: 400,
-      type: HttpProblemTypes.InvalidRequest,
-      titleCode: HttpProblemMessageCodes.InvalidRequestTitle,
-    };
-  if (error.code === DefineMinistryRoleErrorCodes.MinistryNotFound)
-    return {
-      status: 404,
-      type: HttpProblemTypes.ResourceNotFound,
-      titleCode: HttpProblemMessageCodes.ResourceNotFoundTitle,
-    };
-  if (error.code === MinistryRoleDefinitionErrorCodes.ActiveNameAlreadyExists)
-    return {
-      status: 409,
-      type: HttpProblemTypes.ResourceConflict,
-      titleCode: HttpProblemMessageCodes.ResourceConflictTitle,
-    };
-  return {
-    status: 422,
-    type: HttpProblemTypes.ValidationError,
-    titleCode: HttpProblemMessageCodes.ValidationErrorTitle,
-  };
+  return presentedHttpProblemForCode(error.code, {
+    invalidRequest: [...invalidIdCodes],
+    resourceNotFound: [DefineMinistryRoleErrorCodes.MinistryNotFound],
+    resourceConflict: [MinistryRoleDefinitionErrorCodes.ActiveNameAlreadyExists],
+  });
 }
 export function registerDefineMinistryRoleRoute(
   app: FastifyInstance,

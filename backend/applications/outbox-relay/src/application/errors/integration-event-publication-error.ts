@@ -6,9 +6,9 @@ export class IntegrationEventPublicationError extends Error {
 
   constructor(
     code: string = IntegrationEventPublicationErrorCode,
-    options: Readonly<{ retryable?: boolean }> = {},
+    options: Readonly<{ cause?: unknown; retryable?: boolean }> = {},
   ) {
-    super(code);
+    super(code, options.cause === undefined ? undefined : { cause: options.cause });
     this.name = 'IntegrationEventPublicationError';
     this.code = code;
     this.retryable = options.retryable ?? true;

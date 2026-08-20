@@ -2,6 +2,8 @@ import type { ExecutionContext } from '@/shared/application/context';
 import type { NotificationError, NotificationErrorParams } from '@/shared/domain/notification';
 import type { MessageTranslator, SupportedLocale } from '@/shared/presentation/localization';
 
+import { PresentedErrorGroupEmptyError } from './presented-error-group-empty-error';
+
 export interface PresentedError {
   readonly code: string;
   readonly message: string;
@@ -47,6 +49,6 @@ export function presentErrorGroup(
 ): Readonly<{ error: PresentedError; errors: readonly PresentedError[] }> {
   const presented = presentErrors(errors, context, locale, translator);
   const primary = presented[0];
-  if (primary === undefined) throw new Error('presented_error.empty_collection');
+  if (primary === undefined) throw new PresentedErrorGroupEmptyError();
   return Object.freeze({ error: primary, errors: presented });
 }

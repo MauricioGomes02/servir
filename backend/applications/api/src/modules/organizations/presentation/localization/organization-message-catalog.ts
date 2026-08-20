@@ -8,6 +8,8 @@ export const organizationMessageCatalog: MessageCatalog = Object.freeze({
     'organization.details.not_found': 'Igreja nao encontrada.',
     'organization.accessible_list.authenticated_actor_required':
       'Entre na sua conta para consultar suas igrejas.',
+    'organization.creation.authenticated_actor_required':
+      'Entre na sua conta para criar uma igreja.',
   }),
   'en-US': Object.freeze({
     'organization.name.invalid_type': 'The church name must be text.',
@@ -15,5 +17,6 @@ export const organizationMessageCatalog: MessageCatalog = Object.freeze({
     'organization.name.too_long': 'The church name must have at most {maxLength} characters.',
     'organization.details.not_found': 'Church not found.',
     'organization.accessible_list.authenticated_actor_required': 'Sign in to view your churches.',
+    'organization.creation.authenticated_actor_required': 'Sign in to create a church.',
   }),
 });

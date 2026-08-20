@@ -1,33 +1,65 @@
-import type { AccessTokenVerifier } from '@/shared/application/authentication';
+import {
+  AuthenticationErrorCodes,
+  type AccessTokenVerifier,
+  type AuthenticationError,
+} from '@/shared/application/authentication';
 import { createExecutionContext } from '@/shared/application/context';
+import { failure, success, type Result } from '@/shared/core/result';
+import {
+  presentedHttpProblem,
+  PresentedHttpProblemKinds,
+} from '@/shared/infrastructure/http/problem-details';
+import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 
-import { HttpAuthenticationError } from './http-authentication-error';
+import { requireHttpExecutionContext } from './require-http-execution-context';
+import { sendExpectedProblem } from './send-presented-problem';
 
-function bearerToken(authorization: string | undefined): string | undefined {
-  if (authorization === undefined) return undefined;
+function bearerToken(
+  authorization: string | undefined,
+): Result<string | undefined, AuthenticationError> {
+  if (authorization === undefined) return success(undefined);
 
   const match = /^Bearer ([^\s]+)$/i.exec(authorization);
 
-  if (match === null) throw HttpAuthenticationError.missingAccessToken();
+  if (match === null) return failure({ code: AuthenticationErrorCodes.MissingAccessToken });
 
-  return match[1];
+  return success(match[1]);
 }
 
 export function registerFastifyAuthentication(
   app: FastifyInstance,
   accessTokenVerifier: AccessTokenVerifier,
+  messageTranslator: MessageTranslator,
 ): void {
-  app.addHook('preValidation', async (request) => {
+  app.addHook('preValidation', async (request, reply) => {
     const routeConfig = request.routeOptions.config as { authentication?: string };
     if (routeConfig.authentication === 'bootstrap') return;
-    const accessToken = bearerToken(request.headers.authorization);
+    const token = bearerToken(request.headers.authorization);
 
-    if (accessToken === undefined) return;
+    if (!token.success) {
+      return sendExpectedProblem(reply, {
+        context: requireHttpExecutionContext(request.executionContext),
+        error: token.error,
+        locale: request.locale,
+        problem: presentedHttpProblem(PresentedHttpProblemKinds.AuthenticationRequired),
+        translator: messageTranslator,
+      });
+    }
 
-    const result = await accessTokenVerifier.verify(accessToken);
+    if (token.value === undefined) return;
 
-    if (!result.success) throw new HttpAuthenticationError(result.error.code);
+    const result = await accessTokenVerifier.verify(token.value);
+
+    if (!result.success) {
+      return sendExpectedProblem(reply, {
+        context: requireHttpExecutionContext(request.executionContext),
+        error: result.error,
+        locale: request.locale,
+        problem: presentedHttpProblem(PresentedHttpProblemKinds.AuthenticationRequired),
+        translator: messageTranslator,
+      });
+    }
 
     if (request.executionContext === null) return;
 

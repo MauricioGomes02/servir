@@ -9,11 +9,10 @@ import {
   type LogAttributes,
   type Logger,
 } from '@/shared/application/logging';
+import { createErrorLogAttributes } from '@servir/node-observability';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-interface CodedErrorLike {
-  readonly code?: unknown;
-}
+export const HttpUnexpectedErrorCode = 'http.request.unexpected_failure';
 
 export type MonotonicNow = () => number;
 
@@ -35,19 +34,6 @@ function fallbackContext(requestId: string): ExecutionContext | undefined {
   };
 }
 
-function errorAttributes(error: unknown): LogAttributes {
-  if (!(error instanceof Error)) {
-    return { 'error.type': typeof error };
-  }
-
-  const code = (error as CodedErrorLike).code;
-
-  return {
-    'error.type': error.name,
-    ...(typeof code === 'string' ? { 'error.code': code } : {}),
-  };
-}
-
 export class FastifyRequestLogger {
   private readonly failures = new WeakMap<FastifyRequest, LogAttributes>();
   private readonly startedAt = new WeakMap<FastifyRequest, number>();
@@ -66,7 +52,10 @@ export class FastifyRequestLogger {
   }
 
   markFailed(request: FastifyRequest, error: unknown): void {
-    this.failures.set(request, errorAttributes(error));
+    this.failures.set(
+      request,
+      createErrorLogAttributes(error, { fallbackCode: HttpUnexpectedErrorCode }),
+    );
   }
 
   finish(request: FastifyRequest, reply: FastifyReply): void {

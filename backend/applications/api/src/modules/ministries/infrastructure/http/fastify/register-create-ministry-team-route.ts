@@ -3,10 +3,7 @@ import {
   requireHttpExecutionContext,
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
-import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
-} from '@/shared/infrastructure/http/problem-details';
+import { presentedHttpProblemForCode } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
 import { OrganizationIdErrorCodes } from '@/modules/organizations/domain';
@@ -45,32 +42,16 @@ export function registerCreateMinistryTeamRoute(
       );
       const view = dependencies.presenter.present(result, context, request.locale);
       if (view.kind === 'failure') {
-        const invalidId = idErrorCodes.has(view.error.code);
-        const missing = view.error.code === MinistryTeamCreationPolicyErrorCodes.MinistryNotFound;
-        const conflict =
-          view.error.code === MinistryTeamCreationPolicyErrorCodes.ActiveNameAlreadyExists;
         return sendPresentedProblem(reply, {
           context,
           error: view.error,
           errors: view.errors,
           locale: request.locale,
-          problem: {
-            status: invalidId ? 400 : missing ? 404 : conflict ? 409 : 422,
-            type: invalidId
-              ? HttpProblemTypes.InvalidRequest
-              : missing
-                ? HttpProblemTypes.ResourceNotFound
-                : conflict
-                  ? HttpProblemTypes.ResourceConflict
-                  : HttpProblemTypes.ValidationError,
-            titleCode: invalidId
-              ? HttpProblemMessageCodes.InvalidRequestTitle
-              : missing
-                ? HttpProblemMessageCodes.ResourceNotFoundTitle
-                : conflict
-                  ? HttpProblemMessageCodes.ResourceConflictTitle
-                  : HttpProblemMessageCodes.ValidationErrorTitle,
-          },
+          problem: presentedHttpProblemForCode(view.error.code, {
+            invalidRequest: [...idErrorCodes],
+            resourceNotFound: [MinistryTeamCreationPolicyErrorCodes.MinistryNotFound],
+            resourceConflict: [MinistryTeamCreationPolicyErrorCodes.ActiveNameAlreadyExists],
+          }),
           translator: dependencies.messageTranslator,
         });
       }

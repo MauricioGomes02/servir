@@ -9,8 +9,8 @@ import {
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
 import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
+  presentedHttpProblemForCode,
+  PresentedHttpProblemKinds,
 } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
@@ -39,18 +39,10 @@ export function registerGetMinistryDetailsRoute(
       errors: view.errors,
       locale: request.locale,
       translator: dependencies.messageTranslator,
-      problem:
-        view.error.code === GetMinistryDetailsErrorCodes.MinistryNotFound
-          ? {
-              status: 404,
-              type: HttpProblemTypes.ResourceNotFound,
-              titleCode: HttpProblemMessageCodes.ResourceNotFoundTitle,
-            }
-          : {
-              status: 400,
-              type: HttpProblemTypes.InvalidRequest,
-              titleCode: HttpProblemMessageCodes.InvalidRequestTitle,
-            },
+      problem: presentedHttpProblemForCode(view.error.code, {
+        resourceNotFound: [GetMinistryDetailsErrorCodes.MinistryNotFound],
+        fallback: PresentedHttpProblemKinds.InvalidRequest,
+      }),
     });
   });
 }

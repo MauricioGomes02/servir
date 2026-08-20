@@ -4,8 +4,8 @@ import {
   sendPresentedProblem,
 } from '@/shared/infrastructure/http/fastify';
 import {
-  HttpProblemMessageCodes,
-  HttpProblemTypes,
+  presentedHttpProblemForCode,
+  PresentedHttpProblemKinds,
 } from '@/shared/infrastructure/http/problem-details';
 import type { MessageTranslator } from '@/shared/presentation';
 import type { FastifyInstance } from 'fastify';
@@ -44,35 +44,16 @@ export function registerQualifyMemberForMinistryRoleRoute(
       );
       const view = dependencies.presenter.present(result, context, request.locale);
       if (view.kind === 'failure') {
-        const conflict = Object.values(MinistryRoleQualificationErrorCodes).includes(
-          view.error
-            .code as (typeof MinistryRoleQualificationErrorCodes)[keyof typeof MinistryRoleQualificationErrorCodes],
-        );
         return sendPresentedProblem(reply, {
           context,
           error: view.error,
           errors: view.errors,
           locale: request.locale,
-          problem: {
-            status:
-              view.error.code === QualifyMemberForMinistryRoleErrorCodes.MembershipNotFound
-                ? 404
-                : conflict
-                  ? 409
-                  : 400,
-            type:
-              view.error.code === QualifyMemberForMinistryRoleErrorCodes.MembershipNotFound
-                ? HttpProblemTypes.ResourceNotFound
-                : conflict
-                  ? HttpProblemTypes.ResourceConflict
-                  : HttpProblemTypes.InvalidRequest,
-            titleCode:
-              view.error.code === QualifyMemberForMinistryRoleErrorCodes.MembershipNotFound
-                ? HttpProblemMessageCodes.ResourceNotFoundTitle
-                : conflict
-                  ? HttpProblemMessageCodes.ResourceConflictTitle
-                  : HttpProblemMessageCodes.InvalidRequestTitle,
-          },
+          problem: presentedHttpProblemForCode(view.error.code, {
+            resourceNotFound: [QualifyMemberForMinistryRoleErrorCodes.MembershipNotFound],
+            resourceConflict: Object.values(MinistryRoleQualificationErrorCodes),
+            fallback: PresentedHttpProblemKinds.InvalidRequest,
+          }),
           translator: dependencies.messageTranslator,
         });
       }

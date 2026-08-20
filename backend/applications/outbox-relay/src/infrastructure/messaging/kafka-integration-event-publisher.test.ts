@@ -127,11 +127,12 @@ describe('KafkaIntegrationEventPublisher', () => {
   });
 
   it('classifies explicit non-retryable Kafka failures by stable code', async () => {
+    const cause = Object.assign(new Error('unstable SDK message'), {
+      retriable: false,
+    });
     const producer: KafkaProducer = {
       async send() {
-        throw Object.assign(new Error('unstable SDK message'), {
-          retriable: false,
-        });
+        throw cause;
       },
     };
 
@@ -140,14 +141,16 @@ describe('KafkaIntegrationEventPublisher', () => {
       (error: unknown) =>
         error instanceof IntegrationEventPublicationError &&
         error.code === KafkaPublicationErrorCodes.PublishRejected &&
-        error.retryable === false,
+        error.retryable === false &&
+        error.cause === cause,
     );
   });
 
   it('treats unknown publication failures as retryable', async () => {
+    const cause = new Error('unknown failure');
     const producer: KafkaProducer = {
       async send() {
-        throw new Error('unknown failure');
+        throw cause;
       },
     };
 
@@ -156,7 +159,8 @@ describe('KafkaIntegrationEventPublisher', () => {
       (error: unknown) =>
         error instanceof IntegrationEventPublicationError &&
         error.code === KafkaPublicationErrorCodes.PublishFailed &&
-        error.retryable === true,
+        error.retryable === true &&
+        error.cause === cause,
     );
   });
 

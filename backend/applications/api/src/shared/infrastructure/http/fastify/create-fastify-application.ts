@@ -35,7 +35,11 @@ export function createFastifyApplication(
   registerFastifyRequestLogging(app, requestLogger);
   registerFastifyRequestContext(app, dependencies.correlationIdGenerator);
   if (dependencies.accessTokenVerifier !== undefined) {
-    registerFastifyAuthentication(app, dependencies.accessTokenVerifier);
+    registerFastifyAuthentication(
+      app,
+      dependencies.accessTokenVerifier,
+      dependencies.messageTranslator,
+    );
   }
   registerFastifyErrorHandler(app, requestLogger, dependencies.messageTranslator);
 

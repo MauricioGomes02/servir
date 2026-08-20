@@ -11,6 +11,7 @@ import { traceUseCase } from '@/shared/infrastructure/telemetry';
 import { asFunction } from 'awilix';
 
 import { membershipMessageCatalog } from '@/modules/membership/presentation';
+import { identityMessageCatalog } from '@/modules/identity/presentation';
 import { activityMessageCatalog } from '@/modules/activities/presentation';
 import { availabilityMessageCatalog } from '@/modules/availability/presentation';
 import { ministryMessageCatalog } from '@/modules/ministries/presentation';
@@ -39,6 +40,7 @@ export function registerCoreDependencies(
             ...activityMessageCatalog['pt-BR'],
             ...availabilityMessageCatalog['pt-BR'],
             ...httpProblemMessageCatalog['pt-BR'],
+            ...identityMessageCatalog['pt-BR'],
             ...membershipMessageCatalog['pt-BR'],
             ...ministryMessageCatalog['pt-BR'],
             ...organizationMessageCatalog['pt-BR'],
@@ -47,6 +49,7 @@ export function registerCoreDependencies(
             ...activityMessageCatalog['en-US'],
             ...availabilityMessageCatalog['en-US'],
             ...httpProblemMessageCatalog['en-US'],
+            ...identityMessageCatalog['en-US'],
             ...membershipMessageCatalog['en-US'],
             ...ministryMessageCatalog['en-US'],
             ...organizationMessageCatalog['en-US'],
