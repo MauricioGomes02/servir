@@ -8,7 +8,7 @@ Definir como o Servir decide quem pode executar uma operação sem misturar aute
 
 Estão implementados autenticação Google pelo BFF, `User` interno, sessão segura, access token próprio, `AuthenticatedActor` na API, o bootstrap atômico do `OrganizationAccess` `owner` ao criar uma Organization e o primeiro guard HTTP tenant-scoped baseado em acesso ativo.
 
-Rotas autenticadas que recebem `organizationId` agora exigem um `OrganizationAccess` ativo para o par `UserId + OrganizationId`; ausência de identidade produz `401` e ausência de acesso produz `403`. Capabilities, policies específicas, papéis administrativos adicionais, convites e vínculo com Member permanecem incrementais. Exemplos marcados como planejados não representam APIs disponíveis.
+Rotas autenticadas que recebem `organizationId` agora exigem um `OrganizationAccess` ativo para o par `UserId + OrganizationId`; ausência de identidade produz `401` e ausência de acesso produz `403`. Convites de Member usam essa autorização mínima enquanto não existe capability administrativa mais específica, e o aceite cria ou atualiza atomicamente o vínculo do próprio ator. Capabilities, policies específicas e papéis administrativos adicionais permanecem incrementais. Exemplos marcados como planejados não representam APIs disponíveis.
 
 `GET /organizations` lista somente Organizations ligadas ao ator autenticado por um acesso ativo. O cliente não fornece `userId`; a identidade vem da credencial validada. Essa consulta sustenta a seleção segura de igreja sem transformar conhecimento de um `organizationId` em autorização.
 

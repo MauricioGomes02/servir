@@ -85,6 +85,10 @@ function createFixture(outbox?: EventOutbox) {
       async add(access) {
         storedAccesses.push(access);
       },
+      async findById() {
+        return null;
+      },
+      async save() {},
     },
     outbox: recordingOutbox,
   };

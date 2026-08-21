@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo inicial em implementação. Login Google, sessão segura, `User` global, provisionamento idempotente, credenciais próprias, criação atômica do primeiro `OrganizationAccess` como `owner` e verificação HTTP de acesso ativo nas rotas tenant-scoped estão implementados; capabilities específicas, convites, vínculo com Member e interfaces ainda estão planejados.
+Modelo inicial em implementação. Login Google, sessão segura, `User` global, provisionamento idempotente, credenciais próprias, criação atômica do primeiro `OrganizationAccess` como `owner`, verificação HTTP de acesso ativo, `MemberAccessInvitation` e vínculo explícito com Member estão implementados; capabilities específicas e interfaces ainda estão planejadas.
 
 ## Motivação
 
@@ -47,7 +47,6 @@ MemberAccessInvitation (tenant-scoped)
 ├── OrganizationId
 ├── MemberId
 ├── tokenDigest
-├── intendedVerifiedEmail?
 ├── expiresAt
 └── status: pending | accepted | revoked
 ```
@@ -64,11 +63,11 @@ O caso de uso recebe a identidade exclusivamente pelo `ExecutionContext`; `issue
 
 ### Convite de membro
 
-`InviteMemberToAccess` exige ator autorizado, Organization e Member ativos do mesmo tenant. O token aleatório é produzido por adapter criptograficamente seguro, devolvido apenas ao canal de entrega e persistido como digest. Logs e eventos carregam o ID do convite, nunca o token.
+`InviteMemberToAccess` exige ator com acesso ativo, Organization e Member ativo do mesmo tenant. O token aleatório possui 256 bits de entropia, expira em sete dias, é devolvido apenas ao canal de entrega e persistido como digest SHA-256. O vínculo não depende de e-mail: a posse do token pelo User autenticado autoriza o aceite do Member específico indicado pelo convite.
 
 ### Aceitação
 
-`AcceptMemberAccessInvitation` recebe o User autenticado e o segredo apresentado. A Application busca o convite pelo digest, verifica expiração, estado, destinatário e conflitos atuais. A mesma Unit of Work marca o convite como aceito, cria `OrganizationAccess` e persiste outbox. Falha não consome o convite nem cria acesso parcial.
+`AcceptMemberAccessInvitation` recebe o User autenticado pelo `ExecutionContext` e o segredo apresentado pelo cliente. A Application declara a aquisição dos locks de convite, User e Member, nessa ordem, por um port específico do aceite. O lock do convite resolve sua identidade; os repositories carregam Aggregates somente por identidade, e um Facts Reader orientado ao fluxo consulta o estado atual necessário para a decisão. Depois dos locks, o caso de uso verifica expiração, estado e conflitos atuais e cria um acesso vinculado ou atualiza o acesso ativo existente sem mudar role/status. A mesma Unit of Work marca o convite como aceito e persiste o vínculo; falha não consome o convite nem cria acesso parcial. Os repositories mutáveis usam snapshots locais para atualizar somente propriedades alteradas, sem expor campos à Application nem adicionar versão ao schema. Constraints PostgreSQL preservam as cardinalidades como segunda barreira.
 
 ### Cadastro sem convite
 
@@ -121,8 +120,8 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 8. ~~Adicionar descoberta e seleção segura de Organizations acessíveis.~~
 9. ~~Integrar sessão, login Google e logout à navegação da aplicação web.~~
 10. Implementar Microsoft e vinculação explícita de identidades.
-11. Implementar `MemberAccessInvitation` e criação de convite.
-12. Implementar aceitação atômica e `OrganizationAccess` vinculado.
+11. ~~Implementar `MemberAccessInvitation` e criação de convite.~~
+12. ~~Implementar aceitação atômica e `OrganizationAccess` vinculado.~~
 13. Expor “Minha conta” e “Meu perfil”.
 14. Introduzir permissões técnicas pelos primeiros casos de uso administrativos.
 15. Avaliar solicitação espontânea, revogação, recuperação e RLS.
@@ -132,7 +131,6 @@ Uma segunda identidade externa só pode ser vinculada por fluxo explícito inici
 - usar IDs nominais e constraints compostas tenant-safe;
 - tornar provisionamento e callbacks idempotentes;
 - tratar convite como segredo temporário de uso único;
-- exigir e-mail verificado quando ele restringir o destinatário;
 - registrar fatos auditáveis sem registrar credenciais;
 - autorizar na API mesmo quando a interface oculta uma ação.
 - evoluir roles, capabilities e policies conforme a [estratégia de autorização](../authorization.md).

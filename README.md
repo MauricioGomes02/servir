@@ -39,7 +39,7 @@ O modelo não reduz essa operação a cadastros independentes. Ele preserva regr
 | Área            | Disponível hoje                                           | Evolução planejada                                              |
 | --------------- | --------------------------------------------------------- | --------------------------------------------------------------- |
 | Organizações    | Criação e isolamento multi-tenant                         | Administração do ciclo da organização                           |
-| Membros         | Registro, consulta de detalhes e listagem paginada        | Associação com identidade de acesso                             |
+| Membros         | Registro, consulta, listagem e vínculo explícito com User | Interfaces de convite e perfil pessoal                          |
 | Atividades      | Criação, consulta de detalhes e listagem paginada         | Ocorrências recorrentes, reagendamento e cancelamento           |
 | Ministérios     | Criação, funções, solicitação e aprovação de participação | Suspensão, encerramento e reativação                            |
 | Pessoas e times | Qualificações, times, participação e liderança vigente    | Apoio temporário e substituição de liderança                    |

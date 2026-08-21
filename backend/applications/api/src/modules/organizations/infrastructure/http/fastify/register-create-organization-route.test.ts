@@ -81,7 +81,13 @@ function fixture() {
         organizations.push(organization);
       },
     },
-    organizationAccesses: { async add() {} },
+    organizationAccesses: {
+      async add() {},
+      async findById() {
+        return null;
+      },
+      async save() {},
+    },
     outbox: {
       async add(received: readonly EventEnvelope[]) {
         envelopes.push(...received);

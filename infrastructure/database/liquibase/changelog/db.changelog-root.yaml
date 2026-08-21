@@ -62,3 +62,6 @@ databaseChangeLog:
   - include:
       file: changes/020-create-organization-accesses.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/021-create-member-access-invitations.sql
+      relativeToChangelogFile: true
