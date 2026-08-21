@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import {
+  createAuthenticatedActor,
+  parseAuthenticatedUserId,
+} from '@/shared/application/authentication';
+import { success } from '@/shared/core/result';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
 import { Pool } from 'pg';
 import { cleanupOrganizations, requireTestDatabaseUrl } from '@/test-support/postgres-integration';
@@ -50,7 +55,92 @@ const UUIDS = [
   '0198f334-6dc5-7c20-9af1-91d7e599c7d5',
 ];
 
+const AUTHORIZATION_REGRESSION_USER_ID = '0198f334-6dc5-7c20-9af1-91d7e599c8a1';
+const AUTHORIZATION_REGRESSION_ORGANIZATION_A_ID = '0198f334-6dc5-7c20-9af1-91d7e599c8a2';
+const AUTHORIZATION_REGRESSION_ORGANIZATION_B_ID = '0198f334-6dc5-7c20-9af1-91d7e599c8a3';
+const AUTHORIZATION_REGRESSION_ACCESS_ID = '0198f334-6dc5-7c20-9af1-91d7e599c8a4';
+const AUTHORIZATION_REGRESSION_MEMBER_ID = '0198f334-6dc5-7c20-9af1-91d7e599c8a5';
+
+function requireValue<T>(result: { success: true; value: T } | { success: false }): T {
+  assert.equal(result.success, true);
+  if (!result.success) throw new Error('Invalid deterministic integration fixture');
+  return result.value;
+}
+
 describe('createApplication', () => {
+  it('does not expose members from an organization without active access', async (testContext) => {
+    const databaseUrl = requireTestDatabaseUrl();
+    const inspection = new Pool({ connectionString: databaseUrl });
+    const persistence = createPostgresPersistence(databaseUrl);
+    const actor = createAuthenticatedActor(
+      requireValue(parseAuthenticatedUserId(AUTHORIZATION_REGRESSION_USER_ID)),
+    );
+    const app = createApplication({
+      accessTokenVerifier: {
+        async verify() {
+          return success(actor);
+        },
+      },
+      persistence,
+      logger: new InMemoryLogger(),
+    });
+
+    async function cleanup(): Promise<void> {
+      await inspection.query('DELETE FROM organization_accesses WHERE id = $1', [
+        AUTHORIZATION_REGRESSION_ACCESS_ID,
+      ]);
+      await inspection.query('DELETE FROM users WHERE id = $1', [AUTHORIZATION_REGRESSION_USER_ID]);
+      await cleanupOrganizations(inspection, [
+        AUTHORIZATION_REGRESSION_ORGANIZATION_A_ID,
+        AUTHORIZATION_REGRESSION_ORGANIZATION_B_ID,
+      ]);
+    }
+
+    await cleanup();
+    testContext.after(async () => {
+      await app.close();
+      await cleanup();
+      await inspection.end();
+    });
+
+    await inspection.query('INSERT INTO organizations (id, name) VALUES ($1, $2), ($3, $4)', [
+      AUTHORIZATION_REGRESSION_ORGANIZATION_A_ID,
+      'Authorization regression A',
+      AUTHORIZATION_REGRESSION_ORGANIZATION_B_ID,
+      'Authorization regression B',
+    ]);
+    await inspection.query('INSERT INTO users (id, status) VALUES ($1, 1)', [
+      AUTHORIZATION_REGRESSION_USER_ID,
+    ]);
+    await inspection.query(
+      `INSERT INTO organization_accesses (id, organization_id, user_id, role, status)
+       VALUES ($1, $2, $3, 'owner', 'active')`,
+      [
+        AUTHORIZATION_REGRESSION_ACCESS_ID,
+        AUTHORIZATION_REGRESSION_ORGANIZATION_A_ID,
+        AUTHORIZATION_REGRESSION_USER_ID,
+      ],
+    );
+    await inspection.query(
+      `INSERT INTO members (id, organization_id, name, status, registered_at)
+       VALUES ($1, $2, $3, 1, now())`,
+      [
+        AUTHORIZATION_REGRESSION_MEMBER_ID,
+        AUTHORIZATION_REGRESSION_ORGANIZATION_B_ID,
+        'Member from organization B',
+      ],
+    );
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/organizations/${AUTHORIZATION_REGRESSION_ORGANIZATION_B_ID}/members`,
+      headers: { authorization: 'Bearer user-a-token' },
+    });
+
+    assert.equal(response.statusCode, 403);
+    assert.doesNotMatch(response.body, /Member from organization B/);
+  });
+
   it('exposes a transport-level liveness probe without touching persistence', async () => {
     const app = createApplication({
       persistence: createPostgresPersistence(databaseUrl),

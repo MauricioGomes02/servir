@@ -14,7 +14,7 @@ export type PersistenceConfig = Readonly<{
 }>;
 
 export interface ServiceConfig {
-  readonly authentication?: Readonly<{
+  readonly authentication: Readonly<{
     algorithm: 'RS256';
     audience: string;
     issuer: string;
@@ -35,7 +35,9 @@ function readAuthenticationConfig(
     environment.AUTH_AUDIENCE,
     environment.AUTH_JWKS ?? environment.AUTH_JWKS_FILE,
   ];
-  if (values.every((value) => value === undefined || value.trim() === '')) return undefined;
+  if (values.every((value) => value === undefined || value.trim() === '')) {
+    throw new ServiceConfigError(ServiceConfigErrorCodes.AuthenticationRequired);
+  }
 
   const [issuer, audience] = values.map((value) => value?.trim());
   const jwksFile = environment.AUTH_JWKS_FILE?.trim();
@@ -111,7 +113,7 @@ export function readServiceConfig(
   }
 
   return Object.freeze({
-    ...(authentication === undefined ? {} : { authentication }),
+    authentication,
     host,
     port,
     persistence: readPersistenceConfig(environment),

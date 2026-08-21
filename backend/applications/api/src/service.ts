@@ -42,12 +42,8 @@ export async function startService(telemetry: TelemetryLifecycle): Promise<void>
     );
 
     const app = createApplication({
-      ...(config.authentication === undefined
-        ? {}
-        : {
-            accessTokenVerifier: new JoseAccessTokenVerifier(config.authentication),
-            bootstrapAssertionVerifier: new JoseBootstrapAssertionVerifier(config.authentication),
-          }),
+      accessTokenVerifier: new JoseAccessTokenVerifier(config.authentication),
+      bootstrapAssertionVerifier: new JoseBootstrapAssertionVerifier(config.authentication),
       logger,
       persistence: postgresPersistence,
     });

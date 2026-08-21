@@ -6,13 +6,34 @@ import { readServiceConfig } from './service-config';
 function config(environment: NodeJS.ProcessEnv = {}) {
   return readServiceConfig({
     DATABASE_URL: 'postgresql://runtime:secret@localhost:5432/servir',
+    AUTH_AUDIENCE: 'servir-api',
+    AUTH_ISSUER: 'https://identity.servir.test',
+    AUTH_JWKS: JSON.stringify({ keys: [{ kty: 'RSA', kid: 'current-key', n: 'n', e: 'AQAB' }] }),
     ...environment,
   });
 }
 
 describe('readServiceConfig', () => {
+  it('requires authentication configuration for the API runtime', () => {
+    assert.throws(
+      () =>
+        readServiceConfig({
+          DATABASE_URL: 'postgresql://runtime:secret@localhost:5432/servir',
+        }),
+      (error) =>
+        error instanceof ServiceConfigError &&
+        error.code === ServiceConfigErrorCodes.AuthenticationRequired,
+    );
+  });
+
   it('uses PostgreSQL with safe network defaults', () => {
     assert.deepEqual(config(), {
+      authentication: {
+        algorithm: 'RS256',
+        audience: 'servir-api',
+        issuer: 'https://identity.servir.test',
+        jwks: { keys: [{ kty: 'RSA', kid: 'current-key', n: 'n', e: 'AQAB' }] },
+      },
       host: '0.0.0.0',
       port: 3000,
       persistence: {
@@ -88,7 +109,11 @@ describe('readServiceConfig', () => {
       jwks: { keys: [{ kty: 'RSA', kid: 'current-key', n: 'n', e: 'AQAB' }] },
     });
     assert.throws(
-      () => config({ AUTH_ISSUER: 'https://identity.servir.test' }),
+      () =>
+        readServiceConfig({
+          DATABASE_URL: 'postgresql://runtime:secret@localhost:5432/servir',
+          AUTH_ISSUER: 'https://identity.servir.test',
+        }),
       (error) =>
         error instanceof ServiceConfigError &&
         error.code === ServiceConfigErrorCodes.InvalidAuthenticationConfiguration,
