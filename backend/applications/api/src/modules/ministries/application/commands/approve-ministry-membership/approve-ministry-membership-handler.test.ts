@@ -22,6 +22,7 @@ it('persists approval and outbox in the same scope', async () => {
   const ministryId = value(MinistryId.create('0198f334-6dc5-7c20-9af1-91d7e599e242'));
   const membershipId = value(MinistryMembershipId.create('0198f334-6dc5-7c20-9af1-91d7e599e243'));
   const envelopes: EventEnvelope[] = [];
+  const steps: string[] = [];
   const membership = MinistryMembership.request({
     id: membershipId,
     organizationId,
@@ -32,16 +33,34 @@ it('persists approval and outbox in the same scope', async () => {
   });
   membership.acknowledgeDomainEvents(membership.pendingDomainEvents);
   const scope: MinistryMembershipWriteScope = {
+    membershipRequestFacts: {
+      async findFor() {
+        return {
+          currentMembershipExists: false,
+          memberIsActive: true,
+          ministryIsActive: true,
+        };
+      },
+    },
     ministryMemberships: {
       async add() {
         throw new Error('unexpected add');
       },
       async findById() {
+        steps.push('find');
         return membership;
       },
-      async save() {},
+      async save() {
+        steps.push('save');
+      },
     },
     ministryRoleQualificationFacts: { isRoleActive: async () => false },
+    writeLock: {
+      async acquireMembership() {
+        steps.push('lock');
+      },
+      async acquireRequest() {},
+    },
     outbox: {
       async add(received) {
         envelopes.push(...received);
@@ -75,4 +94,5 @@ it('persists approval and outbox in the same scope', async () => {
   assert.equal(membership.status, 'active');
   assert.equal(envelopes[0]?.event.name, 'ministry_membership.approved');
   assert.equal(membership.pendingDomainEvents.length, 0);
+  assert.deepEqual(steps, ['lock', 'find', 'save']);
 });

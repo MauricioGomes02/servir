@@ -8,7 +8,6 @@ import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
-import { success } from '@/shared/core/result';
 import {
   Ministry,
   MinistryId,
@@ -41,24 +40,36 @@ async function fixture(withMinistry = true) {
     storedMinistry = ministry;
   }
   const envelopes: EventEnvelope[] = [];
+  const steps: string[] = [];
   const repository: MinistryWriteScope['ministries'] = {
     async add(ministry) {
       storedMinistry = ministry;
-      return success();
     },
     async findById(receivedOrganizationId, receivedMinistryId) {
+      steps.push('find');
       return storedMinistry?.organizationId.equals(receivedOrganizationId) &&
         storedMinistry.id.equals(receivedMinistryId)
         ? storedMinistry
         : undefined;
     },
     async save(ministry) {
+      steps.push('save');
       storedMinistry = ministry;
-      return success();
     },
   };
   const scope: MinistryWriteScope = {
+    creationFacts: {
+      async find() {
+        return { activeNameExists: false, organizationExists: true };
+      },
+    },
     ministries: repository,
+    writeLock: {
+      async acquireMinistry() {
+        steps.push('lock');
+      },
+      async acquireOrganization() {},
+    },
     outbox: {
       async add(received) {
         envelopes.push(...received);
@@ -91,6 +102,7 @@ async function fixture(withMinistry = true) {
     envelopes,
     organizationId,
     ministryId,
+    steps,
     context: createExecutionContext({
       correlationId: value(parseCorrelationId('role-correlation')),
     }),
@@ -114,6 +126,7 @@ describe('DefineMinistryRoleHandler', () => {
     const stored = await f.repository.findById(f.organizationId, f.ministryId);
     assert.equal(stored?.roles[0]?.name.toString(), 'Vocal');
     assert.equal(stored?.pendingDomainEvents.length, 0);
+    assert.deepEqual(f.steps.slice(0, 3), ['lock', 'find', 'save']);
   });
 
   it('rejects a ministry outside the organization', async () => {

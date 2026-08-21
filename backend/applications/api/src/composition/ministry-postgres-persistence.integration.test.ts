@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { CreateMinistryHandler } from '@/modules/ministries/application';
-import { MinistryCreationPolicy, MinistryId } from '@/modules/ministries/domain';
+import { CreateMinistryHandler, DefineMinistryRoleHandler } from '@/modules/ministries/application';
+import { MinistryCreationPolicy, MinistryId, MinistryRoleId } from '@/modules/ministries/domain';
 import { OrganizationId } from '@/modules/organizations/domain';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 import { parseMessageId, type MessageId } from '@/shared/application/messaging';
@@ -15,7 +15,6 @@ import { Pool } from 'pg';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 import { createPostgresPersistence } from './persistence/create-postgres-persistence';
 import {
-  ministryCreationFacts,
   ministryDetailsReader,
   ministryListReader,
   ministryUnitOfWork,
@@ -29,6 +28,8 @@ const EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599f103';
 const ROLLED_BACK_EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599f104';
 const MESSAGE_ID = '0198f334-6dc5-7c20-9af1-91d7e599f105';
 const ROLE_ID = '0198f334-6dc5-7c20-9af1-91d7e599f106';
+const ROLE_EVENT_ID = '0198f334-6dc5-7c20-9af1-91d7e599f107';
+const ROLE_MESSAGE_ID = '0198f334-6dc5-7c20-9af1-91d7e599f108';
 
 function value<T>(result: { success: true; value: T } | { success: false }): T {
   assert.equal(result.success, true);
@@ -37,12 +38,14 @@ function value<T>(result: { success: true; value: T } | { success: false }): T {
 }
 
 describe('PostgreSQL ministry persistence', () => {
-  it('commits ministry and outbox atomically and rolls both back on outbox failure', async (testContext) => {
+  it('adds and updates a tracked ministry atomically and rolls back on outbox failure', async (testContext) => {
     const inspection = new Pool({ connectionString: databaseUrl });
     const persistence = createPostgresPersistence(databaseUrl);
 
     async function cleanup() {
-      await inspection.query('DELETE FROM outbox_messages WHERE message_id = $1', [MESSAGE_ID]);
+      await inspection.query('DELETE FROM outbox_messages WHERE message_id = ANY($1::uuid[])', [
+        [MESSAGE_ID, ROLE_MESSAGE_ID],
+      ]);
       await inspection.query('DELETE FROM ministry_roles WHERE ministry_id = $1', [MINISTRY_ID]);
       await inspection.query('DELETE FROM ministries WHERE id = ANY($1::uuid[])', [
         [MINISTRY_ID, ROLLED_BACK_MINISTRY_ID],
@@ -66,7 +69,6 @@ describe('PostgreSQL ministry persistence', () => {
     });
     const common = {
       clock: new FixedClock(value(Instant.create('2026-08-06T15:00:00.000Z'))),
-      creationFacts: persistence.services.get(ministryCreationFacts),
       creationPolicy: new MinistryCreationPolicy(),
       unitOfWork: persistence.services.get(ministryUnitOfWork),
       logger: new InMemoryLogger(),
@@ -130,10 +132,18 @@ describe('PostgreSQL ministry persistence', () => {
       },
     );
 
-    await inspection.query(
-      'INSERT INTO ministry_roles (id, organization_id, ministry_id, name, status) VALUES ($1, $2, $3, $4, 1)',
-      [ROLE_ID, ORGANIZATION_ID, MINISTRY_ID, 'Guitarra'],
+    const defined = await new DefineMinistryRoleHandler({
+      clock: new FixedClock(value(Instant.create('2026-08-06T16:00:00.000Z'))),
+      ministryRoleIdGenerator: new SequenceIdGenerator([value(MinistryRoleId.create(ROLE_ID))]),
+      domainEventIdGenerator: new SequenceIdGenerator([value(parseDomainEventId(ROLE_EVENT_ID))]),
+      messageIdGenerator: new SequenceIdGenerator([value(parseMessageId(ROLE_MESSAGE_ID))]),
+      unitOfWork: persistence.services.get(ministryUnitOfWork),
+      logger: new InMemoryLogger(),
+    }).handle(
+      { organizationId: ORGANIZATION_ID, ministryId: MINISTRY_ID, name: 'Guitarra' },
+      context,
     );
+    assert.equal(defined.success, true);
     const details = await persistence.services
       .get(ministryDetailsReader)
       .find(organizationId, value(MinistryId.create(MINISTRY_ID)));

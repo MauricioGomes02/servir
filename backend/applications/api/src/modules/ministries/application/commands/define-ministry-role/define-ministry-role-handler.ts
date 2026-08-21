@@ -63,6 +63,7 @@ export class DefineMinistryRoleHandler {
     const [organizationId, ministryId, name] = validated.value;
 
     const transaction = await this.dependencies.unitOfWork.execute(async (scope) => {
+      await scope.writeLock.acquireMinistry(organizationId, ministryId);
       const ministry = await scope.ministries.findById(organizationId, ministryId);
       if (ministry === undefined) {
         return {
@@ -80,8 +81,7 @@ export class DefineMinistryRoleHandler {
       });
       if (!defined.success) return { result: this.reject(context, defined.error) };
       const events = ministry.pendingDomainEvents;
-      const saved = await scope.ministries.save(ministry);
-      if (!saved.success) return { result: this.reject(context, saved.error) };
+      await scope.ministries.save(ministry);
       await scope.outbox.add(
         events.map((event) =>
           createEventEnvelope({

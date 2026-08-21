@@ -66,6 +66,8 @@ Mantém identidade e ciclo da igreja local. Ministérios, membros e escalas refe
 
 É um Aggregate Root separado que representa o vínculo histórico entre `Member` e `Ministry`. `RequestMinistryMembership` cria o vínculo em `requested`; `ApproveMinistryMembership` realiza a entrada efetiva ao transicionar para `active` e preservar o instante da aprovação. Apenas um vínculo `requested` ou `active` pode existir para o mesmo Member e Ministry. `QualifyMemberForMinistryRole` adiciona uma `MinistryRoleQualification` identificada ao vínculo ativo; só uma qualificação ativa pode existir por função, e a função deve estar ativa no mesmo ministério. Rejeição, suspensão, reativação, encerramento e revogação permanecem planejados.
 
+Nos Commands mutáveis, a Application declara os locks necessários e mantém fatos, Policy, Aggregate, Repository e outbox na mesma Unit of Work. `MinistryRepository` e `MinistryMembershipRepository` carregam somente por identidade e persistem o estado alterado por snapshots locais; não interpretam constraints como regras de negócio. A decisão de concorrência está no [ADR 073](../decisions/073-declarative-ministry-write-locks.md).
+
 ### TeamMembership
 
 É um Aggregate Root histórico criado por `AssignMemberToTeam`. Associa um vínculo ministerial ativo a um time ativo do mesmo Ministry; apenas uma participação ativa existe por par, mas um membro pode participar de vários times. Participação de apoio numa ocorrência permanece futura e pode dispensar vínculo permanente com o time, mas exige vínculo e qualificação ativos no ministério.

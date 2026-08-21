@@ -62,8 +62,6 @@ import {
 import { UuidV7Generator } from '@/shared/infrastructure/id-generator';
 import type { ApplicationModule } from './application-module';
 import {
-  ministryCreationFacts,
-  ministryMembershipRequestFacts,
   ministryMembershipUnitOfWork,
   ministryUnitOfWork,
   ministryTeamCreationFacts,
@@ -84,7 +82,6 @@ export const ministriesModule: ApplicationModule = {
       ministryIdGenerator: new UuidV7Generator(MinistryId.create, options.uuidSource),
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
-      creationFacts: options.persistence.services.get(ministryCreationFacts),
       creationPolicy: new MinistryCreationPolicy(),
       unitOfWork: options.persistence.services.get(ministryUnitOfWork),
       logger: dependencies.logger,
@@ -105,7 +102,6 @@ export const ministriesModule: ApplicationModule = {
       ),
       domainEventIdGenerator: dependencies.domainEventIdGenerator,
       messageIdGenerator: dependencies.messageIdGenerator,
-      facts: options.persistence.services.get(ministryMembershipRequestFacts),
       policy: new MinistryMembershipRequestPolicy(),
       unitOfWork: options.persistence.services.get(ministryMembershipUnitOfWork),
       logger: dependencies.logger,

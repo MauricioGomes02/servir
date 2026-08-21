@@ -2,15 +2,15 @@ import type { MemberId } from '@/modules/membership/domain';
 import type { OrganizationId } from '@/modules/organizations/domain';
 import type { MinistryMembershipRequestFactsReader } from '../../application';
 import type { MinistryId } from '../../domain';
-import type { Pool } from 'pg';
+import type { PoolClient } from 'pg';
 import { PostgresMinistryMembershipRequestFactsReaderError } from './postgres-ministry-membership-request-facts-reader-error';
 
 export class PostgresMinistryMembershipRequestFactsReader implements MinistryMembershipRequestFactsReader {
-  constructor(private readonly pool: Pool) {}
+  constructor(private readonly client: PoolClient) {}
 
   async findFor(organizationId: OrganizationId, ministryId: MinistryId, memberId: MemberId) {
     try {
-      const result = await this.pool.query<{
+      const result = await this.client.query<{
         member_is_active: boolean;
         ministry_is_active: boolean;
         current_membership_exists: boolean;

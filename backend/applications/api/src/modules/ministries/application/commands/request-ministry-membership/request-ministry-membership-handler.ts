@@ -17,10 +17,7 @@ import {
   type MinistryMembershipRequestPolicy,
   type MinistryMembershipRequestPolicyError,
 } from '../../../domain';
-import type {
-  MinistryMembershipRequestFactsReader,
-  MinistryMembershipWriteScope,
-} from '../../ports';
+import type { MinistryMembershipWriteScope } from '../../ports';
 import type { RequestMinistryMembershipCommand } from './request-ministry-membership-command';
 
 export interface RequestMinistryMembershipOutput {
@@ -42,7 +39,6 @@ export interface RequestMinistryMembershipDependencies {
   readonly ministryMembershipIdGenerator: IdGenerator<MinistryMembershipId>;
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
-  readonly facts: MinistryMembershipRequestFactsReader;
   readonly policy: MinistryMembershipRequestPolicy;
   readonly unitOfWork: UnitOfWork<MinistryMembershipWriteScope>;
   readonly logger: Logger;
@@ -63,34 +59,51 @@ export class RequestMinistryMembershipHandler {
     if (!validated.success) return validated;
     const [organizationId, ministryId, memberId] = validated.value;
 
-    const facts = await this.dependencies.facts.findFor(organizationId, ministryId, memberId);
-    const permission = this.dependencies.policy.evaluate(facts);
-    if (!permission.success) return permission;
+    const transaction = await this.dependencies.unitOfWork.execute(async (scope) => {
+      await scope.writeLock.acquireRequest(organizationId, ministryId, memberId);
+      const facts = await scope.membershipRequestFacts.findFor(
+        organizationId,
+        ministryId,
+        memberId,
+      );
+      const permission = this.dependencies.policy.evaluate(facts);
+      if (!permission.success) return permission;
 
-    const membership = MinistryMembership.request({
-      id: this.dependencies.ministryMembershipIdGenerator.generate(),
-      organizationId,
-      ministryId,
-      memberId,
-      eventId: this.dependencies.domainEventIdGenerator.generate(),
-      requestedAt: this.dependencies.clock.now(),
+      const membership = MinistryMembership.request({
+        id: this.dependencies.ministryMembershipIdGenerator.generate(),
+        organizationId,
+        ministryId,
+        memberId,
+        eventId: this.dependencies.domainEventIdGenerator.generate(),
+        requestedAt: this.dependencies.clock.now(),
+      });
+      const events = membership.pendingDomainEvents;
+      await scope.ministryMemberships.add(membership);
+      await scope.outbox.add(
+        events.map((event) =>
+          createEventEnvelope({
+            messageId: this.dependencies.messageIdGenerator.generate(),
+            correlationId: context.correlationId,
+            event,
+          }),
+        ),
+      );
+      return success(
+        Object.freeze({
+          events,
+          membership,
+          output: Object.freeze({
+            ministryMembershipId: membership.id,
+            organizationId: membership.organizationId,
+            ministryId: membership.ministryId,
+            memberId: membership.memberId,
+            status: 'requested' as const,
+          }),
+        }),
+      );
     });
-    const pendingEvents = membership.pendingDomainEvents;
-    const envelopes = pendingEvents.map((event) =>
-      createEventEnvelope({
-        messageId: this.dependencies.messageIdGenerator.generate(),
-        correlationId: context.correlationId,
-        event,
-      }),
-    );
-    const persisted = await this.dependencies.unitOfWork.execute(async (scope) => {
-      const added = await scope.ministryMemberships.add(membership);
-      if (!added.success) return added;
-      await scope.outbox.add(envelopes);
-      return success();
-    });
-    if (!persisted.success) return persisted;
-    membership.acknowledgeDomainEvents(pendingEvents);
+    if (!transaction.success) return transaction;
+    transaction.value.membership.acknowledgeDomainEvents(transaction.value.events);
     this.dependencies.logger.log(
       createLogRecord({
         level: LogLevels.Info,
@@ -100,18 +113,10 @@ export class RequestMinistryMembershipHandler {
           'organization.id': organizationId.value.toString(),
           'ministry.id': ministryId.value.toString(),
           'member.id': memberId.value.toString(),
-          'ministry_membership.id': membership.id.toString(),
+          'ministry_membership.id': transaction.value.membership.id.toString(),
         },
       }),
     );
-    return success(
-      Object.freeze({
-        ministryMembershipId: membership.id,
-        organizationId: membership.organizationId,
-        ministryId: membership.ministryId,
-        memberId: membership.memberId,
-        status: 'requested',
-      }),
-    );
+    return success(transaction.value.output);
   }
 }

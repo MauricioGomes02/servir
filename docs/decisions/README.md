@@ -74,5 +74,6 @@
 | [070](070-incremental-hybrid-authorization.md)                          | Estratégia incremental e híbrida de autorização              | Aceita |
 | [071](071-grafana-over-existing-jaeger-traces.md)                       | Grafana sobre os traces existentes no Jaeger                 | Aceita |
 | [072](072-repository-local-persistence-snapshots.md)                    | Snapshots locais de persistência nos Repositories            | Aceita |
+| [073](073-declarative-ministry-write-locks.md)                          | Locks declarativos nos fluxos de escrita ministerial         | Aceita |
 
 Novos ADRs devem registrar contexto, decisão, consequências e alternativas. Decisões aceitas não são reescritas: uma mudança cria um novo ADR que substitui o anterior.

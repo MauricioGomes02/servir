@@ -9,7 +9,6 @@ import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
-import { success } from '@/shared/core/result';
 import {
   MinistryId,
   MinistryMembershipId,
@@ -33,11 +32,18 @@ function fixture(
   const memberId = value(MemberId.create('0198f334-6dc5-7c20-9af1-91d7e599e212'));
   const memberships: MinistryMembership[] = [];
   const envelopes: EventEnvelope[] = [];
+  const steps: string[] = [];
   const scope: MinistryMembershipWriteScope = {
+    membershipRequestFacts: {
+      async findFor() {
+        steps.push('facts');
+        return facts;
+      },
+    },
     ministryMemberships: {
       async add(membership) {
+        steps.push('add');
         memberships.push(membership);
-        return success();
       },
       async findById() {
         return undefined;
@@ -45,6 +51,12 @@ function fixture(
       async save() {},
     },
     ministryRoleQualificationFacts: { isRoleActive: async () => false },
+    writeLock: {
+      async acquireMembership() {},
+      async acquireRequest() {
+        steps.push('lock');
+      },
+    },
     outbox: {
       async add(received) {
         envelopes.push(...received);
@@ -62,11 +74,6 @@ function fixture(
     messageIdGenerator: new SequenceIdGenerator([
       value(parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599e215')),
     ]),
-    facts: {
-      async findFor() {
-        return facts;
-      },
-    },
     policy: new MinistryMembershipRequestPolicy(),
     unitOfWork: {
       async execute(work) {
@@ -82,6 +89,7 @@ function fixture(
     memberId,
     memberships,
     envelopes,
+    steps,
     context: createExecutionContext({
       correlationId: value(parseCorrelationId('correlation-123')),
     }),
@@ -102,6 +110,7 @@ describe('RequestMinistryMembershipHandler', () => {
     assert.equal(f.memberships.length, 1);
     assert.equal(f.envelopes[0]?.event.name, 'ministry_membership.requested');
     assert.equal(f.memberships[0]?.pendingDomainEvents.length, 0);
+    assert.deepEqual(f.steps, ['lock', 'facts', 'add']);
   });
   it('rejects an absent member without persistence', async () => {
     const f = fixture({

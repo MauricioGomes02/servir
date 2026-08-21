@@ -1,15 +1,15 @@
 import type { OrganizationId } from '@/modules/organizations/domain';
-import type { Pool } from 'pg';
+import type { PoolClient } from 'pg';
 import type { MinistryCreationFactsReader } from '../../application';
 import type { MinistryName } from '../../domain';
 import { PostgresMinistryCreationFactsReaderError } from './postgres-ministry-creation-facts-reader-error';
 
 export class PostgresMinistryCreationFactsReader implements MinistryCreationFactsReader {
-  constructor(private readonly pool: Pool) {}
+  constructor(private readonly client: PoolClient) {}
 
   async find(organizationId: OrganizationId, name: MinistryName) {
     try {
-      const result = await this.pool.query<{
+      const result = await this.client.query<{
         organization_exists: boolean;
         active_name_exists: boolean;
       }>(

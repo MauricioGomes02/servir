@@ -8,12 +8,10 @@ import { Instant } from '@/shared/domain/instant';
 import { FixedClock } from '@/shared/infrastructure/clock';
 import { SequenceIdGenerator } from '@/shared/infrastructure/id-generator';
 import { InMemoryLogger } from '@/shared/infrastructure/logging';
-import { success } from '@/shared/core/result';
 import {
   MinistryCreationPolicy,
   MinistryCreationPolicyErrorCodes,
   MinistryId,
-  MinistryName,
   type Ministry,
 } from '../../../domain';
 import type { MinistryWriteScope } from '../../ports';
@@ -30,17 +28,37 @@ function fixture(organizationExists = true) {
   const ministryId = value(MinistryId.create('0198f334-6dc5-7c20-9af1-91d7e599e011'));
   const ministries: Ministry[] = [];
   const envelopes: EventEnvelope[] = [];
+  const steps: string[] = [];
   const scope: MinistryWriteScope = {
+    creationFacts: {
+      async find(_organizationId, name) {
+        steps.push('facts');
+        return Object.freeze({
+          organizationExists,
+          activeNameExists: ministries.some(
+            (ministry) =>
+              ministry.status === 'active' &&
+              ministry.name.toString().toLowerCase() === name.toString().toLowerCase(),
+          ),
+        });
+      },
+    },
     ministries: {
       async add(ministry) {
+        steps.push('add');
         ministries.push(ministry);
-        return success();
       },
       async findById() {
         return undefined;
       },
-      async save() {
-        return success();
+      async save() {},
+    },
+    writeLock: {
+      async acquireOrganization() {
+        steps.push('lock');
+      },
+      async acquireMinistry() {
+        steps.push('ministry-lock');
       },
     },
     outbox: {
@@ -59,18 +77,6 @@ function fixture(organizationExists = true) {
     messageIdGenerator: new SequenceIdGenerator([
       value(parseMessageId('0198f334-6dc5-7c20-9af1-91d7e599e013')),
     ]),
-    creationFacts: {
-      async find(_organizationId, name) {
-        return Object.freeze({
-          organizationExists,
-          activeNameExists: ministries.some(
-            (ministry) =>
-              ministry.status === 'active' &&
-              ministry.name.toString().toLowerCase() === name.toString().toLowerCase(),
-          ),
-        });
-      },
-    },
     creationPolicy: new MinistryCreationPolicy(),
     unitOfWork: {
       async execute(work) {
@@ -86,6 +92,7 @@ function fixture(organizationExists = true) {
     ministries,
     envelopes,
     logger,
+    steps,
     context: createExecutionContext({
       correlationId: value(parseCorrelationId('correlation-123')),
     }),
@@ -105,6 +112,7 @@ describe('CreateMinistryHandler', () => {
     assert.equal(f.envelopes[0]?.event.name, 'ministry.created');
     assert.deepEqual(f.ministries[0]?.pendingDomainEvents, []);
     assert.equal(JSON.stringify(f.logger.records).includes('Louvor'), false);
+    assert.deepEqual(f.steps, ['lock', 'facts', 'add']);
   });
 
   it('rejects an unknown organization without persistence', async () => {
@@ -126,19 +134,13 @@ describe('CreateMinistryHandler', () => {
       { organizationId: f.organizationId.toString(), name: 'Louvor' },
       f.context,
     );
-    const duplicateName = value(MinistryName.create('louvor'));
-    const duplicateFacts = Object.freeze({
-      organizationExists: true,
-      activeNameExists: f.ministries.some(
-        (ministry) =>
-          ministry.status === 'active' &&
-          ministry.name.toString().toLowerCase() === duplicateName.toString().toLowerCase(),
-      ),
-    });
-    const decision = new MinistryCreationPolicy().evaluate(duplicateFacts);
-    assert.equal(decision.success, false);
-    if (!decision.success)
-      assert.equal(decision.error.code, MinistryCreationPolicyErrorCodes.ActiveNameAlreadyExists);
+    const duplicate = await f.handler.handle(
+      { organizationId: f.organizationId.toString(), name: 'louvor' },
+      f.context,
+    );
+    assert.equal(duplicate.success, false);
+    if (!duplicate.success)
+      assert.equal(duplicate.error.code, MinistryCreationPolicyErrorCodes.ActiveNameAlreadyExists);
     assert.equal(f.envelopes.length, 1);
   });
 });

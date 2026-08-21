@@ -24,7 +24,7 @@ import {
   type MinistryCreationPolicyError,
   type MinistryActiveNameConflictError,
 } from '../../../domain';
-import type { MinistryCreationFactsReader, MinistryWriteScope } from '../../ports';
+import type { MinistryWriteScope } from '../../ports';
 import type { CreateMinistryCommand } from './create-ministry-command';
 
 export interface CreateMinistryOutput {
@@ -39,7 +39,6 @@ export interface CreateMinistryDependencies {
   readonly ministryIdGenerator: IdGenerator<MinistryId>;
   readonly domainEventIdGenerator: IdGenerator<DomainEventId>;
   readonly messageIdGenerator: IdGenerator<MessageId>;
-  readonly creationFacts: MinistryCreationFactsReader;
   readonly creationPolicy: MinistryCreationPolicy;
   readonly unitOfWork: UnitOfWork<MinistryWriteScope>;
   readonly logger: Logger;
@@ -67,72 +66,70 @@ export class CreateMinistryHandler {
     if (!validated.success) return validated;
     const [organizationId, name] = validated.value;
 
-    const facts = await this.dependencies.creationFacts.find(organizationId, name);
-    const permission = this.dependencies.creationPolicy.evaluate(facts);
-    if (!permission.success)
-      return this.reject(context, permission.error, {
+    const transaction = await this.dependencies.unitOfWork.execute(async (scope) => {
+      await scope.writeLock.acquireOrganization(organizationId);
+      const facts = await scope.creationFacts.find(organizationId, name);
+      const permission = this.dependencies.creationPolicy.evaluate(facts);
+      if (!permission.success) return permission;
+
+      this.log(LogLevels.Debug, 'ministry.creation.eligibility.accepted', context, {
         'organization.id': organizationId.value,
       });
+      const ministry = Ministry.create({
+        id: this.dependencies.ministryIdGenerator.generate(),
+        organizationId,
+        name: name.toString(),
+        eventId: this.dependencies.domainEventIdGenerator.generate(),
+        occurredAt: this.dependencies.clock.now(),
+      });
+      if (!ministry.success) return ministry;
 
-    this.log(LogLevels.Debug, 'ministry.creation.eligibility.accepted', context, {
-      'organization.id': organizationId.value,
+      const events = ministry.value.pendingDomainEvents;
+      this.log(LogLevels.Debug, 'ministry.creation.validated', context, {
+        'organization.id': organizationId.value,
+        'ministry.id': ministry.value.id.value,
+        'domain_event.count': events.length,
+      });
+      await scope.ministries.add(ministry.value);
+      await scope.outbox.add(
+        events.map((event) =>
+          createEventEnvelope({
+            messageId: this.dependencies.messageIdGenerator.generate(),
+            correlationId: context.correlationId,
+            event,
+          }),
+        ),
+      );
+      return success(
+        Object.freeze({
+          events,
+          ministry: ministry.value,
+          output: Object.freeze({
+            ministryId: ministry.value.id,
+            organizationId: ministry.value.organizationId,
+            name: ministry.value.name.toString(),
+            status: 'active' as const,
+          }),
+        }),
+      );
     });
-
-    const ministry = Ministry.create({
-      id: this.dependencies.ministryIdGenerator.generate(),
-      organizationId,
-      name: name.toString(),
-      eventId: this.dependencies.domainEventIdGenerator.generate(),
-      occurredAt: this.dependencies.clock.now(),
-    });
-    if (!ministry.success)
-      return this.reject(context, ministry.error, {
+    if (!transaction.success) {
+      return this.reject(context, transaction.error, {
         'organization.id': organizationId.value,
       });
-
-    const pendingEvents = ministry.value.pendingDomainEvents;
-    this.log(LogLevels.Debug, 'ministry.creation.validated', context, {
-      'organization.id': organizationId.value,
-      'ministry.id': ministry.value.id.value,
-      'domain_event.count': pendingEvents.length,
-    });
-    const envelopes = pendingEvents.map((event) =>
-      createEventEnvelope({
-        messageId: this.dependencies.messageIdGenerator.generate(),
-        correlationId: context.correlationId,
-        event,
-      }),
-    );
-
-    const persisted = await this.dependencies.unitOfWork.execute(async (scope) => {
-      const saved = await scope.ministries.add(ministry.value);
-      if (!saved.success) return saved;
-      await scope.outbox.add(envelopes);
-      return success();
-    });
-    if (!persisted.success)
-      return this.reject(context, persisted.error, {
-        'organization.id': organizationId.value,
-      });
+    }
 
     this.log(LogLevels.Info, 'ministry.creation.persisted', context, {
       'organization.id': organizationId.value,
-      'ministry.id': ministry.value.id.value,
-      'domain_event.count': pendingEvents.length,
+      'ministry.id': transaction.value.ministry.id.value,
+      'domain_event.count': transaction.value.events.length,
     });
-    ministry.value.acknowledgeDomainEvents(pendingEvents);
+    transaction.value.ministry.acknowledgeDomainEvents(transaction.value.events);
     this.log(LogLevels.Info, 'ministry.creation.completed', context, {
       'organization.id': organizationId.value,
-      'ministry.id': ministry.value.id.value,
+      'ministry.id': transaction.value.ministry.id.value,
     });
-    return success(
-      Object.freeze({
-        ministryId: ministry.value.id,
-        organizationId: ministry.value.organizationId,
-        name: ministry.value.name.toString(),
-        status: 'active',
-      }),
-    );
+    return success(transaction.value.output);
   }
 
   private reject<TError extends { readonly code: string; readonly field?: string }>(

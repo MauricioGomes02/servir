@@ -1,10 +1,9 @@
-import type { Result } from '@/shared/core/result';
-import type { MinistryMembership, MinistryMembershipRequestPolicyError } from '../../../domain';
+import type { MinistryMembership } from '../../../domain';
 import type { OrganizationId } from '@/modules/organizations/domain';
 import type { MinistryId, MinistryMembershipId } from '../../../domain';
 
 export interface MinistryMembershipRepository {
-  add(membership: MinistryMembership): Promise<Result<void, MinistryMembershipRequestPolicyError>>;
+  add(membership: MinistryMembership): Promise<void>;
   findById(
     organizationId: OrganizationId,
     ministryId: MinistryId,

@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { RequestMinistryMembershipHandler } from '@/modules/ministries/application';
+import {
+  ApproveMinistryMembershipHandler,
+  RequestMinistryMembershipHandler,
+} from '@/modules/ministries/application';
 import { MinistryMembershipId, MinistryMembershipRequestPolicy } from '@/modules/ministries/domain';
 import { createExecutionContext, parseCorrelationId } from '@/shared/application/context';
 import { parseMessageId } from '@/shared/application/messaging';
@@ -13,10 +16,7 @@ import { PostgresEventOutboxError } from '@/shared/infrastructure/messaging';
 import { Pool } from 'pg';
 import { requireTestDatabaseUrl } from '@/test-support/postgres-integration';
 import { createPostgresPersistence } from './persistence/create-postgres-persistence';
-import {
-  ministryMembershipRequestFacts,
-  ministryMembershipUnitOfWork,
-} from './persistence/ministries-persistence-module';
+import { ministryMembershipUnitOfWork } from './persistence/ministries-persistence-module';
 
 const databaseUrl = requireTestDatabaseUrl();
 const ids = {
@@ -29,6 +29,8 @@ const ids = {
   event: '0198f334-6dc5-7c20-9af1-91d7e599f206',
   rolledBackEvent: '0198f334-6dc5-7c20-9af1-91d7e599f207',
   message: '0198f334-6dc5-7c20-9af1-91d7e599f208',
+  approvalEvent: '0198f334-6dc5-7c20-9af1-91d7e599f209',
+  approvalMessage: '0198f334-6dc5-7c20-9af1-91d7e599f20a',
 } as const;
 function value<T>(result: { success: true; value: T } | { success: false }): T {
   assert.equal(result.success, true);
@@ -37,11 +39,13 @@ function value<T>(result: { success: true; value: T } | { success: false }): T {
 }
 
 describe('PostgreSQL ministry membership persistence', () => {
-  it('commits membership and outbox atomically and rolls both back on failure', async (testContext) => {
+  it('adds and updates a tracked membership atomically and rolls back on failure', async (testContext) => {
     const inspection = new Pool({ connectionString: databaseUrl });
     const persistence = createPostgresPersistence(databaseUrl);
     async function cleanup() {
-      await inspection.query('DELETE FROM outbox_messages WHERE message_id = $1', [ids.message]);
+      await inspection.query('DELETE FROM outbox_messages WHERE message_id = ANY($1::uuid[])', [
+        [ids.message, ids.approvalMessage],
+      ]);
       await inspection.query('DELETE FROM ministry_memberships WHERE id = ANY($1::uuid[])', [
         [ids.membership, ids.rolledBackMembership],
       ]);
@@ -72,7 +76,6 @@ describe('PostgreSQL ministry membership persistence', () => {
     const common = {
       clock: new FixedClock(value(Instant.create('2026-08-07T12:00:00.000Z'))),
       messageIdGenerator: new SequenceIdGenerator([value(parseMessageId(ids.message))]),
-      facts: persistence.services.get(ministryMembershipRequestFacts),
       policy: new MinistryMembershipRequestPolicy(),
       unitOfWork: persistence.services.get(ministryMembershipUnitOfWork),
       logger: new InMemoryLogger(),
@@ -103,6 +106,29 @@ describe('PostgreSQL ministry membership persistence', () => {
     assert.equal(row.rows[0]?.event_type, 'servir.ministries.ministry-membership.requested.v1');
     assert.equal(row.rows[0]?.aggregate_id, ids.membership);
     assert.equal(row.rows[0]?.partition_key, ids.organization);
+    const approved = await new ApproveMinistryMembershipHandler({
+      clock: new FixedClock(value(Instant.create('2026-08-07T13:00:00.000Z'))),
+      domainEventIdGenerator: new SequenceIdGenerator([
+        value(parseDomainEventId(ids.approvalEvent)),
+      ]),
+      messageIdGenerator: new SequenceIdGenerator([value(parseMessageId(ids.approvalMessage))]),
+      unitOfWork: persistence.services.get(ministryMembershipUnitOfWork),
+      logger: new InMemoryLogger(),
+    }).handle(
+      {
+        organizationId: ids.organization,
+        ministryId: ids.ministry,
+        ministryMembershipId: ids.membership,
+      },
+      context,
+    );
+    assert.equal(approved.success, true);
+    const approvedRow = await inspection.query<{ approved_at: Date; status: number }>(
+      'SELECT approved_at, status FROM ministry_memberships WHERE id = $1',
+      [ids.membership],
+    );
+    assert.equal(approvedRow.rows[0]?.status, 2);
+    assert.equal(approvedRow.rows[0]?.approved_at.toISOString(), '2026-08-07T13:00:00.000Z');
     const failing = new RequestMinistryMembershipHandler({
       ...common,
       messageIdGenerator: new SequenceIdGenerator([value(parseMessageId(ids.message))]),

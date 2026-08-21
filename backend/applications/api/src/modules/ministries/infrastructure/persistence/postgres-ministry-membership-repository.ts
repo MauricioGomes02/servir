@@ -1,157 +1,291 @@
-import { failure, success } from '@/shared/core/result';
-import type { MinistryMembershipRepository } from '../../application';
-import { MinistryMembership, MinistryMembershipRequestPolicyErrorCodes } from '../../domain';
-import type { PoolClient, QueryResultRow } from 'pg';
-import { OrganizationId } from '@/modules/organizations/domain';
 import { MemberId } from '@/modules/membership/domain';
+import { OrganizationId } from '@/modules/organizations/domain';
 import { Instant } from '@/shared/domain/instant';
+import type { MinistryMembershipRepository } from '../../application';
 import {
   MinistryId,
+  MinistryMembership,
   MinistryMembershipId,
   MinistryRoleId,
   MinistryRoleQualification,
   MinistryRoleQualificationId,
+  type MinistryMembershipStatus,
+  type MinistryRoleQualificationStatus,
 } from '../../domain';
+import type { PoolClient, QueryResult, QueryResultRow } from 'pg';
 import {
   fromMinistryMembershipStatusCode,
   toMinistryMembershipStatusCode,
 } from './ministry-membership-status-code';
-import { PostgresMinistryMembershipRepositoryError } from './postgres-ministry-membership-repository-error';
+import {
+  PostgresMinistryMembershipRepositoryError,
+  PostgresMinistryMembershipRepositoryErrorCodes,
+  type PostgresMinistryMembershipRepositoryErrorCode,
+} from './postgres-ministry-membership-repository-error';
 
 interface MinistryMembershipRow extends QueryResultRow {
-  readonly id: unknown;
-  readonly organization_id: unknown;
-  readonly ministry_id: unknown;
-  readonly member_id: unknown;
-  readonly status: unknown;
-  readonly requested_at: unknown;
   readonly approved_at: unknown;
+  readonly id: unknown;
+  readonly member_id: unknown;
+  readonly ministry_id: unknown;
+  readonly organization_id: unknown;
+  readonly requested_at: unknown;
+  readonly status: unknown;
 }
+
 interface QualificationRow extends QueryResultRow {
   readonly id: unknown;
   readonly ministry_role_id: unknown;
-  readonly status: unknown;
   readonly qualified_at: unknown;
+  readonly status: unknown;
 }
 
-function persistedInstant(value: unknown) {
-  return Instant.create(value instanceof Date ? value.toISOString() : value);
+interface QualificationSnapshot {
+  readonly status: MinistryRoleQualificationStatus;
+}
+
+interface MinistryMembershipSnapshot {
+  readonly approvedAt: string | null;
+  readonly qualifications: Readonly<Record<string, QualificationSnapshot>>;
+  readonly status: MinistryMembershipStatus;
+}
+
+function value<T>(result: { success: true; value: T } | { success: false }): T {
+  if (!result.success) {
+    throw new PostgresMinistryMembershipRepositoryError(
+      PostgresMinistryMembershipRepositoryErrorCodes.InvalidPersistedValue,
+      result,
+    );
+  }
+  return result.value;
+}
+
+function persistedInstant(input: unknown): Instant {
+  return value(Instant.create(input instanceof Date ? input.toISOString() : input));
+}
+
+function qualificationStatus(input: unknown): MinistryRoleQualificationStatus {
+  if (input === 1) return 'active';
+  if (input === 2) return 'revoked';
+  throw new PostgresMinistryMembershipRepositoryError(
+    PostgresMinistryMembershipRepositoryErrorCodes.InvalidPersistedValue,
+    input,
+  );
+}
+
+function qualificationStatusCode(status: MinistryRoleQualificationStatus): number {
+  return status === 'active' ? 1 : 2;
+}
+
+function membershipStatus(input: unknown): MinistryMembershipStatus {
+  try {
+    return fromMinistryMembershipStatusCode(input);
+  } catch (cause) {
+    throw new PostgresMinistryMembershipRepositoryError(
+      PostgresMinistryMembershipRepositoryErrorCodes.InvalidPersistedValue,
+      cause,
+    );
+  }
+}
+
+function snapshot(membership: MinistryMembership): MinistryMembershipSnapshot {
+  return Object.freeze({
+    approvedAt: membership.approvedAt?.toISOString() ?? null,
+    qualifications: Object.freeze(
+      Object.fromEntries(
+        membership.roleQualifications.map((qualification) => [
+          qualification.id.toString(),
+          Object.freeze({ status: qualification.status }),
+        ]),
+      ),
+    ),
+    status: membership.status,
+  });
 }
 
 export class PostgresMinistryMembershipRepository implements MinistryMembershipRepository {
+  private readonly snapshots = new WeakMap<MinistryMembership, MinistryMembershipSnapshot>();
+
   constructor(private readonly client: PoolClient) {}
 
-  async add(membership: MinistryMembership) {
+  private async query<TRow extends QueryResultRow = QueryResultRow>(
+    errorCode: PostgresMinistryMembershipRepositoryErrorCode,
+    text: string,
+    values: readonly unknown[],
+  ): Promise<QueryResult<TRow>> {
     try {
-      const result = await this.client.query<MinistryMembershipRow>(
-        `INSERT INTO ministry_memberships (id, organization_id, ministry_id, member_id, status, requested_at)
-       VALUES ($1, $2, $3, $4, 1, $5)
-       ON CONFLICT (organization_id, ministry_id, member_id) WHERE status IN (1, 2)
-       DO NOTHING RETURNING id`,
-        [
-          membership.id.toString(),
-          membership.organizationId.toString(),
-          membership.ministryId.toString(),
-          membership.memberId.toString(),
-          membership.requestedAt.toISOString(),
-        ],
-      );
-      return result.rowCount === 0
-        ? failure({
-            code: MinistryMembershipRequestPolicyErrorCodes.CurrentMembershipAlreadyExists,
-            field: 'memberId' as const,
-          })
-        : success();
+      return await this.client.query<TRow>(text, [...values]);
     } catch (cause) {
-      throw new PostgresMinistryMembershipRepositoryError(cause);
+      if (cause instanceof PostgresMinistryMembershipRepositoryError) throw cause;
+      throw new PostgresMinistryMembershipRepositoryError(errorCode, cause);
     }
+  }
+
+  async add(membership: MinistryMembership): Promise<void> {
+    await this.query(
+      PostgresMinistryMembershipRepositoryErrorCodes.AddFailed,
+      `INSERT INTO ministry_memberships (
+         id, organization_id, ministry_id, member_id, status, requested_at, approved_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        membership.id.toString(),
+        membership.organizationId.toString(),
+        membership.ministryId.toString(),
+        membership.memberId.toString(),
+        toMinistryMembershipStatusCode(membership.status),
+        membership.requestedAt.toISOString(),
+        membership.approvedAt?.toISOString() ?? null,
+      ],
+    );
+    for (const qualification of membership.roleQualifications) {
+      await this.insertQualification(
+        membership,
+        qualification,
+        PostgresMinistryMembershipRepositoryErrorCodes.AddFailed,
+      );
+    }
+    this.snapshots.set(membership, snapshot(membership));
   }
 
   async findById(
     organizationId: OrganizationId,
     ministryId: MinistryId,
     membershipId: MinistryMembershipId,
-  ) {
-    try {
-      const result = await this.client.query<MinistryMembershipRow>(
-        `SELECT id, organization_id, ministry_id, member_id, status, requested_at, approved_at FROM ministry_memberships WHERE id = $1 AND organization_id = $2 AND ministry_id = $3`,
-        [membershipId.value, organizationId.value, ministryId.value],
-      );
-      if (result.rowCount === 0) return undefined;
-      const row = result.rows[0];
-      const qualificationsResult = await this.client.query<QualificationRow>(
-        'SELECT id, ministry_role_id, status, qualified_at FROM ministry_role_qualifications WHERE organization_id = $1 AND ministry_id = $2 AND ministry_membership_id = $3',
-        [organizationId.value, ministryId.value, membershipId.value],
-      );
-      const id = MinistryMembershipId.create(row.id);
-      const organization = OrganizationId.create(row.organization_id);
-      const ministry = MinistryId.create(row.ministry_id);
-      const member = MemberId.create(row.member_id);
-      const requestedAt = persistedInstant(row.requested_at);
-      const approvedAt = row.approved_at === null ? undefined : persistedInstant(row.approved_at);
-      if (
-        !id.success ||
-        !organization.success ||
-        !ministry.success ||
-        !member.success ||
-        !requestedAt.success ||
-        (approvedAt !== undefined && !approvedAt.success)
-      )
-        throw new Error('invalid_persisted_ministry_membership');
-      const qualifications = qualificationsResult.rows.map((qualificationRow) => {
-        const qualificationId = MinistryRoleQualificationId.create(qualificationRow.id);
-        const roleId = MinistryRoleId.create(qualificationRow.ministry_role_id);
-        const qualifiedAt = persistedInstant(qualificationRow.qualified_at);
-        if (!qualificationId.success || !roleId.success || !qualifiedAt.success)
-          throw new Error('invalid_persisted_ministry_role_qualification');
-        return MinistryRoleQualification.reconstitute(
-          qualificationId.value,
-          roleId.value,
-          qualificationRow.status === 1 ? 'active' : 'revoked',
-          qualifiedAt.value,
-        );
-      });
-      return MinistryMembership.reconstitute({
-        id: id.value,
-        organizationId: organization.value,
-        ministryId: ministry.value,
-        memberId: member.value,
-        status: fromMinistryMembershipStatusCode(row.status),
-        requestedAt: requestedAt.value,
-        approvedAt: approvedAt?.value,
-        roleQualifications: qualifications,
-      });
-    } catch (cause) {
-      throw new PostgresMinistryMembershipRepositoryError(cause);
-    }
+  ): Promise<MinistryMembership | undefined> {
+    const result = await this.query<MinistryMembershipRow>(
+      PostgresMinistryMembershipRepositoryErrorCodes.ReadFailed,
+      `SELECT id, organization_id, ministry_id, member_id, status, requested_at, approved_at
+         FROM ministry_memberships
+        WHERE id = $1 AND organization_id = $2 AND ministry_id = $3`,
+      [membershipId.toString(), organizationId.toString(), ministryId.toString()],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return undefined;
+    const qualificationsResult = await this.query<QualificationRow>(
+      PostgresMinistryMembershipRepositoryErrorCodes.ReadFailed,
+      `SELECT id, ministry_role_id, status, qualified_at
+         FROM ministry_role_qualifications
+        WHERE organization_id = $1 AND ministry_id = $2 AND ministry_membership_id = $3`,
+      [organizationId.toString(), ministryId.toString(), membershipId.toString()],
+    );
+    const approvedAt = row.approved_at === null ? undefined : persistedInstant(row.approved_at);
+    const membership = MinistryMembership.reconstitute({
+      id: value(MinistryMembershipId.create(row.id)),
+      organizationId: value(OrganizationId.create(row.organization_id)),
+      ministryId: value(MinistryId.create(row.ministry_id)),
+      memberId: value(MemberId.create(row.member_id)),
+      status: membershipStatus(row.status),
+      requestedAt: persistedInstant(row.requested_at),
+      ...(approvedAt === undefined ? {} : { approvedAt }),
+      roleQualifications: qualificationsResult.rows.map((qualification) =>
+        MinistryRoleQualification.reconstitute(
+          value(MinistryRoleQualificationId.create(qualification.id)),
+          value(MinistryRoleId.create(qualification.ministry_role_id)),
+          qualificationStatus(qualification.status),
+          persistedInstant(qualification.qualified_at),
+        ),
+      ),
+    });
+    this.snapshots.set(membership, snapshot(membership));
+    return membership;
   }
 
   async save(membership: MinistryMembership): Promise<void> {
-    try {
-      await this.client.query(
-        'UPDATE ministry_memberships SET status = $1, approved_at = $2 WHERE organization_id = $3 AND ministry_id = $4 AND id = $5',
+    const previous = this.snapshots.get(membership);
+    if (previous === undefined) {
+      throw new PostgresMinistryMembershipRepositoryError(
+        PostgresMinistryMembershipRepositoryErrorCodes.UntrackedOnSave,
+        membership.id,
+      );
+    }
+    const current = snapshot(membership);
+    const membershipChanges: Array<Readonly<{ column: string; value: unknown }>> = [];
+    if (previous.status !== current.status) {
+      membershipChanges.push({
+        column: 'status',
+        value: toMinistryMembershipStatusCode(current.status),
+      });
+    }
+    if (previous.approvedAt !== current.approvedAt) {
+      membershipChanges.push({ column: 'approved_at', value: current.approvedAt });
+    }
+    if (membershipChanges.length > 0) {
+      const values = membershipChanges.map((change) => change.value);
+      values.push(
+        membership.id.toString(),
+        membership.ministryId.toString(),
+        membership.organizationId.toString(),
+      );
+      const updated = await this.query(
+        PostgresMinistryMembershipRepositoryErrorCodes.SaveFailed,
+        `UPDATE ministry_memberships
+            SET ${membershipChanges.map((change, index) => `${change.column} = $${index + 1}`).join(', ')}
+          WHERE id = $${membershipChanges.length + 1}
+            AND ministry_id = $${membershipChanges.length + 2}
+            AND organization_id = $${membershipChanges.length + 3}`,
+        values,
+      );
+      this.requireUpdated(updated, membership.id);
+    }
+
+    for (const qualification of membership.roleQualifications) {
+      const priorQualification = previous.qualifications[qualification.id.toString()];
+      if (priorQualification === undefined) {
+        await this.insertQualification(
+          membership,
+          qualification,
+          PostgresMinistryMembershipRepositoryErrorCodes.SaveFailed,
+        );
+        continue;
+      }
+      if (priorQualification.status === qualification.status) continue;
+      const updated = await this.query(
+        PostgresMinistryMembershipRepositoryErrorCodes.SaveFailed,
+        `UPDATE ministry_role_qualifications
+            SET status = $1
+          WHERE id = $2 AND ministry_membership_id = $3
+            AND ministry_id = $4 AND organization_id = $5`,
         [
-          toMinistryMembershipStatusCode(membership.status),
-          membership.approvedAt?.toISOString() ?? null,
-          membership.organizationId.value,
-          membership.ministryId.value,
-          membership.id.value,
+          qualificationStatusCode(qualification.status),
+          qualification.id.toString(),
+          membership.id.toString(),
+          membership.ministryId.toString(),
+          membership.organizationId.toString(),
         ],
       );
-      for (const qualification of membership.roleQualifications)
-        await this.client.query(
-          'INSERT INTO ministry_role_qualifications (id, organization_id, ministry_id, ministry_membership_id, ministry_role_id, status, qualified_at) VALUES ($1, $2, $3, $4, $5, 1, $6) ON CONFLICT (id) DO NOTHING',
-          [
-            qualification.id.value,
-            membership.organizationId.value,
-            membership.ministryId.value,
-            membership.id.value,
-            qualification.ministryRoleId.value,
-            qualification.qualifiedAt.toISOString(),
-          ],
-        );
-    } catch (cause) {
-      throw new PostgresMinistryMembershipRepositoryError(cause);
+      this.requireUpdated(updated, qualification.id);
     }
+    this.snapshots.set(membership, current);
+  }
+
+  private async insertQualification(
+    membership: MinistryMembership,
+    qualification: MinistryRoleQualification,
+    errorCode: PostgresMinistryMembershipRepositoryErrorCode,
+  ): Promise<void> {
+    await this.query(
+      errorCode,
+      `INSERT INTO ministry_role_qualifications (
+         id, organization_id, ministry_id, ministry_membership_id,
+         ministry_role_id, status, qualified_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        qualification.id.toString(),
+        membership.organizationId.toString(),
+        membership.ministryId.toString(),
+        membership.id.toString(),
+        qualification.ministryRoleId.toString(),
+        qualificationStatusCode(qualification.status),
+        qualification.qualifiedAt.toISOString(),
+      ],
+    );
+  }
+
+  private requireUpdated(result: QueryResult, identity: unknown): void {
+    if (result.rowCount === 1) return;
+    throw new PostgresMinistryMembershipRepositoryError(
+      PostgresMinistryMembershipRepositoryErrorCodes.MissingOnSave,
+      identity,
+    );
   }
 }

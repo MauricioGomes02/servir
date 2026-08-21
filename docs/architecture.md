@@ -77,6 +77,8 @@ Essa separação não implica bancos ou serviços distintos. A topologia física
 
 Quando um Command depende de estado externo ao Aggregate que será alterado, um Reader pode fornecer fatos mínimos para uma Policy pura e nomeada. O Reader não retorna a decisão pronta: adapters obtêm dados, Policies decidem negócio e handlers orquestram o fluxo.
 
+Quando esses fatos precisam permanecer estáveis até a escrita, o write scope pode expor um port de lock orientado ao fluxo. O handler declara a ordem `lock → facts ou Aggregate → decisão → persistência`; o adapter implementa a mecânica e o Repository não esconde locks nem converte conflitos físicos em regras de negócio. A aplicação inicial em Ministries está no [ADR 073](decisions/073-declarative-ministry-write-locks.md).
+
 ## Exemplos
 
 - Um agregado registra `OrderCreated`; um publicador externo encaminha o evento.

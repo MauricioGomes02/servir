@@ -1,6 +1,4 @@
 import type {
-  MinistryCreationFactsReader,
-  MinistryMembershipRequestFactsReader,
   MinistryMembershipWriteScope,
   MinistryWriteScope,
   MinistryTeamCreationFactsReader,
@@ -31,8 +29,10 @@ import {
   PostgresMinistryCreationFactsReader,
   PostgresMinistryMembershipRepository,
   PostgresMinistryMembershipRequestFactsReader,
+  PostgresMinistryMembershipWriteLock,
   PostgresMinistryRoleQualificationFactsReader,
   PostgresMinistryRepository,
+  PostgresMinistryWriteLock,
   PostgresMinistryTeamCreationFactsReader,
   PostgresMinistryTeamRepository,
   mapMinistryTeamCreatedIntegrationEvent,
@@ -51,14 +51,8 @@ import { defineService } from '../services';
 
 export const ministryUnitOfWork =
   defineService<UnitOfWork<MinistryWriteScope>>('ministries.unit-of-work');
-export const ministryCreationFacts = defineService<MinistryCreationFactsReader>(
-  'ministries.creation-facts',
-);
 export const ministryMembershipUnitOfWork = defineService<UnitOfWork<MinistryMembershipWriteScope>>(
   'ministries.membership-unit-of-work',
-);
-export const ministryMembershipRequestFacts = defineService<MinistryMembershipRequestFactsReader>(
-  'ministries.membership-request-facts',
 );
 export const ministryTeamUnitOfWork = defineService<UnitOfWork<MinistryTeamWriteScope>>(
   'ministries.team-unit-of-work',
@@ -116,11 +110,15 @@ export function registerMinistriesPersistence(builder: PostgresPersistenceBuilde
     mapTeamLeaderAppointedIntegrationEvent,
   );
   builder.addWriteScope(ministryUnitOfWork, (client) => ({
+    creationFacts: new PostgresMinistryCreationFactsReader(client),
     ministries: new PostgresMinistryRepository(client),
+    writeLock: new PostgresMinistryWriteLock(client),
   }));
   builder.addWriteScope(ministryMembershipUnitOfWork, (client) => ({
+    membershipRequestFacts: new PostgresMinistryMembershipRequestFactsReader(client),
     ministryMemberships: new PostgresMinistryMembershipRepository(client),
     ministryRoleQualificationFacts: new PostgresMinistryRoleQualificationFactsReader(client),
+    writeLock: new PostgresMinistryMembershipWriteLock(client),
   }));
   builder.addWriteScope(ministryTeamUnitOfWork, (client) => ({
     ministryTeams: new PostgresMinistryTeamRepository(client),
@@ -131,11 +129,6 @@ export function registerMinistriesPersistence(builder: PostgresPersistenceBuilde
   builder.addWriteScope(teamLeadershipUnitOfWork, (client) => ({
     teamLeaderships: new PostgresTeamLeadershipRepository(client),
   }));
-  builder.addValue(ministryCreationFacts, (pool) => new PostgresMinistryCreationFactsReader(pool));
-  builder.addValue(
-    ministryMembershipRequestFacts,
-    (pool) => new PostgresMinistryMembershipRequestFactsReader(pool),
-  );
   builder.addValue(
     ministryTeamCreationFacts,
     (pool) => new PostgresMinistryTeamCreationFactsReader(pool),

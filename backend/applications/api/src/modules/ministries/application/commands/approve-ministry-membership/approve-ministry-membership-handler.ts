@@ -59,6 +59,7 @@ export class ApproveMinistryMembershipHandler {
     if (!validated.success) return validated;
     const [organizationId, ministryId, membershipId] = validated.value;
     const transaction = await this.dependencies.unitOfWork.execute(async (scope) => {
+      await scope.writeLock.acquireMembership(organizationId, ministryId, membershipId);
       const membership = await scope.ministryMemberships.findById(
         organizationId,
         ministryId,
